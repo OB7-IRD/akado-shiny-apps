@@ -1,8 +1,8 @@
 # package
-packages <- c("shinydashboard", "shinyWidgets")
+packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "codama", "shinycssloaders", "DT")
 install.packages(setdiff(packages, rownames(installed.packages())), dependencies = TRUE)
 lapply(packages, library, character.only = TRUE)
-
+source("./function.R")
 
 
 header <- dashboardHeader(
@@ -43,56 +43,82 @@ body <- dashboardBody(
       }
     "))
   ),
-  tabItem(
-    tabName = "home",
-    fluidPage(
-      box(
-        width = 12,
-        h1("Contexte"),
-        p("AKADO automatically performs a series of tests on the data and produces summary tables that provide a more or less detailed assessment of the anomalies detected. A final summary presents the percentages of occurrences of errors that remain to be corrected.")
-      ),
-      box(
-        width = 12,
-        h1("Data base Observe"),
-        selectInput(
-          inputId = "data_base_observe", label = "Choose a data base:",
-          choices = list("---", "NY", "NJ", "CT")
+  # Color of the icons in relation to the consistency test
+  tags$style(".fa-check {color:#05DE1E}"),
+  tags$style(".fa-xmark {color:#DE0505}"),
+  # Green background color for notifications id = "notif_default"
+  tags$style("#shiny-notification-notif_default {background-color:#B2E8A2;}"),
+  # Add pages
+  tabItems(
+    tabItem(
+      tabName = "home",
+      fluidPage(
+        box(
+          width = 12,
+          h1("Contexte"),
+          p("AKADO automatically performs a series of tests on the data and produces summary tables that provide a more or less detailed assessment of the anomalies detected. A final summary presents the percentages of occurrences of errors that remain to be corrected.")
+        ),
+        box(
+          width = 12,
+          h1("Data base Observe"),
+          selectInput(
+            inputId = "data_base_observe", label = "Choose a data base:",
+            choices = list("---", "NY", "NJ", "CT")
+          )
+        ),
+        box(
+          width = 12,
+          h1("Selection of the trip "),
+          h2("Unique selection by vessel number and trip end date"),
+          fluidRow(
+            column(width = 6, numericInput(
+              inputId = "vessel_number", label = "Indicate a vessel number:", value = NA, min = 0
+            )),
+            column(width = 6, dateInput(
+              inputId = "trip_end_date", label = "Choose a trip end date:", value = NA
+            ))
+          ),
+          h2("Multiple selection by date range"),
+          fluidRow(
+            column(width = 6, dateInput(
+              inputId = "trip_start_date_range", label = "Choose a trip start date:", value = NA
+            )),
+            column(width = 6, dateInput(
+              inputId = "trip_end_date_range", label = "Choose a trip end date:", value = NA
+            ))
+          ),
+          span(textOutput("error_date_select"), style = "color:red;")
+        ),
+        box(
+          width = 12,
+          style = "padding-bottom:55px;",
+          align = "center",
+          actionButton(inputId = "start_button", label = "Start"),
+          withSpinner(htmlOutput("error_trip_select"), type = 6, size = 0.5, proxy.height = "70px")
         )
-      ),
-      box(
-        width = 12,
-        h1("Selection of the trip "),
-        h2("Unique selection by vessel number and trip end date"),
-        fluidRow(
-          column(width = 6, numericInput(
-            inputId = "vessel_number", label = "Indicate a vessel number:", value = 0, min = 0
-          )),
-          column(width = 6, dateInput(
-            "trip_end_date", "Choose a trip end date:"
-          ))
-        ),
-        h2("Multiple selection by date range"),
-        fluidRow(
-          column(width = 6, dateInput(
-            inputId = "trip_start_date_range", label = "Choose a trip start date:"
-          )),
-          column(width = 6, dateInput(
-            "trip_end_date_range", "Choose a trip end date:"
-          ))
-        ),
-        span(textOutput("error_date_select"), style = "color:red;")
-      ),
-      box(
-        width = 12,
-        align="center",
-      actionButton("start_button", "Start"))
+      )
+    ),
+    tabItem(
+      tabName = "trip",
+      fluidPage(
+        box(
+          width = 5,
+          h1("Presence of activity"),
+          withSpinner(DTOutput("check_trip_activity"), type = 1)
+        )
+      )
+    ),
+    tabItem(
+      tabName = "setting",
+      fluidPage(
+        fileInput(
+          inputId = "setting_file_path", label = paste0("Path of the configuration file .yml ; (Default: ", path.expand("~"), "/.appconfig/configuration_file.yml)"),
+          multiple = FALSE,
+          accept = c(".yml")
+        )
+      )
     )
-  ),
-  tabItem(
-    tabName = "trip",
-    fluidPage()
   )
 )
-
 
 ui <- dashboardPage(header, siderbar, body)
