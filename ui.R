@@ -105,6 +105,11 @@ body <- dashboardBody(
           width = 5,
           h1("Presence of activity"),
           withSpinner(DTOutput("check_trip_activity"), type = 1)
+        ),
+        box(
+          width = 6,
+          h1("Fishing time"),
+          withSpinner(DTOutput("check_fishing_time"), type = 1)
         )
       )
     ),

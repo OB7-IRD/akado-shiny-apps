@@ -7,7 +7,7 @@ shinyServer(function(input, output, session) {
       "Error: start date must be before end date"
     }
   })
-
+  
   # Error message if the trip selection elements are not correctly filled in
   text_error_trip_select <- eventReactive(input$start_button, {
     # if no selection element is filled in
@@ -28,7 +28,7 @@ shinyServer(function(input, output, session) {
     }
     return(TRUE)
   })
-
+  
   # Read the .yml file of configuration for the connection
   config_data <- eventReactive(input$start_button, {
     # If the user has not specified a file and the file exists in the default path, indicates the default path
@@ -46,7 +46,7 @@ shinyServer(function(input, output, session) {
       )
     }
   })
-
+  
   trip_select <- eventReactive(input$start_button, {
     # If the connection data exists and there was no error in the trip selection, makes the connection
     req(config_data())
@@ -60,7 +60,7 @@ shinyServer(function(input, output, session) {
       )
       # If the database is "observe_9a", read, transform and execute the SQL query that selects the trips according to the user parameters
       if (data_connection[1] == "observe_9a") {
-        # Read the SQL query 
+        # Read the SQL query
         trip_id_sql <- paste(
           readLines("./sql/trip_id.sql"),
           collapse = "\n"
@@ -113,10 +113,10 @@ shinyServer(function(input, output, session) {
       }
     }
   })
-
+  
   # Performs all calculations to test for inconsistencies
   calcul_check <- reactive({
-        # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
+    # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
     if (text_error_trip_select() == TRUE && is.data.frame(trip_select())) {
       # Connection to the base
       data_connection <- furdeb::postgresql_dbconnection(
@@ -128,12 +128,6 @@ shinyServer(function(input, output, session) {
       )
       # If the database is "observe_9a", read, transform and execute the SQL query that selects the trips according to the user parameters
       if (data_connection[1] == "observe_9a") {
-        # Uses a function which indicates whether the selected trips contain activities or not
-        check_trip_activityinspector_data <- check_trip_activityinspector(
-          data_connection = data_connection,
-          select = trip_select()$trip_id,
-          output = "report"
-        )
         # Read the SQL query to retrieve the vessel code and the end of the trip of all the trips that have been selected
         trip_enddate_vessel_code_sql <- paste(
           readLines("./sql/trip_enddate_vessel_code.sql"),
@@ -144,7 +138,7 @@ shinyServer(function(input, output, session) {
           conn = data_connection[[2]],
           sql = trip_enddate_vessel_code_sql,
           select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"),
-            collapse = ", "
+                                       collapse = ", "
           ))
         )
         # Execute the SQL query
@@ -152,39 +146,74 @@ shinyServer(function(input, output, session) {
           conn = data_connection[[2]],
           statement = trip_enddate_vessel_code_sql
         ))
+        # Uses a function which indicates whether the selected trips contain activities or not
+        check_trip_activity_inspector_data <- check_trip_activity_inspector(
+          data_connection = data_connection,
+          type_select = "trip",
+          select = trip_select()$trip_id,
+          output = "report"
+        )
+        # Uses a function which indicates whether the selected trips contain fishing time inconsistent
+        check_fishing_time_inspector_data <- check_fishing_time_inspector(
+          data_connection = data_connection,
+          type_select = "trip",
+          select = trip_select()$trip_id,
+          output = "report"
+        )
         # Disconnection to the base
         DBI::dbDisconnect(data_connection[[2]])
-        # Combines the consistency test on the presence of activity and trip identification information
-        check_trip_activity <- merge(trip_enddate_vessel_code_data, check_trip_activityinspector_data, by.x = "trip_id", by.y = "select")
-        # Modify the table for display purposes: change type, delete column and rename column
-        check_trip_activity$trip_enddate <- as.character(check_trip_activity$trip_enddate)
-        check_trip_activity <- subset(check_trip_activity, select = -c(trip_id))
+        trip_enddate_vessel_code_data$trip_enddate <- as.character(trip_enddate_vessel_code_data$trip_enddate)
+        # Uses a function to format the table
+        check_trip_activity<-table_display_trip(check_trip_activity_inspector_data,trip_enddate_vessel_code_data)
+        # Modify the table for display purposes: rename column
         check_trip_activity <- dplyr::rename(
           .data = check_trip_activity,
           `Vessel code` = vessel_code,
           `Trip enddate` = trip_enddate,
           Activity = logical
         )
-        # Add icons according to the success of the test
-        check_trip_activity$Activity[check_trip_activity$Activity == TRUE] <- as.character(icon("check"))
-        check_trip_activity$Activity[check_trip_activity$Activity == FALSE] <- as.character(icon("xmark"))
-        return(check_trip_activity)
+        # Uses a function to format the table
+        check_fishing_time<-table_display_trip(check_fishing_time_inspector_data,trip_enddate_vessel_code_data)
+        # Modify the table for display purposes: rename column
+        check_fishing_time <- dplyr::rename(
+          .data = check_fishing_time,
+          `Vessel code` = vessel_code,
+          `Trip enddate` = trip_enddate,
+          Activity = logical,
+          `Trip fishing time` = trip_fishing_time,
+          `Sum route fishing time` = sum_route_fishingtime
+        )
+         return(list(check_trip_activity, check_fishing_time))
       }
     }
   })
-
+  
   # Table of consistency test of the presence of activities
-  output$check_trip_activity <- renderDT({
-      #If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
+  output$check_trip_activity <- renderDT(
+    {
+      # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
-        return(calcul_check())
+        return(calcul_check()[[1]])
       }
     },
     escape = FALSE,
-    options = list(lengthChange = FALSE, scrollX = FALSE, scrollY = FALSE),
+    options = list(lengthChange = FALSE, scrollX = TRUE),
     rownames = FALSE
   )
-
+  
+  # Table of consistency test of the fishing time
+  output$check_fishing_time <- renderDT(
+    {
+      # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
+      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
+        return(calcul_check()[[2]])
+      }
+    },
+    escape = FALSE,
+    options = list(lengthChange = FALSE, scrollX = TRUE),
+    rownames = FALSE
+  )
+  
   # Displays the errors and notifications that occur when you want to start the calculations
   output$error_trip_select <- renderText({
     # If there are errors in the selection parameters
