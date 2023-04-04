@@ -110,6 +110,11 @@ body <- dashboardBody(
           width = 6,
           h1("Fishing time"),
           withSpinner(DTOutput("check_fishing_time"), type = 1)
+        ),
+        box(
+          width = 6,
+          h1("Sea time"),
+          withSpinner(DTOutput("check_sea_time"), type = 1)
         )
       )
     ),

@@ -160,6 +160,13 @@ shinyServer(function(input, output, session) {
           select = trip_select()$trip_id,
           output = "report"
         )
+        # Uses a function which indicates whether the selected trips contain sea time inconsistent
+        check_sea_time_inspector_data <- check_sea_time_inspector(
+          data_connection = data_connection,
+          type_select = "trip",
+          select = trip_select()$trip_id,
+          output = "report"
+        )
         # Disconnection to the base
         DBI::dbDisconnect(data_connection[[2]])
         trip_enddate_vessel_code_data$trip_enddate <- as.character(trip_enddate_vessel_code_data$trip_enddate)
@@ -183,7 +190,18 @@ shinyServer(function(input, output, session) {
           `Trip fishing time` = trip_fishing_time,
           `Sum route fishing time` = sum_route_fishingtime
         )
-         return(list(check_trip_activity, check_fishing_time))
+        # Uses a function to format the table
+        check_sea_time<-table_display_trip(check_sea_time_inspector_data,trip_enddate_vessel_code_data)
+        # Modify the table for display purposes: rename column
+        check_sea_time <- dplyr::rename(
+          .data = check_sea_time,
+          `Vessel code` = vessel_code,
+          `Trip enddate` = trip_enddate,
+          Activity = logical,
+          `Trip sea time` = trip_sea_time,
+          `Sum route sea time` = sum_route_seatime
+        )
+         return(list(check_trip_activity, check_fishing_time, check_sea_time))
       }
     }
   })
@@ -207,6 +225,19 @@ shinyServer(function(input, output, session) {
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
         return(calcul_check()[[2]])
+      }
+    },
+    escape = FALSE,
+    options = list(lengthChange = FALSE, scrollX = TRUE),
+    rownames = FALSE
+  )
+  
+  # Table of consistency test of the sea time
+  output$check_sea_time <- renderDT(
+    {
+      # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
+      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
+        return(calcul_check()[[3]])
       }
     },
     escape = FALSE,
