@@ -101,20 +101,30 @@ body <- dashboardBody(
     tabItem(
       tabName = "trip",
       fluidPage(
-        box(
-          width = 5,
-          h1("Presence of activity"),
-          withSpinner(DTOutput("check_trip_activity"), type = 1)
+        div(
+          class = "col-sm-12 col-md-6 col-lg-4",
+          box(
+            width = "100%",
+            h1("Presence of activity"),
+            withSpinner(DTOutput("check_trip_activity"), type = 6)
+          )
         ),
-        box(
-          width = 6,
-          h1("Fishing time"),
-          withSpinner(DTOutput("check_fishing_time"), type = 1)
+        div(
+          class = "col-sm-12 col-md-6 col-lg-4",
+          box(
+            width = "100%",
+            h1("Fishing time"),
+            withSpinner(DTOutput("check_fishing_time"), type = 6)
+          )
         ),
-        box(
-          width = 6,
-          h1("Sea time"),
-          withSpinner(DTOutput("check_sea_time"), type = 1)
+        div(class = "clearfix visible-md"),
+        div(
+          class = "col-sm-12 col-md-6 col-lg-4",
+          box(
+            width = "100%",
+            h1("Sea time"),
+            withSpinner(DTOutput("check_sea_time"), type = 6)
+          )
         )
       )
     ),

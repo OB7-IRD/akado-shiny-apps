@@ -177,7 +177,7 @@ shinyServer(function(input, output, session) {
           .data = check_trip_activity,
           `Vessel code` = vessel_code,
           `Trip enddate` = trip_enddate,
-          Activity = logical
+          Check = logical
         )
         # Uses a function to format the table
         check_fishing_time<-table_display_trip(check_fishing_time_inspector_data,trip_enddate_vessel_code_data)
@@ -186,7 +186,7 @@ shinyServer(function(input, output, session) {
           .data = check_fishing_time,
           `Vessel code` = vessel_code,
           `Trip enddate` = trip_enddate,
-          Activity = logical,
+          Check = logical,
           `Trip fishing time` = trip_fishing_time,
           `Sum route fishing time` = sum_route_fishingtime
         )
@@ -197,7 +197,7 @@ shinyServer(function(input, output, session) {
           .data = check_sea_time,
           `Vessel code` = vessel_code,
           `Trip enddate` = trip_enddate,
-          Activity = logical,
+          Check = logical,
           `Trip sea time` = trip_sea_time,
           `Sum route sea time` = sum_route_seatime
         )
