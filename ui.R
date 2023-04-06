@@ -132,7 +132,7 @@ body <- dashboardBody(
       tabName = "setting",
       fluidPage(
         fileInput(
-          inputId = "setting_file_path", label = paste0("Path of the configuration file .yml ; (Default: ", path.expand("~"), "/.appconfig/configuration_file.yml)"),
+          inputId = "setting_file_path", label = paste0("Path of the configuration file .yml ; (Default: ", path.expand("~/.appconfig/akador/configuration_file.yml"),")"),
           multiple = FALSE,
           accept = c(".yml")
         )
