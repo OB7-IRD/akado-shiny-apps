@@ -32,8 +32,8 @@ shinyServer(function(input, output, session) {
   # Read the .yml file of configuration for the connection
   config_data <- eventReactive(input$start_button, {
     # If the user has not specified a file and the file exists in the default path, indicates the default path
-    if (is.null(input$setting_file_path$datapath) && file.exists(path.expand("~/.appconfig/akador/configuration_file.yml"))) {
-      path_setting_file <- path.expand("~/.appconfig/akador/configuration_file.yml")
+    if (is.null(input$setting_file_path$datapath) && file.exists(file.path(path.expand("~"),".appconfig","akador","configuration_file.yml"))) {
+      path_setting_file <- file.path(path.expand("~"),".appconfig","akador","configuration_file.yml")
       # If the user has specified a file, indicates the path to specify
     } else if (!is.null(input$setting_file_path$datapath)) {
       path_setting_file <- input$setting_file_path$datapath
@@ -62,7 +62,7 @@ shinyServer(function(input, output, session) {
       if (data_connection[1] == "observe_9a") {
         # Read the SQL query
         trip_id_sql <- paste(
-          readLines("./sql/trip_id.sql"),
+          readLines(file.path(".","sql","trip_id.sql")),
           collapse = "\n"
         )
         # Transform the SQL query
@@ -130,7 +130,7 @@ shinyServer(function(input, output, session) {
       if (data_connection[1] == "observe_9a") {
         # Read the SQL query to retrieve the vessel code and the end of the trip of all the trips that have been selected
         trip_enddate_vessel_code_sql <- paste(
-          readLines("./sql/trip_enddate_vessel_code.sql"),
+          readLines(file.path(".","sql","trip_enddate_vessel_code.sql")),
           collapse = "\n"
         )
         # Replaces the anchors with the selected values
@@ -256,7 +256,7 @@ shinyServer(function(input, output, session) {
     if (text_error_trip_select() == TRUE && !isTruthy(config_data())) {
       text <- "Error: There is no configuration file for the connection to the base"
       showNotification(id = "notif_warning", ui = text, type = "error")
-      return(paste0("<span style=\"color:red\">", text, ", please either select one using the \"settings\" tab or put it in ", path.expand("~/.appconfig/akador/configuration_file.yml)</span>")))
+      return(paste0("<span style=\"color:red\">", text, ", please either select one using the \"settings\" tab or put it in ", file.path(path.expand("~"),".appconfig","akador","configuration_file.yml"),"</span>"))
     }
     # If the selected trip is not found in the database
     if (text_error_trip_select() == TRUE && !is.data.frame(trip_select()) && trip_select() == FALSE) {

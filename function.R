@@ -117,7 +117,7 @@ check_trip_activity_inspector <- function(data_connection,
     }
     # Trip associated with route and activity
     trip_with_activity_sql <- paste(
-      readLines("./sql/trip_with_activity.sql"),
+      readLines(file.path(".","sql","trip_with_activity.sql")),
       collapse = "\n"
     )
     trip_with_activity_sql <- DBI::sqlInterpolate(
@@ -528,7 +528,7 @@ check_sea_time_inspector <- function(data_connection,
     }
     # sea time link to trip
     trip_seatime_sql <- paste(
-      readLines("./sql/trip_seatime.sql"),
+      readLines(file.path(".","sql","trip_seatime.sql")),
       collapse = "\n"
     )
     trip_seatime_sql <- DBI::sqlInterpolate(
@@ -544,7 +544,7 @@ check_sea_time_inspector <- function(data_connection,
     ))
     # sea time link to route
     route_seatime_sql <- paste(
-      readLines("./sql/route_seatime.sql"),
+      readLines(file.path(".","sql","route_seatime.sql")),
       collapse = "\n"
     )
     route_seatime_sql <- DBI::sqlInterpolate(

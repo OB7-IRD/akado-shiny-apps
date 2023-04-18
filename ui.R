@@ -2,7 +2,7 @@
 packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "codama", "shinycssloaders", "DT")
 install.packages(setdiff(packages, rownames(installed.packages())), dependencies = TRUE)
 lapply(packages, library, character.only = TRUE)
-source("./function.R")
+source(file.path(".","function.R"))
 
 
 header <- dashboardHeader(
@@ -132,7 +132,7 @@ body <- dashboardBody(
       tabName = "setting",
       fluidPage(
         fileInput(
-          inputId = "setting_file_path", label = paste0("Path of the configuration file .yml ; (Default: ", path.expand("~/.appconfig/akador/configuration_file.yml"),")"),
+          inputId = "setting_file_path", label = paste0("Path of the configuration file .yml ; (Default: ", file.path(path.expand("~"),".appconfig","akador","configuration_file.yml"),")"),
           multiple = FALSE,
           accept = c(".yml")
         )
