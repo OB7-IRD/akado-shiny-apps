@@ -301,10 +301,7 @@ check_fishing_time_inspector <- function(data_connection,
     }
     # Fishing time link to trip
     trip_fishingtime_sql <- paste(
-      readLines(con = system.file("sql",
-                                  "trip_fishingtime.sql",
-                                  package = "codama"
-      )),
+      readLines(file.path(".","sql","trip_fishingtime.sql")),
       collapse = "\n"
     )
     trip_fishingtime_sql <- DBI::sqlInterpolate(
@@ -320,10 +317,7 @@ check_fishing_time_inspector <- function(data_connection,
     ))
     # Fishing time link to route
     route_fishingtime_sql <- paste(
-      readLines(con = system.file("sql",
-                                  "route_fishingtime.sql",
-                                  package = "codama"
-      )),
+      readLines(file.path(".","sql","route_fishingtime.sql")),
       collapse = "\n"
     )
     route_fishingtime_sql <- DBI::sqlInterpolate(
