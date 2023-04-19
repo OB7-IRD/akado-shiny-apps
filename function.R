@@ -597,8 +597,8 @@ check_sea_time_inspector <- function(data_connection,
   trip_seatime_data[is.na(trip_seatime_data$trip_sea_time), "logical"] <- FALSE
   # Management of the 0 value for the time at sea
   colnames_comparison <- grep("vectors_comparisons_", colnames(trip_seatime_data))
-  trip_seatime_data[trip_seatime_data$trip_sea_time == 0, colnames_comparison] <- "trip sea time is 0"
-  trip_seatime_data[trip_seatime_data$trip_sea_time == 0, "logical"] <- FALSE
+  trip_seatime_data[!is.na(trip_seatime_data$trip_sea_time) && trip_seatime_data$trip_sea_time == 0, colnames_comparison] <- "trip sea time is 0"
+  trip_seatime_data[!is.na(trip_seatime_data$trip_sea_time) && trip_seatime_data$trip_sea_time == 0, "logical"] <- FALSE
   if ((sum(trip_seatime_data$logical) + sum(!trip_seatime_data$logical)) != nrow_first) {
     stop(
       format(
