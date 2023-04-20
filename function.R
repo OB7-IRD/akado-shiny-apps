@@ -35,13 +35,13 @@ check_trip_activity_inspector <- function(data_connection,
   if (r_type_checking(
     r_object = output,
     type = "character",
-    allowed_values = c("message", "report", "logical"),
+    allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
     return(r_type_checking(
       r_object = output,
       type = "character",
-      allowed_values = c("message", "report", "logical"),
+      allowed_value = c("message", "report", "logical"),
       output = "message"
     ))
   }
@@ -50,13 +50,13 @@ check_trip_activity_inspector <- function(data_connection,
     if (r_type_checking(
       r_object = type_select,
       type = "character",
-      allowed_values = c("trip", "year"),
+      allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
       return(r_type_checking(
         r_object = type_select,
         type = "character",
-        allowed_values = c("trip", "year"),
+        allowed_value = c("trip", "year"),
         output = "message"
       ))
     }
@@ -144,7 +144,7 @@ check_trip_activity_inspector <- function(data_connection,
   # 3 - Data design ----
   nrow_first <- length(trip_id)
   # Search trip ID in the associations trip, route, activity
-  comparison <- vectors_comparisons(trip_id,
+  comparison <- vector_comparison(trip_id,
                                     trip_with_activity_data$trip_id,
                                     comparison_type = "difference",
                                     output = "report"
@@ -221,13 +221,13 @@ check_fishing_time_inspector <- function(data_connection,
   if (r_type_checking(
     r_object = output,
     type = "character",
-    allowed_values = c("message", "report", "logical"),
+    allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
     return(r_type_checking(
       r_object = output,
       type = "character",
-      allowed_values = c("message", "report", "logical"),
+      allowed_value = c("message", "report", "logical"),
       output = "message"
     ))
   }
@@ -236,13 +236,13 @@ check_fishing_time_inspector <- function(data_connection,
     if (r_type_checking(
       r_object = type_select,
       type = "character",
-      allowed_values = c("trip", "year"),
+      allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
       return(r_type_checking(
         r_object = type_select,
         type = "character",
-        allowed_values = c("trip", "year"),
+        allowed_value = c("trip", "year"),
         output = "message"
       ))
     }
@@ -356,7 +356,7 @@ check_fishing_time_inspector <- function(data_connection,
   route_fishingtime_data$trip_idfishing_time <- paste0(route_fishingtime_data$trip_id, route_fishingtime_data$sum_route_fishingtime)
   trip_fishingtime_data$trip_idfishing_time <- paste0(trip_fishingtime_data$trip_id, trip_fishingtime_data$trip_fishing_time)
   # Compare trip IDs and fishing time of the trip or the sum of the route
-  comparison <- vectors_comparisons(trip_fishingtime_data$trip_idfishing_time,
+  comparison <- vector_comparison(trip_fishingtime_data$trip_idfishing_time,
                                     route_fishingtime_data$trip_idfishing_time,
                                     comparison_type = "difference",
                                     output = "report"
@@ -442,13 +442,13 @@ check_sea_time_inspector <- function(data_connection,
   if (r_type_checking(
     r_object = output,
     type = "character",
-    allowed_values = c("message", "report", "logical"),
+    allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
     return(r_type_checking(
       r_object = output,
       type = "character",
-      allowed_values = c("message", "report", "logical"),
+      allowed_value = c("message", "report", "logical"),
       output = "message"
     ))
   }
@@ -457,13 +457,13 @@ check_sea_time_inspector <- function(data_connection,
     if (r_type_checking(
       r_object = type_select,
       type = "character",
-      allowed_values = c("trip", "year"),
+      allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
       return(r_type_checking(
         r_object = type_select,
         type = "character",
-        allowed_values = c("trip", "year"),
+        allowed_value = c("trip", "year"),
         output = "message"
       ))
     }
@@ -577,7 +577,7 @@ check_sea_time_inspector <- function(data_connection,
   route_seatime_data$trip_idsea_time <- paste0(route_seatime_data$trip_id, route_seatime_data$sum_route_seatime)
   trip_seatime_data$trip_idsea_time <- paste0(trip_seatime_data$trip_id, trip_seatime_data$trip_sea_time)
   # Compare trip IDs and sea time of the trip or the sum of the route
-  comparison <- vectors_comparisons(trip_seatime_data$trip_idsea_time,
+  comparison <- vector_comparison(trip_seatime_data$trip_idsea_time,
                                     route_seatime_data$trip_idsea_time,
                                     comparison_type = "difference",
                                     output = "report"
@@ -597,8 +597,8 @@ check_sea_time_inspector <- function(data_connection,
   trip_seatime_data[is.na(trip_seatime_data$trip_sea_time), "logical"] <- FALSE
   # Management of the 0 value for the time at sea
   colnames_comparison <- grep("vectors_comparisons_", colnames(trip_seatime_data))
-  trip_seatime_data[!is.na(trip_seatime_data$trip_sea_time) && trip_seatime_data$trip_sea_time == 0, colnames_comparison] <- "trip sea time is 0"
-  trip_seatime_data[!is.na(trip_seatime_data$trip_sea_time) && trip_seatime_data$trip_sea_time == 0, "logical"] <- FALSE
+  trip_seatime_data[!is.na(trip_seatime_data$trip_sea_time) & trip_seatime_data$trip_sea_time == 0, colnames_comparison] <- "trip sea time is 0"
+  trip_seatime_data[!is.na(trip_seatime_data$trip_sea_time) & trip_seatime_data$trip_sea_time == 0, "logical"] <- FALSE
   if ((sum(trip_seatime_data$logical) + sum(!trip_seatime_data$logical)) != nrow_first) {
     stop(
       format(
