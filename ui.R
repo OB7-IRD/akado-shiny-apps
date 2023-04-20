@@ -1,5 +1,5 @@
 # package
-packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "codama", "shinycssloaders", "DT")
+packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "codama", "shinycssloaders", "DT","shinyjs")
 install.packages(setdiff(packages, rownames(installed.packages())), dependencies = TRUE)
 lapply(packages, library, character.only = TRUE)
 source(file.path(".","function.R"))
@@ -33,6 +33,7 @@ siderbar <-
   )
 
 body <- dashboardBody(
+  useShinyjs(),
   # Fix the setting onget at the bottom
   tags$head(
     tags$style(HTML("
@@ -45,6 +46,7 @@ body <- dashboardBody(
   ),
   # Color of the icons in relation to the consistency test
   tags$style(".fa-check {color:#05DE1E}"),
+  tags$style(".fa-exclamation {color:#FFA600}"),
   tags$style(".fa-xmark {color:#DE0505}"),
   # Green background color for notifications id = "notif_default"
   tags$style("#shiny-notification-notif_default {background-color:#B2E8A2;}"),
@@ -101,7 +103,14 @@ body <- dashboardBody(
     tabItem(
       tabName = "trip",
       fluidPage(
+        box(
+          width = "100%",
+          align="center",
+            radioButtons(inputId="type_check_trip", label="Choice the display of verification types", choiceNames=c("All (Warning or error)","Warning only","Error only"), choiceValues=list("All","Warning","Error"), inline=TRUE),
+          tags$hr(style="border-color: #D2D2D2;"),
+            radioButtons(inputId="type_line_check_trip", label="Choice of line type display", choiceNames =list(HTML(paste0("All ( ",icon("check")," - ",icon("exclamation")," - ",icon("xmark")," )")), HTML(paste0("Warning or error ( ",icon("exclamation")," - ",icon("xmark")," )"))), choiceValues=list("All","inconsistent"), inline=TRUE)),
         div(
+          id = "div_check_trip_activity",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
             width = "100%",
@@ -110,6 +119,7 @@ body <- dashboardBody(
           )
         ),
         div(
+          id = "div_check_fishing_time",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
             width = "100%",
@@ -119,6 +129,7 @@ body <- dashboardBody(
         ),
         div(class = "clearfix visible-md"),
         div(
+          id = "div_check_sea_time",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
             width = "100%",

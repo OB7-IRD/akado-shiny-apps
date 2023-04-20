@@ -245,6 +245,25 @@ shinyServer(function(input, output, session) {
     rownames = FALSE
   )
   
+  # Management of the display or not of the boxes in the trip tab
+  observeEvent(input$type_check_trip, {
+    if(input$type_check_trip=="All"){
+      shinyjs::show(id = "div_check_trip_activity", anim = TRUE)
+      shinyjs::show(id = "div_check_fishing_time", anim = TRUE)
+      shinyjs::show(id = "div_check_sea_time", anim = TRUE)
+    }
+    if(input$type_check_trip=="Warning"){
+      shinyjs::hide(id = "div_check_trip_activity", anim = TRUE)
+      shinyjs::hide(id = "div_check_fishing_time", anim = TRUE)
+      shinyjs::hide(id = "div_check_sea_time", anim = TRUE)
+    }
+    if(input$type_check_trip=="Error"){
+      shinyjs::show(id = "div_check_trip_activity", anim = TRUE)
+      shinyjs::show(id = "div_check_fishing_time", anim = TRUE)
+      shinyjs::show(id = "div_check_sea_time", anim = TRUE)
+    }
+  })
+  
   # Displays the errors and notifications that occur when you want to start the calculations
   output$error_trip_select <- renderText({
     # If there are errors in the selection parameters
