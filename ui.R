@@ -1,10 +1,12 @@
 # package
-packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "shinycssloaders", "DT","shinyjs")
+packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "shinycssloaders", "DT", "shinyjs")
 install.packages(setdiff(packages, rownames(installed.packages())), dependencies = TRUE)
-if(length(setdiff("codama", rownames(installed.packages())))>0){devtools::install_github("https://github.com/OB7-IRD/codama", ref = "development",INSTALL_opts=c("--no-multiarch"))}
-  
+if (length(setdiff("codama", rownames(installed.packages()))) > 0) {
+  devtools::install_github("https://github.com/OB7-IRD/codama", ref = "development", INSTALL_opts = c("--no-multiarch"))
+}
+
 lapply(packages, library, character.only = TRUE)
-source(file.path(".","function.R"))
+source(file.path(".", "function.R"))
 
 
 header <- dashboardHeader(
@@ -107,10 +109,11 @@ body <- dashboardBody(
       fluidPage(
         box(
           width = "100%",
-          align="center",
-            radioButtons(inputId="type_check_trip", label="Choice the display of verification types", choiceNames=c("All (Warning or error)","Warning only","Error only"), choiceValues=list("All","Warning","Error"), inline=TRUE),
-          tags$hr(style="border-color: #D2D2D2;"),
-            radioButtons(inputId="type_line_check_trip", label="Choice of line type display", choiceNames =list(HTML(paste0("All ( ",icon("check")," - ",icon("exclamation")," - ",icon("xmark")," )")), HTML(paste0("Warning or error ( ",icon("exclamation")," - ",icon("xmark")," )"))), choiceValues=list("All","inconsistent"), inline=TRUE)),
+          align = "center",
+          radioButtons(inputId = "type_check_trip", label = "Choice the display of verification types", choiceNames = c("All (Warning or error)", "Warning only", "Error only"), choiceValues = list("All", "Warning", "Error"), inline = TRUE),
+          tags$hr(style = "border-color: #D2D2D2;"),
+          radioButtons(inputId = "type_line_check_trip", label = "Choice of line type display", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Warning or error ( ", icon("exclamation"), " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent"), inline = TRUE)
+        ),
         div(
           id = "div_check_trip_activity",
           class = "col-sm-12 col-md-6 col-lg-4",
@@ -145,7 +148,7 @@ body <- dashboardBody(
       tabName = "setting",
       fluidPage(
         fileInput(
-          inputId = "setting_file_path", label = paste0("Path of the configuration file .yml ; (Default: ", file.path(path.expand("~"),".appconfig","akador","configuration_file.yml"),")"),
+          inputId = "setting_file_path", label = paste0("Path of the configuration file .yml ; (Default: ", file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"), ")"),
           multiple = FALSE,
           accept = c(".yml")
         )

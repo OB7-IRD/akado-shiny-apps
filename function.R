@@ -117,7 +117,7 @@ check_trip_activity_inspector <- function(data_connection,
     }
     # Trip associated with route and activity
     trip_with_activity_sql <- paste(
-      readLines(file.path(".","sql","trip_with_activity.sql")),
+      readLines(file.path(".", "sql", "trip_with_activity.sql")),
       collapse = "\n"
     )
     trip_with_activity_sql <- DBI::sqlInterpolate(
@@ -145,9 +145,9 @@ check_trip_activity_inspector <- function(data_connection,
   nrow_first <- length(trip_id)
   # Search trip ID in the associations trip, route, activity
   comparison <- vector_comparison(trip_id,
-                                    trip_with_activity_data$trip_id,
-                                    comparison_type = "difference",
-                                    output = "report"
+                                  trip_with_activity_data$trip_id,
+                                  comparison_type = "difference",
+                                  output = "report"
   )
   comparison$logical <- FALSE
   colnames_comparison <- grep("vectors_comparisons_", colnames(comparison))
@@ -301,7 +301,7 @@ check_fishing_time_inspector <- function(data_connection,
     }
     # Fishing time link to trip
     trip_fishingtime_sql <- paste(
-      readLines(file.path(".","sql","trip_fishingtime.sql")),
+      readLines(file.path(".", "sql", "trip_fishingtime.sql")),
       collapse = "\n"
     )
     trip_fishingtime_sql <- DBI::sqlInterpolate(
@@ -317,7 +317,7 @@ check_fishing_time_inspector <- function(data_connection,
     ))
     # Fishing time link to route
     route_fishingtime_sql <- paste(
-      readLines(file.path(".","sql","route_fishingtime.sql")),
+      readLines(file.path(".", "sql", "route_fishingtime.sql")),
       collapse = "\n"
     )
     route_fishingtime_sql <- DBI::sqlInterpolate(
@@ -357,9 +357,9 @@ check_fishing_time_inspector <- function(data_connection,
   trip_fishingtime_data$trip_idfishing_time <- paste0(trip_fishingtime_data$trip_id, trip_fishingtime_data$trip_fishing_time)
   # Compare trip IDs and fishing time of the trip or the sum of the route
   comparison <- vector_comparison(trip_fishingtime_data$trip_idfishing_time,
-                                    route_fishingtime_data$trip_idfishing_time,
-                                    comparison_type = "difference",
-                                    output = "report"
+                                  route_fishingtime_data$trip_idfishing_time,
+                                  comparison_type = "difference",
+                                  output = "report"
   )
   comparison$logical <- FALSE
   # Modify the table for display purposes: add, remove and order column
@@ -522,7 +522,7 @@ check_sea_time_inspector <- function(data_connection,
     }
     # sea time link to trip
     trip_seatime_sql <- paste(
-      readLines(file.path(".","sql","trip_seatime.sql")),
+      readLines(file.path(".", "sql", "trip_seatime.sql")),
       collapse = "\n"
     )
     trip_seatime_sql <- DBI::sqlInterpolate(
@@ -538,7 +538,7 @@ check_sea_time_inspector <- function(data_connection,
     ))
     # sea time link to route
     route_seatime_sql <- paste(
-      readLines(file.path(".","sql","route_seatime.sql")),
+      readLines(file.path(".", "sql", "route_seatime.sql")),
       collapse = "\n"
     )
     route_seatime_sql <- DBI::sqlInterpolate(
@@ -578,9 +578,9 @@ check_sea_time_inspector <- function(data_connection,
   trip_seatime_data$trip_idsea_time <- paste0(trip_seatime_data$trip_id, trip_seatime_data$trip_sea_time)
   # Compare trip IDs and sea time of the trip or the sum of the route
   comparison <- vector_comparison(trip_seatime_data$trip_idsea_time,
-                                    route_seatime_data$trip_idsea_time,
-                                    comparison_type = "difference",
-                                    output = "report"
+                                  route_seatime_data$trip_idsea_time,
+                                  comparison_type = "difference",
+                                  output = "report"
   )
   comparison$logical <- FALSE
   # Modify the table for display purposes: add, remove and order column
@@ -627,7 +627,7 @@ check_sea_time_inspector <- function(data_connection,
 }
 
 # Function which formats the trip data for display
-table_display_trip<-function(data,data_trip){
+table_display_trip <- function(data, data_trip) {
   # Combines the consistency test on the data and data trip identification information
   data <- merge(data_trip, data, by.x = "trip_id", by.y = "trip_id")
   # Modify the table for display purposes: delete column

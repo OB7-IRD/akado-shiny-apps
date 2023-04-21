@@ -32,8 +32,8 @@ shinyServer(function(input, output, session) {
   # Read the .yml file of configuration for the connection
   config_data <- eventReactive(input$start_button, {
     # If the user has not specified a file and the file exists in the default path, indicates the default path
-    if (is.null(input$setting_file_path$datapath) && file.exists(file.path(path.expand("~"),".appconfig","akador","configuration_file.yml"))) {
-      path_setting_file <- file.path(path.expand("~"),".appconfig","akador","configuration_file.yml")
+    if (is.null(input$setting_file_path$datapath) && file.exists(file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"))) {
+      path_setting_file <- file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml")
       # If the user has specified a file, indicates the path to specify
     } else if (!is.null(input$setting_file_path$datapath)) {
       path_setting_file <- input$setting_file_path$datapath
@@ -62,7 +62,7 @@ shinyServer(function(input, output, session) {
       if (data_connection[1] == "observe_9a") {
         # Read the SQL query
         trip_id_sql <- paste(
-          readLines(file.path(".","sql","trip_id.sql")),
+          readLines(file.path(".", "sql", "trip_id.sql")),
           collapse = "\n"
         )
         # Transform the SQL query
@@ -130,7 +130,7 @@ shinyServer(function(input, output, session) {
       if (data_connection[1] == "observe_9a") {
         # Read the SQL query to retrieve the vessel code and the end of the trip of all the trips that have been selected
         trip_enddate_vessel_code_sql <- paste(
-          readLines(file.path(".","sql","trip_enddate_vessel_code.sql")),
+          readLines(file.path(".", "sql", "trip_enddate_vessel_code.sql")),
           collapse = "\n"
         )
         # Replaces the anchors with the selected values
@@ -171,7 +171,7 @@ shinyServer(function(input, output, session) {
         DBI::dbDisconnect(data_connection[[2]])
         trip_enddate_vessel_code_data$trip_enddate <- as.character(trip_enddate_vessel_code_data$trip_enddate)
         # Uses a function to format the table
-        check_trip_activity<-table_display_trip(check_trip_activity_inspector_data,trip_enddate_vessel_code_data)
+        check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_enddate_vessel_code_data)
         # Modify the table for display purposes: rename column
         check_trip_activity <- dplyr::rename(
           .data = check_trip_activity,
@@ -180,7 +180,7 @@ shinyServer(function(input, output, session) {
           Check = logical
         )
         # Uses a function to format the table
-        check_fishing_time<-table_display_trip(check_fishing_time_inspector_data,trip_enddate_vessel_code_data)
+        check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_enddate_vessel_code_data)
         # Modify the table for display purposes: rename column
         check_fishing_time <- dplyr::rename(
           .data = check_fishing_time,
@@ -191,7 +191,7 @@ shinyServer(function(input, output, session) {
           `Sum route fishing time` = sum_route_fishingtime
         )
         # Uses a function to format the table
-        check_sea_time<-table_display_trip(check_sea_time_inspector_data,trip_enddate_vessel_code_data)
+        check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_enddate_vessel_code_data)
         # Modify the table for display purposes: rename column
         check_sea_time <- dplyr::rename(
           .data = check_sea_time,
@@ -201,7 +201,7 @@ shinyServer(function(input, output, session) {
           `Trip sea time` = trip_sea_time,
           `Sum route sea time` = sum_route_seatime
         )
-         return(list(check_trip_activity, check_fishing_time, check_sea_time))
+        return(list(check_trip_activity, check_fishing_time, check_sea_time))
       }
     }
   })
@@ -211,11 +211,12 @@ shinyServer(function(input, output, session) {
     {
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
-        data<-calcul_check()[[1]]
-        if(input$type_line_check_trip=="inconsistent"){
-          return(data[data$Check!=as.character(icon("check")),])
-        }else{
-        return(data)}
+        data <- calcul_check()[[1]]
+        if (input$type_line_check_trip == "inconsistent") {
+          return(data[data$Check != as.character(icon("check")), ])
+        } else {
+          return(data)
+        }
       }
     },
     escape = FALSE,
@@ -228,11 +229,12 @@ shinyServer(function(input, output, session) {
     {
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
-        data<-calcul_check()[[2]]
-        if(input$type_line_check_trip=="inconsistent"){
-          return(data[data$Check!=as.character(icon("check")),])
-        }else{
-          return(data)}
+        data <- calcul_check()[[2]]
+        if (input$type_line_check_trip == "inconsistent") {
+          return(data[data$Check != as.character(icon("check")), ])
+        } else {
+          return(data)
+        }
       }
     },
     escape = FALSE,
@@ -245,11 +247,12 @@ shinyServer(function(input, output, session) {
     {
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
-        data<-calcul_check()[[3]]
-        if(input$type_line_check_trip=="inconsistent"){
-          return(data[data$Check!=as.character(icon("check")),])
-        }else{
-          return(data)}
+        data <- calcul_check()[[3]]
+        if (input$type_line_check_trip == "inconsistent") {
+          return(data[data$Check != as.character(icon("check")), ])
+        } else {
+          return(data)
+        }
       }
     },
     escape = FALSE,
@@ -259,17 +262,17 @@ shinyServer(function(input, output, session) {
   
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
-    if(input$type_check_trip=="All"){
+    if (input$type_check_trip == "All") {
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE)
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE)
       shinyjs::show(id = "div_check_sea_time", anim = TRUE)
     }
-    if(input$type_check_trip=="Warning"){
+    if (input$type_check_trip == "Warning") {
       shinyjs::hide(id = "div_check_trip_activity", anim = TRUE)
       shinyjs::hide(id = "div_check_fishing_time", anim = TRUE)
       shinyjs::hide(id = "div_check_sea_time", anim = TRUE)
     }
-    if(input$type_check_trip=="Error"){
+    if (input$type_check_trip == "Error") {
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE)
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE)
       shinyjs::show(id = "div_check_sea_time", anim = TRUE)
@@ -287,7 +290,7 @@ shinyServer(function(input, output, session) {
     if (text_error_trip_select() == TRUE && !isTruthy(config_data())) {
       text <- "Error: There is no configuration file for the connection to the base"
       showNotification(id = "notif_warning", ui = text, type = "error")
-      return(paste0("<span style=\"color:red\">", text, ", please either select one using the \"settings\" tab or put it in ", file.path(path.expand("~"),".appconfig","akador","configuration_file.yml"),"</span>"))
+      return(paste0("<span style=\"color:red\">", text, ", please either select one using the \"settings\" tab or put it in ", file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"), "</span>"))
     }
     # If the selected trip is not found in the database
     if (text_error_trip_select() == TRUE && !is.data.frame(trip_select()) && trip_select() == FALSE) {
