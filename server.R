@@ -211,7 +211,11 @@ shinyServer(function(input, output, session) {
     {
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
-        return(calcul_check()[[1]])
+        data<-calcul_check()[[1]]
+        if(input$type_line_check_trip=="inconsistent"){
+          return(data[data$Check!=as.character(icon("check")),])
+        }else{
+        return(data)}
       }
     },
     escape = FALSE,
@@ -224,7 +228,11 @@ shinyServer(function(input, output, session) {
     {
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
-        return(calcul_check()[[2]])
+        data<-calcul_check()[[2]]
+        if(input$type_line_check_trip=="inconsistent"){
+          return(data[data$Check!=as.character(icon("check")),])
+        }else{
+          return(data)}
       }
     },
     escape = FALSE,
@@ -237,7 +245,11 @@ shinyServer(function(input, output, session) {
     {
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
-        return(calcul_check()[[3]])
+        data<-calcul_check()[[3]]
+        if(input$type_line_check_trip=="inconsistent"){
+          return(data[data$Check!=as.character(icon("check")),])
+        }else{
+          return(data)}
       }
     },
     escape = FALSE,
