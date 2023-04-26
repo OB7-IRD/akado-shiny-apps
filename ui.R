@@ -4,7 +4,7 @@ install.packages(setdiff(packages, rownames(installed.packages())), dependencies
 if (length(setdiff("codama", rownames(installed.packages()))) > 0) {
   devtools::install_github("https://github.com/OB7-IRD/codama", ref = "development", INSTALL_opts = c("--no-multiarch"))
 }
-
+packages<-c(packages,"codama")
 lapply(packages, library, character.only = TRUE)
 source(file.path(".", "function.R"))
 
@@ -37,6 +37,7 @@ siderbar <-
   )
 
 body <- dashboardBody(
+  # Allows you to hide or show the boxes according to
   useShinyjs(),
   # Fix the setting onget at the bottom
   tags$head(
@@ -129,16 +130,17 @@ body <- dashboardBody(
           box(
             width = "100%",
             h1("Fishing time"),
+            "If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the tide.",
             withSpinner(DTOutput("check_fishing_time"), type = 6)
           )
         ),
-        div(class = "clearfix visible-md"),
         div(
           id = "div_check_sea_time",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
             width = "100%",
             h1("Sea time"),
+            "If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the tide.",
             withSpinner(DTOutput("check_sea_time"), type = 6)
           )
         )

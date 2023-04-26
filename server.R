@@ -265,16 +265,19 @@ shinyServer(function(input, output, session) {
     if (input$type_check_trip == "All") {
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE)
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE)
+      insertUI(selector = "#div_check_fishing_time", ui=div(class = "clearfix visible-md", id="div_visible_md_check_fishing_time"), where ="afterEnd")
       shinyjs::show(id = "div_check_sea_time", anim = TRUE)
     }
     if (input$type_check_trip == "Warning") {
       shinyjs::hide(id = "div_check_trip_activity", anim = TRUE)
       shinyjs::hide(id = "div_check_fishing_time", anim = TRUE)
+      removeUI(selector = "#div_visible_md_check_fishing_time")
       shinyjs::hide(id = "div_check_sea_time", anim = TRUE)
     }
     if (input$type_check_trip == "Error") {
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE)
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE)
+      insertUI(selector = "#div_check_fishing_time", ui=div(class = "clearfix visible-md", id="div_visible_md_check_fishing_time"), where ="afterEnd")
       shinyjs::show(id = "div_check_sea_time", anim = TRUE)
     }
   })
