@@ -157,6 +157,17 @@ body <- dashboardBody(
             "If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct.",
             withSpinner(DTOutput("check_landing_consistent"), type = 6, size = 0.5, proxy.height = "70px")
           )
+        ),
+        div(
+          id = "div_check_landing_total_weigh",
+          class = "col-sm-12 col-md-6 col-lg-4",
+          box(
+            style = "padding-bottom:55px;",
+            width = "100%",
+            h1("Total landed weight"),
+            "If the values are not equal, you must enter the value of the sum of the commercial lots in the 'Landed Weight' field of the trip.",
+            withSpinner(DTOutput("check_landing_total_weigh"), type = 6, size = 0.5, proxy.height = "70px")
+          )
         )
       )
     ),
