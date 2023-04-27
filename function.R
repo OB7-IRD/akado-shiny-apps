@@ -745,7 +745,7 @@ check_landing_consistent_inspector <- function(data_connection,
     }
     # landing total weight and vessel capacity link to trip
     trip_weight_capacity_sql <- paste(
-      readLines(file.path("D:", "Git", "trip_weight_vessel_capacity.sql")),
+      readLines(file.path("sql", "trip_weight_vessel_capacity.sql")),
       collapse = "\n"
     )
     trip_weight_capacity_sql <- DBI::sqlInterpolate(
