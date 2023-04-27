@@ -4,7 +4,7 @@ install.packages(setdiff(packages, rownames(installed.packages())), dependencies
 if (length(setdiff("codama", rownames(installed.packages()))) > 0) {
   devtools::install_github("https://github.com/OB7-IRD/codama", ref = "development", INSTALL_opts = c("--no-multiarch"))
 }
-packages<-c(packages,"codama")
+packages <- c(packages, "codama")
 lapply(packages, library, character.only = TRUE)
 source(file.path(".", "function.R"))
 
@@ -119,29 +119,43 @@ body <- dashboardBody(
           id = "div_check_trip_activity",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
+            style = "padding-bottom:55px;",
             width = "100%",
             h1("Presence of activity"),
-            withSpinner(DTOutput("check_trip_activity"), type = 6)
+            withSpinner(DTOutput("check_trip_activity"), type = 6, size = 0.5, proxy.height = "70px")
           )
         ),
         div(
           id = "div_check_fishing_time",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
+            style = "padding-bottom:55px;",
             width = "100%",
             h1("Fishing time"),
             "If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the tide.",
-            withSpinner(DTOutput("check_fishing_time"), type = 6)
+            withSpinner(DTOutput("check_fishing_time"), type = 6, size = 0.5, proxy.height = "70px")
           )
         ),
         div(
           id = "div_check_sea_time",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
+            style = "padding-bottom:55px;",
             width = "100%",
             h1("Sea time"),
             "If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the tide.",
-            withSpinner(DTOutput("check_sea_time"), type = 6)
+            withSpinner(DTOutput("check_sea_time"), type = 6, size = 0.5, proxy.height = "70px")
+          )
+        ),
+        div(
+          id = "div_check_landing_consistent",
+          class = "col-sm-12 col-md-6 col-lg-4",
+          box(
+            style = "padding-bottom:55px;",
+            width = "100%",
+            h1("Vessel capacity"),
+            "If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct.",
+            withSpinner(DTOutput("check_landing_consistent"), type = 6, size = 0.5, proxy.height = "70px")
           )
         )
       )

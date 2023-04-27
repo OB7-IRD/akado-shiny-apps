@@ -626,16 +626,481 @@ check_sea_time_inspector <- function(data_connection,
   }
 }
 
-# Function which formats the trip data for display
-table_display_trip <- function(data, data_trip) {
+
+# Function that tests if the vessel capacity is consistent with the landing total weight, in the future integrated in the pakage codama
+check_landing_consistent_inspector <- function(data_connection,
+                                               type_select,
+                                               select,
+                                               output) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE & class(data_connection) != "data.frame") {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
+      sep = ""
+    )
+  } else {
+    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = data_connection[[2]],
+        type = "PostgreSQLConnection",
+        output = "message"
+      ))
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (data_connection[1] == "observe_9a") {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("trip", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("trip", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "trip" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Trip selection in the SQL query
+    if (type_select == "trip") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Trip with a departure or arrival date in the selected year
+      trip_id_selected_by_year_sql <- paste(
+        readLines(con = system.file("sql",
+                                    "trip_id_selected_by_year.sql",
+                                    package = "codama"
+        )),
+        collapse = "\n"
+      )
+      trip_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = trip_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = trip_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", trip_id_selected_by_year_data$trip_id, "'")
+    }
+    # landing total weight and vessel capacity link to trip
+    trip_weight_capacity_sql <- paste(
+      readLines(file.path("D:", "Git", "trip_weight_vessel_capacity.sql")),
+      collapse = "\n"
+    )
+    trip_weight_capacity_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = trip_weight_capacity_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    trip_weight_capacity_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = trip_weight_capacity_sql
+    ))
+  } else {
+    if (is.data.frame(data_connection[[1]]) == TRUE) {
+      trip_weight_capacity_sql <- data_connection[[1]]
+    } else {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  nrow_first <- nrow(trip_weight_capacity_data)
+  # Calculate the landing total weight per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  trip_weight_capacity_data$trip_weighttotal <- rowSums(x = trip_weight_capacity_data[, c("trip_landingtotalweight", "trip_localmarkettotalweight")], na.rm = TRUE)
+  # Compare landing total weight of the trip with vessel capacity
+  comparison <- vectors_comparisons(trip_weight_capacity_data$trip_weighttotal,
+                                    trip_weight_capacity_data$vessel_capacity,
+                                    comparison_type = "less",
+                                    output = "report"
+  )
+  trip_weight_capacity_data$logical <- comparison$logical
+  trip_weight_capacity_data <- subset(trip_weight_capacity_data, select = -c(trip_landingtotalweight, trip_localmarkettotalweight))
+  # Management of missing vessel capacity
+  trip_weight_capacity_data[is.na(trip_weight_capacity_data$vessel_capacity), "logical"] <- FALSE
+  # Management of the 0 value for vessel capacity
+  trip_weight_capacity_data[!is.na(trip_weight_capacity_data$vessel_capacity) & trip_weight_capacity_data$vessel_capacity == 0, "logical"] <- FALSE
+  if ((sum(trip_weight_capacity_data$logical) + sum(!trip_weight_capacity_data$logical)) != nrow_first) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!trip_weight_capacity_data$logical), " trips with vessel capacity smaller than the landing total weight")))
+  }
+  if (output == "report") {
+    return(trip_weight_capacity_data)
+  }
+  if (output == "logical") {
+    if (sum(!trip_weight_capacity_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
+# Function that identify similarities and differences between two R vectors, in the future integrated in the pakage codama
+vectors_comparisons <- function(first_vector,
+                                second_vector,
+                                comparison_type,
+                                output) {
+  # arguments verifications ----
+  if (missing(x = first_vector)) {
+    stop(
+      format(
+        x = Sys.time(),
+        "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Error, missing \"first_vector\" argument.\n"
+    )
+  }
+  if (missing(x = second_vector)) {
+    stop(
+      format(
+        x = Sys.time(),
+        "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Error, missing \"second_vector\" argument.\n"
+    )
+  }
+  if (missing(x = comparison_type)) {
+    stop(
+      format(
+        x = Sys.time(),
+        "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Error, missing \"comparison_type\" argument.\n"
+    )
+  }
+  if (class(x = first_vector) != class(x = second_vector)) {
+    stop(cat(
+      format(
+        x = Sys.time(),
+        "%Y-%m-%d %H:%M:%S"
+      ),
+      " Error - invalid data, different classes between vectors\n"
+    ))
+  }
+  if (r_type_checking(
+    r_object = comparison_type,
+    type = "character",
+    length = 1L,
+    allowed_value = c(
+      "equal",
+      "less",
+      "greater",
+      "less_equal",
+      "greater_equal"
+    ),
+    output = "logical"
+  ) == TRUE & length(x = first_vector) != length(x = second_vector)) {
+    stop(cat(
+      format(
+        x = Sys.time(),
+        "%Y-%m-%d %H:%M:%S"
+      ),
+      " Error - invalid data, different sizes between vectors\n"
+    ))
+  }
+  if (r_type_checking(
+    r_object = comparison_type,
+    type = "character",
+    length = 1L,
+    allowed_value = c(
+      "difference",
+      "equal",
+      "less",
+      "greater",
+      "less_equal",
+      "greater_equal"
+    ),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = comparison_type,
+      type = "character",
+      length = 1L,
+      allowed_value = c(
+        "difference",
+        "equal",
+        "less",
+        "greater",
+        "less_equal",
+        "greater_equal"
+      ),
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = comparison_type,
+    type = "character",
+    length = 1L,
+    allowed_value = c(
+      "less",
+      "greater",
+      "less_equal",
+      "greater_equal"
+    ),
+    output = "logical"
+  ) == TRUE) {
+    if (r_type_checking(
+      r_object = first_vector,
+      type = "numeric",
+      output = "logical"
+    ) != TRUE && inherits(first_vector, "Date") != TRUE) {
+      stop(cat(
+        format(
+          x = Sys.time(),
+          "%Y-%m-%d %H:%M:%S"
+        ),
+        " Error - invalid class for \"first_vector\" and \"second_vector\", the accepted classes are: numeric or Date\n"
+      ))
+    }
+  }
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    length = 1L,
+    allowed_value = c(
+      "message",
+      "report",
+      "logical"
+    ),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      length = 1L,
+      allowed_value = c(
+        "message",
+        "report",
+        "logical"
+      ),
+      output = "message"
+    ))
+  }
+  # global process ----
+  data <- dplyr::tibble("first_vector" = first_vector)
+  if (comparison_type == "difference") {
+    data_final <- dplyr::left_join(
+      x = data,
+      y = (dplyr::tibble("first_vector" = setdiff(
+        x = first_vector,
+        y = second_vector
+      )) %>%
+        dplyr::mutate(logical = FALSE)),
+      by = "first_vector"
+    ) %>%
+      dplyr::mutate(logical = dplyr::case_when(
+        is.na(logical) ~ TRUE,
+        TRUE ~ logical
+      ))
+    message_success <- "- Success, all elements of the first vector are present in the second sector.\n"
+    message_failure_singular <- "element of the first vector is not present in the second sector.\n"
+    message_failure_plural <- "elements of the first vector are not present in the second sector.\n"
+  } else if (comparison_type == "equal") {
+    data_final <- dplyr::mutate(
+      .data = data,
+      second_vector = second_vector,
+      logical = dplyr::case_when(
+        first_vector == second_vector ~ TRUE,
+        TRUE ~ FALSE
+      )
+    )
+    message_success <- "- Success, the two vectors are identical.\n"
+    message_failure_singular <- "element of the first vector is not equal than their pair in the second sector.\n"
+    message_failure_plural <- "elements of the first vector are not equal than their pair in the second sector.\n"
+  } else if (comparison_type == "less") {
+    data_final <- dplyr::mutate(
+      .data = data,
+      second_vector = second_vector,
+      logical = dplyr::case_when(
+        first_vector < second_vector ~ TRUE,
+        TRUE ~ FALSE
+      )
+    )
+    message_success <- "- Success, all elements of the first vector are less than their pair in the second sector.\n"
+    message_failure_singular <- "element of the first vector is not less than their pair in the second sector.\n"
+    message_failure_plural <- "elements of the first vector are not less than their pair in the second sector.\n"
+  } else if (comparison_type == "greater") {
+    data_final <- dplyr::mutate(
+      .data = data,
+      second_vector = second_vector,
+      logical = dplyr::case_when(
+        first_vector > second_vector ~ TRUE,
+        TRUE ~ FALSE
+      )
+    )
+    message_success <- "- Success, all elements of the first vector are greater than their pair in the second sector.\n"
+    message_failure_singular <- "element of the first vector is not greater than their pair in the second sector.\n"
+    message_failure_plural <- "elements of the first vector are not greater than their pair in the second sector.\n"
+  } else if (comparison_type == "less_equal") {
+    data_final <- dplyr::mutate(
+      .data = data,
+      second_vector = second_vector,
+      logical = dplyr::case_when(
+        first_vector <= second_vector ~ TRUE,
+        TRUE ~ FALSE
+      )
+    )
+    message_success <- "- Success, all elements of the first vector are less than or equal to their pair in the second sector.\n"
+    message_failure_singular <- "element of the first vector is not less than or equal to their pair in the second sector.\n"
+    message_failure_plural <- "elements of the first vector are not less than or equal to their pair in the second sector.\n"
+  } else if (comparison_type == "greater_equal") {
+    data_final <- dplyr::mutate(
+      .data = data,
+      second_vector = second_vector,
+      logical = dplyr::case_when(
+        first_vector >= second_vector ~ TRUE,
+        TRUE ~ FALSE
+      )
+    )
+    message_success <- "- Success, all elements of the first vector are greater than or equal to their pair in the second sector.\n"
+    message_failure_singular <- "element of the first vector is not greater than or equal to their pair in the second sector.\n"
+    message_failure_plural <- "elements of the first vector are not greater than or equal to their pair in the second sector.\n"
+  }
+  
+  # Output if the comparison is respected
+  if (sum(data_final$logical) == nrow(data_final)) {
+    if (output == "message") {
+      return(cat(
+        format(
+          x = Sys.time(),
+          "%Y-%m-%d %H:%M:%S"
+        ),
+        message_success
+      ))
+    } else if (output == "logical") {
+      return(TRUE)
+    }
+  }
+  # Output if the comparison is not respected
+  else {
+    if (output == "message") {
+      mismatch_element <- sum(!data_final$logical)
+      return(cat(
+        format(
+          x = Sys.time(),
+          "%Y-%m-%d %H:%M:%S"
+        ),
+        "- Failure,",
+        mismatch_element,
+        ifelse(test = mismatch_element == 1,
+               yes = message_failure_singular,
+               no = message_failure_plural
+        )
+      ))
+      return(cat(
+        format(
+          x = Sys.time(),
+          "%Y-%m-%d %H:%M:%S"
+        ),
+        message_failure
+      ))
+    } else if (output == "logical") {
+      return(FALSE)
+    }
+  }
+  if (output == "report") {
+    return(data_final)
+  }
+}
+
+# Function which formats the trip data for display inconsistency
+table_display_trip <- function(data, data_trip, type_inconsistency) {
   # Combines the consistency test on the data and data trip identification information
   data <- merge(data_trip, data, by.x = "trip_id", by.y = "trip_id")
   # Modify the table for display purposes: delete column
   colnames_comparison <- grep("vectors_comparisons_", colnames(data))
-  data <- data[, -c(colnames_comparison)]
+  if (length(colnames_comparison) > 0) {
+    data <- data[, -c(colnames_comparison)]
+  }
   data <- subset(data, select = -c(trip_id))
   # Add icons according to the success of the test
   data$logical[data$logical == TRUE] <- as.character(icon("check"))
-  data$logical[data$logical == FALSE] <- as.character(icon("xmark"))
+  if (type_inconsistency == "error") {
+    data$logical[data$logical == FALSE] <- as.character(icon("xmark"))
+  }
+  if (type_inconsistency == "warning") {
+    data$logical[data$logical == FALSE] <- as.character(icon("exclamation"))
+  }
   return(data)
 }

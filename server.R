@@ -167,11 +167,18 @@ shinyServer(function(input, output, session) {
           select = trip_select()$trip_id,
           output = "report"
         )
+        # Uses a function which indicates whether the selected trips contain landing total weight inconsistent with vessel capacity
+        check_landing_consistent_inspector_data <- check_landing_consistent_inspector(
+          data_connection = data_connection,
+          type_select = "trip",
+          select = trip_select()$trip_id,
+          output = "report"
+        )
         # Disconnection to the base
         DBI::dbDisconnect(data_connection[[2]])
         trip_enddate_vessel_code_data$trip_enddate <- as.character(trip_enddate_vessel_code_data$trip_enddate)
         # Uses a function to format the table
-        check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_enddate_vessel_code_data)
+        check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
         check_trip_activity <- dplyr::rename(
           .data = check_trip_activity,
@@ -180,7 +187,7 @@ shinyServer(function(input, output, session) {
           Check = logical
         )
         # Uses a function to format the table
-        check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_enddate_vessel_code_data)
+        check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_fishing_time <- dplyr::rename(
           .data = check_fishing_time,
@@ -191,7 +198,7 @@ shinyServer(function(input, output, session) {
           `Sum route fishing time` = sum_route_fishingtime
         )
         # Uses a function to format the table
-        check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_enddate_vessel_code_data)
+        check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_sea_time <- dplyr::rename(
           .data = check_sea_time,
@@ -201,7 +208,18 @@ shinyServer(function(input, output, session) {
           `Trip sea time` = trip_sea_time,
           `Sum route sea time` = sum_route_seatime
         )
-        return(list(check_trip_activity, check_fishing_time, check_sea_time))
+        # Uses a function to format the table
+        check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "warning")
+        # Modify the table for display purposes: rename column
+        check_landing_consistent <- dplyr::rename(
+          .data = check_landing_consistent,
+          `Vessel code` = vessel_code,
+          `Trip enddate` = trip_enddate,
+          Check = logical,
+          `Vessel capacity` = vessel_capacity,
+          `Total weight` = trip_weighttotal
+        )
+        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent))
       }
     }
   })
@@ -260,25 +278,49 @@ shinyServer(function(input, output, session) {
     rownames = FALSE
   )
   
+  # Table of consistency test of the landing total weight with vessel capacity
+  output$check_landing_consistent <- renderDT(
+    {
+      # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
+      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
+        data <- calcul_check()[[4]]
+        if (input$type_line_check_trip == "inconsistent") {
+          return(data[data$Check != as.character(icon("check")), ])
+        } else {
+          return(data)
+        }
+      }
+    },
+    escape = FALSE,
+    options = list(lengthChange = FALSE, scrollX = TRUE),
+    rownames = FALSE
+  )
+  
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
     if (input$type_check_trip == "All") {
-      shinyjs::show(id = "div_check_trip_activity", anim = TRUE)
-      shinyjs::show(id = "div_check_fishing_time", anim = TRUE)
-      insertUI(selector = "#div_check_fishing_time", ui=div(class = "clearfix visible-md", id="div_visible_md_check_fishing_time"), where ="afterEnd")
-      shinyjs::show(id = "div_check_sea_time", anim = TRUE)
+      shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
+      shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
+      insertUI(selector = "#div_check_fishing_time", ui = div(class = "clearfix visible-md", id = "div_visible_md_check"), where = "afterEnd")
+      shinyjs::show(id = "div_check_sea_time", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_sea_time", ui = div(class = "clearfix visible-lg", id = "div_visible_lg_check"), where = "afterEnd")
+      shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, animType = "fade")
     }
     if (input$type_check_trip == "Warning") {
-      shinyjs::hide(id = "div_check_trip_activity", anim = TRUE)
-      shinyjs::hide(id = "div_check_fishing_time", anim = TRUE)
-      removeUI(selector = "#div_visible_md_check_fishing_time")
-      shinyjs::hide(id = "div_check_sea_time", anim = TRUE)
+      removeUI(selector = "#div_visible_md_check")
+      removeUI(selector = "#div_visible_lg_check")
+      shinyjs::hide(id = "div_check_fishing_time", anim = FALSE)
+      shinyjs::hide(id = "div_check_sea_time", anim = FALSE)
+      shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
+      shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
     }
     if (input$type_check_trip == "Error") {
-      shinyjs::show(id = "div_check_trip_activity", anim = TRUE)
-      shinyjs::show(id = "div_check_fishing_time", anim = TRUE)
-      insertUI(selector = "#div_check_fishing_time", ui=div(class = "clearfix visible-md", id="div_visible_md_check_fishing_time"), where ="afterEnd")
-      shinyjs::show(id = "div_check_sea_time", anim = TRUE)
+      removeUI(selector = "#div_visible_md_check")
+      removeUI(selector = "#div_visible_lg_check")
+      shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
+      shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
+      shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
+      shinyjs::show(id = "div_check_sea_time", anim = TRUE, time = 1, animType = "fade")
     }
   })
   
