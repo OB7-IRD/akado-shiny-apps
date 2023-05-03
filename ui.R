@@ -1,5 +1,5 @@
 # package
-packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "shinycssloaders", "DT", "shinyjs")
+packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "shinycssloaders", "DT", "shinyjs","plotly")
 install.packages(setdiff(packages, rownames(installed.packages())), dependencies = TRUE)
 if (length(setdiff("codama", rownames(installed.packages()))) > 0) {
   devtools::install_github("https://github.com/OB7-IRD/codama", ref = "development", INSTALL_opts = c("--no-multiarch"))
@@ -132,7 +132,7 @@ body <- dashboardBody(
             style = "padding-bottom:55px;",
             width = "100%",
             h1("Fishing time"),
-            "If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the tide.",
+            HTML("<ul><li>If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the tide</li></ul>"),
             withSpinner(DTOutput("check_fishing_time"), type = 6, size = 0.5, proxy.height = "70px")
           )
         ),
@@ -143,7 +143,7 @@ body <- dashboardBody(
             style = "padding-bottom:55px;",
             width = "100%",
             h1("Sea time"),
-            "If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the tide.",
+            HTML("<ul><li>If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the tide</li></ul>"),
             withSpinner(DTOutput("check_sea_time"), type = 6, size = 0.5, proxy.height = "70px")
           )
         ),
@@ -154,7 +154,7 @@ body <- dashboardBody(
             style = "padding-bottom:55px;",
             width = "100%",
             h1("Vessel capacity"),
-            "If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct.",
+            HTML("<ul><li>If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct</li></ul>"),
             withSpinner(DTOutput("check_landing_consistent"), type = 6, size = 0.5, proxy.height = "70px")
           )
         ),
@@ -165,8 +165,20 @@ body <- dashboardBody(
             style = "padding-bottom:55px;",
             width = "100%",
             h1("Total landed weight"),
-            "If the values are not equal, you must enter the value of the sum of the commercial lots in the 'Landed Weight' field of the trip.",
+            HTML("<ul><li>If the values are not equal, you must enter the value of the sum of the commercial lots in the 'Landed Weight' field of the trip</li></ul>"),
             withSpinner(DTOutput("check_landing_total_weigh"), type = 6, size = 0.5, proxy.height = "70px")
+          )
+        ),
+        div(
+          id = "div_check_temporal_limit",
+          class = "col-sm-12 col-md-6 col-lg-4",
+          box(
+            style = "padding-bottom:55px;",
+            width = "100%",
+            h1("Time coverage"),
+            HTML("<ul><li>You must check the fishing log to see if a day is missing</li>
+                 <li>You must verify that the departure and arrival dates match in the fishing logbook and landing documents</li></ul>"),
+            withSpinner(DTOutput("check_temporal_limit"), type = 6, size = 0.5, proxy.height = "70px")
           )
         )
       )

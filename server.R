@@ -182,6 +182,13 @@ shinyServer(function(input, output, session) {
           output = "report",
           epsilon = epsilon
         )
+        # Uses a function which indicates whether the selected trips contain the trip start and end date inconsistent with the dates of activity
+        check_temporal_limit_inspector_data <- check_temporal_limit_inspector(
+          data_connection = data_connection,
+          type_select = "trip",
+          select = trip_select()$trip_id,
+          output = "report"
+        )
         # Disconnection to the base
         DBI::dbDisconnect(data_connection[[2]])
         trip_enddate_vessel_code_data$trip_enddate <- as.character(trip_enddate_vessel_code_data$trip_enddate)
@@ -238,7 +245,39 @@ shinyServer(function(input, output, session) {
           `Trip landing weight` = trip_landingtotalweight,
           `Sum landing weight` = sum_weightlanding
         )
-        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent,check_landing_total_weigh))
+        # Add button and data for plot in table
+        check_temporal_limit<-check_temporal_limit_inspector_data[[1]]
+        check_temporal_limit_data_plot<- check_temporal_limit_inspector_data[[2]]
+        # Add missing date
+        check_temporal_limit_data_plot<- as.data.frame(check_temporal_limit_data_plot) %>%
+          group_by(trip_id) %>%
+          tidyr::complete(activity_date = seq.Date(trip_startdate[1], trip_enddate[1], by = "day"), trip_startdate=trip_startdate[1], trip_enddate=trip_enddate[1])
+        # Replaces NA for missing dates
+        check_temporal_limit_data_plot<-check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date=TRUE, exter_activity_date=FALSE,count_freq = 0, logical = FALSE))
+        # Add vessel code
+        check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
+        check_temporal_limit_data_plot <- merge(trip_enddate_vessel_code_data, check_temporal_limit_data_plot, by.x = "trip_id", by.y = "trip_id")
+        check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>%
+          dplyr::group_by(trip_id) %>%
+          dplyr::summarise(buttontmp = paste0("button&",paste0(deparse(dplyr::across()), collapse = ""),"&", trip_id,"&",vessel_code), .groups = "keep") %>%
+          dplyr::filter(dplyr::row_number()==1)
+        check_temporal_limit<-merge(check_temporal_limit,check_temporal_limit_data_plot,by="trip_id")
+        check_temporal_limit$button<-NA
+        check_temporal_limit$button[check_temporal_limit$logical == FALSE] <- sapply(which(check_temporal_limit$logical == FALSE), function(c) {
+          as.character(shiny::actionButton(inputId=check_temporal_limit$buttontmp[c], label="Detail",onclick='Shiny.setInputValue(\"button\", this.id, {priority: \"event\"})'))
+        })
+        check_temporal_limit <- subset(check_temporal_limit, select = -c(buttontmp))
+        # Uses a function to format the table
+        check_temporal_limit <- table_display_trip(check_temporal_limit, trip_enddate_vessel_code_data, type_inconsistency = "error")
+        # Modify the table for display purposes: rename column
+        check_temporal_limit <- dplyr::rename(
+          .data = check_temporal_limit,
+          `Vessel code` = vessel_code,
+          `Trip enddate` = trip_enddate,
+          Check = logical,
+          `Details problem` = button
+        )
+        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent,check_landing_total_weigh,check_temporal_limit))
       }
     }
   })
@@ -333,10 +372,63 @@ shinyServer(function(input, output, session) {
     rownames = FALSE
   )
   
+  # Table of consistency test of trip start and end date is consistent with the the dates of activity
+  output$check_temporal_limit <- renderDT(
+    {
+      # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
+      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
+        data <- calcul_check()[[6]]
+        if (input$type_line_check_trip == "inconsistent") {
+          return(data[data$Check != as.character(icon("check")), ])
+        } else {
+          return(data)
+        }
+      }
+    },
+    escape = FALSE,
+    options = list(lengthChange = FALSE, scrollX = TRUE),
+    rownames = FALSE
+  )
+  
+  output$plot <- renderPlotly({
+    splitID <- strsplit(input$button, "&")[[1]]
+    tmp <- eval(parse(text = splitID[[2]]))
+    plotly::plot_ly()%>%
+      plotly::add_markers(x=c(tmp$trip_startdate[1],tmp$trip_enddate[1]), y=c(1,1), marker = list(
+        color = "#63A9FF", symbol = "circle"), name="start date and end date", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>"))%>%
+      plotly::add_markers(data = subset(tmp, logical==TRUE),x= ~ activity_date, y= ~ count_freq, marker = list(
+        color = "#18ED84", symbol = "cross-thin-open"), name="date activity good", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>"))%>%
+      plotly::add_markers(data = subset(tmp, logical==FALSE),x= ~ activity_date, y= ~ count_freq, marker = list(
+        color = "#FF7320", symbol = "x-thin-open"), name="date activity bad", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>"))%>%
+      layout(
+        xaxis = list(
+          title = "Date",
+          dtick = 86400000.0*5,
+          tickformat="%b %d"),
+        yaxis = list(
+          title = "Occurence",
+          tickvals=c(tmp$count_freq,1),
+          ticktext=c(tmp$count_freq,1)))
+  })
+  
+  observeEvent(input$button, {
+    splitID<-strsplit(input$button, "&")[[1]]
+    data <- eval(parse(text = splitID[[2]]))
+    vessel_code <- splitID[4]
+    showModal(modalDialog(
+      plotlyOutput("plot"),
+      title = paste0("Vessel code : ", vessel_code, ", trip end date : ", data$trip_enddate[1]),
+      size = "s",
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
     if (input$type_check_trip == "All") {
       removeUI(selector = "#div_visible_md_check")
+      removeUI(selector = "#div_visible_lg_check")
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
       insertUI(selector = "#div_check_fishing_time", ui = div(class = "clearfix visible-md", id = "div_visible_md_check"), where = "afterEnd")
@@ -345,6 +437,7 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, animType = "fade")
       insertUI(selector = "#div_check_landing_consistent", ui = div(class = "clearfix visible-md", id = "div_visible_md_check"), where = "afterEnd")
       shinyjs::show(id = "div_check_landing_total_weigh", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_temporal_limit", anim = TRUE, animType = "fade")
     }
     if (input$type_check_trip == "Warning") {
       removeUI(selector = "#div_visible_md_check")
@@ -352,6 +445,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_fishing_time", anim = FALSE)
       shinyjs::hide(id = "div_check_sea_time", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_total_weigh", anim = FALSE)
+      shinyjs::hide(id = "div_check_temporal_limit", anim = FALSE)
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
     }
@@ -364,6 +458,8 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "div_check_sea_time", anim = TRUE, time = 1, animType = "fade")
       insertUI(selector = "#div_check_sea_time", ui = div(class = "clearfix visible-md", id = "div_visible_md_check"), where = "afterEnd")
       shinyjs::show(id = "div_check_landing_total_weigh", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_landing_total_weigh", ui = div(class = "clearfix visible-lg", id = "div_visible_lg_check"), where = "afterEnd")
+      shinyjs::show(id = "div_check_temporal_limit", anim = TRUE, animType = "fade")
     }
   })
   

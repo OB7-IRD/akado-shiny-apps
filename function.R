@@ -1035,6 +1035,207 @@ check_landing_total_weight_inspector <- function(data_connection,
   }
 }
 
+# Function that tests if trip start and end date is consistent with the dates of activity, in the future integrated in the pakage codama
+check_temporal_limit_inspector<-function(data_connection,
+         type_select,
+         select,
+         output) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE & class(data_connection) != "data.frame") {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
+      sep = ""
+    )
+  } else {
+    if (r_type_checking(
+      r_object = data_connection,
+      type = "list",
+      length = 2L,
+      output = "logical"
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = data_connection[[2]],
+        type = "PostgreSQLConnection",
+        output = "message"
+      ))
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (data_connection[1] == "observe_9a") {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("trip", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("trip", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "trip" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Trip selection in the SQL query
+    if (type_select == "trip") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Trip with a departure or arrival date in the selected year
+      trip_id_selected_by_year_sql <- paste(
+        readLines(con = file.path("sql",
+          "trip_id_selected_by_year.sql"
+        )),
+        collapse = "\n"
+      )
+      trip_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = trip_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = trip_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", trip_id_selected_by_year_data$trip_id, "'")
+    }
+    # trip start and end date and date of route
+    trip_date_activity_sql <- paste(
+      readLines(file.path("sql", "trip_date_activity.sql")),
+      collapse = "\n"
+    )
+    trip_date_activity_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = trip_date_activity_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    trip_date_activity_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = trip_date_activity_sql
+    ))
+  } else {
+    if (is.data.frame(data_connection[[1]]) == TRUE) {
+      trip_date_activity_data <- data_connection[[1]]
+    } else {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  nrow_first <- length(unique(trip_date_activity_data$trip_id))
+  # Calculate the temporal indicator per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
+  trip_date_activity_data_detail <- trip_date_activity_data
+  # Calculation if the date is in the interval of the beginning of the trip and the end of the trip
+  trip_date_activity_data_detail$inter_activity_date <- (trip_date_activity_data$activity_date >= trip_date_activity_data$trip_startdate) & (trip_date_activity_data$activity_date <= trip_date_activity_data$trip_enddate)
+  # Calculation if the date is outside the interval of the beginning of the trip and the end of the trip
+  trip_date_activity_data_detail$exter_activity_date <- (trip_date_activity_data$activity_date < trip_date_activity_data$trip_startdate) | (trip_date_activity_data$activity_date > trip_date_activity_data$trip_enddate)
+  # Calculates the number of occurrences of each activity date
+  trip_date_activity_data_detail <- trip_date_activity_data_detail %>%
+    dplyr::group_by(trip_id, trip_startdate, trip_enddate, activity_date, inter_activity_date, exter_activity_date, ) %>%
+    dplyr::summarise(count_freq = length(activity_date), .groups = "keep")
+  # Calculation if an inconsistency among the different tests on the date has been found
+  trip_date_activity_data_detail$logical <- trip_date_activity_data_detail$inter_activity_date & !trip_date_activity_data_detail$exter_activity_date & trip_date_activity_data_detail$count_freq == 1
+  # Calculation if the number of days is consistent and if there are inconsistencies in the dates for the trips
+  trip_date_activity_data <- trip_date_activity_data_detail %>%
+    dplyr::group_by(trip_id, trip_startdate, trip_enddate) %>%
+    dplyr::summarise(nb_day = length(activity_date), logical_tmp = sum(!logical) == 0, .groups = "keep")
+  # Calculation if an inconsistency among the different tests on the trip has been found
+  trip_date_activity_data <- trip_date_activity_data %>%
+    dplyr::summarise(logical = sum(c(!((1+trip_enddate-trip_startdate)==nb_day) , !logical_tmp)) == 0, .groups = "keep")
+  # Management of missing trip start and end date
+  trip_date_activity_data[is.na(trip_date_activity_data$trip_startdate) | is.na(trip_date_activity_data$trip_enddate), "logical"] <- FALSE
+  trip_date_activity_data <- subset(trip_date_activity_data, select = -c(trip_startdate, trip_enddate))
+  if ((sum(trip_date_activity_data$logical) + sum(!trip_date_activity_data$logical)) != nrow_first) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!trip_date_activity_data$logical), " trips with a landing weight for the canneries different from the sum of the weights of each landing for the canneries")))
+  }
+  if (output == "report") {
+    return(list(trip_date_activity_data, trip_date_activity_data_detail))
+  }
+  if (output == "logical") {
+    if (sum(!trip_date_activity_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 
 # Function that identify similarities and differences between two R vectors, in the future integrated in the pakage codama
 vectors_comparisons <- function(first_vector,
