@@ -173,7 +173,7 @@ shinyServer(function(input, output, session) {
           type_select = "trip",
           select = trip_select()$trip_id,
           output = "report"
-        ) 
+        )
         # Uses a function which indicates whether the selected trips contain the total landed weight for canneries inconsistent with the weights of each landing for the canneries
         check_landing_total_weight_inspector_data <- check_landing_total_weight_inspector(
           data_connection = data_connection,
@@ -246,25 +246,25 @@ shinyServer(function(input, output, session) {
           `Sum landing weight` = sum_weightlanding
         )
         # Add button and data for plot in table
-        check_temporal_limit<-check_temporal_limit_inspector_data[[1]]
-        check_temporal_limit_data_plot<- check_temporal_limit_inspector_data[[2]]
+        check_temporal_limit <- check_temporal_limit_inspector_data[[1]]
+        check_temporal_limit_data_plot <- check_temporal_limit_inspector_data[[2]]
         # Add missing date
-        check_temporal_limit_data_plot<- as.data.frame(check_temporal_limit_data_plot) %>%
+        check_temporal_limit_data_plot <- as.data.frame(check_temporal_limit_data_plot) %>%
           group_by(trip_id) %>%
-          tidyr::complete(activity_date = seq.Date(trip_startdate[1], trip_enddate[1], by = "day"), trip_startdate=trip_startdate[1], trip_enddate=trip_enddate[1])
+          tidyr::complete(activity_date = seq.Date(trip_startdate[1], trip_enddate[1], by = "day"), trip_startdate = trip_startdate[1], trip_enddate = trip_enddate[1])
         # Replaces NA for missing dates
-        check_temporal_limit_data_plot<-check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date=TRUE, exter_activity_date=FALSE,count_freq = 0, logical = FALSE))
+        check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date = TRUE, exter_activity_date = FALSE, count_freq = 0, logical = FALSE))
         # Add vessel code
         check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
         check_temporal_limit_data_plot <- merge(trip_enddate_vessel_code_data, check_temporal_limit_data_plot, by.x = "trip_id", by.y = "trip_id")
         check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>%
           dplyr::group_by(trip_id) %>%
-          dplyr::summarise(buttontmp = paste0("button&",paste0(deparse(dplyr::across()), collapse = ""),"&", trip_id,"&",vessel_code), .groups = "keep") %>%
-          dplyr::filter(dplyr::row_number()==1)
-        check_temporal_limit<-merge(check_temporal_limit,check_temporal_limit_data_plot,by="trip_id")
-        check_temporal_limit$button<-NA
+          dplyr::summarise(buttontmp = paste0("button&", paste0(deparse(dplyr::across()), collapse = ""), "&", trip_id, "&", vessel_code), .groups = "keep") %>%
+          dplyr::filter(dplyr::row_number() == 1)
+        check_temporal_limit <- merge(check_temporal_limit, check_temporal_limit_data_plot, by = "trip_id")
+        check_temporal_limit$button <- NA
         check_temporal_limit$button[check_temporal_limit$logical == FALSE] <- sapply(which(check_temporal_limit$logical == FALSE), function(c) {
-          as.character(shiny::actionButton(inputId=check_temporal_limit$buttontmp[c], label="Detail",onclick='Shiny.setInputValue(\"button\", this.id, {priority: \"event\"})'))
+          as.character(shiny::actionButton(inputId = check_temporal_limit$buttontmp[c], label = "Detail", onclick = 'Shiny.setInputValue(\"button\", this.id, {priority: \"event\"})'))
         })
         check_temporal_limit <- subset(check_temporal_limit, select = -c(buttontmp))
         # Uses a function to format the table
@@ -277,7 +277,7 @@ shinyServer(function(input, output, session) {
           Check = logical,
           `Details problem` = button
         )
-        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent,check_landing_total_weigh,check_temporal_limit))
+        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit))
       }
     }
   })
@@ -393,26 +393,32 @@ shinyServer(function(input, output, session) {
   output$plot <- renderPlotly({
     splitID <- strsplit(input$button, "&")[[1]]
     tmp <- eval(parse(text = splitID[[2]]))
-    plotly::plot_ly()%>%
-      plotly::add_markers(x=c(tmp$trip_startdate[1],tmp$trip_enddate[1]), y=c(1,1), marker = list(
-        color = "#63A9FF", symbol = "circle"), name="start date and end date", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>"))%>%
-      plotly::add_markers(data = subset(tmp, logical==TRUE),x= ~ activity_date, y= ~ count_freq, marker = list(
-        color = "#18ED84", symbol = "cross-thin-open"), name="date activity good", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>"))%>%
-      plotly::add_markers(data = subset(tmp, logical==FALSE),x= ~ activity_date, y= ~ count_freq, marker = list(
-        color = "#FF7320", symbol = "x-thin-open"), name="date activity bad", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>"))%>%
+    plotly::plot_ly() %>%
+      plotly::add_markers(x = c(tmp$trip_startdate[1], tmp$trip_enddate[1]), y = c(1, 1), marker = list(
+        color = "#63A9FF", symbol = "circle"
+      ), name = "start date and end date", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
+      plotly::add_markers(data = subset(tmp, logical == TRUE), x = ~activity_date, y = ~count_freq, marker = list(
+        color = "#18ED84", symbol = "cross-thin-open"
+      ), name = "date activity good", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
+      plotly::add_markers(data = subset(tmp, logical == FALSE), x = ~activity_date, y = ~count_freq, marker = list(
+        color = "#FF7320", symbol = "x-thin-open"
+      ), name = "date activity bad", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
       layout(
         xaxis = list(
           title = "Date",
-          dtick = 86400000.0*5,
-          tickformat="%b %d"),
+          dtick = 86400000.0 * 5,
+          tickformat = "%b %d"
+        ),
         yaxis = list(
           title = "Occurence",
-          tickvals=c(tmp$count_freq,1),
-          ticktext=c(tmp$count_freq,1)))
+          tickvals = c(tmp$count_freq, 1),
+          ticktext = c(tmp$count_freq, 1)
+        )
+      )
   })
   
   observeEvent(input$button, {
-    splitID<-strsplit(input$button, "&")[[1]]
+    splitID <- strsplit(input$button, "&")[[1]]
     data <- eval(parse(text = splitID[[2]]))
     vessel_code <- splitID[4]
     showModal(modalDialog(

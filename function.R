@@ -1,4 +1,4 @@
-epsilon<-0.01
+epsilon <- 0.01
 
 
 # Function that tests the presence of activity associated with the trip, in the future integrated in the pakage codama
@@ -993,9 +993,9 @@ check_landing_total_weight_inspector <- function(data_connection,
     dplyr::summarise(sum_weightlanding = ifelse(all(is.na(landing_weight)), landing_weight[NA_integer_], sum(landing_weight, na.rm = TRUE)))
   # Merge and calcul difference
   trip_weight_capacity_data <- merge(trip_weight_capacity_data, trip_weight_landing_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
-  trip_weight_capacity_data$difference<- ifelse(is.na(trip_weight_capacity_data$trip_landingtotalweight),0,trip_weight_capacity_data$trip_landingtotalweight) - ifelse(is.na(trip_weight_capacity_data$sum_weightlanding),0,trip_weight_capacity_data$sum_weightlanding)
-  trip_weight_capacity_data$difference<- abs(trip_weight_capacity_data$difference)
-  trip_weight_capacity_data$epsilon<-epsilon
+  trip_weight_capacity_data$difference <- ifelse(is.na(trip_weight_capacity_data$trip_landingtotalweight), 0, trip_weight_capacity_data$trip_landingtotalweight) - ifelse(is.na(trip_weight_capacity_data$sum_weightlanding), 0, trip_weight_capacity_data$sum_weightlanding)
+  trip_weight_capacity_data$difference <- abs(trip_weight_capacity_data$difference)
+  trip_weight_capacity_data$epsilon <- epsilon
   # Compare trip IDs and weight landing of the trip or the sum of the landing
   comparison <- vectors_comparisons(trip_weight_capacity_data$difference,
                                     trip_weight_capacity_data$epsilon,
@@ -1003,11 +1003,11 @@ check_landing_total_weight_inspector <- function(data_connection,
                                     output = "report"
   )
   trip_weight_capacity_data$logical <- comparison$logical
-  trip_weight_capacity_data <- subset(trip_weight_capacity_data, select = -c(vessel_capacity,trip_localmarkettotalweight,difference,epsilon))
+  trip_weight_capacity_data <- subset(trip_weight_capacity_data, select = -c(vessel_capacity, trip_localmarkettotalweight, difference, epsilon))
   # Management of missing landing weight
   trip_weight_capacity_data[is.na(trip_weight_capacity_data$trip_landingtotalweight), "logical"] <- FALSE
   # Management of missing sum of the landing
-  trip_weight_capacity_data[is.na(trip_weight_capacity_data$sum_weightlanding) & !is.na(trip_weight_capacity_data$trip_landingtotalweight) & trip_weight_capacity_data$trip_landingtotalweight>0, "logical"] <- FALSE
+  trip_weight_capacity_data[is.na(trip_weight_capacity_data$sum_weightlanding) & !is.na(trip_weight_capacity_data$trip_landingtotalweight) & trip_weight_capacity_data$trip_landingtotalweight > 0, "logical"] <- FALSE
   if ((sum(trip_weight_capacity_data$logical) + sum(!trip_weight_capacity_data$logical)) != nrow_first) {
     stop(
       format(
@@ -1036,10 +1036,10 @@ check_landing_total_weight_inspector <- function(data_connection,
 }
 
 # Function that tests if trip start and end date is consistent with the dates of activity, in the future integrated in the pakage codama
-check_temporal_limit_inspector<-function(data_connection,
-         type_select,
-         select,
-         output) {
+check_temporal_limit_inspector <- function(data_connection,
+                                           type_select,
+                                           select,
+                                           output) {
   # 0 - Global variables assignement ----
   # 1 - Arguments verification ----
   if (r_type_checking(
@@ -1137,7 +1137,8 @@ check_temporal_limit_inspector<-function(data_connection,
     if (type_select == "year") {
       # Trip with a departure or arrival date in the selected year
       trip_id_selected_by_year_sql <- paste(
-        readLines(con = file.path("sql",
+        readLines(con = file.path(
+          "sql",
           "trip_id_selected_by_year.sql"
         )),
         collapse = "\n"
@@ -1205,7 +1206,7 @@ check_temporal_limit_inspector<-function(data_connection,
     dplyr::summarise(nb_day = length(activity_date), logical_tmp = sum(!logical) == 0, .groups = "keep")
   # Calculation if an inconsistency among the different tests on the trip has been found
   trip_date_activity_data <- trip_date_activity_data %>%
-    dplyr::summarise(logical = sum(c(!((1+trip_enddate-trip_startdate)==nb_day) , !logical_tmp)) == 0, .groups = "keep")
+    dplyr::summarise(logical = sum(c(!((1 + trip_enddate - trip_startdate) == nb_day), !logical_tmp)) == 0, .groups = "keep")
   # Management of missing trip start and end date
   trip_date_activity_data[is.na(trip_date_activity_data$trip_startdate) | is.na(trip_date_activity_data$trip_enddate), "logical"] <- FALSE
   trip_date_activity_data <- subset(trip_date_activity_data, select = -c(trip_startdate, trip_enddate))
