@@ -48,6 +48,10 @@ body <- dashboardBody(
       }
     "))
   ),
+  # Fix the scrollbar with withSpinner effect
+  tags$head(tags$style(
+    HTML('.wrapper {height: auto !important; position:relative; overflow-x:hidden; overflow-y:hidden}')
+  )),
   # Color of the icons in relation to the consistency test
   tags$style(".fa-check {color:#05DE1E}"),
   tags$style(".fa-exclamation {color:#FFA600}"),
@@ -97,7 +101,6 @@ body <- dashboardBody(
         ),
         box(
           width = 12,
-          style = "padding-bottom:55px;",
           align = "center",
           actionButton(inputId = "start_button", label = "Start"),
           withSpinner(htmlOutput("error_trip_select"), type = 6, size = 0.5, proxy.height = "70px")
@@ -118,7 +121,6 @@ body <- dashboardBody(
           id = "div_check_trip_activity",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
-            style = "padding-bottom:55px;",
             width = "100%",
             h1("Presence of activity"),
             withSpinner(DTOutput("check_trip_activity"), type = 6, size = 0.5, proxy.height = "70px")
@@ -128,7 +130,6 @@ body <- dashboardBody(
           id = "div_check_fishing_time",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
-            style = "padding-bottom:55px;",
             width = "100%",
             h1("Fishing time"),
             HTML("<ul><li>If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the tide</li></ul>"),
@@ -139,7 +140,6 @@ body <- dashboardBody(
           id = "div_check_sea_time",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
-            style = "padding-bottom:55px;",
             width = "100%",
             h1("Sea time"),
             HTML("<ul><li>If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the tide</li></ul>"),
@@ -150,7 +150,6 @@ body <- dashboardBody(
           id = "div_check_landing_consistent",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
-            style = "padding-bottom:55px;",
             width = "100%",
             h1("Vessel capacity"),
             HTML("<ul><li>If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct</li></ul>"),
@@ -161,7 +160,6 @@ body <- dashboardBody(
           id = "div_check_landing_total_weigh",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
-            style = "padding-bottom:55px;",
             width = "100%",
             h1("Total landed weight"),
             HTML("<ul><li>If the values are not equal, you must enter the value of the sum of the commercial lots in the 'Landed Weight' field of the trip</li></ul>"),
@@ -172,7 +170,6 @@ body <- dashboardBody(
           id = "div_check_temporal_limit",
           class = "col-sm-12 col-md-6 col-lg-4",
           box(
-            style = "padding-bottom:55px;",
             width = "100%",
             h1("Time coverage"),
             HTML("<ul><li>You must check the fishing log to see if a day is missing</li>

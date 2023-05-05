@@ -147,8 +147,8 @@ check_trip_activity_inspector <- function(data_connection,
   # 3 - Data design ----
   nrow_first <- length(trip_id)
   # Search trip ID in the associations trip, route, activity
-  comparison <- vector_comparison(trip_id,
-                                  trip_with_activity_data$trip_id,
+  comparison <- vector_comparison(first_vector = trip_id,
+                                  second_vector = trip_with_activity_data$trip_id,
                                   comparison_type = "difference",
                                   output = "report"
   )
@@ -356,8 +356,8 @@ check_fishing_time_inspector <- function(data_connection,
   route_fishingtime_data$trip_idfishing_time <- paste0(route_fishingtime_data$trip_id, route_fishingtime_data$sum_route_fishingtime)
   trip_fishingtime_data$trip_idfishing_time <- paste0(trip_fishingtime_data$trip_id, trip_fishingtime_data$trip_fishing_time)
   # Compare trip IDs and fishing time of the trip or the sum of the route
-  comparison <- vector_comparison(trip_fishingtime_data$trip_idfishing_time,
-                                  route_fishingtime_data$trip_idfishing_time,
+  comparison <- vector_comparison(first_vector = trip_fishingtime_data$trip_idfishing_time,
+                                  second_vector = route_fishingtime_data$trip_idfishing_time,
                                   comparison_type = "difference",
                                   output = "report"
   )
@@ -572,8 +572,8 @@ check_sea_time_inspector <- function(data_connection,
   route_seatime_data$trip_idsea_time <- paste0(route_seatime_data$trip_id, route_seatime_data$sum_route_seatime)
   trip_seatime_data$trip_idsea_time <- paste0(trip_seatime_data$trip_id, trip_seatime_data$trip_sea_time)
   # Compare trip IDs and sea time of the trip or the sum of the route
-  comparison <- vector_comparison(trip_seatime_data$trip_idsea_time,
-                                  route_seatime_data$trip_idsea_time,
+  comparison <- vector_comparison(first_vector = trip_seatime_data$trip_idsea_time,
+                                  second_vector = route_seatime_data$trip_idsea_time,
                                   comparison_type = "difference",
                                   output = "report"
   )
@@ -771,10 +771,10 @@ check_landing_consistent_inspector <- function(data_connection,
   # Calculate the landing total weight per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   trip_weight_capacity_data$trip_weighttotal <- rowSums(x = trip_weight_capacity_data[, c("trip_landingtotalweight", "trip_localmarkettotalweight")], na.rm = TRUE)
   # Compare landing total weight of the trip with vessel capacity
-  comparison <- vector_comparison(trip_weight_capacity_data$trip_weighttotal,
-                                    trip_weight_capacity_data$vessel_capacity,
-                                    comparison_type = "less",
-                                    output = "report"
+  comparison <- vector_comparison(first_vector = trip_weight_capacity_data$trip_weighttotal,
+                                  second_vector = trip_weight_capacity_data$vessel_capacity,
+                                  comparison_type = "less",
+                                  output = "report"
   )
   trip_weight_capacity_data$logical <- comparison$logical
   trip_weight_capacity_data <- subset(trip_weight_capacity_data, select = -c(trip_landingtotalweight, trip_localmarkettotalweight))
@@ -982,10 +982,10 @@ check_landing_total_weight_inspector <- function(data_connection,
   trip_weight_capacity_data$difference <- abs(trip_weight_capacity_data$difference)
   trip_weight_capacity_data$epsilon <- epsilon
   # Compare trip IDs and weight landing of the trip or the sum of the landing
-  comparison <- vector_comparison(trip_weight_capacity_data$difference,
-                                    trip_weight_capacity_data$epsilon,
-                                    comparison_type = "less_equal",
-                                    output = "report"
+  comparison <- vector_comparison(first_vector = trip_weight_capacity_data$difference,
+                                  second_vector = trip_weight_capacity_data$epsilon,
+                                  comparison_type = "less_equal",
+                                  output = "report"
   )
   trip_weight_capacity_data$logical <- comparison$logical
   trip_weight_capacity_data <- subset(trip_weight_capacity_data, select = -c(vessel_capacity, trip_localmarkettotalweight, difference, epsilon))
@@ -1176,9 +1176,29 @@ check_temporal_limit_inspector <- function(data_connection,
   # Calculate the temporal indicator per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   trip_date_activity_data_detail <- trip_date_activity_data
   # Calculation if the date is in the interval of the beginning of the trip and the end of the trip
-  trip_date_activity_data_detail$inter_activity_date <- (trip_date_activity_data$activity_date >= trip_date_activity_data$trip_startdate) & (trip_date_activity_data$activity_date <= trip_date_activity_data$trip_enddate)
+  trip_date_activity_data_detail$trip_startdate_greater_equal <- vector_comparison(first_vector = trip_date_activity_data$activity_date,
+                                                                                   second_vector = trip_date_activity_data$trip_startdate,
+                                                                                   comparison_type = "greater_equal",
+                                                                                   output = "report"
+  )$logical
+  trip_date_activity_data_detail$trip_enddate_less_equal <- vector_comparison(first_vector = trip_date_activity_data$activity_date,
+                                                                              second_vector = trip_date_activity_data$trip_enddate,
+                                                                              comparison_type = "less_equal",
+                                                                              output = "report"
+  )$logical
+  trip_date_activity_data_detail$inter_activity_date <- trip_date_activity_data_detail$trip_startdate_greater_equal & trip_date_activity_data_detail$trip_enddate_less_equal
   # Calculation if the date is outside the interval of the beginning of the trip and the end of the trip
-  trip_date_activity_data_detail$exter_activity_date <- (trip_date_activity_data$activity_date < trip_date_activity_data$trip_startdate) | (trip_date_activity_data$activity_date > trip_date_activity_data$trip_enddate)
+  trip_date_activity_data_detail$trip_startdate_less <- vector_comparison(first_vector = trip_date_activity_data$activity_date,
+                                                                          second_vector = trip_date_activity_data$trip_startdate,
+                                                                          comparison_type = "less",
+                                                                          output = "report"
+  )$logical
+  trip_date_activity_data_detail$trip_enddate_greater <- vector_comparison(first_vector = trip_date_activity_data$activity_date,
+                                                                           second_vector = trip_date_activity_data$trip_enddate,
+                                                                           comparison_type = "greater",
+                                                                           output = "report"
+  )$logical
+  trip_date_activity_data_detail$exter_activity_date <- trip_date_activity_data_detail$trip_startdate_less | trip_date_activity_data_detail$trip_enddate_greater
   # Calculates the number of occurrences of each activity date
   trip_date_activity_data_detail <- trip_date_activity_data_detail %>%
     dplyr::group_by(trip_id, trip_startdate, trip_enddate, activity_date, inter_activity_date, exter_activity_date, ) %>%

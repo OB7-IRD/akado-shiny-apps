@@ -424,7 +424,8 @@ shinyServer(function(input, output, session) {
     showModal(modalDialog(
       plotlyOutput("plot"),
       title = paste0("Vessel code : ", vessel_code, ", trip end date : ", data$trip_enddate[1]),
-      size = "s",
+      size = "l",
+      fade = TRUE,
       easyClose = TRUE,
       footer = NULL
     ))
