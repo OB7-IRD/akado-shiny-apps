@@ -770,6 +770,8 @@ check_landing_consistent_inspector <- function(data_connection,
   nrow_first <- nrow(trip_weight_capacity_data)
   # Calculate the landing total weight per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   trip_weight_capacity_data$trip_weighttotal <- rowSums(x = trip_weight_capacity_data[, c("trip_landingtotalweight", "trip_localmarkettotalweight")], na.rm = TRUE)
+  # Converts cubic meters to tons
+  trip_weight_capacity_data$vessel_capacity <- trip_weight_capacity_data$vessel_capacity*0.7
   # Compare landing total weight of the trip with vessel capacity
   comparison <- vector_comparison(first_vector = trip_weight_capacity_data$trip_weighttotal,
                                   second_vector = trip_weight_capacity_data$vessel_capacity,
@@ -1258,4 +1260,31 @@ table_display_trip <- function(data, data_trip, type_inconsistency) {
     data$logical[data$logical == FALSE] <- as.character(icon("exclamation"))
   }
   return(data)
+}
+
+
+# Function to create the plot of the consistency of the dates by trip
+plot_temporal_limit <- function(data) {
+  plotly::plot_ly() %>%
+    plotly::add_markers(x = c(data$trip_startdate[1], data$trip_enddate[1]), y = c(1, 1), marker = list(
+      color = "#63A9FF", symbol = "circle"
+    ), name = "start date and end date", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
+    plotly::add_markers(data = subset(data, logical == TRUE), x = ~activity_date, y = ~count_freq, marker = list(
+      color = "#18ED84", symbol = "cross-thin-open"
+    ), name = "date activity good", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
+    plotly::add_markers(data = subset(data, logical == FALSE), x = ~activity_date, y = ~count_freq, marker = list(
+      color = "#FF7320", symbol = "x-thin-open"
+    ), name = "date activity bad", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
+    layout(
+      xaxis = list(
+        title = "Date",
+        dtick = 86400000.0 * 5,
+        tickformat = "%b %d"
+      ),
+      yaxis = list(
+        title = "Occurence",
+        tickvals = c(data$count_freq, 1),
+        ticktext = c(data$count_freq, 1)
+      )
+    )
 }

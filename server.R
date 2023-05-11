@@ -392,29 +392,8 @@ shinyServer(function(input, output, session) {
   
   output$plot <- renderPlotly({
     splitID <- strsplit(input$button, "&")[[1]]
-    tmp <- eval(parse(text = splitID[[2]]))
-    plotly::plot_ly() %>%
-      plotly::add_markers(x = c(tmp$trip_startdate[1], tmp$trip_enddate[1]), y = c(1, 1), marker = list(
-        color = "#63A9FF", symbol = "circle"
-      ), name = "start date and end date", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
-      plotly::add_markers(data = subset(tmp, logical == TRUE), x = ~activity_date, y = ~count_freq, marker = list(
-        color = "#18ED84", symbol = "cross-thin-open"
-      ), name = "date activity good", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
-      plotly::add_markers(data = subset(tmp, logical == FALSE), x = ~activity_date, y = ~count_freq, marker = list(
-        color = "#FF7320", symbol = "x-thin-open"
-      ), name = "date activity bad", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
-      layout(
-        xaxis = list(
-          title = "Date",
-          dtick = 86400000.0 * 5,
-          tickformat = "%b %d"
-        ),
-        yaxis = list(
-          title = "Occurence",
-          tickvals = c(tmp$count_freq, 1),
-          ticktext = c(tmp$count_freq, 1)
-        )
-      )
+    data <- eval(parse(text = splitID[[2]]))
+    plot_temporal_limit(data)
   })
   
   observeEvent(input$button, {
