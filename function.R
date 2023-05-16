@@ -14,15 +14,22 @@ check_trip_activity_inspector <- function(data_connection,
     type = "list",
     length = 2L,
     output = "logical"
-  ) != TRUE) {
-    return(r_type_checking(
+  ) != TRUE & class(data_connection) != "data.frame") {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
+      sep = ""
+    )
+  } else {
+    if (r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
-      output = "message"
-    ))
-  } else {
-    if (r_type_checking(
+      output = "logical"
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -135,6 +142,9 @@ check_trip_activity_inspector <- function(data_connection,
       statement = trip_with_activity_sql
     ))
   } else {
+    if (is.data.frame(data_connection[[1]]) == TRUE) {
+      trip_with_activity_data <- data_connection[[1]]
+    } else {
     stop(
       format(
         x = Sys.time(),
@@ -143,6 +153,7 @@ check_trip_activity_inspector <- function(data_connection,
       " - Consistency check not developed yet for this \"data_connection\" argument.\n ",
       sep = ""
     )
+    }
   }
   # 3 - Data design ----
   nrow_first <- length(trip_id)
@@ -210,11 +221,14 @@ check_fishing_time_inspector <- function(data_connection,
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
-        r_object = data_connection[[2]],
-        type = "PostgreSQLConnection",
-        output = "message"
-      ))
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
+        sep = ""
+      )
     }
   }
   # Checks the type and values of output
@@ -426,11 +440,14 @@ check_sea_time_inspector <- function(data_connection,
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
-        r_object = data_connection[[2]],
-        type = "PostgreSQLConnection",
-        output = "message"
-      ))
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
+        sep = ""
+      )
     }
   }
   # Checks the type and values of output
@@ -837,11 +854,14 @@ check_landing_total_weight_inspector <- function(data_connection,
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
-        r_object = data_connection[[2]],
-        type = "PostgreSQLConnection",
-        output = "message"
-      ))
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
+        sep = ""
+      )
     }
   }
   # Checks the type and values of output
@@ -991,7 +1011,7 @@ check_landing_total_weight_inspector <- function(data_connection,
   )
   trip_weight_capacity_data$logical <- comparison$logical
   trip_weight_capacity_data <- subset(trip_weight_capacity_data, select = -c(vessel_capacity, trip_localmarkettotalweight, difference, epsilon))
-  # Management of missing landing weight
+  # Management of missing landing weight in trip
   trip_weight_capacity_data[is.na(trip_weight_capacity_data$trip_landingtotalweight), "logical"] <- FALSE
   # Management of missing sum of the landing
   trip_weight_capacity_data[is.na(trip_weight_capacity_data$sum_weightlanding) & !is.na(trip_weight_capacity_data$trip_landingtotalweight) & trip_weight_capacity_data$trip_landingtotalweight > 0, "logical"] <- FALSE
