@@ -176,6 +176,17 @@ body <- dashboardBody(
                  <li>You must verify that the departure and arrival dates match in the fishing logbook and landing documents</li></ul>"),
             withSpinner(DTOutput("check_temporal_limit"), type = 6, size = 0.5, proxy.height = "70px")
           )
+        ),
+        div(
+          id = "div_check_harbour",
+          class = "col-sm-12 col-md-6 col-lg-4",
+          box(
+            width = "100%",
+            h1("Harbour"),
+            HTML("<ul><li>Check if all fishing logs have been entered.</li>
+                 <li>Check with the captain to see if any outings have been made in the meantime.</li></ul>"),
+            withSpinner(DTOutput("check_harbour"), type = 6, size = 0.5, proxy.height = "70px")
+          )
         )
       )
     ),

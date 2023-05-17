@@ -189,6 +189,13 @@ shinyServer(function(input, output, session) {
           select = trip_select()$trip_id,
           output = "report"
         )
+        # Uses a function which indicates whether the selected trips contain the trip sharbour of departure of the current trip inconsistent with the harbour of landing of the previous trip 
+        check_harbour_inspector_data <- check_harbour_inspector(
+          data_connection = data_connection,
+          type_select = "trip",
+          select = trip_select()$trip_id,
+          output = "report"
+        )
         # Disconnection to the base
         DBI::dbDisconnect(data_connection[[2]])
         trip_enddate_vessel_code_data$trip_enddate <- as.character(trip_enddate_vessel_code_data$trip_enddate)
@@ -245,7 +252,7 @@ shinyServer(function(input, output, session) {
           `Trip landing weight` = trip_landingtotalweight,
           `Sum landing weight` = sum_weightlanding
         )
-        # Add button and data for plot in table
+        # Data preparation
         check_temporal_limit <- check_temporal_limit_inspector_data[[1]]
         check_temporal_limit_data_plot <- check_temporal_limit_inspector_data[[2]]
         # Add missing date
@@ -257,6 +264,7 @@ shinyServer(function(input, output, session) {
         # Add vessel code
         check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
         check_temporal_limit_data_plot <- merge(trip_enddate_vessel_code_data, check_temporal_limit_data_plot, by.x = "trip_id", by.y = "trip_id")
+        # Add button and data for plot in table 
         check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>%
           dplyr::group_by(trip_id) %>%
           dplyr::summarise(buttontmp = paste0("button&", paste0(deparse(dplyr::across()), collapse = ""), "&", trip_id, "&", vessel_code), .groups = "keep") %>%
@@ -277,7 +285,18 @@ shinyServer(function(input, output, session) {
           Check = logical,
           `Details problem` = button
         )
-        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit))
+        # Uses a function to format the table
+        check_harbour <- table_display_trip(check_harbour_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "error")
+        # Modify the table for display purposes: rename column
+        check_harbour <- dplyr::rename(
+          .data = check_harbour,
+          `Vessel code` = vessel_code,
+          `Trip enddate` = trip_enddate,
+          Check = logical,
+         `Harbour landing` = harbour_name_landing,
+         `Harbour departure` = harbour_name_departure
+        )
+        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour))
       }
     }
   })
@@ -410,6 +429,25 @@ shinyServer(function(input, output, session) {
     ))
   })
   
+  
+  # Table of consistency test of the harbour of landing of the previous trip and the harbour of departure of the current trip
+  output$check_harbour <- renderDT(
+    {
+      # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
+      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
+        data <- calcul_check()[[7]]
+        if (input$type_line_check_trip == "inconsistent") {
+          return(data[data$Check != as.character(icon("check")), ])
+        } else {
+          return(data)
+        }
+      }
+    },
+    escape = FALSE,
+    options = list(lengthChange = FALSE, scrollX = TRUE),
+    rownames = FALSE
+  )
+  
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
     if (input$type_check_trip == "All") {
@@ -424,6 +462,9 @@ shinyServer(function(input, output, session) {
       insertUI(selector = "#div_check_landing_consistent", ui = div(class = "clearfix visible-md", id = "div_visible_md_check"), where = "afterEnd")
       shinyjs::show(id = "div_check_landing_total_weigh", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_temporal_limit", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_temporal_limit", ui = div(class = "clearfix visible-md", id = "div_visible_md_check"), where = "afterEnd")
+      insertUI(selector = "#div_check_temporal_limit", ui = div(class = "clearfix visible-lg", id = "div_visible_lg_check"), where = "afterEnd")
+      shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
     }
     if (input$type_check_trip == "Warning") {
       removeUI(selector = "#div_visible_md_check")
@@ -432,6 +473,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_sea_time", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_total_weigh", anim = FALSE)
       shinyjs::hide(id = "div_check_temporal_limit", anim = FALSE)
+      shinyjs::hide(id = "div_check_harbour", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
     }
@@ -446,6 +488,8 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "div_check_landing_total_weigh", anim = TRUE, animType = "fade")
       insertUI(selector = "#div_check_landing_total_weigh", ui = div(class = "clearfix visible-lg", id = "div_visible_lg_check"), where = "afterEnd")
       shinyjs::show(id = "div_check_temporal_limit", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_temporal_limit", ui = div(class = "clearfix visible-md", id = "div_visible_md_check"), where = "afterEnd")
+      shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
     }
   })
   
