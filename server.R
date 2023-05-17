@@ -189,7 +189,7 @@ shinyServer(function(input, output, session) {
           select = trip_select()$trip_id,
           output = "report"
         )
-        # Uses a function which indicates whether the selected trips contain the trip sharbour of departure of the current trip inconsistent with the harbour of landing of the previous trip 
+        # Uses a function which indicates whether the selected trips contain the trip sharbour of departure of the current trip inconsistent with the harbour of landing of the previous trip
         check_harbour_inspector_data <- check_harbour_inspector(
           data_connection = data_connection,
           type_select = "trip",
@@ -264,7 +264,7 @@ shinyServer(function(input, output, session) {
         # Add vessel code
         check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
         check_temporal_limit_data_plot <- merge(trip_enddate_vessel_code_data, check_temporal_limit_data_plot, by.x = "trip_id", by.y = "trip_id")
-        # Add button and data for plot in table 
+        # Add button and data for plot in table
         check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>%
           dplyr::group_by(trip_id) %>%
           dplyr::summarise(buttontmp = paste0("button&", paste0(deparse(dplyr::across()), collapse = ""), "&", trip_id, "&", vessel_code), .groups = "keep") %>%
@@ -293,8 +293,8 @@ shinyServer(function(input, output, session) {
           `Vessel code` = vessel_code,
           `Trip enddate` = trip_enddate,
           Check = logical,
-         `Harbour landing` = harbour_name_landing,
-         `Harbour departure` = harbour_name_departure
+          `Harbour landing` = harbour_name_landing,
+          `Harbour departure` = harbour_name_departure
         )
         return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour))
       }

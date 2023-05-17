@@ -50,7 +50,7 @@ body <- dashboardBody(
   ),
   # Fix the scrollbar with withSpinner effect
   tags$head(tags$style(
-    HTML('.wrapper {height: auto !important; position:relative; overflow-x:hidden; overflow-y:hidden}')
+    HTML(".wrapper {height: auto !important; position:relative; overflow-x:hidden; overflow-y:hidden}")
   )),
   # Color of the icons in relation to the consistency test
   tags$style(".fa-check {color:#05DE1E}"),
