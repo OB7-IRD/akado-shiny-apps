@@ -1,6 +1,3 @@
-epsilon <- 0.01
-
-
 # Function that tests the presence of activity associated with the trip, in the future integrated in the pakage codama
 check_trip_activity_inspector <- function(data_connection,
                                           type_select,
@@ -1199,7 +1196,7 @@ check_temporal_limit_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  nrow_first <- length(unique(trip_date_activity_data$trip_id))
+  nrow_first <- length(unique(select_sql))
   # Calculate the temporal indicator per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   trip_date_activity_data_detail <- trip_date_activity_data
   # Calculation if the date is in the interval of the beginning of the trip and the end of the trip
@@ -1277,7 +1274,8 @@ check_temporal_limit_inspector <- function(data_connection,
 check_harbour_inspector <- function(data_connection,
                                     type_select,
                                     select,
-                                    output) {
+                                    output,
+                                    logbook_program) {
   # 0 - Global variables assignement ----
   # 1 - Arguments verification ----
   if (r_type_checking(
@@ -1319,6 +1317,18 @@ check_harbour_inspector <- function(data_connection,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  # Checks the type of logbook_program
+  if (r_type_checking(
+    r_object = logbook_program,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = logbook_program,
+      type = "character",
       output = "message"
     ))
   }
@@ -1398,7 +1408,8 @@ check_harbour_inspector <- function(data_connection,
     trip_previous_trip_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_previous_trip_sql,
-      select_item = DBI::SQL(paste(select_sql,
+      select_item_1 = DBI::SQL(paste(paste0("'", logbook_program, "'"), collapse = ", ")),
+      select_item_2 = DBI::SQL(paste(select_sql,
                                    collapse = ", "
       ))
     )
@@ -1529,6 +1540,8 @@ table_display_trip <- function(data, data_trip, type_inconsistency) {
 
 # Function to create the plot of the consistency of the dates by trip
 plot_temporal_limit <- function(data) {
+  # Deletes the rows where the date of the activity is missing
+  data<-data[!is.na(data$activity_date),]
   plotly::plot_ly() %>%
     plotly::add_markers(x = c(data$trip_startdate[1], data$trip_enddate[1]), y = c(1, 1), marker = list(
       color = "#63A9FF", symbol = "circle"

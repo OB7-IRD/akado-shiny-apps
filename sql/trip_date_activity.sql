@@ -6,6 +6,6 @@ SELECT
     r."date"::date AS activity_date
 FROM 
     ps_logbook.route r
-	INNER JOIN ps_common.trip t ON r.trip = t.topiaid
+	RIGHT JOIN ps_common.trip t ON r.trip = t.topiaid
 WHERE 
     t.topiaid IN (?select_item)

@@ -69,31 +69,32 @@ shinyServer(function(input, output, session) {
         # Deletes the part linked to the selection with a date range
         if (isTruthy(input$vessel_number) && isTruthy(input$trip_end_date)) {
           trip_id_sql <- sub(
-            pattern = "(t.startdate >= ?select_item_1 AND t.enddate <= ?select_item_2)",
+            pattern = "(t.startdate >= ?select_item_2 AND t.enddate <= ?select_item_3)",
             replacement = "",
             x = trip_id_sql,
             fixed = TRUE
           )
-          select_item_1 <- input$vessel_number
-          select_item_2 <- input$trip_end_date
+          select_item_2 <- input$vessel_number
+          select_item_3 <- input$trip_end_date
         }
         # Deletes the part linked to a selection with the vessel code and the end date of the trip
         if (isTruthy(input$trip_start_date_range) && isTruthy(input$trip_end_date_range)) {
           trip_id_sql <- sub(
-            pattern = "(v.code IN (?select_item_1) AND t.enddate IN (?select_item_2))",
+            pattern = "(v.code IN (?select_item_2) AND t.enddate IN (?select_item_3))",
             replacement = "",
             x = trip_id_sql,
             fixed = TRUE
           )
-          select_item_1 <- input$trip_start_date_range
-          select_item_2 <- input$trip_end_date_range
+          select_item_2 <- input$trip_start_date_range
+          select_item_3 <- input$trip_end_date_range
         }
         # Replaces the anchors with the selected values
         trip_id_sql <- DBI::sqlInterpolate(
           conn = data_connection[[2]],
           sql = trip_id_sql,
-          select_item_1 = DBI::SQL(paste0("'", select_item_1, "'")),
-          select_item_2 = DBI::SQL(paste0("'", select_item_2, "'"))
+          select_item_1 = DBI::SQL(paste(paste0("'", config_data()[["logbook_program"]], "'"), collapse = ", ")),
+          select_item_2 = DBI::SQL(paste0("'", select_item_2, "'")),
+          select_item_3 = DBI::SQL(paste0("'", select_item_3, "'"))
         )
         # Execute the SQL query
         trip_id_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -180,7 +181,7 @@ shinyServer(function(input, output, session) {
           type_select = "trip",
           select = trip_select()$trip_id,
           output = "report",
-          epsilon = epsilon
+          epsilon = config_data()[["epsilon"]]
         )
         # Uses a function which indicates whether the selected trips contain the trip start and end date inconsistent with the dates of activity
         check_temporal_limit_inspector_data <- check_temporal_limit_inspector(
@@ -194,7 +195,8 @@ shinyServer(function(input, output, session) {
           data_connection = data_connection,
           type_select = "trip",
           select = trip_select()$trip_id,
-          output = "report"
+          output = "report",
+          logbook_program = config_data()[["logbook_program"]]
         )
         # Disconnection to the base
         DBI::dbDisconnect(data_connection[[2]])
