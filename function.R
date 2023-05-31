@@ -138,9 +138,11 @@ check_trip_activity_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = trip_with_activity_sql
     ))
+    nrow_first <- length(select)
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE) {
       trip_with_activity_data <- data_connection[[1]]
+      nrow_first <- nrow(trip_with_activity_data)
     } else {
       stop(
         format(
@@ -153,7 +155,6 @@ check_trip_activity_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  nrow_first <- length(trip_id)
   # Search trip ID in the associations trip, route, activity
   comparison <- vector_comparison(
     first_vector = trip_id,
@@ -343,10 +344,12 @@ check_fishing_time_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = route_fishingtime_sql
     ))
+    nrow_first<-length(unique(select))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
       trip_fishingtime_data <- data_connection[[1]]
       route_fishingtime_data <- data_connection[[2]]
+      nrow_first <- nrow(trip_fishingtime_data)
     } else {
       stop(
         format(
@@ -359,7 +362,6 @@ check_fishing_time_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  nrow_first <- nrow(trip_fishingtime_data)
   # Calculate the sum of the fishing time per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   route_fishingtime_data <- route_fishingtime_data %>%
     dplyr::group_by(trip_id) %>%
@@ -563,10 +565,12 @@ check_sea_time_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = route_seatime_sql
     ))
+    nrow_first <- length(unique(select))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
       trip_seatime_data <- data_connection[[1]]
       route_seatime_data <- data_connection[[2]]
+      nrow_first <- nrow(trip_seatime_data)
     } else {
       stop(
         format(
@@ -579,7 +583,6 @@ check_sea_time_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  nrow_first <- nrow(trip_seatime_data)
   # Calculate the sum of the sea time per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   route_seatime_data <- route_seatime_data %>%
     dplyr::group_by(trip_id) %>%
@@ -769,9 +772,11 @@ check_landing_consistent_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = trip_weight_capacity_sql
     ))
+    nrow_first <- length(unique(select))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE) {
-      trip_weight_capacity_sql <- data_connection[[1]]
+      trip_weight_capacity_data <- data_connection[[1]]
+      nrow_first<-nrow(trip_weight_capacity_data)
     } else {
       stop(
         format(
@@ -784,7 +789,6 @@ check_landing_consistent_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  nrow_first <- nrow(trip_weight_capacity_data)
   # Calculate the landing total weight per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   trip_weight_capacity_data$trip_weighttotal <- rowSums(x = trip_weight_capacity_data[, c("trip_landingtotalweight", "trip_localmarkettotalweight")], na.rm = TRUE)
   # Converts cubic meters to tons
@@ -797,6 +801,7 @@ check_landing_consistent_inspector <- function(data_connection,
     output = "report"
   )
   trip_weight_capacity_data$logical <- comparison$logical
+  trip_weight_capacity_data <- dplyr::relocate(.data = trip_weight_capacity_data, vessel_capacity, trip_weighttotal, .after = logical)
   trip_weight_capacity_data <- subset(trip_weight_capacity_data, select = -c(trip_landingtotalweight, trip_localmarkettotalweight))
   # Management of missing vessel capacity
   trip_weight_capacity_data[is.na(trip_weight_capacity_data$vessel_capacity), "logical"] <- FALSE
@@ -978,10 +983,12 @@ check_landing_total_weight_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = trip_weight_landing_sql
     ))
+    nrow_first<-length(unique(select))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
       trip_weight_capacity_data <- data_connection[[1]]
       trip_weight_landing_data <- data_connection[[2]]
+      nrow_first <- nrow(trip_weight_capacity_data)
     } else {
       stop(
         format(
@@ -994,7 +1001,6 @@ check_landing_total_weight_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  nrow_first <- nrow(trip_weight_capacity_data)
   # Calculate the landing total weight per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   trip_weight_landing_data <- trip_weight_landing_data %>%
     dplyr::group_by(trip_id) %>%
@@ -1012,6 +1018,7 @@ check_landing_total_weight_inspector <- function(data_connection,
     output = "report"
   )
   trip_weight_capacity_data$logical <- comparison$logical
+  trip_weight_capacity_data <- dplyr::relocate(.data = trip_weight_capacity_data, trip_landingtotalweight, sum_weightlanding, .after = logical)
   trip_weight_capacity_data <- subset(trip_weight_capacity_data, select = -c(vessel_capacity, trip_localmarkettotalweight, difference, epsilon))
   # Management of missing landing weight in trip
   trip_weight_capacity_data[is.na(trip_weight_capacity_data$trip_landingtotalweight), "logical"] <- FALSE
@@ -1181,9 +1188,11 @@ check_temporal_limit_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = trip_date_activity_sql
     ))
+    nrow_first <- length(unique(select_sql))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE) {
       trip_date_activity_data <- data_connection[[1]]
+      nrow_first <- length(unique(trip_date_activity_data$trip_id))
     } else {
       stop(
         format(
@@ -1196,7 +1205,6 @@ check_temporal_limit_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  nrow_first <- length(unique(select_sql))
   # Calculate the temporal indicator per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   trip_date_activity_data_detail <- trip_date_activity_data
   # Calculation if the date is in the interval of the beginning of the trip and the end of the trip
@@ -1320,18 +1328,6 @@ check_harbour_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  # Checks the type of logbook_program
-  if (r_type_checking(
-    r_object = logbook_program,
-    type = "character",
-    output = "logical"
-  ) != TRUE) {
-    return(r_type_checking(
-      r_object = logbook_program,
-      type = "character",
-      output = "message"
-    ))
-  }
   if (data_connection[1] == "observe_9a") {
     # Checks the type and values of type_select
     if (r_type_checking(
@@ -1369,6 +1365,18 @@ check_harbour_inspector <- function(data_connection,
       return(r_type_checking(
         r_object = select,
         type = "numeric",
+        output = "message"
+      ))
+    }
+    # Checks the type of logbook_program
+    if (r_type_checking(
+      r_object = logbook_program,
+      type = "character",
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = logbook_program,
+        type = "character",
         output = "message"
       ))
     }
@@ -1459,11 +1467,13 @@ check_harbour_inspector <- function(data_connection,
       .data = departure_harbour_data,
       harbour_id_departure = harbour_id,
     )
+    nrow_first<-length(unique(select))
   } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
+    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE && is.data.frame(data_connection[[3]]) == TRUE) {
       trip_previous_trip_data <- data_connection[[1]]
       landing_harbour_data <- data_connection[[2]]
       departure_harbour_data <- data_connection[[3]]
+      nrow_first<-nrow(trip_previous_trip_data)
     } else {
       stop(
         format(
@@ -1476,8 +1486,7 @@ check_harbour_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  nrow_first <- nrow(trip_previous_trip_data)
-  # merge data
+  # Merge data
   trip_previous_trip_data <- merge(trip_previous_trip_data, landing_harbour_data, by.x = "trip_previous_id", by.y = "trip_id", all.x = TRUE)
   trip_previous_trip_data <- merge(trip_previous_trip_data, departure_harbour_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE, suffixes = c("_landing", "_departure"))
   # Compare landing total weight of the trip with vessel capacity
@@ -1488,6 +1497,7 @@ check_harbour_inspector <- function(data_connection,
     output = "report"
   )
   trip_previous_trip_data$logical <- comparison$logical
+  trip_previous_trip_data <- dplyr::relocate(.data = trip_previous_trip_data, harbour_name_landing, harbour_name_departure, .after = logical)
   trip_previous_trip_data <- subset(trip_previous_trip_data, select = -c(trip_previous_id, harbour_id_landing, harbour_id_departure))
   # Management of missing vessel capacity
   trip_previous_trip_data[is.na(trip_previous_trip_data$harbour_id_departure), "logical"] <- FALSE
