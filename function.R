@@ -1529,6 +1529,292 @@ check_harbour_inspector <- function(data_connection,
   }
 }
 
+# Function that tests if RF1 is within the limit values, in the future integrated in the pakage codama 
+check_raising_factor_inspector <- function(data_connection,
+                                           type_select,
+                                           select,
+                                           output,
+                                           logbook_program,
+                                           species,
+                                           limit = c(0.9, 1.1)) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = data_connection,
+      type = "list",
+      length = 2L,
+      output = "message"
+    ))
+  } else {
+    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Class for \"data_connection\" must be a *list* with either the connection information or the three data frames.\n ",
+        sep = ""
+      )
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  # Checks the type of limit
+  if (r_type_checking(
+    r_object = limit,
+    type = "numeric",
+    length = 2L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = limit,
+      type = "numeric",
+      length = 2L,
+      output = "message"
+    ))
+  }
+  if (data_connection[1] == "observe_9a") {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("trip", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("trip", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "trip" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # Checks the type of logbook_program
+    if (r_type_checking(
+      r_object = logbook_program,
+      type = "character",
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = logbook_program,
+        type = "character",
+        output = "message"
+      ))
+    }
+    # Checks the type of species
+    if (r_type_checking(
+      r_object = species,
+      type = "character",
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = species,
+        type = "character",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Trip selection in the SQL query
+    if (type_select == "trip") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Trip with a departure or arrival date in the selected year
+      trip_id_selected_by_year_sql <- paste(
+        readLines(con = system.file("sql",
+                                    "trip_id_selected_by_year.sql",
+                                    package = "codama"
+        )),
+        collapse = "\n"
+      )
+      trip_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = trip_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = trip_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", trip_id_selected_by_year_data$trip_id, "'")
+    }
+    # Retrieves all identifiers for the entire tide
+    tide_id_sql <- paste(
+      readLines(file.path("sql", "tide_id.sql")),
+      collapse = "\n"
+    )
+    tide_id_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = tide_id_sql,
+      select_item_1 = DBI::SQL(paste(paste0("'", logbook_program, "'"), collapse = ", ")),
+      select_item_2 = DBI::SQL(paste(select_sql, collapse = ", "))
+    )
+    tide_id_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = tide_id_sql
+    ))
+    # Retrieves the weight of each catch in the tide
+    select_sql <- paste0("'", tide_id_data$trip_id, "'")
+    catch_weight_RF1_sql <- paste(
+      readLines(file.path("sql", "catch_weight_RF1.sql")),
+      collapse = "\n"
+    )
+    catch_weight_RF1_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = catch_weight_RF1_sql,
+      select_item_1 = DBI::SQL(paste(select_sql, collapse = ", ")),
+      select_item_2 = DBI::SQL(paste(paste0("'", species, "'"), collapse = ", "))
+    )
+    catch_weight_RF1_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = catch_weight_RF1_sql
+    ))
+    # Retrieves the landing total weight
+    trip_weight_capacity_sql <- paste(
+      readLines(file.path("sql", "trip_weight_vessel_capacity.sql")),
+      collapse = "\n"
+    )
+    trip_weight_capacity_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = trip_weight_capacity_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    trip_weight_capacity_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = trip_weight_capacity_sql
+    ))
+    nrow_first <- length(unique(select))
+  } else {
+    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE && is.data.frame(data_connection[[3]]) == TRUE) {
+      tide_id_data <- data_connection[[1]]
+      catch_weight_RF1_data <- data_connection[[2]]
+      trip_weight_capacity_data <- data_connection[[3]]
+      select <- tide_id_data$trip_id
+      nrow_first <- nrow(tide_id_data)
+    } else {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  # Calculation of the sum of weights caught per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
+  catch_weight_RF1_data <- catch_weight_RF1_data %>%
+    dplyr::group_by(trip_id) %>%
+    dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
+  # Merge data
+  tide_id_data <- merge(tide_id_data, catch_weight_RF1_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  tide_id_data <- merge(tide_id_data, trip_weight_capacity_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  # Creation of a tide identification number
+  tide_id_data$tide_id <- paste0(tide_id_data$trip_end_tide_id, "_", tide_id_data$trip_previous_end_tide_id)
+  # RF1 calculation
+  tide_id_data_RF1 <- tide_id_data %>%
+    dplyr::group_by(tide_id) %>%
+    dplyr::summarise(RF1 = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
+  tide_id_data$lower_limit <- limit[1]
+  tide_id_data$upper_limit <- limit[2]
+  # Selection of user-supplied trips
+  tide_id_data <- merge(data.frame(trip_id = select), unique(tide_id_data), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  # Merge data
+  tide_id_data <- merge(tide_id_data, tide_id_data_RF1, by.x = "tide_id", by.y = "tide_id", all.x = TRUE)
+  # Compare RF1 to valid limits
+  comparison_less <- vector_comparison(
+    first_vector = tide_id_data$RF1,
+    second_vector = tide_id_data$upper_limit,
+    comparison_type = "less",
+    output = "report"
+  )
+  comparison_greater <- vector_comparison(
+    first_vector = tide_id_data$RF1,
+    second_vector = tide_id_data$lower_limit,
+    comparison_type = "greater",
+    output = "report"
+  )
+  tide_id_data$logical <- comparison_less$logical & comparison_greater$logical
+  tide_id_data <- dplyr::relocate(.data = tide_id_data, RF1, .after = logical)
+  tide_id_data <- subset(tide_id_data, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, vessel_capacity, sum_catch_weight, trip_landingtotalweight, trip_localmarkettotalweight, lower_limit, upper_limit))
+  if ((sum(tide_id_data$logical) + sum(!tide_id_data$logical)) != nrow_first) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!tide_id_data$logical), " trips with departure port different from the landing harbour of a previous trip")))
+  }
+  if (output == "report") {
+    return(tide_id_data)
+  }
+  if (output == "logical") {
+    if (sum(!tide_id_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
 
 # Function which formats the trip data for display inconsistency
 table_display_trip <- function(data, data_trip, type_inconsistency) {
@@ -1543,6 +1829,9 @@ table_display_trip <- function(data, data_trip, type_inconsistency) {
   }
   if (type_inconsistency == "warning") {
     data$logical[data$logical == FALSE] <- as.character(icon("exclamation"))
+  }
+  if (type_inconsistency == "info") {
+    data$logical[data$logical == FALSE] <- as.character(icon("info"))
   }
   return(data)
 }

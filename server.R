@@ -190,13 +190,22 @@ shinyServer(function(input, output, session) {
           select = trip_select()$trip_id,
           output = "report"
         )
-        # Uses a function which indicates whether the selected trips contain the trip sharbour of departure of the current trip inconsistent with the harbour of landing of the previous trip
+        # Uses a function which indicates whether the selected trips contain the trip harbour of departure of the current trip inconsistent with the harbour of landing of the previous trip
         check_harbour_inspector_data <- check_harbour_inspector(
           data_connection = data_connection,
           type_select = "trip",
           select = trip_select()$trip_id,
           output = "report",
           logbook_program = config_data()[["logbook_program"]]
+        )
+        # Uses a function which indicates whether the selected trips contain RF1 inconsistent with limit values
+        check_raising_factor_data <- check_raising_factor_inspector(
+          data_connection = data_connection,
+          type_select = "trip",
+          select = trip_select()$trip_id,
+          output = "report",
+          logbook_program = config_data()[["logbook_program"]],
+          species = config_data()[["species_RF1"]]
         )
         # Disconnection to the base
         DBI::dbDisconnect(data_connection[[2]])
@@ -298,7 +307,17 @@ shinyServer(function(input, output, session) {
           `Harbour landing` = harbour_name_landing,
           `Harbour departure` = harbour_name_departure
         )
-        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour))
+        # Uses a function to format the table
+        check_raising_factor <- table_display_trip(check_raising_factor_data, trip_enddate_vessel_code_data, type_inconsistency = "info")
+        check_raising_factor$RF1 <- trunc(check_raising_factor$RF1*1000)/1000
+        # Modify the table for display purposes: rename column
+        check_raising_factor <- dplyr::rename(
+          .data = check_raising_factor,
+          `Vessel code` = vessel_code,
+          `Trip enddate` = trip_enddate,
+          Check = logical
+        )
+        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor))
       }
     }
   })
@@ -450,6 +469,24 @@ shinyServer(function(input, output, session) {
     rownames = FALSE
   )
   
+  # Table of consistency test of the harbour of RF1 and limit values
+  output$check_raising_factor <- renderDT(
+    {
+      # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
+      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
+        data <- calcul_check()[[8]]
+        if (input$type_line_check_trip == "inconsistent") {
+          return(data[data$Check != as.character(icon("check")), ])
+        } else {
+          return(data)
+        }
+      }
+    },
+    escape = FALSE,
+    options = list(lengthChange = FALSE, scrollX = TRUE),
+    rownames = FALSE
+  )
+  
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
     if (input$type_check_trip == "All") {
@@ -467,6 +504,19 @@ shinyServer(function(input, output, session) {
       insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check")), where = "afterEnd")
       insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check")), where = "afterEnd")
       shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
+    }
+    if (input$type_check_trip == "Info") {
+      removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
+      removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
+      shinyjs::hide(id = "div_check_fishing_time", anim = FALSE)
+      shinyjs::hide(id = "div_check_sea_time", anim = FALSE)
+      shinyjs::hide(id = "div_check_landing_total_weigh", anim = FALSE)
+      shinyjs::hide(id = "div_check_temporal_limit", anim = FALSE)
+      shinyjs::hide(id = "div_check_harbour", anim = FALSE)   
+      shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
+      shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
+      shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
     }
     if (input$type_check_trip == "Warning") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -475,7 +525,8 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_sea_time", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_total_weigh", anim = FALSE)
       shinyjs::hide(id = "div_check_temporal_limit", anim = FALSE)
-      shinyjs::hide(id = "div_check_harbour", anim = TRUE, animType = "fade")
+      shinyjs::hide(id = "div_check_harbour", anim = FALSE)
+      shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
     }
@@ -484,6 +535,7 @@ shinyServer(function(input, output, session) {
       removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
       shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
+      shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_sea_time", anim = TRUE, time = 1, animType = "fade")
       insertUI(selector = "#div_check_sea_time", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check")), where = "afterEnd")

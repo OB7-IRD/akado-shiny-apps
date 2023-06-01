@@ -56,6 +56,7 @@ body <- dashboardBody(
   tags$style(".fa-check {color:#05DE1E}"),
   tags$style(".fa-exclamation {color:#FFA600}"),
   tags$style(".fa-xmark {color:#DE0505}"),
+  tags$style(".fa-info {color:#F4D03F}"),
   # Green background color for notifications id = "notif_default"
   tags$style("#shiny-notification-notif_default {background-color:#B2E8A2;}"),
   # Add pages
@@ -113,9 +114,9 @@ body <- dashboardBody(
         box(
           width = "100%",
           align = "center",
-          radioButtons(inputId = "type_check_trip", label = "Choice the display of verification types", choiceNames = c("All (Warning or error)", "Warning only", "Error only"), choiceValues = list("All", "Warning", "Error"), inline = TRUE),
+          radioButtons(inputId = "type_check_trip", label = "Choice the display of verification types", choiceNames = c("All (Info, warning or error)", "Info only", "Warning only", "Error only"), choiceValues = list("All", "Info", "Warning", "Error"), inline = TRUE),
           tags$hr(style = "border-color: #D2D2D2;"),
-          radioButtons(inputId = "type_line_check_trip", label = "Choice of line type display", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Warning or error ( ", icon("exclamation"), " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent"), inline = TRUE)
+          radioButtons(inputId = "type_line_check_trip", label = "Choice of line type display", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Info, warning or error ( ", icon("info"), " - ", icon("exclamation"),  " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent"), inline = TRUE)
         ),
         div(
           id = "div_check_trip_activity",
@@ -186,6 +187,16 @@ body <- dashboardBody(
             HTML("<ul><li>Check if all fishing logs have been entered.</li>
                  <li>Check with the captain to see if any outings have been made in the meantime.</li></ul>"),
             withSpinner(DTOutput("check_harbour"), type = 6, size = 0.5, proxy.height = "70px")
+          )
+        ),
+        div(
+          id = "div_check_raising_factor",
+          class = "col-sm-12 col-md-6 col-lg-4",
+          box(
+            width = "100%",
+            h1("Raising Factor"),
+            HTML("<ul><li>If the ratio is not between 0.9 < R < 1.1 (Landing/catch), you need to check the partial landing value.</li></ul>"),
+            withSpinner(DTOutput("check_raising_factor"), type = 6, size = 0.5, proxy.height = "70px")
           )
         )
       )
