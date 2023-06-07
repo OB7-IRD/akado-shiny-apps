@@ -138,7 +138,7 @@ check_trip_activity_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = trip_with_activity_sql
     ))
-    nrow_first <- length(select)
+    nrow_first <- length(select_sql)
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE) {
       trip_with_activity_data <- data_connection[[1]]
@@ -344,7 +344,7 @@ check_fishing_time_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = route_fishingtime_sql
     ))
-    nrow_first<-length(unique(select))
+    nrow_first<-length(unique(select_sql))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
       trip_fishingtime_data <- data_connection[[1]]
@@ -565,7 +565,7 @@ check_sea_time_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = route_seatime_sql
     ))
-    nrow_first <- length(unique(select))
+    nrow_first <- length(unique(select_sql))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
       trip_seatime_data <- data_connection[[1]]
@@ -772,7 +772,7 @@ check_landing_consistent_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = trip_weight_capacity_sql
     ))
-    nrow_first <- length(unique(select))
+    nrow_first <- length(unique(select_sql))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE) {
       trip_weight_capacity_data <- data_connection[[1]]
@@ -983,7 +983,7 @@ check_landing_total_weight_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = trip_weight_landing_sql
     ))
-    nrow_first<-length(unique(select))
+    nrow_first<-length(unique(select_sql))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
       trip_weight_capacity_data <- data_connection[[1]]
@@ -1264,7 +1264,7 @@ check_temporal_limit_inspector <- function(data_connection,
   
   # 4 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!trip_date_activity_data$logical), " trips with a landing weight for the canneries different from the sum of the weights of each landing for the canneries")))
+    return(print(paste0("There are ", sum(!trip_date_activity_data$logical), " trips with missing or surplus days")))
   }
   if (output == "report") {
     return(list(trip_date_activity_data, trip_date_activity_data_detail))
@@ -1467,7 +1467,7 @@ check_harbour_inspector <- function(data_connection,
       .data = departure_harbour_data,
       harbour_id_departure = harbour_id,
     )
-    nrow_first<-length(unique(select))
+    nrow_first<-length(unique(select_sql))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE && is.data.frame(data_connection[[3]]) == TRUE) {
       trip_previous_trip_data <- data_connection[[1]]
@@ -1703,15 +1703,15 @@ check_raising_factor_inspector <- function(data_connection,
       statement = tide_id_sql
     ))
     # Retrieves the weight of each catch in the tide
-    select_sql <- paste0("'", tide_id_data$trip_id, "'")
+    select_trip_tide_sql <- paste0("'", tide_id_data$trip_id, "'")
     catch_weight_RF1_sql <- paste(
-      readLines(file.path("sql", "catch_weight_RF1.sql")),
+      readLines(file.path("sql", "trip_catch_weight_RF1.sql")),
       collapse = "\n"
     )
     catch_weight_RF1_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = catch_weight_RF1_sql,
-      select_item_1 = DBI::SQL(paste(select_sql, collapse = ", ")),
+      select_item_1 = DBI::SQL(paste(select_trip_tide_sql, collapse = ", ")),
       select_item_2 = DBI::SQL(paste(paste0("'", species, "'"), collapse = ", "))
     )
     catch_weight_RF1_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1726,7 +1726,7 @@ check_raising_factor_inspector <- function(data_connection,
     trip_weight_capacity_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_weight_capacity_sql,
-      select_item = DBI::SQL(paste(select_sql,
+      select_item = DBI::SQL(paste(select_trip_tide_sql,
                                    collapse = ", "
       ))
     )
@@ -1734,7 +1734,7 @@ check_raising_factor_inspector <- function(data_connection,
       conn = data_connection[[2]],
       statement = trip_weight_capacity_sql
     ))
-    nrow_first <- length(unique(select))
+    nrow_first <- length(unique(select_sql))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE && is.data.frame(data_connection[[3]]) == TRUE) {
       tide_id_data <- data_connection[[1]]
@@ -1804,7 +1804,7 @@ check_raising_factor_inspector <- function(data_connection,
   
   # 4 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!tide_id_data$logical), " trips with departure port different from the landing harbour of a previous trip")))
+    return(print(paste0("There are ", sum(!tide_id_data$logical), " trips with RF1 outside defined thresholds or missing")))
   }
   if (output == "report") {
     return(tide_id_data)
