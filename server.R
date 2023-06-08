@@ -58,8 +58,8 @@ shinyServer(function(input, output, session) {
         db_host = config_data()[["databases_configuration"]][["observe_vmot6"]][["host"]],
         db_port = config_data()[["databases_configuration"]][["observe_vmot6"]][["port"]]
       )
-      # If the database is "observe_9b", read, transform and execute the SQL query that selects the trips according to the user parameters
-      if (data_connection[1] == "observe_9b") {
+      # If the database is "observe_", read, transform and execute the SQL query that selects the trips according to the user parameters
+      if (any(grep("observe_",data_connection[1]))) {
         # Read the SQL query
         trip_id_sql <- paste(
           readLines(file.path(".", "sql", "trip_id.sql")),
@@ -127,8 +127,8 @@ shinyServer(function(input, output, session) {
         db_host = config_data()[["databases_configuration"]][["observe_vmot6"]][["host"]],
         db_port = config_data()[["databases_configuration"]][["observe_vmot6"]][["port"]]
       )
-      # If the database is "observe_9b", read, transform and execute the SQL query that selects the trips according to the user parameters
-      if (data_connection[1] == "observe_9b") {
+      # If the database is "observe_", read, transform and execute the SQL query that selects the trips according to the user parameters
+      if (any(grep("observe_",data_connection[1]))) {
         # Read the SQL query to retrieve the vessel code and the end of the trip of all the trips that have been selected
         trip_enddate_vessel_code_sql <- paste(
           readLines(file.path(".", "sql", "trip_enddate_vessel_code.sql")),

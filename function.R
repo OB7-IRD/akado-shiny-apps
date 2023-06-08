@@ -52,7 +52,7 @@ check_trip_activity_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9b") {
+  if (any(grep("observe_",data_connection[1]))) {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -244,7 +244,7 @@ check_fishing_time_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9b") {
+  if (any(grep("observe_",data_connection[1]))) {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -465,7 +465,7 @@ check_sea_time_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9b") {
+  if (any(grep("observe_",data_connection[1]))) {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -688,7 +688,7 @@ check_landing_consistent_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9b") {
+  if (any(grep("observe_",data_connection[1]))) {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -884,7 +884,7 @@ check_landing_total_weight_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9b") {
+  if (any(grep("observe_",data_connection[1]))) {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -1104,7 +1104,7 @@ check_temporal_limit_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9b") {
+  if (any(grep("observe_",data_connection[1]))) {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -1328,7 +1328,7 @@ check_harbour_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9b") {
+  if (any(grep("observe_",data_connection[1]))) {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -1595,7 +1595,7 @@ check_raising_factor_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9b") {
+  if (any(grep("observe_",data_connection[1]))) {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -1867,7 +1867,7 @@ check_fishing_context_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9b") {
+  if (any(grep("observe_",data_connection[1]))) {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
