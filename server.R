@@ -129,35 +129,19 @@ shinyServer(function(input, output, session) {
       )
       # If the database is "observe_", read, transform and execute the SQL query that selects the trips according to the user parameters
       if (any(grep("observe_",data_connection[1]))) {
-        # Read the SQL query to retrieve the vessel code and the end of the trip of all the trips that have been selected
-        trip_enddate_vessel_code_sql <- paste(
-          readLines(file.path(".", "sql", "trip_enddate_vessel_code.sql")),
-          collapse = "\n"
-        )
-        # Replaces the anchors with the selected values
-        trip_enddate_vessel_code_sql <- DBI::sqlInterpolate(
-          conn = data_connection[[2]],
-          sql = trip_enddate_vessel_code_sql,
-          select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"),
-                                       collapse = ", "
-          ))
-        )
-        # Execute the SQL query
-        trip_enddate_vessel_code_data <- dplyr::tibble(DBI::dbGetQuery(
-          conn = data_connection[[2]],
-          statement = trip_enddate_vessel_code_sql
-        ))
         # Retrieve trip activity
+        # Read the SQL query to retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
         activity_id_sql <- paste(
           readLines(file.path("sql", "activity_id.sql")),
           collapse = "\n"
         )
+        # Replaces the anchors with the selected values
         activity_id_sql <- DBI::sqlInterpolate(
           conn = data_connection[[2]],
           sql = activity_id_sql,
           select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"), collapse = ", "))
         )
-        
+        # Execute the SQL query
         activity_select <- dplyr::tibble(DBI::dbGetQuery(
           conn = data_connection[[2]],
           statement = activity_id_sql
@@ -231,9 +215,8 @@ shinyServer(function(input, output, session) {
         )
         # Disconnection to the base
         DBI::dbDisconnect(data_connection[[2]])
-        trip_enddate_vessel_code_data$trip_enddate <- as.character(trip_enddate_vessel_code_data$trip_enddate)
         # Uses a function to format the table
-        check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "warning")
+        check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
         check_trip_activity <- dplyr::rename(
           .data = check_trip_activity,
@@ -242,7 +225,7 @@ shinyServer(function(input, output, session) {
           Check = logical
         )
         # Uses a function to format the table
-        check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "error")
+        check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select(), type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_fishing_time <- dplyr::rename(
           .data = check_fishing_time,
@@ -253,7 +236,7 @@ shinyServer(function(input, output, session) {
           `Sum route fishing time` = sum_route_fishingtime
         )
         # Uses a function to format the table
-        check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "error")
+        check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_select(), type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_sea_time <- dplyr::rename(
           .data = check_sea_time,
@@ -264,7 +247,7 @@ shinyServer(function(input, output, session) {
           `Sum route sea time` = sum_route_seatime
         )
         # Uses a function to format the table
-        check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "warning")
+        check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_select(), type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
         check_landing_consistent <- dplyr::rename(
           .data = check_landing_consistent,
@@ -275,7 +258,7 @@ shinyServer(function(input, output, session) {
           `Total weight` = trip_weighttotal
         )
         # Uses a function to format the table
-        check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "error")
+        check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_select(), type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_landing_total_weigh <- dplyr::rename(
           .data = check_landing_total_weigh,
@@ -296,7 +279,7 @@ shinyServer(function(input, output, session) {
         check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date = TRUE, exter_activity_date = FALSE, count_freq = 0, logical = FALSE))
         # Add vessel code
         check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
-        check_temporal_limit_data_plot <- merge(trip_enddate_vessel_code_data, check_temporal_limit_data_plot, by.x = "trip_id", by.y = "trip_id")
+        check_temporal_limit_data_plot <- merge(trip_select(), check_temporal_limit_data_plot, by.x = "trip_id", by.y = "trip_id")
         # Add button and data for plot in table
         check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>%
           dplyr::group_by(trip_id) %>%
@@ -309,7 +292,7 @@ shinyServer(function(input, output, session) {
         })
         check_temporal_limit <- subset(check_temporal_limit, select = -c(buttontmp))
         # Uses a function to format the table
-        check_temporal_limit <- table_display_trip(check_temporal_limit, trip_enddate_vessel_code_data, type_inconsistency = "error")
+        check_temporal_limit <- table_display_trip(check_temporal_limit, trip_select(), type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_temporal_limit <- dplyr::rename(
           .data = check_temporal_limit,
@@ -319,7 +302,7 @@ shinyServer(function(input, output, session) {
           `Details problem` = button
         )
         # Uses a function to format the table
-        check_harbour <- table_display_trip(check_harbour_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "error")
+        check_harbour <- table_display_trip(check_harbour_inspector_data, trip_select(), type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_harbour <- dplyr::rename(
           .data = check_harbour,
@@ -330,7 +313,7 @@ shinyServer(function(input, output, session) {
           `Harbour departure` = harbour_name_departure
         )
         # Uses a function to format the table
-        check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "info")
+        check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
         check_raising_factor$RF1 <- trunc(check_raising_factor$RF1*1000)/1000
         # Modify the table for display purposes: rename column
         check_raising_factor <- dplyr::rename(
@@ -536,7 +519,7 @@ shinyServer(function(input, output, session) {
       }
     },
     escape = FALSE,
-    options = list(lengthChange = FALSE, scrollX = TRUE),
+    options = list(lengthChange = FALSE, scrollX = TRUE, autoWidth = TRUE, columnDefs = list(list(targets=c(2), width='50px'))),
     rownames = FALSE
   )
   
