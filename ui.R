@@ -31,6 +31,10 @@ siderbar <-
       menuItem("Well", tabName = "well", icon = icon("boxes-stacked")),
       menuItem("Anapo", tabName = "anapo", icon = icon("route")),
       menuItem("Summary", tabName = "summary", icon = icon("scroll")),
+      hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #333, #ccc, #333); background-image: -moz-linear-gradient(left, #333, #ccc, #333); background-image: -ms-linear-gradient(left,#333, #ccc, #333); background-image: -o-linear-gradient(left, #333, #ccc, #333);"),
+      radioButtons(inputId = "type_check_trip", label = "Choice the display of verification types", choiceNames = c("All (Info, warning or error)", "Info only", "Warning only", "Error only"), choiceValues = list("All", "Info", "Warning", "Error")),
+      radioButtons(inputId = "type_line_check_trip", label = "Choice of line type display", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Info, warning or error ( ", icon("info"), " - ", icon("exclamation"),  " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent")),
+      
       menuItem("Setting", tabName = "setting", icon = icon("gear"))
     )
   )
@@ -59,6 +63,7 @@ body <- dashboardBody(
   tags$style(".fa-info {color:#F4D03F}"),
   # Green background color for notifications id = "notif_default"
   tags$style("#shiny-notification-notif_default {background-color:#B2E8A2;}"),
+  tags$style("#type_check_trip, #type_line_check_trip {font-size:11px;}"),
   # Add pages
   tabItems(
     tabItem(
@@ -111,13 +116,6 @@ body <- dashboardBody(
     tabItem(
       tabName = "trip",
       fluidPage(
-        box(
-          width = "100%",
-          align = "center",
-          radioButtons(inputId = "type_check_trip", label = "Choice the display of verification types", choiceNames = c("All (Info, warning or error)", "Info only", "Warning only", "Error only"), choiceValues = list("All", "Info", "Warning", "Error"), inline = TRUE),
-          tags$hr(style = "border-color: #D2D2D2;"),
-          radioButtons(inputId = "type_line_check_trip", label = "Choice of line type display", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Info, warning or error ( ", icon("info"), " - ", icon("exclamation"),  " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent"), inline = TRUE)
-        ),
         div(
           id = "div_check_trip_activity",
           class = "col-sm-12 col-md-6 col-lg-4",
@@ -204,13 +202,6 @@ body <- dashboardBody(
     tabItem(
       tabName = "activity",
       fluidPage(
-        box(
-          width = "100%",
-          align = "center",
-          radioButtons(inputId = "type_check_trip", label = "Choice the display of verification types", choiceNames = c("All (Info, warning or error)", "Info only", "Warning only", "Error only"), choiceValues = list("All", "Info", "Warning", "Error"), inline = TRUE),
-          tags$hr(style = "border-color: #D2D2D2;"),
-          radioButtons(inputId = "type_line_check_trip", label = "Choice of line type display", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Info, warning or error ( ", icon("info"), " - ", icon("exclamation"),  " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent"), inline = TRUE)
-        ),
         div(
           id = "div_check_fishing_context",
           class = "col-sm-12 col-md-6 col-lg-4",
