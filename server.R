@@ -58,8 +58,8 @@ shinyServer(function(input, output, session) {
         db_host = config_data()[["databases_configuration"]][["observe_vmot6"]][["host"]],
         db_port = config_data()[["databases_configuration"]][["observe_vmot6"]][["port"]]
       )
-      # If the database is "observe_9a", read, transform and execute the SQL query that selects the trips according to the user parameters
-      if (data_connection[1] == "observe_9a") {
+      # If the database is "observe_9b", read, transform and execute the SQL query that selects the trips according to the user parameters
+      if (data_connection[1] == "observe_9b") {
         # Read the SQL query
         trip_id_sql <- paste(
           readLines(file.path(".", "sql", "trip_id.sql")),
@@ -127,8 +127,8 @@ shinyServer(function(input, output, session) {
         db_host = config_data()[["databases_configuration"]][["observe_vmot6"]][["host"]],
         db_port = config_data()[["databases_configuration"]][["observe_vmot6"]][["port"]]
       )
-      # If the database is "observe_9a", read, transform and execute the SQL query that selects the trips according to the user parameters
-      if (data_connection[1] == "observe_9a") {
+      # If the database is "observe_9b", read, transform and execute the SQL query that selects the trips according to the user parameters
+      if (data_connection[1] == "observe_9b") {
         # Read the SQL query to retrieve the vessel code and the end of the trip of all the trips that have been selected
         trip_enddate_vessel_code_sql <- paste(
           readLines(file.path(".", "sql", "trip_enddate_vessel_code.sql")),
@@ -147,6 +147,21 @@ shinyServer(function(input, output, session) {
           conn = data_connection[[2]],
           statement = trip_enddate_vessel_code_sql
         ))
+        # Retrieve trip activity
+        activity_id_sql <- paste(
+          readLines(file.path("sql", "activity_id.sql")),
+          collapse = "\n"
+        )
+        activity_id_sql <- DBI::sqlInterpolate(
+          conn = data_connection[[2]],
+          sql = activity_id_sql,
+          select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"), collapse = ", "))
+        )
+        
+        activity_select <- dplyr::tibble(DBI::dbGetQuery(
+          conn = data_connection[[2]],
+          statement = activity_id_sql
+        ))   
         # Uses a function which indicates whether the selected trips contain activities or not
         check_trip_activity_inspector_data <- check_trip_activity_inspector(
           data_connection = data_connection,
@@ -199,13 +214,20 @@ shinyServer(function(input, output, session) {
           logbook_program = config_data()[["logbook_program"]]
         )
         # Uses a function which indicates whether the selected trips contain RF1 inconsistent with limit values
-        check_raising_factor_data <- check_raising_factor_inspector(
+        check_raising_factor_inspector_data <- check_raising_factor_inspector(
           data_connection = data_connection,
           type_select = "trip",
           select = trip_select()$trip_id,
           output = "report",
           logbook_program = config_data()[["logbook_program"]],
           species = config_data()[["species_RF1"]]
+        )
+        # Uses a function which indicates whether the school type is consistent with the association
+        check_fishing_context_inspector_data <- check_fishing_context_inspector(
+          data_connection = data_connection,
+          type_select = "activity",
+          select = activity_select$activity_id,
+          output = "report"
         )
         # Disconnection to the base
         DBI::dbDisconnect(data_connection[[2]])
@@ -308,7 +330,7 @@ shinyServer(function(input, output, session) {
           `Harbour departure` = harbour_name_departure
         )
         # Uses a function to format the table
-        check_raising_factor <- table_display_trip(check_raising_factor_data, trip_enddate_vessel_code_data, type_inconsistency = "info")
+        check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_enddate_vessel_code_data, type_inconsistency = "info")
         check_raising_factor$RF1 <- trunc(check_raising_factor$RF1*1000)/1000
         # Modify the table for display purposes: rename column
         check_raising_factor <- dplyr::rename(
@@ -317,7 +339,20 @@ shinyServer(function(input, output, session) {
           `Trip enddate` = trip_enddate,
           Check = logical
         )
-        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor))
+        # Uses a function to format the table
+        check_fishing_context <- table_display_trip(check_fishing_context_inspector_data, activity_select, type_inconsistency = "error")
+        # Modify the table for display purposes: rename column
+        check_fishing_context <- dplyr::rename(
+          .data = check_fishing_context,
+          `Vessel code` = vessel_code,
+          `Trip enddate` = trip_enddate,
+          `Activity date` = activity_date,
+          `Activity number` = activity_number,
+          `School type` = schooltype_code,
+          `Number of associations object` = association_object_count,
+          Check = logical
+        )
+        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor,check_fishing_context))
       }
     }
   })
@@ -475,6 +510,24 @@ shinyServer(function(input, output, session) {
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
         data <- calcul_check()[[8]]
+        if (input$type_line_check_trip == "inconsistent") {
+          return(data[data$Check != as.character(icon("check")), ])
+        } else {
+          return(data)
+        }
+      }
+    },
+    escape = FALSE,
+    options = list(lengthChange = FALSE, scrollX = TRUE),
+    rownames = FALSE
+  )
+  
+  # Table of consistency test school type and association
+  output$check_fishing_context <- renderDT(
+    {
+      # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
+      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
+        data <- calcul_check()[[9]]
         if (input$type_line_check_trip == "inconsistent") {
           return(data[data$Check != as.character(icon("check")), ])
         } else {

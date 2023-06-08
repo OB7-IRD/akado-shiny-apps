@@ -202,6 +202,29 @@ body <- dashboardBody(
       )
     ),
     tabItem(
+      tabName = "activity",
+      fluidPage(
+        box(
+          width = "100%",
+          align = "center",
+          radioButtons(inputId = "type_check_trip", label = "Choice the display of verification types", choiceNames = c("All (Info, warning or error)", "Info only", "Warning only", "Error only"), choiceValues = list("All", "Info", "Warning", "Error"), inline = TRUE),
+          tags$hr(style = "border-color: #D2D2D2;"),
+          radioButtons(inputId = "type_line_check_trip", label = "Choice of line type display", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Info, warning or error ( ", icon("info"), " - ", icon("exclamation"),  " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent"), inline = TRUE)
+        ),
+        div(
+          id = "div_check_fishing_context",
+          class = "col-sm-12 col-md-6 col-lg-4",
+          box(
+            width = "100%",
+            h1("Fishing context"),
+            HTML("<ul><li>If the school type is \"object school\" (code 1), then there must be at least one object-type association.</li>
+                 <li>If the school type is \"free school\" (code 2), then the association identifier, if it exists, must not be of object type</li></ul>"),
+            withSpinner(DTOutput("check_fishing_context"), type = 6, size = 0.5, proxy.height = "70px")
+          )
+        )
+      )
+    ),
+    tabItem(
       tabName = "setting",
       fluidPage(
         fileInput(

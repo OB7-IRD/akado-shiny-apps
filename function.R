@@ -52,7 +52,7 @@ check_trip_activity_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9a") {
+  if (data_connection[1] == "observe_9b") {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -244,7 +244,7 @@ check_fishing_time_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9a") {
+  if (data_connection[1] == "observe_9b") {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -465,7 +465,7 @@ check_sea_time_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9a") {
+  if (data_connection[1] == "observe_9b") {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -688,7 +688,7 @@ check_landing_consistent_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9a") {
+  if (data_connection[1] == "observe_9b") {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -884,7 +884,7 @@ check_landing_total_weight_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9a") {
+  if (data_connection[1] == "observe_9b") {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -1104,7 +1104,7 @@ check_temporal_limit_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9a") {
+  if (data_connection[1] == "observe_9b") {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -1328,7 +1328,7 @@ check_harbour_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9a") {
+  if (data_connection[1] == "observe_9b") {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -1595,7 +1595,7 @@ check_raising_factor_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (data_connection[1] == "observe_9a") {
+  if (data_connection[1] == "observe_9b") {
     # Checks the type and values of type_select
     if (r_type_checking(
       r_object = type_select,
@@ -1818,12 +1818,231 @@ check_raising_factor_inspector <- function(data_connection,
   }
 }
 
+# Function that tests if the school type is consistent with the association, in the future integrated in the pakage codama 
+check_fishing_context_inspector <- function(data_connection,
+                                            type_select,
+                                            select,
+                                            output) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = data_connection,
+      type = "list",
+      length = 2L,
+      output = "message"
+    ))
+  } else {
+    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
+        sep = ""
+      )
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (data_connection[1] == "observe_9b") {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("activity", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("activity", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "activity" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Activity selection in the SQL query
+    if (type_select == "activity") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Activity with date in the selected year
+      activity_id_selected_by_year_sql <- paste(
+        readLines(file.path(
+          "D:", "Git",
+          "activity_id_selected_by_year.sql"
+        )),
+        collapse = "\n"
+      )
+      activity_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = activity_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = activity_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", activity_id_selected_by_year_data$activity_id, "'")
+    }
+    # Retrieves the schooltype of activity
+    activity_schooltype_sql <- paste(
+      readLines(file.path("D:", "Git", "activity_schooltype.sql")),
+      collapse = "\n"
+    )
+    activity_schooltype_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = activity_schooltype_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    activity_schooltype_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = activity_schooltype_sql
+    ))
+    # Retrieves activities with object-type associations
+    activity_association_object_sql <- paste(
+      readLines(file.path("D:", "Git", "activity_association_object.sql")),
+      collapse = "\n"
+    )
+    activity_association_object_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = activity_association_object_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    activity_association_object_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = activity_association_object_sql
+    ))
+    nrow_first <- length(unique(select_sql))
+  } else {
+    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
+      activity_schooltype_data <- data_connection[[1]]
+      activity_association_object_data <- data_connection[[2]]
+      nrow_first <- nrow(activity_schooltype_data)
+    } else {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  # Calcule le nombre d'association de type objet
+  activity_association_object_data <- activity_association_object_data %>%
+    dplyr::group_by(activity_id) %>%
+    dplyr::summarise(association_object_count = dplyr::n())
+  # Merge
+  activity_schooltype_data <- merge(activity_schooltype_data, activity_association_object_data, all.x = TRUE)
+  activity_schooltype_data$seuil <- 0
+  activity_schooltype_data$association_object_count[is.na(activity_schooltype_data$association_object_count)] <- 0
+  # Indicates whether or not an object-type association exists
+  comparison <- vector_comparison(
+    first_vector = activity_schooltype_data$association_object_count,
+    second_vector = activity_schooltype_data$seuil,
+    comparison_type = "greater",
+    output = "report"
+  )
+  activity_schooltype_data$logical <- comparison$logical
+  # Case of free school : must not have any object-type association (inverse of the result obtained)
+  activity_schooltype_data$logical[!is.na(activity_schooltype_data$schooltype_code) & activity_schooltype_data$schooltype_code == "2"] <- !activity_schooltype_data$logical[!is.na(activity_schooltype_data$schooltype_code) & activity_schooltype_data$schooltype_code == "2"]
+  # Cas des banc inconnues et NA : pas de contrainte
+  activity_schooltype_data$logical[is.na(activity_schooltype_data$schooltype_code) | activity_schooltype_data$schooltype_code == "0"] <- TRUE
+  activity_schooltype_data <- dplyr::relocate(.data = activity_schooltype_data, schooltype_code, association_object_count, .after = logical)
+  activity_schooltype_data <- subset(activity_schooltype_data, select = -c(seuil))
+  if ((sum(activity_schooltype_data$logical) + sum(!activity_schooltype_data$logical)) != nrow_first) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!activity_schooltype_data$logical), " activity with school types that do not correspond to the observed associations")))
+  }
+  if (output == "report") {
+    return(activity_schooltype_data)
+  }
+  if (output == "logical") {
+    if (sum(!activity_schooltype_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
+
 # Function which formats the trip data for display inconsistency
-table_display_trip <- function(data, data_trip, type_inconsistency) {
-  # Combines the consistency test on the data and data trip identification information
-  data <- merge(data_trip, data, by.x = "trip_id", by.y = "trip_id")
+table_display_trip <- function(data, data_info, type_inconsistency) {
+  # Retrieves the name of the column containing the ID
+  colname_id<-grep("_id$",colnames(data),value = TRUE)
+  # Combines the consistency test on the data and data identification information
+  data <- merge(data_info, data, by = colname_id)
   # Modify the table for display purposes: delete column
-  data <- subset(data, select = -c(trip_id))
+  data <- subset(data, select = -c(eval(parse(text = colname_id))))
   # Add icons according to the success of the test
   data$logical[data$logical == TRUE] <- as.character(icon("check"))
   if (type_inconsistency == "error") {
