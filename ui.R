@@ -108,111 +108,31 @@ body <- dashboardBody(
         box(
           width = 12,
           align = "center",
-          actionButton(inputId = "start_button", label = "Start"),
-          withSpinner(htmlOutput("error_trip_select"), type = 6, size = 0.5, proxy.height = "70px")
+          actionButton(inputId = NS(namespace="start_button",id="start_button"), label = "Start"),
+          withSpinner(htmlOutput(NS(namespace="error_trip_select",id="text")), type = 6, size = 0.5, proxy.height = "70px")
         )
       )
     ),
     tabItem(
       tabName = "trip",
       fluidPage(
-        div(
-          id = "div_check_trip_activity",
-          class = "col-sm-12 col-md-6 col-lg-4",
-          box(
-            width = "100%",
-            h1("Presence of activity"),
-            withSpinner(DTOutput("check_trip_activity"), type = 6, size = 0.5, proxy.height = "70px")
-          )
-        ),
-        div(
-          id = "div_check_fishing_time",
-          class = "col-sm-12 col-md-6 col-lg-4",
-          box(
-            width = "100%",
-            h1("Fishing time"),
-            HTML("<ul><li>If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the tide</li></ul>"),
-            withSpinner(DTOutput("check_fishing_time"), type = 6, size = 0.5, proxy.height = "70px")
-          )
-        ),
-        div(
-          id = "div_check_sea_time",
-          class = "col-sm-12 col-md-6 col-lg-4",
-          box(
-            width = "100%",
-            h1("Sea time"),
-            HTML("<ul><li>If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the tide</li></ul>"),
-            withSpinner(DTOutput("check_sea_time"), type = 6, size = 0.5, proxy.height = "70px")
-          )
-        ),
-        div(
-          id = "div_check_landing_consistent",
-          class = "col-sm-12 col-md-6 col-lg-4",
-          box(
-            width = "100%",
-            h1("Vessel capacity"),
-            HTML("<ul><li>If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct</li></ul>"),
-            withSpinner(DTOutput("check_landing_consistent"), type = 6, size = 0.5, proxy.height = "70px")
-          )
-        ),
-        div(
-          id = "div_check_landing_total_weigh",
-          class = "col-sm-12 col-md-6 col-lg-4",
-          box(
-            width = "100%",
-            h1("Total landed weight"),
-            HTML("<ul><li>If the values are not equal, you must enter the value of the sum of the commercial lots in the 'Landed Weight' field of the trip</li></ul>"),
-            withSpinner(DTOutput("check_landing_total_weigh"), type = 6, size = 0.5, proxy.height = "70px")
-          )
-        ),
-        div(
-          id = "div_check_temporal_limit",
-          class = "col-sm-12 col-md-6 col-lg-4",
-          box(
-            width = "100%",
-            h1("Time coverage"),
-            HTML("<ul><li>You must check the fishing log to see if a day is missing</li>
+        table_ui(id="check_trip_activity", title="Presence of activity"),
+        table_ui(id="check_fishing_time", title="Fishing time",text="<ul><li>If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the tide</li></ul>"),
+        table_ui(id="check_sea_time", title="Sea time",text="<ul><li>If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the tide</li></ul>"),
+        table_ui(id="check_landing_consistent", title="Vessel capacity",text="<ul><li>If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct</li></ul>"),
+        table_ui(id="check_landing_total_weigh", title="Total landed weight",text="<ul><li>If the values are not equal, you must enter the value of the sum of the commercial lots in the 'Landed Weight' field of the trip</li></ul>"),
+        table_ui(id="check_temporal_limit", title="Time coverage",text="<ul><li>You must check the fishing log to see if a day is missing</li>
                  <li>You must verify that the departure and arrival dates match in the fishing logbook and landing documents</li></ul>"),
-            withSpinner(DTOutput("check_temporal_limit"), type = 6, size = 0.5, proxy.height = "70px")
-          )
-        ),
-        div(
-          id = "div_check_harbour",
-          class = "col-sm-12 col-md-6 col-lg-4",
-          box(
-            width = "100%",
-            h1("Harbour"),
-            HTML("<ul><li>Check if all fishing logs have been entered.</li>
+        table_ui(id="check_harbour", title="Harbour",text="<ul><li>Check if all fishing logs have been entered.</li>
                  <li>Check with the captain to see if any outings have been made in the meantime.</li></ul>"),
-            withSpinner(DTOutput("check_harbour"), type = 6, size = 0.5, proxy.height = "70px")
-          )
-        ),
-        div(
-          id = "div_check_raising_factor",
-          class = "col-sm-12 col-md-6 col-lg-4",
-          box(
-            width = "100%",
-            h1("Raising Factor"),
-            HTML("<ul><li>If the ratio is not between 0.9 < R < 1.1 (Landing/catch), you need to check the partial landing value.</li></ul>"),
-            withSpinner(DTOutput("check_raising_factor"), type = 6, size = 0.5, proxy.height = "70px")
-          )
+        table_ui(id="check_raising_factor", title="Raising Factor",text="<ul><li>If the ratio is not between 0.9 < R < 1.1 (Landing/catch), you need to check the partial landing value.</li></ul>")
         )
-      )
     ),
     tabItem(
       tabName = "activity",
       fluidPage(
-        div(
-          id = "div_check_fishing_context",
-          class = "col-sm-12 col-md-6 col-lg-4",
-          box(
-            width = "100%",
-            h1("Fishing context"),
-            HTML("<ul><li>If the school type is \"object school\" (code 1), then there must be at least one object-type association.</li>
-                 <li>If the school type is \"free school\" (code 2), then the association identifier, if it exists, must not be of object type</li></ul>"),
-            withSpinner(DTOutput("check_fishing_context"), type = 6, size = 0.5, proxy.height = "70px")
-          )
-        )
+        table_ui(id="check_fishing_context", title="Fishing context",text="<ul><li>If the school type is \"object school\" (code 1), then there must be at least one object-type association.</li>
+                 <li>If the school type is \"free school\" (code 2), then the association identifier, if it exists, must not be of object type</li></ul>")
       )
     ),
     tabItem(
