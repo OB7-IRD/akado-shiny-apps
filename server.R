@@ -217,21 +217,11 @@ shinyServer(function(input, output, session) {
         DBI::dbDisconnect(data_connection[[2]])
         # Uses a function to format the table
         check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
-        # Modify the table for display purposes: rename column
-        check_trip_activity <- dplyr::rename(
-          .data = check_trip_activity,
-          `Vessel code` = vessel_code,
-          `Trip enddate` = trip_enddate,
-          Check = logical
-        )
         # Uses a function to format the table
         check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select(), type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_fishing_time <- dplyr::rename(
           .data = check_fishing_time,
-          `Vessel code` = vessel_code,
-          `Trip enddate` = trip_enddate,
-          Check = logical,
           `Trip fishing time` = trip_fishing_time,
           `Sum route fishing time` = sum_route_fishingtime
         )
@@ -240,9 +230,6 @@ shinyServer(function(input, output, session) {
         # Modify the table for display purposes: rename column
         check_sea_time <- dplyr::rename(
           .data = check_sea_time,
-          `Vessel code` = vessel_code,
-          `Trip enddate` = trip_enddate,
-          Check = logical,
           `Trip sea time` = trip_sea_time,
           `Sum route sea time` = sum_route_seatime
         )
@@ -251,9 +238,6 @@ shinyServer(function(input, output, session) {
         # Modify the table for display purposes: rename column
         check_landing_consistent <- dplyr::rename(
           .data = check_landing_consistent,
-          `Vessel code` = vessel_code,
-          `Trip enddate` = trip_enddate,
-          Check = logical,
           `Vessel capacity` = vessel_capacity,
           `Total weight` = trip_weighttotal
         )
@@ -262,9 +246,6 @@ shinyServer(function(input, output, session) {
         # Modify the table for display purposes: rename column
         check_landing_total_weigh <- dplyr::rename(
           .data = check_landing_total_weigh,
-          `Vessel code` = vessel_code,
-          `Trip enddate` = trip_enddate,
-          Check = logical,
           `Trip landing weight` = trip_landingtotalweight,
           `Sum landing weight` = sum_weightlanding
         )
@@ -296,9 +277,6 @@ shinyServer(function(input, output, session) {
         # Modify the table for display purposes: rename column
         check_temporal_limit <- dplyr::rename(
           .data = check_temporal_limit,
-          `Vessel code` = vessel_code,
-          `Trip enddate` = trip_enddate,
-          Check = logical,
           `Details problem` = button
         )
         # Uses a function to format the table
@@ -306,34 +284,19 @@ shinyServer(function(input, output, session) {
         # Modify the table for display purposes: rename column
         check_harbour <- dplyr::rename(
           .data = check_harbour,
-          `Vessel code` = vessel_code,
-          `Trip enddate` = trip_enddate,
-          Check = logical,
           `Harbour landing` = harbour_name_landing,
           `Harbour departure` = harbour_name_departure
         )
         # Uses a function to format the table
         check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
         check_raising_factor$RF1 <- trunc(check_raising_factor$RF1*1000)/1000
-        # Modify the table for display purposes: rename column
-        check_raising_factor <- dplyr::rename(
-          .data = check_raising_factor,
-          `Vessel code` = vessel_code,
-          `Trip enddate` = trip_enddate,
-          Check = logical
-        )
         # Uses a function to format the table
         check_fishing_context <- table_display_trip(check_fishing_context_inspector_data, activity_select, type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_fishing_context <- dplyr::rename(
           .data = check_fishing_context,
-          `Vessel code` = vessel_code,
-          `Trip enddate` = trip_enddate,
-          `Activity date` = activity_date,
-          `Activity number` = activity_number,
           `School type` = schooltype_code,
-          `Number of associations object` = association_object_count,
-          Check = logical
+          `Number of associations object` = association_object_count
         )
         return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor,check_fishing_context))
       }

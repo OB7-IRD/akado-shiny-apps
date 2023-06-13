@@ -2043,6 +2043,8 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   data <- merge(data_info, data, by = colname_id)
   # Modify the table for display purposes: delete column
   data <- subset(data, select = -c(eval(parse(text = colname_id))))
+  # Sort rows by date
+  data<-data[order(data$trip_enddate),]
   # Add icons according to the success of the test
   data$logical[data$logical == TRUE] <- as.character(icon("check"))
   if (type_inconsistency == "error") {
@@ -2053,6 +2055,21 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   }
   if (type_inconsistency == "info") {
     data$logical[data$logical == FALSE] <- as.character(icon("info"))
+  }
+  # Modify the table for display purposes: rename column
+  data <- dplyr::rename(
+    .data = data,
+    `Vessel code` = vessel_code,
+    `Trip enddate` = trip_enddate,
+    Check = logical
+  )
+  # Modify the table for display purposes specifically for activities : rename column
+  if(length(grep("^activity_",colnames(data),value = TRUE)) != 0){
+    data <- dplyr::rename(
+      .data = data,
+      `Activity date` = activity_date,
+      `Activity number` = activity_number
+    )
   }
   return(data)
 }
