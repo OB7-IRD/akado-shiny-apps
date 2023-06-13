@@ -31,10 +31,9 @@ siderbar <-
       menuItem("Well", tabName = "well", icon = icon("boxes-stacked")),
       menuItem("Anapo", tabName = "anapo", icon = icon("route")),
       menuItem("Summary", tabName = "summary", icon = icon("scroll")),
-      hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #333, #ccc, #333); background-image: -moz-linear-gradient(left, #333, #ccc, #333); background-image: -ms-linear-gradient(left,#333, #ccc, #333); background-image: -o-linear-gradient(left, #333, #ccc, #333);"),
+      hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #333, #ccc, #333); background-image: -moz-linear-gradient(left, #333, #ccc, #333); background-image: -ms-linear-gradient(left,#333, #ccc, #333); background-image: -o-linear-gradient(left, #333, #ccc, #333);"),
       radioButtons(inputId = "type_check_trip", label = "Choice the display of verification types", choiceNames = c("All (Info, warning or error)", "Info only", "Warning only", "Error only"), choiceValues = list("All", "Info", "Warning", "Error")),
-      radioButtons(inputId = "type_line_check_trip", label = "Choice of line type display", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Info, warning or error ( ", icon("info"), " - ", icon("exclamation"),  " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent")),
-      
+      radioButtons(inputId = "type_line_check_trip", label = "Choice of line type display", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Info, warning or error ( ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent")),
       menuItem("Setting", tabName = "setting", icon = icon("gear"))
     )
   )
@@ -108,30 +107,30 @@ body <- dashboardBody(
         box(
           width = 12,
           align = "center",
-          actionButton(inputId = NS(namespace="start_button",id="start_button"), label = "Start"),
-          withSpinner(htmlOutput(NS(namespace="error_trip_select",id="text")), type = 6, size = 0.5, proxy.height = "70px")
+          actionButton(inputId = NS(namespace = "start_button", id = "start_button"), label = "Start"),
+          withSpinner(htmlOutput(NS(namespace = "error_trip_select", id = "text")), type = 6, size = 0.5, proxy.height = "70px")
         )
       )
     ),
     tabItem(
       tabName = "trip",
       fluidPage(
-        table_ui(id="check_trip_activity", title="Presence of activity"),
-        table_ui(id="check_fishing_time", title="Fishing time",text="<ul><li>If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the tide</li></ul>"),
-        table_ui(id="check_sea_time", title="Sea time",text="<ul><li>If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the tide</li></ul>"),
-        table_ui(id="check_landing_consistent", title="Vessel capacity",text="<ul><li>If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct</li></ul>"),
-        table_ui(id="check_landing_total_weigh", title="Total landed weight",text="<ul><li>If the values are not equal, you must enter the value of the sum of the commercial lots in the 'Landed Weight' field of the trip</li></ul>"),
-        table_ui(id="check_temporal_limit", title="Time coverage",text="<ul><li>You must check the fishing log to see if a day is missing</li>
+        table_ui(id = "check_trip_activity", title = "Presence of activity"),
+        table_ui(id = "check_fishing_time", title = "Fishing time", text = "<ul><li>If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the tide</li></ul>"),
+        table_ui(id = "check_sea_time", title = "Sea time", text = "<ul><li>If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the tide</li></ul>"),
+        table_ui(id = "check_landing_consistent", title = "Vessel capacity", text = "<ul><li>If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct</li></ul>"),
+        table_ui(id = "check_landing_total_weigh", title = "Total landed weight", text = "<ul><li>If the values are not equal, you must enter the value of the sum of the commercial lots in the 'Landed Weight' field of the trip</li></ul>"),
+        table_ui(id = "check_temporal_limit", title = "Time coverage", text = "<ul><li>You must check the fishing log to see if a day is missing</li>
                  <li>You must verify that the departure and arrival dates match in the fishing logbook and landing documents</li></ul>"),
-        table_ui(id="check_harbour", title="Harbour",text="<ul><li>Check if all fishing logs have been entered.</li>
+        table_ui(id = "check_harbour", title = "Harbour", text = "<ul><li>Check if all fishing logs have been entered.</li>
                  <li>Check with the captain to see if any outings have been made in the meantime.</li></ul>"),
-        table_ui(id="check_raising_factor", title="Raising Factor",text="<ul><li>If the ratio is not between 0.9 < R < 1.1 (Landing/catch), you need to check the partial landing value.</li></ul>")
-        )
+        table_ui(id = "check_raising_factor", title = "Raising Factor", text = "<ul><li>If the ratio is not between 0.9 < R < 1.1 (Landing/catch), you need to check the partial landing value.</li></ul>")
+      )
     ),
     tabItem(
       tabName = "activity",
       fluidPage(
-        table_ui(id="check_fishing_context", title="Fishing context",text="<ul><li>If the school type is \"object school\" (code 1), then there must be at least one object-type association.</li>
+        table_ui(id = "check_fishing_context", title = "Fishing context", text = "<ul><li>If the school type is \"object school\" (code 1), then there must be at least one object-type association.</li>
                  <li>If the school type is \"free school\" (code 2), then the association identifier, if it exists, must not be of object type</li></ul>")
       )
     ),

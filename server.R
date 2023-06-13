@@ -8,38 +8,38 @@ shinyServer(function(input, output, session) {
     }
   })
   
-   # Error message if the trip selection elements are not correctly filled in
-  text_error_trip_select<-text_error_trip_select_server(id="start_button", parent_in = input)
+  # Error message if the trip selection elements are not correctly filled in
+  text_error_trip_select <- text_error_trip_select_server(id = "start_button", parent_in = input)
   
   # Read the .yml file of configuration for the connection
-  config_data<-config_data_server(id="start_button",parent_in = input)
+  config_data <- config_data_server(id = "start_button", parent_in = input)
   
   # Retrieves the list of trips selected by the user
-  trip_select <- trip_select_server(id="start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data)
+  trip_select <- trip_select_server(id = "start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data)
   
   # Performs all calculations to test for inconsistencies
-  calcul_check <- calcul_check_server(id="start_button", text_error_trip_select = text_error_trip_select, trip_select=trip_select, config_data=config_data)
-
+  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data)
+  
   # Displays the errors and notifications that occur when you want to start the calculation
-   error_trip_select_serveur(id="error_trip_select",text_error_trip_select=text_error_trip_select,config_data=config_data,trip_select=trip_select,calcul_check=calcul_check)
+  error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
   
   # Table of consistency test of the presence of activities
-  table_server(id="check_trip_activity",data=calcul_check, number=1,parent_in = input,text_error_trip_select=text_error_trip_select,trip_select=trip_select,calcul_check=calcul_check)
+  table_server(id = "check_trip_activity", data = calcul_check, number = 1, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
   # Table of consistency test of the fishing time
-  table_server(id="check_fishing_time",data=calcul_check, number=2,parent_in = input,text_error_trip_select=text_error_trip_select,trip_select=trip_select,calcul_check=calcul_check)
+  table_server(id = "check_fishing_time", data = calcul_check, number = 2, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
   # Table of consistency test of the sea time
-  table_server(id="check_sea_time",data=calcul_check, number=3,parent_in = input,text_error_trip_select=text_error_trip_select,trip_select=trip_select,calcul_check=calcul_check)
+  table_server(id = "check_sea_time", data = calcul_check, number = 3, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
   # Table of consistency test of the landing total weight with vessel capacity
-  table_server(id="check_landing_consistent",data=calcul_check, number=4,parent_in = input,text_error_trip_select=text_error_trip_select,trip_select=trip_select,calcul_check=calcul_check)
+  table_server(id = "check_landing_consistent", data = calcul_check, number = 4, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
   # Table of consistency test of the total landed weight for canneries is consistent with the weights of each landing for the canneries
-  table_server(id="check_landing_total_weigh",data=calcul_check, number=5,parent_in = input,text_error_trip_select=text_error_trip_select,trip_select=trip_select,calcul_check=calcul_check)
+  table_server(id = "check_landing_total_weigh", data = calcul_check, number = 5, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
   # Table of consistency test of trip start and end date is consistent with the the dates of activity
-  table_server(id="check_temporal_limit",data=calcul_check, number=6,parent_in = input,text_error_trip_select=text_error_trip_select,trip_select=trip_select,calcul_check=calcul_check)
+  table_server(id = "check_temporal_limit", data = calcul_check, number = 6, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
   output$plot <- renderPlotly({
     splitID <- strsplit(input$button, "&")[[1]]
@@ -63,13 +63,13 @@ shinyServer(function(input, output, session) {
   
   
   # Table of consistency test of the harbour of landing of the previous trip and the harbour of departure of the current trip
-  table_server(id="check_harbour",data=calcul_check, number=7,parent_in = input,text_error_trip_select=text_error_trip_select,trip_select=trip_select,calcul_check=calcul_check)
+  table_server(id = "check_harbour", data = calcul_check, number = 7, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
   # Table of consistency test of the harbour of RF1 and limit values
-  table_server(id="check_raising_factor",data=calcul_check, number=8,parent_in = input,text_error_trip_select=text_error_trip_select,trip_select=trip_select,calcul_check=calcul_check)
+  table_server(id = "check_raising_factor", data = calcul_check, number = 8, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
   # Table of consistency test school type and association
-  table_server(id="check_fishing_context",data=calcul_check, number=9,parent_in = input,text_error_trip_select=text_error_trip_select,trip_select=trip_select,calcul_check=calcul_check,autoWidth = TRUE, columnDefs = list(list(targets=c(2), width='50px')))
+  table_server(id = "check_fishing_context", data = calcul_check, number = 9, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
   
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
@@ -78,15 +78,15 @@ shinyServer(function(input, output, session) {
       removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
-      insertUI(selector = "#div_check_fishing_time", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"),div(class = "visible-md",hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      insertUI(selector = "#div_check_fishing_time", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_sea_time", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_sea_time", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"),div( class = "visible-lg",hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      insertUI(selector = "#div_check_sea_time", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_landing_consistent", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"),div(class = "visible-md",hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      insertUI(selector = "#div_check_landing_consistent", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_landing_total_weigh", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_temporal_limit", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"),div( class = "visible-md", hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"),div(  class = "visible-lg", hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))  ), where = "afterEnd")
+      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
     }
@@ -97,7 +97,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_sea_time", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_total_weigh", anim = FALSE)
       shinyjs::hide(id = "div_check_temporal_limit", anim = FALSE)
-      shinyjs::hide(id = "div_check_harbour", anim = FALSE)   
+      shinyjs::hide(id = "div_check_harbour", anim = FALSE)
       shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
@@ -122,11 +122,11 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_sea_time", anim = TRUE, time = 1, animType = "fade")
-      insertUI(selector = "#div_check_sea_time", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"),div( class = "visible-md",hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);")) ), where = "afterEnd")
+      insertUI(selector = "#div_check_sea_time", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_landing_total_weigh", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_landing_total_weigh", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"),div(  class = "visible-lg", hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);")) ), where = "afterEnd")
+      insertUI(selector = "#div_check_landing_total_weigh", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_temporal_limit", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"),div( class = "visible-md",  hr(style= "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);")) ), where = "afterEnd")
+      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
     }
   })
