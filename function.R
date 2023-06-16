@@ -1985,7 +1985,7 @@ check_fishing_context_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  # Calcule le nombre d'association de type objet
+  # Calculates the number of object-type associations
   activity_association_object_data <- activity_association_object_data %>%
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(association_object_count = dplyr::n())
@@ -2003,7 +2003,7 @@ check_fishing_context_inspector <- function(data_connection,
   activity_schooltype_data$logical <- comparison$logical
   # Case of free school : must not have any object-type association (inverse of the result obtained)
   activity_schooltype_data$logical[!is.na(activity_schooltype_data$schooltype_code) & activity_schooltype_data$schooltype_code == "2"] <- !activity_schooltype_data$logical[!is.na(activity_schooltype_data$schooltype_code) & activity_schooltype_data$schooltype_code == "2"]
-  # Cas des banc inconnues et NA : pas de contrainte
+  # Unknown benches and NA: no constraint
   activity_schooltype_data$logical[is.na(activity_schooltype_data$schooltype_code) | activity_schooltype_data$schooltype_code == "0"] <- TRUE
   activity_schooltype_data <- dplyr::relocate(.data = activity_schooltype_data, schooltype_code, association_object_count, .after = logical)
   activity_schooltype_data <- subset(activity_schooltype_data, select = -c(seuil))
@@ -2305,7 +2305,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Add button and data for plot in table
           check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>%
             dplyr::group_by(trip_id) %>%
-            dplyr::summarise(buttontmp = paste0("button&", paste0(deparse(dplyr::across()), collapse = ""), "&", trip_id, "&", vessel_code), .groups = "keep") %>%
+            dplyr::reframe(buttontmp = paste0("button&", paste0(deparse(dplyr::across(.cols=everything())), collapse = ""), "&", trip_id, "&", vessel_code), .groups = "keep") %>% 
+            dplyr::group_by(trip_id) %>% 
             dplyr::filter(dplyr::row_number() == 1)
           check_temporal_limit <- merge(check_temporal_limit, check_temporal_limit_data_plot, by = "trip_id")
           check_temporal_limit$button <- NA

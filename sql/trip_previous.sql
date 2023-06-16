@@ -9,7 +9,7 @@ FROM (
 		max(trip_previous_tmp.enddate) AS trip_previous_enddate
 	FROM 
 		ps_common.trip trip
-		LEFT JOIN  ps_common.trip trip_previous_tmp ON trip.vessel = trip_previous_tmp.vessel AND trip_previous_tmp.enddate < trip.startdate AND coalesce(trip_previous_tmp.logbookprogram,'NULL') IN (?select_item_1)
+		LEFT JOIN  ps_common.trip trip_previous_tmp ON trip.vessel = trip_previous_tmp.vessel AND trip_previous_tmp.enddate <= trip.startdate AND coalesce(trip_previous_tmp.logbookprogram,'NULL') IN (?select_item_1)
 	WHERE 
 		trip.topiaid IN (?select_item_2)
 	GROUP BY trip.topiaid

@@ -76,6 +76,7 @@ shinyServer(function(input, output, session) {
     if (input$type_check_trip == "All") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
       removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
+      # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
       insertUI(selector = "#div_check_fishing_time", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
@@ -89,6 +90,8 @@ shinyServer(function(input, output, session) {
       insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
+      # Activity
+      shinyjs::show(id = "div_check_fishing_context", anim = TRUE, animType = "fade")
     }
     if (input$type_check_trip == "Info") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -100,6 +103,8 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_harbour", anim = FALSE)
       shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
+      shinyjs::hide(id = "div_check_fishing_context", anim = FALSE)
+      # Trip
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
     }
     if (input$type_check_trip == "Warning") {
@@ -111,6 +116,8 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_temporal_limit", anim = FALSE)
       shinyjs::hide(id = "div_check_harbour", anim = FALSE)
       shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
+      shinyjs::hide(id = "div_check_fishing_context", anim = FALSE)
+      # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
     }
@@ -120,6 +127,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
       shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
+      # Trip
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_sea_time", anim = TRUE, time = 1, animType = "fade")
       insertUI(selector = "#div_check_sea_time", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
@@ -128,6 +136,8 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "div_check_temporal_limit", anim = TRUE, animType = "fade")
       insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
+      # Activity
+      shinyjs::show(id = "div_check_fishing_context", anim = TRUE, animType = "fade")
     }
   })
 })

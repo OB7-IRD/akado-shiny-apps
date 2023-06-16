@@ -22,7 +22,7 @@ FROM
 			min(trip_current_end_tide_tmp.enddate) AS trip_current_enddate
 		FROM 
 			ps_common.trip trip
-			LEFT JOIN  ps_common.trip trip_previous_end_tide_tmp ON trip.vessel = trip_previous_end_tide_tmp.vessel AND trip_previous_end_tide_tmp.enddate < trip.startdate AND coalesce(trip_previous_end_tide_tmp.logbookprogram,'NULL') IN (?select_item_1) AND trip_previous_end_tide_tmp.landingwellcontentstatus = (SELECT w.topiaid FROM ps_logbook.wellcontentstatus w WHERE w.code = '1')
+			LEFT JOIN  ps_common.trip trip_previous_end_tide_tmp ON trip.vessel = trip_previous_end_tide_tmp.vessel AND trip_previous_end_tide_tmp.enddate <= trip.startdate AND coalesce(trip_previous_end_tide_tmp.logbookprogram,'NULL') IN (?select_item_1) AND trip_previous_end_tide_tmp.landingwellcontentstatus = (SELECT w.topiaid FROM ps_logbook.wellcontentstatus w WHERE w.code = '1')
 			LEFT JOIN  ps_common.trip trip_current_end_tide_tmp ON trip.vessel = trip_current_end_tide_tmp.vessel AND trip_current_end_tide_tmp.enddate >= trip.startdate AND coalesce(trip_current_end_tide_tmp.logbookprogram,'NULL') IN (?select_item_1) AND trip_current_end_tide_tmp.landingwellcontentstatus = (SELECT w.topiaid FROM ps_logbook.wellcontentstatus w WHERE w.code = '1')
 		WHERE 
 			trip.topiaid IN (?select_item_2) 
