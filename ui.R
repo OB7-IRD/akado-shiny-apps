@@ -131,8 +131,11 @@ body <- dashboardBody(
       tabName = "activity",
       fluidPage(
         table_ui(id = "check_fishing_context", title = "Fishing context", text = "<ul><li>If the school type is \"object school\" (code 1), then there must be at least one object-type association.</li>
-                 <li>If the school type is \"free school\" (code 2), then the association identifier, if it exists, must not be of object type</li></ul>")
-      )
+                 <li>If the school type is \"free school\" (code 2), then the association identifier, if it exists, must not be of object type</li></ul>"),
+      table_ui(id = "check_operationt", title = "Operation", text = "<ul><li>If the vessel activity is \"Fishing (skiff is deployed)\" (code 6), then it needs a success status, otherwise it must not have any.</li>
+                 <li>If the school type is \"Undefined\" (code 0), success type must not be \"Positive\" (code 1) or \"Null\" (code 0).</li>
+                 <li>If the weight is not 0 then success type must be \"Positive\" (code 1) or \"Unknown\" (code 2), otherwise, if it exists, must be 0 .</li></ul>")
+    )
     ),
     tabItem(
       tabName = "setting",

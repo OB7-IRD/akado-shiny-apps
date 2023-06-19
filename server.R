@@ -71,6 +71,10 @@ shinyServer(function(input, output, session) {
   # Table of consistency test school type and association
   table_server(id = "check_fishing_context", data = calcul_check, number = 9, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
   
+  # Table of consistency test school type and association
+  table_server(id = "check_operationt", data = calcul_check, number = 10, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
+  
+  
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
     if (input$type_check_trip == "All") {
@@ -92,6 +96,7 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
       # Activity
       shinyjs::show(id = "div_check_fishing_context", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_operationt", anim = TRUE, animType = "fade")
     }
     if (input$type_check_trip == "Info") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -104,6 +109,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
       shinyjs::hide(id = "div_check_fishing_context", anim = FALSE)
+      shinyjs::hide(id = "div_check_operationt", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
     }
@@ -117,6 +123,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_harbour", anim = FALSE)
       shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
       shinyjs::hide(id = "div_check_fishing_context", anim = FALSE)
+      shinyjs::hide(id = "div_check_operationt", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
@@ -138,6 +145,7 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
       # Activity
       shinyjs::show(id = "div_check_fishing_context", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_operationt", anim = TRUE, animType = "fade")
     }
   })
 })
