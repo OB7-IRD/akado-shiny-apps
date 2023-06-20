@@ -148,4 +148,13 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "div_check_operationt", anim = TRUE, animType = "fade")
     }
   })
+  
+  # Summary page text
+  output$text_summary<- renderText({
+    # Grouping of data sets with the addition of the group number, then selection of lines containing inconsistencies
+    data_regroup <- calcul_check() %>% bind_rows(.id = "group_id") %>% filter(Check != '<i class="fas fa-check" role="presentation" aria-label="check icon"></i>')
+    # Text display
+    paste0("Number of trips analyzed : ", length(trip_select()$trip_id), " ; Number of trip reports :  ", nrow(unique(data_regroup[,c("Vessel code","Trip enddate")]))," ; Number of check : ", length(calcul_check()), " ; Number of check with trip reports :  ", length(unique(data_regroup[,"group_id"])))
+      })
+  
 })

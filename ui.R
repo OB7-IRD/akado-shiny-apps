@@ -138,6 +138,11 @@ body <- dashboardBody(
     )
     ),
     tabItem(
+      tabName = "summary",
+      fluidPage(
+        textOutput("text_summary")
+      )),
+    tabItem(
       tabName = "setting",
       fluidPage(
         fileInput(
