@@ -2199,17 +2199,19 @@ check_operationt_inspector <- function(data_connection,
   activity_data$logical_successstatus_vesselactivity <- comparison_successstatus_vesselactivity$logical
   # Case of success status NA: must not have activity 6 (inverse of the result obtained)
   activity_data$logical_successstatus_vesselactivity[is.na(activity_data$successstatus_code)] <- !activity_data$logical_successstatus_vesselactivity[is.na(activity_data$successstatus_code)]
-  # Indicates indeterminate success status
-  activity_data$seuil <- "2"
-  comparison_successstatus_schooltype <- vector_comparison(
-    first_vector = activity_data$successstatus_code,
+  # Indicates indeterminate school must not have positive or negative success status
+  activity_data$seuil <- "0"
+  logical_successstatus_schooltype_indeterminate <- vector_comparison(
+    first_vector = activity_data$schooltype_code,
     second_vector = activity_data$seuil,
-    comparison_type = "equal",
+    comparison_type = "difference",
     output = "report"
   )
-  activity_data$logical_successstatus_schooltype <- comparison_successstatus_schooltype$logical
-  # Free or object school or NA: no constraints
-  activity_data$logical_successstatus_schooltype[is.na(activity_data$schooltype_code) | activity_data$schooltype_code != "0"] <- TRUE
+  activity_data$logical_successstatus_schooltype_indeterminate <- !logical_successstatus_schooltype_indeterminate$logical
+  # Case of success status indeterminate or NA: no constraints
+  activity_data$logical_successstatus_schooltype_indeterminate[is.na(activity_data$successstatus_code) | activity_data$successstatus_code == "2"] <- TRUE
+  # Indicates whether the success status requires a school type 
+  activity_data$logical_successstatus_schooltype<-!is.na(activity_data$schooltype_code) 
   # Case of success status NA: no constraints
   activity_data$logical_successstatus_schooltype[is.na(activity_data$successstatus_code)] <- TRUE
   # Indicates whether captured weight is greater than 0
@@ -2228,9 +2230,9 @@ check_operationt_inspector <- function(data_connection,
   # NA weight: no constraints
   activity_data$logical_successstatus_weight[is.na(activity_data$activity_weight)] <- TRUE
   # Combines test results
-  activity_data$logical <- activity_data$logical_successstatus_vesselactivity & activity_data$logical_successstatus_schooltype & activity_data$logical_successstatus_weight
+  activity_data$logical <- activity_data$logical_successstatus_vesselactivity & activity_data$logical_successstatus_schooltype_indeterminate & activity_data$logical_successstatus_schooltype & activity_data$logical_successstatus_weight
   activity_data <- dplyr::relocate(.data = activity_data, vesselactivity_code, successstatus_code, schooltype_code, activity_weight, .after = logical)
-  activity_data <- subset(activity_data, select = -c(seuil, logical_successstatus_vesselactivity, logical_successstatus_schooltype, logical_successstatus_weight))
+  activity_data <- subset(activity_data, select = -c(seuil, logical_successstatus_vesselactivity, logical_successstatus_schooltype_indeterminate, logical_successstatus_schooltype, logical_successstatus_weight))
   if ((sum(activity_data$logical) + sum(!activity_data$logical)) != nrow_first) {
     stop(
       format(
