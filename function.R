@@ -2529,8 +2529,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_temporal_limit_data_plot <- check_temporal_limit_inspector_data[[2]]
           # Add missing date
           check_temporal_limit_data_plot <- as.data.frame(check_temporal_limit_data_plot) %>%
-            group_by(trip_id) %>%
-            tidyr::complete(activity_date = seq.Date(trip_startdate[1], trip_enddate[1], by = "day"), trip_startdate = trip_startdate[1], trip_enddate = trip_enddate[1])
+            dplyr::group_by(trip_id) %>%
+            tidyr::complete(activity_date = seq.Date(min(trip_startdate[1],trip_enddate[1]), max(trip_startdate[1],trip_enddate[1]), by = "day"), trip_startdate = trip_startdate[1], trip_enddate = trip_enddate[1])
           # Replaces NA for missing dates
           check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date = TRUE, exter_activity_date = FALSE, count_freq = 0, logical = FALSE))
           # Add vessel code
@@ -2539,7 +2539,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Add button and data for plot in table
           check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>%
             dplyr::group_by(trip_id) %>%
-            dplyr::reframe(buttontmp = paste0("button&", paste0(deparse(dplyr::across(.cols=everything())), collapse = ""), "&", trip_id, "&", vessel_code)) %>% 
+            dplyr::reframe(buttontmp = paste0("button&", paste0(deparse(dplyr::across(.cols=c("activity_date", "logical", "count_freq"))), collapse = ""), "&", trip_id, "&", vessel_code, "&", trip_startdate, "&", trip_enddate)) %>% 
             dplyr::group_by(trip_id) %>% 
             dplyr::filter(dplyr::row_number() == 1)
           check_temporal_limit <- merge(check_temporal_limit, check_temporal_limit_data_plot, by = "trip_id")
@@ -2699,11 +2699,11 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
 
 
 # Function to create the plot of the consistency of the dates by trip
-plot_temporal_limit <- function(data) {
+plot_temporal_limit <- function(data, startdate, enddate) {
   # Deletes the rows where the date of the activity is missing
   data <- data[!is.na(data$activity_date), ]
   plotly::plot_ly() %>%
-    plotly::add_markers(x = c(data$trip_startdate[1], data$trip_enddate[1]), y = c(1, 1), marker = list(
+    plotly::add_markers(x = c(startdate, enddate), y = c(1, 1), marker = list(
       color = "#63A9FF", symbol = "circle"
     ), name = "start date and end date", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
     plotly::add_markers(data = subset(data, logical == TRUE), x = ~activity_date, y = ~count_freq, marker = list(

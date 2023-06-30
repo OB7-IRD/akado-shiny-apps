@@ -44,16 +44,19 @@ shinyServer(function(input, output, session) {
   output$plot <- renderPlotly({
     splitID <- strsplit(input$button, "&")[[1]]
     data <- eval(parse(text = splitID[[2]]))
-    plot_temporal_limit(data)
+    startdate <- as.Date(x=splitID[5], format="%Y-%m-%d")
+    enddate <- as.Date(x=splitID[6], format="%Y-%m-%d")
+    plot_temporal_limit(data,startdate,enddate)
   })
   
   observeEvent(input$button, {
     splitID <- strsplit(input$button, "&")[[1]]
     data <- eval(parse(text = splitID[[2]]))
     vessel_code <- splitID[4]
+    enddate <- splitID[6]
     showModal(modalDialog(
       plotlyOutput("plot"),
-      title = paste0("Vessel code : ", vessel_code, ", trip end date : ", data$trip_enddate[1]),
+      title = paste0("Vessel code : ", vessel_code, ", trip end date : ", enddate),
       size = "l",
       fade = TRUE,
       easyClose = TRUE,
