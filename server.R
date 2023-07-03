@@ -77,6 +77,28 @@ shinyServer(function(input, output, session) {
   # Table of consistency test the succes status and the vessel activity, the type of school or the weight caught
   table_server(id = "check_operationt", data = calcul_check, number = 10, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
   
+  # Table of consistency test the ocean declaration and activity position
+  table_server(id = "check_position", data = calcul_check, number = 11, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
+  
+  # Position control plot, display in a window
+  output$plot_position <- renderPlotly({
+    splitID <- strsplit(input$button_position, "&")[[1]]
+    data <- eval(parse(text = splitID[[2]]))
+    plot_position(data)
+  })
+  
+  # Position control window
+  observeEvent(input$button_position, {
+    splitID <- strsplit(input$button_position, "&")[[1]]
+    showModal(modalDialog(
+      plotlyOutput("plot_position"),
+      title = paste0("Vessel code : ", splitID[4], ", Trip end date : ", splitID[5],", Activity date : ",splitID[6], ", Acitivity number : ",splitID[7], ", Type : ",splitID[8], ", Ocean trip : ",splitID[9], ", Ocean activity : ",splitID[10]),
+      size = "l",
+      fade = TRUE,
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
   
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
@@ -100,6 +122,8 @@ shinyServer(function(input, output, session) {
       # Activity
       shinyjs::show(id = "div_check_fishing_context", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_operationt", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_operationt", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      shinyjs::show(id = "div_check_position", anim = TRUE, animType = "fade")
     }
     if (input$type_check_trip == "Info") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -113,6 +137,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
       shinyjs::hide(id = "div_check_fishing_context", anim = FALSE)
       shinyjs::hide(id = "div_check_operationt", anim = FALSE)
+      shinyjs::hide(id = "div_check_position", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
     }
@@ -127,6 +152,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
       shinyjs::hide(id = "div_check_fishing_context", anim = FALSE)
       shinyjs::hide(id = "div_check_operationt", anim = FALSE)
+      shinyjs::hide(id = "div_check_position", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
@@ -149,6 +175,8 @@ shinyServer(function(input, output, session) {
       # Activity
       shinyjs::show(id = "div_check_fishing_context", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_operationt", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_operationt", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      shinyjs::show(id = "div_check_position", anim = TRUE, animType = "fade")
     }
   })
   

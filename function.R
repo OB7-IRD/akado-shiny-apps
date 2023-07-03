@@ -2260,6 +2260,229 @@ check_operationt_inspector <- function(data_connection,
   }
 }
 
+# Function that tests if ocean declaration is consistent with activity position, in the future integrated in the pakage codama
+check_position_inspector <- function(data_connection,
+                                     type_select,
+                                     select,
+                                     output) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = data_connection,
+      type = "list",
+      length = 2L,
+      output = "message"
+    ))
+  } else {
+    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
+        sep = ""
+      )
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (any(grep("observe_", data_connection[1]))) {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("activity", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("activity", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "activity" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Activity selection in the SQL query
+    if (type_select == "activity") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Activity with date in the selected year
+      activity_id_selected_by_year_sql <- paste(
+        readLines(file.path(
+          "sql",
+          "activity_id_selected_by_year.sql"
+        )),
+        collapse = "\n"
+      )
+      activity_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = activity_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = activity_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", activity_id_selected_by_year_data$activity_id, "'")
+    }
+    # Retrieves the position of activity
+    activity_sea_land_sql <- paste(
+      readLines(file.path("sql", "activity_sea_land.sql")),
+      collapse = "\n"
+    )
+    activity_sea_land_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = activity_sea_land_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    activity_sea_land_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = activity_sea_land_sql
+    ))
+    # Retrieves the position of activity in harbour
+    activity_harbour_sql <- paste(
+      readLines(file.path("sql", "activity_harbour.sql")),
+      collapse = "\n"
+    )
+    activity_harbour_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = activity_harbour_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    activity_harbour_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = activity_harbour_sql
+    ))
+    nrow_first <- length(unique(select_sql))
+  } else {
+    if (is.data.frame(data_connection[[1]]) == TRUE) {
+      activity_sea_land_data <- data_connection[[1]]
+      activity_harbour_data <- data_connection[[2]]
+      nrow_first <- nrow(activity_schooltype_data)
+    } else {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  # Indicates whether the ocean is the same
+  comparison_ocean <- vector_comparison(
+    first_vector = activity_sea_land_data$ocean_name,
+    second_vector = activity_sea_land_data$ocean_name_pos,
+    comparison_type = "equal",
+    output = "report"
+  )
+  activity_sea_land_data$logical_ocean <- comparison_ocean$logical
+  # Indicates whether in land harbour
+  comparison_harbour <- vector_comparison(
+    first_vector = activity_sea_land_data$activity_id,
+    second_vector = activity_harbour_data$activity_id,
+    comparison_type = "difference",
+    output = "report"
+  )
+  activity_sea_land_data$logical_harbour <- comparison_harbour$logical
+  # Case of harbour in sea : not in harbour
+  activity_sea_land_data$logical_harbour[!is.na(activity_sea_land_data$ocean_name_pos)] <- FALSE
+  activity_sea_land_data$logical <- activity_sea_land_data$logical_ocean | activity_sea_land_data$logical_harbour
+  # Gives the type of location
+  activity_sea_land_data$type <- "Sea"
+  activity_sea_land_data$type[is.na(activity_sea_land_data$ocean_name_pos)] <- "Land"
+  activity_sea_land_data$type[activity_sea_land_data$logical_harbour] <- "Harbour"
+  # Case of ocean trip is null :
+  activity_sea_land_data$logical[is.na(activity_sea_land_data$ocean_name)] <- FALSE
+  activity_sea_land_data <- dplyr::relocate(.data = activity_sea_land_data, type, ocean_name, ocean_name_pos, .after = logical)
+  activity_sea_land_data_detail <- activity_sea_land_data
+  activity_sea_land_data <- subset(activity_sea_land_data, select = -c(activity_position, activity_crs, logical_ocean, logical_harbour))
+  if ((sum(activity_sea_land_data$logical) + sum(!activity_sea_land_data$logical)) != nrow_first) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!activity_sea_land_data$logical), " activity with school types that do not correspond to the observed associations")))
+  }
+  if (output == "report") {
+    return(list(activity_sea_land_data, activity_sea_land_data_detail))
+  }
+  if (output == "logical") {
+    if (sum(!activity_sea_land_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
+
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
@@ -2488,6 +2711,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             select = activity_select$activity_id,
             output = "report"
           )
+          # Uses a function which indicates whether the ocean declaration is consistent with activity position
+          check_position_inspector_data <- check_position_inspector(
+            data_connection = data_connection,
+            type_select = "activity",
+            select = activity_select$activity_id,
+            output = "report"
+          )
           # Disconnection to the base
           DBI::dbDisconnect(data_connection[[2]])
           # Uses a function to format the table
@@ -2572,7 +2802,19 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Success status` = successstatus_code,
             `Weigth` = activity_weight
           )
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt))
+          # Add button and data for plot in table
+          check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select, colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id","vessel_code","trip_enddate", "activity_date", "activity_number", "type", "ocean_name", "ocean_name_pos"), name_button = "button_position")
+          # Uses a function to format the table
+          check_position <- table_display_trip(check_position, activity_select, type_inconsistency = "error")
+          # Modify the table for display purposes: rename column
+          check_position <- dplyr::rename(
+            .data = check_position,
+            `Type` = type,
+            `Ocean trip` = ocean_name,
+            `Ocean activity` = ocean_name_pos,
+            `Details problem` = button
+          )
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position))
         }
       }
     })
@@ -2731,4 +2973,15 @@ plot_temporal_limit <- function(data, startdate, enddate) {
         ticktext = c(data$count_freq, 1)
       )
     )
+}
+
+# Function to create the plot of the consistency of the position for the activity
+plot_position<- function(data){
+  # Spatial formatting
+  data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+  # Plot
+  plotly::plot_ly(
+    data = data_geo,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers",  marker = list(size = 10), hovertemplate = "(%{lat}°,%{lon}°)<extra></extra>")%>%
+    plotly::layout(showlegend=FALSE,mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
+  
 }
