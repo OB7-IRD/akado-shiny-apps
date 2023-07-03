@@ -41,21 +41,22 @@ shinyServer(function(input, output, session) {
   # Table of consistency test of trip start and end date is consistent with the the dates of activity
   table_server(id = "check_temporal_limit", data = calcul_check, number = 6, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
-  output$plot <- renderPlotly({
-    splitID <- strsplit(input$button, "&")[[1]]
+  # Date control plot, display in a window
+  output$plot_temporal_limit <- renderPlotly({
+    splitID <- strsplit(input$button_temporal_limit, "&")[[1]]
     data <- eval(parse(text = splitID[[2]]))
     startdate <- as.Date(x=splitID[5], format="%Y-%m-%d")
     enddate <- as.Date(x=splitID[6], format="%Y-%m-%d")
     plot_temporal_limit(data,startdate,enddate)
   })
   
-  observeEvent(input$button, {
-    splitID <- strsplit(input$button, "&")[[1]]
-    data <- eval(parse(text = splitID[[2]]))
+  # Date control window
+  observeEvent(input$button_temporal_limit, {
+    splitID <- strsplit(input$button_temporal_limit, "&")[[1]]
     vessel_code <- splitID[4]
     enddate <- splitID[6]
     showModal(modalDialog(
-      plotlyOutput("plot"),
+      plotlyOutput("plot_temporal_limit"),
       title = paste0("Vessel code : ", vessel_code, ", trip end date : ", enddate),
       size = "l",
       fade = TRUE,
@@ -63,7 +64,6 @@ shinyServer(function(input, output, session) {
       footer = NULL
     ))
   })
-  
   
   # Table of consistency test of the harbour of landing of the previous trip and the harbour of departure of the current trip
   table_server(id = "check_harbour", data = calcul_check, number = 7, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
@@ -74,7 +74,7 @@ shinyServer(function(input, output, session) {
   # Table of consistency test school type and association
   table_server(id = "check_fishing_context", data = calcul_check, number = 9, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
   
-  # Table of consistency test school type and association
+  # Table of consistency test the succes status and the vessel activity, the type of school or the weight caught
   table_server(id = "check_operationt", data = calcul_check, number = 10, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
   
   

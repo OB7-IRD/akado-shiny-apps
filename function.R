@@ -2533,21 +2533,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             tidyr::complete(activity_date = seq.Date(min(trip_startdate[1],trip_enddate[1]), max(trip_startdate[1],trip_enddate[1]), by = "day"), trip_startdate = trip_startdate[1], trip_enddate = trip_enddate[1])
           # Replaces NA for missing dates
           check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date = TRUE, exter_activity_date = FALSE, count_freq = 0, logical = FALSE))
-          # Add vessel code
           check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
-          check_temporal_limit_data_plot <- merge(trip_select(), check_temporal_limit_data_plot, by.x = "trip_id", by.y = "trip_id")
           # Add button and data for plot in table
-          check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>%
-            dplyr::group_by(trip_id) %>%
-            dplyr::reframe(buttontmp = paste0("button&", paste0(deparse(dplyr::across(.cols=c("activity_date", "logical", "count_freq"))), collapse = ""), "&", trip_id, "&", vessel_code, "&", trip_startdate, "&", trip_enddate)) %>% 
-            dplyr::group_by(trip_id) %>% 
-            dplyr::filter(dplyr::row_number() == 1)
-          check_temporal_limit <- merge(check_temporal_limit, check_temporal_limit_data_plot, by = "trip_id")
-          check_temporal_limit$button <- NA
-          check_temporal_limit$button[check_temporal_limit$logical == FALSE] <- sapply(which(check_temporal_limit$logical == FALSE), function(c) {
-            as.character(shiny::actionButton(inputId = check_temporal_limit$buttontmp[c], label = "Detail", onclick = 'Shiny.setInputValue(\"button\", this.id, {priority: \"event\"})'))
-          })
-          check_temporal_limit <- subset(check_temporal_limit, select = -c(buttontmp))
+          check_temporal_limit <- data_button_plot(data_plot = check_temporal_limit_data_plot, data_display = check_temporal_limit, data_id = trip_select(), colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("trip_id","vessel_code","trip_startdate","trip_enddate"), name_button = "button_temporal_limit")
           # Uses a function to format the table
           check_temporal_limit <- table_display_trip(check_temporal_limit, trip_select(), type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -2697,11 +2685,30 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   return(data)
 }
 
+# Function to create the button in the table that will create the plot
+data_button_plot <- function(data_plot, data_display, data_id, colname_id, colname_plot, colname_info,name_button){
+  # Add line identification 
+  data_plot <- merge(data_id, data_plot, by.x = colname_id, by.y = colname_id)
+  # Add button and data for plot in table
+  code_txt<-paste0('data_plot <- data_plot %>%dplyr::group_by(',colname_id,') %>%
+  dplyr::reframe(buttontmp = paste0("button&", paste0(deparse(dplyr::across(.cols=c(',paste0(colname_plot,collapse= ','),'))), collapse = ""), "&",',paste0(colname_info,collapse= ', "&",'),'))%>%
+  dplyr::group_by(',colname_id,') %>% dplyr::filter(dplyr::row_number() == 1)')
+  eval(parse(text=code_txt))
+  data_display <- merge(data_display, data_plot, by = colname_id)
+  data_display$button <- NA
+   data_display$button[data_display$logical == FALSE] <- sapply(which(data_display$logical == FALSE), function(c) {
+     as.character(shiny::actionButton(inputId = data_display$buttontmp[c], label = "Detail", onclick = paste0('Shiny.setInputValue(\"',name_button,'\", this.id, {priority: \"event\"})')))
+   })
+  data_display <- subset(data_display, select = -c(buttontmp))
+  return(data_display)
+}
+
 
 # Function to create the plot of the consistency of the dates by trip
 plot_temporal_limit <- function(data, startdate, enddate) {
   # Deletes the rows where the date of the activity is missing
   data <- data[!is.na(data$activity_date), ]
+  # Plot
   plotly::plot_ly() %>%
     plotly::add_markers(x = c(startdate, enddate), y = c(1, 1), marker = list(
       color = "#63A9FF", symbol = "circle"
