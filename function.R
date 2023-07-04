@@ -197,10 +197,10 @@ check_fishing_time_inspector <- function(data_connection,
                                          output) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
-  route_fishing_time <- NULL
+  route_fishingtime <- NULL
   trip_fishingtime_data <- NULL
-  trip_fishing_time <- NULL
-  trip_idfishing_time <- NULL
+  trip_fishingtime <- NULL
+  trip_idfishingtime <- NULL
   # 1 - Arguments verification ----
   if (r_type_checking(
     r_object = data_connection,
@@ -365,25 +365,25 @@ check_fishing_time_inspector <- function(data_connection,
   # Calculate the sum of the fishing time per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   route_fishingtime_data <- route_fishingtime_data %>%
     dplyr::group_by(trip_id) %>%
-    dplyr::summarise(sum_route_fishingtime = ifelse(all(is.na(route_fishing_time)), route_fishing_time[NA_integer_], sum(route_fishing_time, na.rm = TRUE)))
+    dplyr::summarise(sum_route_fishingtime = ifelse(all(is.na(route_fishingtime)), route_fishingtime[NA_integer_], sum(route_fishingtime, na.rm = TRUE)))
   # Group the pair to compare
-  route_fishingtime_data$trip_idfishing_time <- paste0(route_fishingtime_data$trip_id, route_fishingtime_data$sum_route_fishingtime)
-  trip_fishingtime_data$trip_idfishing_time <- paste0(trip_fishingtime_data$trip_id, trip_fishingtime_data$trip_fishing_time)
+  route_fishingtime_data$trip_idfishingtime <- paste0(route_fishingtime_data$trip_id, route_fishingtime_data$sum_route_fishingtime)
+  trip_fishingtime_data$trip_idfishingtime <- paste0(trip_fishingtime_data$trip_id, trip_fishingtime_data$trip_fishingtime)
   # Compare trip IDs and fishing time of the trip or the sum of the route
   comparison <- vector_comparison(
-    first_vector = trip_fishingtime_data$trip_idfishing_time,
-    second_vector = route_fishingtime_data$trip_idfishing_time,
+    first_vector = trip_fishingtime_data$trip_idfishingtime,
+    second_vector = route_fishingtime_data$trip_idfishingtime,
     comparison_type = "difference",
     output = "report"
   )
   # Modify the table for display purposes: add, remove and order column
-  trip_fishingtime_data <- merge(trip_fishingtime_data, comparison, by.x = "trip_idfishing_time", by.y = "first_vector")
-  trip_fishingtime_data <- dplyr::relocate(.data = trip_fishingtime_data, trip_fishing_time, .after = logical)
-  route_fishingtime_data <- subset(route_fishingtime_data, select = -c(trip_idfishing_time))
-  trip_fishingtime_data <- subset(trip_fishingtime_data, select = -c(trip_idfishing_time))
+  trip_fishingtime_data <- merge(trip_fishingtime_data, comparison, by.x = "trip_idfishingtime", by.y = "first_vector")
+  trip_fishingtime_data <- dplyr::relocate(.data = trip_fishingtime_data, trip_fishingtime, .after = logical)
+  route_fishingtime_data <- subset(route_fishingtime_data, select = -c(trip_idfishingtime))
+  trip_fishingtime_data <- subset(trip_fishingtime_data, select = -c(trip_idfishingtime))
   trip_fishingtime_data <- merge(trip_fishingtime_data, route_fishingtime_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # Management of missing fishing time values
-  trip_fishingtime_data[is.na(trip_fishingtime_data$trip_fishing_time), "logical"] <- FALSE
+  trip_fishingtime_data[is.na(trip_fishingtime_data$trip_fishingtime), "logical"] <- FALSE
   if ((sum(trip_fishingtime_data$logical) + sum(!trip_fishingtime_data$logical)) != nrow_first) {
     stop(
       format(
@@ -418,10 +418,10 @@ check_sea_time_inspector <- function(data_connection,
                                      output) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
-  route_sea_time <- NULL
+  route_seatime <- NULL
   trip_seatime_data <- NULL
-  trip_sea_time <- NULL
-  trip_idsea_time <- NULL
+  trip_seatime <- NULL
+  trip_idseatime <- NULL
   # 1 - Arguments verification ----
   if (r_type_checking(
     r_object = data_connection,
@@ -586,27 +586,27 @@ check_sea_time_inspector <- function(data_connection,
   # Calculate the sum of the sea time per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   route_seatime_data <- route_seatime_data %>%
     dplyr::group_by(trip_id) %>%
-    dplyr::summarise(sum_route_seatime = ifelse(all(is.na(route_sea_time)), route_sea_time[NA_integer_], sum(route_sea_time, na.rm = TRUE)))
+    dplyr::summarise(sum_route_seatime = ifelse(all(is.na(route_seatime)), route_seatime[NA_integer_], sum(route_seatime, na.rm = TRUE)))
   # Group the pair to compare
-  route_seatime_data$trip_idsea_time <- paste0(route_seatime_data$trip_id, route_seatime_data$sum_route_seatime)
-  trip_seatime_data$trip_idsea_time <- paste0(trip_seatime_data$trip_id, trip_seatime_data$trip_sea_time)
+  route_seatime_data$trip_idseatime <- paste0(route_seatime_data$trip_id, route_seatime_data$sum_route_seatime)
+  trip_seatime_data$trip_idseatime <- paste0(trip_seatime_data$trip_id, trip_seatime_data$trip_seatime)
   # Compare trip IDs and sea time of the trip or the sum of the route
   comparison <- vector_comparison(
-    first_vector = trip_seatime_data$trip_idsea_time,
-    second_vector = route_seatime_data$trip_idsea_time,
+    first_vector = trip_seatime_data$trip_idseatime,
+    second_vector = route_seatime_data$trip_idseatime,
     comparison_type = "difference",
     output = "report"
   )
   # Modify the table for display purposes: add, remove and order column
-  trip_seatime_data <- merge(trip_seatime_data, comparison, by.x = "trip_idsea_time", by.y = "first_vector")
-  trip_seatime_data <- dplyr::relocate(.data = trip_seatime_data, trip_sea_time, .after = logical)
-  route_seatime_data <- subset(route_seatime_data, select = -c(trip_idsea_time))
-  trip_seatime_data <- subset(trip_seatime_data, select = -c(trip_idsea_time))
+  trip_seatime_data <- merge(trip_seatime_data, comparison, by.x = "trip_idseatime", by.y = "first_vector")
+  trip_seatime_data <- dplyr::relocate(.data = trip_seatime_data, trip_seatime, .after = logical)
+  route_seatime_data <- subset(route_seatime_data, select = -c(trip_idseatime))
+  trip_seatime_data <- subset(trip_seatime_data, select = -c(trip_idseatime))
   trip_seatime_data <- merge(trip_seatime_data, route_seatime_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # Management of missing sea time values
-  trip_seatime_data[is.na(trip_seatime_data$trip_sea_time), "logical"] <- FALSE
+  trip_seatime_data[is.na(trip_seatime_data$trip_seatime), "logical"] <- FALSE
   # Management of the 0 value for the time at sea
-  trip_seatime_data[!is.na(trip_seatime_data$trip_sea_time) & trip_seatime_data$trip_sea_time == 0, "logical"] <- FALSE
+  trip_seatime_data[!is.na(trip_seatime_data$trip_seatime) & trip_seatime_data$trip_seatime == 0, "logical"] <- FALSE
   if ((sum(trip_seatime_data$logical) + sum(!trip_seatime_data$logical)) != nrow_first) {
     stop(
       format(
@@ -2727,7 +2727,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Modify the table for display purposes: rename column
           check_fishing_time <- dplyr::rename(
             .data = check_fishing_time,
-            `Trip fishing time` = trip_fishing_time,
+            `Trip fishing time` = trip_fishingtime,
             `Sum route fishing time` = sum_route_fishingtime
           )
           # Uses a function to format the table
@@ -2735,7 +2735,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Modify the table for display purposes: rename column
           check_sea_time <- dplyr::rename(
             .data = check_sea_time,
-            `Trip sea time` = trip_sea_time,
+            `Trip sea time` = trip_seatime,
             `Sum route sea time` = sum_route_seatime
           )
           # Uses a function to format the table

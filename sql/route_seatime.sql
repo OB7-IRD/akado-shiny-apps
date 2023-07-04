@@ -1,7 +1,7 @@
 --- Recovers information about the sea time declared in the route
 SELECT 
     r.trip::text AS trip_id,
-    r.timeatsea::numeric AS route_sea_time 
+    r.timeatsea::numeric AS route_seatime 
 FROM 
     ps_logbook.route r 
 WHERE 
