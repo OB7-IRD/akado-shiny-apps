@@ -2482,6 +2482,221 @@ check_position_inspector <- function(data_connection,
   }
 }
 
+# Function that sum of the weight indicated for the catch is consistent with activity weight, in the future integrated in the pakage codama
+check_weight_inspector <- function(data_connection,
+                                   type_select,
+                                   select,
+                                   output) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = data_connection,
+      type = "list",
+      length = 2L,
+      output = "message"
+    ))
+  } else {
+    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
+        sep = ""
+      )
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (any(grep("observe_", data_connection[1]))) {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("activity", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("activity", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "activity" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Activity selection in the SQL query
+    if (type_select == "activity") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Activity with date in the selected year
+      activity_id_selected_by_year_sql <- paste(
+        readLines(file.path(
+          "sql",
+          "activity_id_selected_by_year.sql"
+        )),
+        collapse = "\n"
+      )
+      activity_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = activity_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = activity_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", activity_id_selected_by_year_data$activity_id, "'")
+    }
+    # Retrieves the weigth catch of the activity
+    activity_weight_sql <- paste(
+      readLines(file.path("sql", "activity_weight.sql")),
+      collapse = "\n"
+    )
+    activity_weight_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = activity_weight_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    activity_weight_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = activity_weight_sql
+    ))
+    # Retrieves the weight of each capture of the activity
+    catch_weight_sql <- paste(
+      readLines(file.path("sql", "catch_weight.sql")),
+      collapse = "\n"
+    )
+    catch_weight_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = catch_weight_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    catch_weight_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = catch_weight_sql
+    ))
+    nrow_first <- length(unique(select_sql))
+  } else {
+    if (is.data.frame(data_connection[[1]]) == TRUE) {
+      activity_weight_data <- data_connection[[1]]
+      catch_weight_data <- data_connection[[2]]
+      nrow_first <- nrow(activity_schooltype_data)
+    } else {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  # Calculate the sum of the weight per activity (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
+  catch_weight_data <- catch_weight_data %>%
+    dplyr::group_by(activity_id) %>%
+    dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
+  # Group the pair to compare
+  catch_weight_data$activity_id_weight <- paste0(catch_weight_data$activity_id, catch_weight_data$sum_catch_weight)
+  activity_weight_data$activity_id_weight <- paste0(activity_weight_data$activity_id, activity_weight_data$activity_weight)
+  # Compare trip IDs and sea time of the trip or the sum of the route
+  comparison <- vector_comparison(
+    first_vector = activity_weight_data$activity_id_weight,
+    second_vector = catch_weight_data$activity_id_weight,
+    comparison_type = "difference",
+    output = "report"
+  )
+  # Modify the table for display purposes: add, remove and order column
+  activity_weight_data <- merge(activity_weight_data, comparison, by.x = "activity_id_weight", by.y = "first_vector")
+  activity_weight_data <- dplyr::relocate(.data = activity_weight_data, activity_weight, .after = logical)
+  catch_weight_data <- subset(catch_weight_data, select = -c(activity_id_weight))
+  activity_weight_data <- subset(activity_weight_data, select = -c(activity_id_weight))
+  activity_weight_data <- merge(activity_weight_data, catch_weight_data, by.x = "activity_id", by.y = "activity_id", all.x = TRUE)
+  # Management of the 0 value for the weight activity
+  activity_weight_data[!is.na(activity_weight_data$activity_weight) & activity_weight_data$activity_weight == 0 & is.na(activity_weight_data$sum_catch_weight), "logical"] <- TRUE
+  if ((sum(activity_weight_data$logical) + sum(!activity_weight_data$logical)) != nrow_first) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!activity_sea_land_data$logical), " activity with a weight different from the sum of the weight of each catch")))
+  }
+  if (output == "report") {
+    return(activity_weight_data)
+  }
+  if (output == "logical") {
+    if (sum(!activity_weight_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
 
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
@@ -2718,7 +2933,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             select = activity_select$activity_id,
             output = "report"
           )
-          # Disconnection to the base
+          # Uses a function which indicates whether that sum of the weight indicated for the catch is consistent with activity weight
+          check_weight_inspector_data<-check_weight_inspector(
+            data_connection = data_connection,
+            type_select = "activity",
+            select = activity_select$activity_id,
+            output = "report"
+          )
+          # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           # Uses a function to format the table
           check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
@@ -2814,7 +3036,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Ocean activity` = ocean_name_pos,
             `Details problem` = button
           )
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position))
+          # Uses a function to format the table
+          check_weight <- table_display_trip(check_weight_inspector_data, activity_select, type_inconsistency = "error")
+          # Modify the table for display purposes: rename column
+          check_weight <- dplyr::rename(
+            .data = check_weight,
+            `Activity weight` = activity_weight,
+            `Sum catch weight` = sum_catch_weight
+          )
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight))
         }
       }
     })
