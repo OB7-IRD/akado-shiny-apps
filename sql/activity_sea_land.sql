@@ -10,6 +10,6 @@ FROM
     INNER JOIN ps_logbook.route r ON a.route = r.topiaid 
     INNER JOIN ps_common.trip t ON r.trip = t.topiaid 
     LEFT JOIN common.ocean o ON t.ocean = o.topiaid 
-    LEFT JOIN (SELECT za.ocean, ST_Union(za.geom) AS geom FROM public.zfao_areas za GROUP BY za.ocean) AS tmp_geo ON ST_Intersects(tmp_geo.geom, a.the_geom) = TRUE 
+    LEFT JOIN (SELECT za.ocean, ST_Union(za.geom) AS geom FROM public.zfao_areas za WHERE f_level = 'MAJOR' GROUP BY za.ocean) AS tmp_geo ON ST_Intersects(tmp_geo.geom, a.the_geom) = TRUE 
  WHERE 
     a.topiaid IN (?select_item) 

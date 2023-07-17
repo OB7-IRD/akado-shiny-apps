@@ -367,23 +367,18 @@ check_fishing_time_inspector <- function(data_connection,
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_route_fishingtime = ifelse(all(is.na(route_fishingtime)), route_fishingtime[NA_integer_], sum(route_fishingtime, na.rm = TRUE)))
   # Group the pair to compare
-  route_fishingtime_data$trip_idfishingtime <- paste0(route_fishingtime_data$trip_id, route_fishingtime_data$sum_route_fishingtime)
-  trip_fishingtime_data$trip_idfishingtime <- paste0(trip_fishingtime_data$trip_id, trip_fishingtime_data$trip_fishingtime)
-  # Compare trip IDs and fishing time of the trip or the sum of the route
+  trip_fishingtime_data <- merge(trip_fishingtime_data, route_fishingtime_data, by = "trip_id", all.x = TRUE)
+  # Compare fishing time of the trip or the sum of the route
   comparison <- vector_comparison(
-    first_vector = trip_fishingtime_data$trip_idfishingtime,
-    second_vector = route_fishingtime_data$trip_idfishingtime,
-    comparison_type = "difference",
+    trip_fishingtime_data$trip_fishingtime,
+    trip_fishingtime_data$sum_route_fishingtime,
+    comparison_type = "equal",
     output = "report"
   )
   # Modify the table for display purposes: add, remove and order column
-  trip_fishingtime_data <- merge(trip_fishingtime_data, comparison, by.x = "trip_idfishingtime", by.y = "first_vector")
-  trip_fishingtime_data <- dplyr::relocate(.data = trip_fishingtime_data, trip_fishingtime, .after = logical)
-  route_fishingtime_data <- subset(route_fishingtime_data, select = -c(trip_idfishingtime))
-  trip_fishingtime_data <- subset(trip_fishingtime_data, select = -c(trip_idfishingtime))
-  trip_fishingtime_data <- merge(trip_fishingtime_data, route_fishingtime_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
-  # Management of missing fishing time values
-  trip_fishingtime_data[is.na(trip_fishingtime_data$trip_fishingtime), "logical"] <- FALSE
+  trip_fishingtime_data <- cbind(trip_fishingtime_data, comparison)
+  trip_fishingtime_data <- dplyr::relocate(.data = trip_fishingtime_data, trip_fishingtime, sum_route_fishingtime, .after = logical)
+  trip_fishingtime_data <- subset(trip_fishingtime_data, select = -c(first_vector, second_vector))
   if ((sum(trip_fishingtime_data$logical) + sum(!trip_fishingtime_data$logical)) != nrow_first) {
     stop(
       format(
@@ -588,23 +583,18 @@ check_sea_time_inspector <- function(data_connection,
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_route_seatime = ifelse(all(is.na(route_seatime)), route_seatime[NA_integer_], sum(route_seatime, na.rm = TRUE)))
   # Group the pair to compare
-  route_seatime_data$trip_idseatime <- paste0(route_seatime_data$trip_id, route_seatime_data$sum_route_seatime)
-  trip_seatime_data$trip_idseatime <- paste0(trip_seatime_data$trip_id, trip_seatime_data$trip_seatime)
+  trip_seatime_data <- merge(trip_seatime_data, route_seatime_data, by = "trip_id", all.x = TRUE)
   # Compare trip IDs and sea time of the trip or the sum of the route
   comparison <- vector_comparison(
-    first_vector = trip_seatime_data$trip_idseatime,
-    second_vector = route_seatime_data$trip_idseatime,
-    comparison_type = "difference",
+    first_vector = trip_seatime_data$trip_seatime,
+    second_vector = trip_seatime_data$sum_route_seatime,
+    comparison_type = "equal",
     output = "report"
   )
   # Modify the table for display purposes: add, remove and order column
-  trip_seatime_data <- merge(trip_seatime_data, comparison, by.x = "trip_idseatime", by.y = "first_vector")
-  trip_seatime_data <- dplyr::relocate(.data = trip_seatime_data, trip_seatime, .after = logical)
-  route_seatime_data <- subset(route_seatime_data, select = -c(trip_idseatime))
-  trip_seatime_data <- subset(trip_seatime_data, select = -c(trip_idseatime))
-  trip_seatime_data <- merge(trip_seatime_data, route_seatime_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
-  # Management of missing sea time values
-  trip_seatime_data[is.na(trip_seatime_data$trip_seatime), "logical"] <- FALSE
+  trip_seatime_data <- cbind(trip_seatime_data, comparison)
+  trip_seatime_data <- dplyr::relocate(.data = trip_seatime_data, trip_seatime, sum_route_seatime, .after = logical)
+  trip_seatime_data <- subset(trip_seatime_data, select = -c(first_vector, second_vector))
   # Management of the 0 value for the time at sea
   trip_seatime_data[!is.na(trip_seatime_data$trip_seatime) & trip_seatime_data$trip_seatime == 0, "logical"] <- FALSE
   if ((sum(trip_seatime_data$logical) + sum(!trip_seatime_data$logical)) != nrow_first) {
@@ -2654,21 +2644,20 @@ check_weight_inspector <- function(data_connection,
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
   # Group the pair to compare
-  catch_weight_data$activity_id_weight <- paste0(catch_weight_data$activity_id, catch_weight_data$sum_catch_weight)
-  activity_weight_data$activity_id_weight <- paste0(activity_weight_data$activity_id, activity_weight_data$activity_weight)
-  # Compare trip IDs and sea time of the trip or the sum of the route
+  activity_weight_data <- merge(activity_weight_data, catch_weight_data, by = "activity_id", all.x = TRUE)
+  # Compare weight of the activity or the sum of the catch
   comparison <- vector_comparison(
-    first_vector = activity_weight_data$activity_id_weight,
-    second_vector = catch_weight_data$activity_id_weight,
-    comparison_type = "difference",
+    first_vector = activity_weight_data$activity_weight,
+    second_vector = activity_weight_data$sum_catch_weight,
+    comparison_type = "equal",
     output = "report"
   )
   # Modify the table for display purposes: add, remove and order column
-  activity_weight_data <- merge(activity_weight_data, comparison, by.x = "activity_id_weight", by.y = "first_vector")
-  activity_weight_data <- dplyr::relocate(.data = activity_weight_data, activity_weight, .after = logical)
-  catch_weight_data <- subset(catch_weight_data, select = -c(activity_id_weight))
-  activity_weight_data <- subset(activity_weight_data, select = -c(activity_id_weight))
-  activity_weight_data <- merge(activity_weight_data, catch_weight_data, by.x = "activity_id", by.y = "activity_id", all.x = TRUE)
+  activity_weight_data <- cbind(activity_weight_data, comparison)
+  activity_weight_data <- dplyr::relocate(.data = activity_weight_data, activity_weight, sum_catch_weight, .after = logical)
+  activity_weight_data <- subset(activity_weight_data, select = -c(first_vector, second_vector))
+  # Management of the NA value for the weight activity and catch
+  activity_weight_data[is.na(activity_weight_data$activity_weight) & is.na(activity_weight_data$sum_catch_weight), "logical"] <- TRUE
   # Management of the 0 value for the weight activity
   activity_weight_data[!is.na(activity_weight_data$activity_weight) & activity_weight_data$activity_weight == 0 & is.na(activity_weight_data$sum_catch_weight), "logical"] <- TRUE
   if ((sum(activity_weight_data$logical) + sum(!activity_weight_data$logical)) != nrow_first) {
