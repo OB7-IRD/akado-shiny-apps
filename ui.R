@@ -62,7 +62,18 @@ body <- dashboardBody(
   tags$style(".fa-info {color:#F4D03F}"),
   # Green background color for notifications id = "notif_default"
   tags$style("#shiny-notification-notif_default {background-color:#B2E8A2;}"),
+  # Font size buttons in menu 
   tags$style("#type_check_trip, #type_line_check_trip {font-size:11px;}"),
+  # Changes paddings between columns in display tables 
+  tags$style(HTML("table.dataTable thead>tr>th.sorting{
+      padding-left:2px;
+      padding-right:10px;
+      }")),
+  # Change position of sort icon in display tables
+  tags$style(HTML("table.dataTable thead>tr>th.sorting:before,
+      table.dataTable thead>tr>th.sorting:after{
+      right: 0px
+      }")),
   # Add pages
   tabItems(
     tabItem(
@@ -70,12 +81,47 @@ body <- dashboardBody(
       fluidPage(
         box(
           width = 12,
-          h1("Contexte"),
+          title ="Contexte", 
+          status = "primary", 
+          solidHeader = TRUE,
           p("AKADO automatically performs a series of tests on the data and produces summary tables that provide a more or less detailed assessment of the anomalies detected. A final summary presents the percentages of occurrences of errors that remain to be corrected.")
         ),
         box(
-          width = 12,
-          h1("Data base Observe"),
+          width = 6,
+          title = "Selection of the trip ", 
+          status = "primary", 
+          solidHeader = TRUE,
+          box(
+            width = 12,
+            title ="Unique selection by vessel number and trip end date", 
+            solidHeader = TRUE,
+          fluidRow(
+            column(width = 6, numericInput(
+              inputId = "vessel_number", label = "Indicate a vessel number:", value = NA, min = 0
+            )),
+            column(width = 6, dateInput(
+              inputId = "trip_end_date", label = HTML("Choose a trip end date:&nbsp&nbsp&nbsp&nbsp&nbsp"), value = NA
+            ))
+          )),
+          box(
+            width = 12,
+            title = "Multiple selection by date range", 
+            solidHeader = TRUE,
+          fluidRow(
+            column(width = 6, dateInput(
+              inputId = "trip_start_date_range", label = "Choose a trip start date:", value = NA
+            )),
+            column(width = 6, dateInput(
+              inputId = "trip_end_date_range", label = HTML("Choose a trip end date:&nbsp&nbsp"), value = NA
+            ))
+          )),
+          span(textOutput("error_date_select"), style = "color:red;")
+        ),
+        box(
+          width = 6,
+          status = "primary", 
+          solidHeader = TRUE,
+          title = "Data base Observe",
           selectInput(
             inputId = "data_base_observe", label = "Choose a data base:",
             choices = list("---", "NY", "NJ", "CT")
@@ -83,30 +129,8 @@ body <- dashboardBody(
         ),
         box(
           width = 12,
-          h1("Selection of the trip "),
-          h2("Unique selection by vessel number and trip end date"),
-          fluidRow(
-            column(width = 6, numericInput(
-              inputId = "vessel_number", label = "Indicate a vessel number:", value = NA, min = 0
-            )),
-            column(width = 6, dateInput(
-              inputId = "trip_end_date", label = "Choose a trip end date:", value = NA
-            ))
-          ),
-          h2("Multiple selection by date range"),
-          fluidRow(
-            column(width = 6, dateInput(
-              inputId = "trip_start_date_range", label = "Choose a trip start date:", value = NA
-            )),
-            column(width = 6, dateInput(
-              inputId = "trip_end_date_range", label = "Choose a trip end date:", value = NA
-            ))
-          ),
-          span(textOutput("error_date_select"), style = "color:red;")
-        ),
-        box(
-          width = 12,
           align = "center",
+          status = "primary",
           actionButton(inputId = NS(namespace = "start_button", id = "start_button"), label = "Start"),
           withSpinner(htmlOutput(NS(namespace = "error_trip_select", id = "text")), type = 6, size = 0.5, proxy.height = "70px")
         )

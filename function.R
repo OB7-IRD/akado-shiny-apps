@@ -3086,10 +3086,9 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
           }
         }
       },
-      escape = FALSE,
-      options = list(lengthChange = FALSE, scrollX = TRUE, autoWidth = autoWidth, columnDefs = columnDefs),
-      rownames = FALSE
-    )
+      escape = FALSE, rownames = FALSE,
+      options = list(lengthChange = FALSE, scrollX = TRUE, autoWidth= autoWidth, columnDefs = unlist(list(list(list(className = 'dt-left', targets = "_all")),columnDefs ),recursive = F)
+    ))
   })
 }
 
@@ -3100,7 +3099,9 @@ table_ui <- function(id, title, text = NULL) {
     class = "col-sm-12 col-md-6 col-lg-4",
     box(
       width = "100%",
-      h1(title),
+      title = title,
+      status = "primary", 
+      solidHeader = TRUE,
       HTML(text),
       withSpinner(DTOutput(NS(namespace = id, id = "table")), type = 6, size = 0.5, proxy.height = "70px")
     )
@@ -3190,7 +3191,8 @@ plot_temporal_limit <- function(data, startdate, enddate) {
         title = "Occurence",
         tickvals = c(data$count_freq, 1),
         ticktext = c(data$count_freq, 1)
-      )
+      ),
+      legend = list(orientation = 'h', y=-0.3)
     )
 }
 

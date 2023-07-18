@@ -55,9 +55,18 @@ shinyServer(function(input, output, session) {
     splitID <- strsplit(input$button_temporal_limit, "&")[[1]]
     vessel_code <- splitID[4]
     enddate <- splitID[6]
+    # Non-breaking hyphen (-)
+    enddate<- gsub("-","&#8209;",enddate)
     showModal(modalDialog(
-      plotlyOutput("plot_temporal_limit"),
-      title = paste0("Vessel code : ", vessel_code, ", trip end date : ", enddate),
+      fluidRow(column(3,
+                      style = "padding-left:5px;padding-right:0px;",
+                      HTML(paste0("<b>Trip information : </b><br> 
+                             <ul><li>Vessel code : ", vessel_code, "</li>
+                             <li>Trip end date : ", enddate, "</li></ul>"))),
+      column(9,
+             style = "padding-left:0px;padding-right:5px;",
+             plotlyOutput("plot_temporal_limit"))),
+      title = "Time coverage detail",
       size = "l",
       fade = TRUE,
       easyClose = TRUE,
@@ -72,13 +81,13 @@ shinyServer(function(input, output, session) {
   table_server(id = "check_raising_factor", data = calcul_check, number = 8, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
   
   # Table of consistency test school type and association
-  table_server(id = "check_fishing_context", data = calcul_check, number = 9, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
+  table_server(id = "check_fishing_context", data = calcul_check, number = 9, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"),list(targets = c(2), width = "73px")))
   
   # Table of consistency test the succes status and the vessel activity, the type of school or the weight caught
-  table_server(id = "check_operationt", data = calcul_check, number = 10, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
+  table_server(id = "check_operationt", data = calcul_check, number = 10, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"),list(targets = c(2), width = "73px")))
   
   # Table of consistency test the ocean declaration and activity position
-  table_server(id = "check_position", data = calcul_check, number = 11, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
+  table_server(id = "check_position", data = calcul_check, number = 11, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"),list(targets = c(2), width = "73px")))
   
   # Position control plot, display in a window
   output$plot_position <- renderPlotly({
@@ -90,9 +99,32 @@ shinyServer(function(input, output, session) {
   # Position control window
   observeEvent(input$button_position, {
     splitID <- strsplit(input$button_position, "&")[[1]]
+    enddate <- splitID[5]
+    activity_date <- splitID[5]
+    # Spatial formatting
+    data <- eval(parse(text = splitID[[2]]))
+    data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+    # Non-breaking hyphen (-)
+    enddate<- gsub("-","&#8209;",enddate)
+    activity_date<- gsub("-","&#8209;",activity_date)
     showModal(modalDialog(
-      plotlyOutput("plot_position"),
-      title = paste0("Vessel code : ", splitID[4], ", Trip end date : ", splitID[5],", Activity date : ",splitID[6], ", Acitivity number : ",splitID[7], ", Type : ",splitID[8], ", Ocean trip : ",splitID[9], ", Ocean activity : ",splitID[10]),
+      fluidRow(column(3,
+                      style = "padding-left:5px;padding-right:0px;",
+                      HTML(paste0("<b>Trip information : </b><br> 
+                             <ul><li>Vessel code : ", splitID[4], "</li>
+                             <li>Trip end date : ", enddate, "</li>
+                             <li>Activity date : ", activity_date, "</li>
+                             <li>Activity number : ", splitID[7], "</li>
+                             <li>Latitude : ", data_geo$Y, "°</li>
+                             <li>Longitude : ", data_geo$X, "°</li></ul>
+                             <b>Problem information : </b><br>
+                             <ul><li>Type : ", splitID[8], "</li>
+                             <li>Ocean trip : ", splitID[9], "</li>
+                             <li>Ocean activity : ", splitID[10], "</li></ul>"))),
+               column(9,
+                      style = "padding-left:0px;padding-right:5px;",
+                      plotlyOutput("plot_position"))),
+      title = "Position",
       size = "l",
       fade = TRUE,
       easyClose = TRUE,
@@ -101,7 +133,7 @@ shinyServer(function(input, output, session) {
   })
   
   # Table of consistency test the sum of the weight indicated for the catch and activity weight
-  table_server(id = "check_weight", data = calcul_check, number = 12, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(2), width = "50px")))
+  table_server(id = "check_weight", data = calcul_check, number = 12, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"),list(targets = c(2), width = "73px")))
   
   
   # Management of the display or not of the boxes in the trip tab
