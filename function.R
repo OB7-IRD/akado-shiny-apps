@@ -164,12 +164,13 @@ check_trip_activity_inspector <- function(data_connection,
   )
   trip_id <- cbind(trip_id, comparison)
   if ((sum(trip_id$logical) + sum(!trip_id$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="trip"){text_object_more_or_less(select,trip_id$trip_id)},
       sep = ""
     )
   }
@@ -380,12 +381,13 @@ check_fishing_time_inspector <- function(data_connection,
   trip_fishingtime_data <- dplyr::relocate(.data = trip_fishingtime_data, trip_fishingtime, sum_route_fishingtime, .after = logical)
   trip_fishingtime_data <- subset(trip_fishingtime_data, select = -c(first_vector, second_vector))
   if ((sum(trip_fishingtime_data$logical) + sum(!trip_fishingtime_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="trip"){text_object_more_or_less(select,trip_fishingtime_data$trip_id)},
       sep = ""
     )
   }
@@ -598,12 +600,13 @@ check_sea_time_inspector <- function(data_connection,
   # Management of the 0 value for the time at sea
   trip_seatime_data[!is.na(trip_seatime_data$trip_seatime) & trip_seatime_data$trip_seatime == 0, "logical"] <- FALSE
   if ((sum(trip_seatime_data$logical) + sum(!trip_seatime_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="trip"){text_object_more_or_less(select,trip_seatime_data$trip_id)},
       sep = ""
     )
   }
@@ -798,12 +801,13 @@ check_landing_consistent_inspector <- function(data_connection,
   # Management of the 0 value for vessel capacity
   trip_weight_capacity_data[!is.na(trip_weight_capacity_data$vessel_capacity) & trip_weight_capacity_data$vessel_capacity == 0, "logical"] <- FALSE
   if ((sum(trip_weight_capacity_data$logical) + sum(!trip_weight_capacity_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="trip"){text_object_more_or_less(select,trip_weight_capacity_data$trip_id)},
       sep = ""
     )
   }
@@ -1015,12 +1019,13 @@ check_landing_total_weight_inspector <- function(data_connection,
   # Management of missing sum of the landing
   trip_weight_capacity_data[is.na(trip_weight_capacity_data$sum_weightlanding) & !is.na(trip_weight_capacity_data$trip_landingtotalweight) & trip_weight_capacity_data$trip_landingtotalweight > 0, "logical"] <- FALSE
   if ((sum(trip_weight_capacity_data$logical) + sum(!trip_weight_capacity_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="trip"){text_object_more_or_less(select,trip_weight_capacity_data$trip_id)},
       sep = ""
     )
   }
@@ -1242,12 +1247,13 @@ check_temporal_limit_inspector <- function(data_connection,
   trip_date_activity_data[is.na(trip_date_activity_data$trip_startdate) | is.na(trip_date_activity_data$trip_enddate), "logical"] <- FALSE
   trip_date_activity_data <- subset(trip_date_activity_data, select = -c(trip_startdate, trip_enddate))
   if ((sum(trip_date_activity_data$logical) + sum(!trip_date_activity_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="trip"){text_object_more_or_less(select,trip_date_activity_data$trip_id)},
       sep = ""
     )
   }
@@ -1457,7 +1463,7 @@ check_harbour_inspector <- function(data_connection,
       .data = departure_harbour_data,
       harbour_id_departure = harbour_id,
     )
-    nrow_first <- length(unique(select_sql))
+    nrow_first <- length(unique(select))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE && is.data.frame(data_connection[[3]]) == TRUE) {
       trip_previous_trip_data <- data_connection[[1]]
@@ -1493,12 +1499,13 @@ check_harbour_inspector <- function(data_connection,
   trip_previous_trip_data[is.na(trip_previous_trip_data$harbour_id_departure), "logical"] <- FALSE
   trip_previous_trip_data[is.na(trip_previous_trip_data$harbour_id_landing), "logical"] <- FALSE
   if ((sum(trip_previous_trip_data$logical) + sum(!trip_previous_trip_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="trip"){text_object_more_or_less(select,trip_previous_trip_data$trip_id)},
       sep = ""
     )
   }
@@ -1780,14 +1787,16 @@ check_raising_factor_inspector <- function(data_connection,
   # Corrects missing RF1s when nothing has been landed and there is no capture
   tide_id_data[(is.na(tide_id_data$trip_landingtotalweight) | tide_id_data$trip_landingtotalweight == 0) & is.na(tide_id_data$sum_catch_weight), "logical"] <- TRUE
   tide_id_data <- dplyr::relocate(.data = tide_id_data, RF1, .after = logical)
+  trip_end_tide_id<-tide_id_data$trip_end_tide_id
   tide_id_data <- subset(tide_id_data, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, vessel_capacity, sum_catch_weight, trip_landingtotalweight, trip_localmarkettotalweight, lower_limit, upper_limit))
   if ((sum(tide_id_data$logical) + sum(!tide_id_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="trip"){text_object_more_or_less(select,tide_id_data$trip_id)},
       sep = ""
     )
   }
@@ -1998,12 +2007,13 @@ check_fishing_context_inspector <- function(data_connection,
   activity_schooltype_data <- dplyr::relocate(.data = activity_schooltype_data, schooltype_code, association_object_count, .after = logical)
   activity_schooltype_data <- subset(activity_schooltype_data, select = -c(seuil))
   if ((sum(activity_schooltype_data$logical) + sum(!activity_schooltype_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="activity"){text_object_more_or_less(select,activity_schooltype_data$activity_id)},
       sep = ""
     )
   }
@@ -2224,12 +2234,13 @@ check_operationt_inspector <- function(data_connection,
   activity_data <- dplyr::relocate(.data = activity_data, vesselactivity_code, successstatus_code, schooltype_code, activity_weight, .after = logical)
   activity_data <- subset(activity_data, select = -c(seuil, logical_successstatus_vesselactivity, logical_successstatus_schooltype_indeterminate, logical_successstatus_schooltype, logical_successstatus_weight))
   if ((sum(activity_data$logical) + sum(!activity_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="activity"){text_object_more_or_less(select,activity_data$activity_id)},
       sep = ""
     )
   }
@@ -2446,12 +2457,13 @@ check_position_inspector <- function(data_connection,
   activity_sea_land_data_detail <- activity_sea_land_data
   activity_sea_land_data <- subset(activity_sea_land_data, select = -c(activity_position, activity_crs, logical_ocean, logical_harbour))
   if ((sum(activity_sea_land_data$logical) + sum(!activity_sea_land_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="activity"){text_object_more_or_less(select,activity_sea_land_data$activity_id)},
       sep = ""
     )
   }
@@ -2661,19 +2673,20 @@ check_weight_inspector <- function(data_connection,
   # Management of the 0 value for the weight activity
   activity_weight_data[!is.na(activity_weight_data$activity_weight) & activity_weight_data$activity_weight == 0 & is.na(activity_weight_data$sum_catch_weight), "logical"] <- TRUE
   if ((sum(activity_weight_data$logical) + sum(!activity_weight_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="activity"){text_object_more_or_less(select,activity_weight_data$activity_id)},
       sep = ""
     )
   }
   
   # 4 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!activity_sea_land_data$logical), " activity with a weight different from the sum of the weight of each catch")))
+    return(print(paste0("There are ", sum(!activity_weight_data$logical), " activity with a weight different from the sum of the weight of each catch")))
   }
   if (output == "report") {
     return(activity_weight_data)
@@ -3206,3 +3219,20 @@ plot_position<- function(data){
     plotly::layout(showlegend=FALSE,mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
   
 }
+
+ # Function to list elements with a number of occurrences other than 2
+text_object_more_or_less<-function(id,result_check){
+  all<-c(id,result_check)
+  number_occurrences<-table(all)
+  text<-""
+  if(sum(number_occurrences==1)>0){
+    text<-paste0(text,"Missing item ","(",sum(number_occurrences==1),"):",paste0(names(number_occurrences[number_occurrences==1]), collapse = ", "),"\n")
+  }
+  if(sum(number_occurrences>2)>0){
+    text<-paste0(text,"Too many item ","(",sum(number_occurrences>2),"):",paste0(names(number_occurrences[number_occurrences>2]), collapse = ", "))
+  }
+  return(text)
+}
+
+
+
