@@ -2700,6 +2700,220 @@ check_weight_inspector <- function(data_connection,
   }
 }
 
+# Function that size class of the samples depending on the species and measurement type is consistent with valid limits, in the future integrated in the pakage codama
+check_length_class_inspector <- function(data_connection,
+                                         type_select,
+                                         select,
+                                         output,
+                                         species = c("YFT", "BET", "ALB"),
+                                         size_measure_type="FL",
+                                         limit=80) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE & class(data_connection) != "data.frame") {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
+      sep = ""
+    )
+  } else {
+    if (r_type_checking(
+      r_object = data_connection,
+      type = "list",
+      length = 2L,
+      output = "logical"
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = data_connection[[2]],
+        type = "PostgreSQLConnection",
+        output = "message"
+      ))
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (any(grep("observe_", data_connection[1]))) {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("sample", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("sample", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "sample" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Sample selection in the SQL query
+    if (type_select == "sample") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Sample with date in the selected year
+      sample_id_selected_by_year_sql <- paste(
+        readLines(file.path(
+          "sql",
+          "sample_id_selected_by_year.sql"
+        )),
+        collapse = "\n"
+      )
+      sample_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = sample_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      sample_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = sample_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", sample_id_selected_by_year_data$sample_id, "'")
+    }
+    # Retrieves the species, measurement type and size class of the samples
+    samplespeciesmeasure_sizeclass_sql <- paste(
+      readLines(file.path("sql", "samplespeciesmeasure_sizeclass.sql")),
+      collapse = "\n"
+    )
+    samplespeciesmeasure_sizeclass_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = samplespeciesmeasure_sizeclass_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    samplespeciesmeasure_sizeclass_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = samplespeciesmeasure_sizeclass_sql
+    ))
+    nrow_first <- length(unique(select_sql))
+  } else {
+    if (is.data.frame(data_connection) == TRUE) {
+      samplespeciesmeasure_sizeclass_data <- data_connection
+      nrow_first <- nrow(samplespeciesmeasure_sizeclass_data)
+    } else {
+      warning(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  samplespeciesmeasure_sizeclass_data$seuil<-limit
+  # Compare size class of the samples
+  comparison_sizeclass <- vector_comparison(
+    first_vector = samplespeciesmeasure_sizeclass_data$samplespeciesmeasure_sizeclass,
+    second_vector = samplespeciesmeasure_sizeclass_data$seuil,
+    comparison_type = "less_equal",
+    output = "report"
+  )
+  samplespeciesmeasure_sizeclass_data$logical_sizeclass  <- comparison_sizeclass$logical
+  # Compare specie of the samples
+  comparison_species <- vector_comparison(
+    first_vector = samplespeciesmeasure_sizeclass_data$specie_code,
+    second_vector = species,
+    comparison_type = "difference",
+    output = "report"
+  )
+  samplespeciesmeasure_sizeclass_data$logical_species <- comparison_species$logical
+  # Compare size measure type of the samples
+  comparison_sizemeasuretype <- vector_comparison(
+    first_vector = samplespeciesmeasure_sizeclass_data$sizemeasuretype_code,
+    second_vector = size_measure_type,
+    comparison_type = "difference",
+    output = "report"
+  )
+  samplespeciesmeasure_sizeclass_data$logical_sizemeasuretype <- comparison_sizemeasuretype$logical
+  samplespeciesmeasure_sizeclass_data$logical <- samplespeciesmeasure_sizeclass_data$logical_sizeclass | !samplespeciesmeasure_sizeclass_data$logical_sizemeasuretype | !samplespeciesmeasure_sizeclass_data$logical_species
+  # Modify the table for display purposes: add, remove and order column
+  samplespeciesmeasure_sizeclass_data <- dplyr::relocate(.data = samplespeciesmeasure_sizeclass_data, specie_code, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
+  samplespeciesmeasure_sizeclass_data <- subset(samplespeciesmeasure_sizeclass_data, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, seuil, specie_code, sizemeasuretype_code))
+  if ((sum(samplespeciesmeasure_sizeclass_data$logical) + sum(!samplespeciesmeasure_sizeclass_data$logical)) != nrow_first) {
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="sample"){text_object_more_or_less(select,samplespeciesmeasure_sizeclass_data$samplespeciesmeasure_id)},
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!samplespeciesmeasure_sizeclass_data$logical), " samples with measurements ", paste0(size_measure_type, collapse = ", "), ", for species ", paste0(species, collapse = ", "), ", greater than ", limit)))
+  }
+  if (output == "report") {
+    return(samplespeciesmeasure_sizeclass_data)
+  }
+  if (output == "logical") {
+    if (sum(!samplespeciesmeasure_sizeclass_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
@@ -2854,6 +3068,23 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = activity_id_sql
           ))
+          # Retrieve trip sample species measure
+          # Read the SQL query to retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
+          samplespeciesmeasure_id_sql <- paste(
+            readLines(file.path("sql", "samplespeciesmeasure_id.sql")),
+            collapse = "\n"
+          )
+          # Replaces the anchors with the selected values
+          samplespeciesmeasure_id_sql <- DBI::sqlInterpolate(
+            conn = data_connection[[2]],
+            sql = samplespeciesmeasure_id_sql,
+            select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"), collapse = ", "))
+          )
+          # Execute the SQL query
+          samplespeciesmeasure_select <- dplyr::tibble(DBI::dbGetQuery(
+            conn = data_connection[[2]],
+            statement = samplespeciesmeasure_id_sql
+          ))
           # Uses a function which indicates whether the selected trips contain activities or not
           check_trip_activity_inspector_data <- check_trip_activity_inspector(
             data_connection = data_connection,
@@ -2940,6 +3171,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             data_connection = data_connection,
             type_select = "activity",
             select = activity_select$activity_id,
+            output = "report"
+          )
+          # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid limits
+          check_length_class_inspector_data<-check_length_class_inspector(
+            data_connection = data_connection,
+            type_select = "sample",
+            select = samplespeciesmeasure_select$samplespeciesmeasure_id,
             output = "report"
           )
           # Disconnection to the bases
@@ -3046,7 +3284,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Activity weight` = activity_weight,
             `Sum catch weight` = sum_catch_weight
           )
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight))
+          # Uses a function to format the table
+          check_length_class <- table_display_trip(check_length_class_inspector_data, samplespeciesmeasure_select, type_inconsistency = "error")
+          # Modify the table for display purposes: rename column
+          check_length_class <- dplyr::rename(
+            .data = check_length_class,
+            `Size class` = samplespeciesmeasure_sizeclass
+          )
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class))
         }
       }
     })
@@ -3155,6 +3400,15 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
       .data = data,
       `Activity date` = activity_date,
       `Activity number` = activity_number
+    )
+  }
+  # Modify the table for display purposes specifically for activities : rename column
+  if (length(grep("^samplespeciesmeasure_", colnames(data), value = TRUE)) != 0) {
+    data <- dplyr::rename(
+      .data = data,
+      `Sample number` = sample_number,
+      `FAO code` = specie_name,
+      `Size measure type` = sizemeasuretype_code
     )
   }
   return(data)

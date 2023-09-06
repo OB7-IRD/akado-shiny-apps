@@ -165,6 +165,12 @@ body <- dashboardBody(
       )
     ),
     tabItem(
+      tabName = "sample",
+      fluidPage(
+        table_ui(id = "check_length_class", title = "Size class", text = "")
+        )
+    ),
+    tabItem(
       tabName = "summary",
       fluidPage(
         textOutput("text_summary")
