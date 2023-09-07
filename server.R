@@ -138,6 +138,8 @@ shinyServer(function(input, output, session) {
   # Table of consistency test the size class of the samples depending on the species and measurement type is consistent with valid limits
   table_server(id = "check_length_class", data = calcul_check, number = 13, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
   
+  # Table of consistency test the total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class, in the future integrated in the pakage codama
+  table_server(id = "check_measure", data = calcul_check, number = 14, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
   
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
@@ -167,6 +169,7 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "div_check_weight", anim = TRUE, animType = "fade")
       # Sample
       shinyjs::show(id = "div_check_length_class", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_measure", anim = TRUE, animType = "fade")
       }
     if (input$type_check_trip == "Info") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -183,6 +186,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_position", anim = FALSE)
       shinyjs::hide(id = "div_check_weight", anim = FALSE,)
       shinyjs::hide(id = "div_check_length_class", anim = FALSE)
+      shinyjs::hide(id = "div_check_measure", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
     }
@@ -200,6 +204,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_position", anim = FALSE)
       shinyjs::hide(id = "div_check_weight", anim = FALSE,)
       shinyjs::hide(id = "div_check_length_class", anim = FALSE)
+      shinyjs::hide(id = "div_check_measure", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
@@ -228,6 +233,7 @@ shinyServer(function(input, output, session) {
       shinyjs::show(id = "div_check_weight", anim = TRUE, animType = "fade")
       # Sample
       shinyjs::show(id = "div_check_length_class", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_measure", anim = TRUE, animType = "fade")
     }
   })
   

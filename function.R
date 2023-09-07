@@ -1004,7 +1004,7 @@ check_landing_total_weight_inspector <- function(data_connection,
   trip_weight_capacity_data$difference <- ifelse(is.na(trip_weight_capacity_data$trip_landingtotalweight), 0, trip_weight_capacity_data$trip_landingtotalweight) - ifelse(is.na(trip_weight_capacity_data$sum_weightlanding), 0, trip_weight_capacity_data$sum_weightlanding)
   trip_weight_capacity_data$difference <- abs(trip_weight_capacity_data$difference)
   trip_weight_capacity_data$epsilon <- epsilon
-  # Compare trip IDs and weight landing of the trip or the sum of the landing
+  # Compare sum difference with epsilon
   comparison <- vector_comparison(
     first_vector = trip_weight_capacity_data$difference,
     second_vector = trip_weight_capacity_data$epsilon,
@@ -2914,6 +2914,223 @@ check_length_class_inspector <- function(data_connection,
   }
 }
 
+# Function the total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class, in the future integrated in the pakage codama
+check_measure_inspector  <- function(data_connection,
+                                     type_select,
+                                     select,
+                                     output) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = data_connection,
+      type = "list",
+      length = 2L,
+      output = "message"
+    ))
+  } else {
+    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
+        sep = ""
+      )
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (any(grep("observe_",data_connection[1]))) {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("sample", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("sample", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "sample" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Trip selection in the SQL query
+    if (type_select == "sample") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Trip with a departure or arrival date in the selected year
+      sample_id_selected_by_year_sql <- paste(
+        readLines(con = system.file("sql",
+                                    "sample_id_selected_by_year.sql",
+                                    package = "codama"
+        )),
+        collapse = "\n"
+      )
+      sample_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = sample_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      sample_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = sample_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", sample_id_selected_by_year_data$trip_id, "'")
+    }
+    # number of individual measurements by sample and by species
+    samplespecies_measuredcount_sql <- paste(
+      readLines(file.path("sql", "samplespecies_measuredcount.sql")),
+      collapse = "\n"
+    )
+    samplespecies_measuredcount_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = samplespecies_measuredcount_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    samplespecies_measuredcount_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = samplespecies_measuredcount_sql
+    ))
+    # number of individual measurements by sample and by species and by size class
+    samplespeciesmeasure_count_sql <- paste(
+      readLines(file.path("sql", "samplespeciesmeasure_count.sql")),
+      collapse = "\n"
+    )
+    samplespeciesmeasure_count_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = samplespeciesmeasure_count_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    samplespeciesmeasure_count_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = samplespeciesmeasure_count_sql
+    ))
+    nrow_first<-length(unique(select_sql))
+  } else {
+    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
+      samplespecies_measuredcount_data <- data_connection[[1]]
+      samplespeciesmeasure_count_data <- data_connection[[2]]
+      nrow_first <- nrow(trip_weight_capacity_data)
+    } else {
+      warning(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  # Calculates the total sum of individuals by sample (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
+  samplespecies_measuredcount_data <- samplespecies_measuredcount_data %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::summarise(sum_measuredcount = ifelse(all(is.na(samplespecies_measuredcount)), samplespecies_measuredcount[NA_integer_], sum(samplespecies_measuredcount, na.rm = TRUE)))
+  samplespeciesmeasure_count_data <- samplespeciesmeasure_count_data %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::summarise(sum_count = ifelse(all(is.na(samplespeciesmeasure_count)), samplespeciesmeasure_count[NA_integer_], sum(samplespeciesmeasure_count, na.rm = TRUE)))
+  # Merge
+  samplespecies_measuredcount_data <- merge(samplespecies_measuredcount_data, samplespeciesmeasure_count_data, by.x = "sample_id", by.y = "sample_id", all.x = TRUE)
+  # Compare the two sums
+  comparison <- vector_comparison(
+    first_vector = samplespecies_measuredcount_data$sum_measuredcount,
+    second_vector = samplespecies_measuredcount_data$sum_count,
+    comparison_type = "equal",
+    output = "report"
+  )
+  samplespecies_measuredcount_data$logical <- comparison$logical
+  samplespecies_measuredcount_data <- dplyr::relocate(.data = samplespecies_measuredcount_data, sum_measuredcount, sum_count, .after = logical)
+  # Management of missing count measurements by sample and by species
+  samplespecies_measuredcount_data[is.na(samplespecies_measuredcount_data$sum_measuredcount), "logical"] <- FALSE
+  # Management of missing count measurements by sample and by species and by size class
+  samplespecies_measuredcount_data[is.na(samplespecies_measuredcount_data$sum_count), "logical"] <- FALSE
+  if ((sum(samplespecies_measuredcount_data$logical) + sum(!samplespecies_measuredcount_data$logical)) != nrow_first) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="sample"){text_object_more_or_less(select,samplespecies_measuredcount_data$sample_id)},
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!samplespecies_measuredcount_data$logical), " samples with number of individuals measured per species different from number measured per species and size class")))
+  }
+  if (output == "report") {
+    return(samplespecies_measuredcount_data)
+  }
+  if (output == "logical") {
+    if (sum(!samplespecies_measuredcount_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
@@ -3068,8 +3285,25 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = activity_id_sql
           ))
-          # Retrieve trip sample species measure
+          # Retrieve trip sample
           # Read the SQL query to retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
+          sample_id_sql <- paste(
+            readLines(file.path("sql", "sample_id.sql")),
+            collapse = "\n"
+          )
+          # Replaces the anchors with the selected values
+          sample_id_sql <- DBI::sqlInterpolate(
+            conn = data_connection[[2]],
+            sql = sample_id_sql,
+            select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"), collapse = ", "))
+          )
+          # Execute the SQL query
+          sample_select <- dplyr::tibble(DBI::dbGetQuery(
+            conn = data_connection[[2]],
+            statement = sample_id_sql
+          ))
+          # Retrieve trip sample species measure
+          # Read the SQL query to retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
           samplespeciesmeasure_id_sql <- paste(
             readLines(file.path("sql", "samplespeciesmeasure_id.sql")),
             collapse = "\n"
@@ -3178,6 +3412,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             data_connection = data_connection,
             type_select = "sample",
             select = samplespeciesmeasure_select$samplespeciesmeasure_id,
+            output = "report"
+          )
+          # Uses a function which indicates whether that total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
+          check_measure_inspector_data<-check_measure_inspector(
+            data_connection = data_connection,
+            type_select = "sample",
+            select = sample_select$sample_id,
             output = "report"
           )
           # Disconnection to the bases
@@ -3291,7 +3532,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             .data = check_length_class,
             `Size class` = samplespeciesmeasure_sizeclass
           )
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class))
+          # Uses a function to format the table
+          check_measure <- table_display_trip(check_measure_inspector_data, sample_select, type_inconsistency = "error")
+          # Modify the table for display purposes: rename column
+          check_measure <- dplyr::rename(
+            .data = check_measure,
+            `Number individuals measured sample` = sum_measuredcount,
+            `Sum numbers individuals size class` = sum_count
+          )
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure))
         }
       }
     })
@@ -3403,10 +3652,16 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
     )
   }
   # Modify the table for display purposes specifically for activities : rename column
+  if (length(grep("^sample_", colnames(data), value = TRUE)) != 0) {
+    data <- dplyr::rename(
+      .data = data,
+      `Sample number` = sample_number
+    )
+  }
+  # Modify the table for display purposes specifically for activities : rename column
   if (length(grep("^samplespeciesmeasure_", colnames(data), value = TRUE)) != 0) {
     data <- dplyr::rename(
       .data = data,
-      `Sample number` = sample_number,
       `FAO code` = specie_name,
       `Size measure type` = sizemeasuretype_code
     )
