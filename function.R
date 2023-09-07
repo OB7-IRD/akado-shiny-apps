@@ -2265,7 +2265,8 @@ check_operationt_inspector <- function(data_connection,
 check_position_inspector <- function(data_connection,
                                      type_select,
                                      select,
-                                     output) {
+                                     output,
+                                     ocean_name_nonpriority = "Atlantic") {
   # 0 - Global variables assignement ----
   # 1 - Arguments verification ----
   if (r_type_checking(
@@ -2347,6 +2348,17 @@ check_position_inspector <- function(data_connection,
       return(r_type_checking(
         r_object = select,
         type = "numeric",
+        output = "message"
+      ))
+    }
+    if (r_type_checking(
+      r_object = ocean_name_nonpriority,
+      type = "character",
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = ocean_name_nonpriority,
+        type = "character",
         output = "message"
       ))
     }
@@ -2447,6 +2459,12 @@ check_position_inspector <- function(data_connection,
   # Case of harbour in sea : not in harbour
   activity_sea_land_data$logical_harbour[!is.na(activity_sea_land_data$ocean_name_pos)] <- FALSE
   activity_sea_land_data$logical <- activity_sea_land_data$logical_ocean | activity_sea_land_data$logical_harbour
+  # Case case where the position is exactly on the boundary of the two oceans: focus on the Indian Ocean
+  count_ocean_activity <- activity_sea_land_data %>%
+    dplyr::group_by(activity_id) %>%
+    dplyr::summarise(count_ocean = length(unique(ocean_name_pos))) %>%
+    dplyr::filter(count_ocean == 2)
+  activity_sea_land_data <- activity_sea_land_data[!(activity_sea_land_data$activity_id %in% count_ocean_activity$activity_id & activity_sea_land_data$ocean_name_pos == ocean_name_nonpriority), ]
   # Gives the type of location
   activity_sea_land_data$type <- "Sea"
   activity_sea_land_data$type[is.na(activity_sea_land_data$ocean_name_pos)] <- "Land"
@@ -3104,7 +3122,7 @@ check_measure_inspector  <- function(data_connection,
   # Management of missing count measurements by sample and by species and by size class
   samplespecies_measuredcount_data[is.na(samplespecies_measuredcount_data$sum_count), "logical"] <- FALSE
   if ((sum(samplespecies_measuredcount_data$logical) + sum(!samplespecies_measuredcount_data$logical)) != nrow_first) {
-    stop(
+    warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
