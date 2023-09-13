@@ -1786,6 +1786,8 @@ check_raising_factor_inspector <- function(data_connection,
   tide_id_data$logical <- comparison_less$logical & comparison_greater$logical
   # Corrects missing RF1s when nothing has been landed and there is no capture
   tide_id_data[(is.na(tide_id_data$trip_landingtotalweight) | tide_id_data$trip_landingtotalweight == 0) & is.na(tide_id_data$sum_catch_weight), "logical"] <- TRUE
+  # Correction of complete tides not yet finished
+  tide_id_data[(is.na(tide_id_data$trip_end_tide_id)),"logical"]<-TRUE
   tide_id_data <- dplyr::relocate(.data = tide_id_data, RF1, .after = logical)
   trip_end_tide_id<-tide_id_data$trip_end_tide_id
   tide_id_data <- subset(tide_id_data, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, vessel_capacity, sum_catch_weight, trip_landingtotalweight, trip_localmarkettotalweight, lower_limit, upper_limit))
