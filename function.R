@@ -3150,6 +3150,210 @@ check_measure_inspector  <- function(data_connection,
 }
 
 
+# Function the sea surface temperature is consistent with valid limits, in the future integrated in the pakage codama
+check_temperature_inspector <- function(data_connection,
+                                        type_select,
+                                        select,
+                                        output,
+                                        limit = c(15, 32)) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE & class(data_connection) != "data.frame") {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
+      sep = ""
+    )
+  } else {
+    if (r_type_checking(
+      r_object = data_connection,
+      type = "list",
+      length = 2L,
+      output = "logical"
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = data_connection[[2]],
+        type = "PostgreSQLConnection",
+        output = "message"
+      ))
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (any(grep("observe_", data_connection[1]))) {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("activity", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("activity", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "activity" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Activity selection in the SQL query
+    if (type_select == "activity") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Activity with date in the selected year
+      activity_id_selected_by_year_sql <- paste(
+        readLines(file.path(
+          "sql",
+          "activity_id_selected_by_year.sql"
+        )),
+        collapse = "\n"
+      )
+      activity_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = activity_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = activity_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", activity_id_selected_by_year_data$activity_id, "'")
+    }
+    # Retrieves the sea surface temperature of the activity
+    activity_seasurfacetemperature_sql <- paste(
+      readLines(file.path("sql", "activity_seasurfacetemperature.sql")),
+      collapse = "\n"
+    )
+    activity_seasurfacetemperature_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = activity_seasurfacetemperature_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    activity_seasurfacetemperature_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = activity_seasurfacetemperature_sql
+    ))
+    nrow_first <- length(unique(select_sql))
+  } else {
+    if (is.data.frame(data_connection[[1]]) == TRUE) {
+      activity_seasurfacetemperature_data <- data_connection
+      nrow_first <- nrow(activity_seasurfacetemperature_data)
+    } else {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide the datasets instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  # Compare RF1 to valid limits
+  activity_seasurfacetemperature_data$lower_limit <- limit[1]
+  activity_seasurfacetemperature_data$upper_limit <- limit[2]
+  comparison_less <- vector_comparison(
+    first_vector = activity_seasurfacetemperature_data$activity_seasurfacetemperature,
+    second_vector = activity_seasurfacetemperature_data$upper_limit,
+    comparison_type = "less_equal",
+    output = "report"
+  )
+  comparison_greater <- vector_comparison(
+    first_vector = activity_seasurfacetemperature_data$activity_seasurfacetemperature,
+    second_vector = activity_seasurfacetemperature_data$lower_limit,
+    comparison_type = "greater_equal",
+    output = "report"
+  )
+  activity_seasurfacetemperature_data$logical <- comparison_less$logical & comparison_greater$logical
+  # Management of the NA value for the sea surface temperature
+  activity_seasurfacetemperature_data[is.na(activity_seasurfacetemperature_data$activity_seasurfacetemperature), "logical"] <- TRUE
+  # Modify the table for display purposes: add, remove and order column
+  activity_seasurfacetemperature_data <- dplyr::relocate(.data = activity_seasurfacetemperature_data, activity_seasurfacetemperature, .after = logical)
+  activity_seasurfacetemperature_data <- subset(activity_seasurfacetemperature_data, select = -c(lower_limit, upper_limit))
+  if ((sum(activity_seasurfacetemperature_data$logical) + sum(!activity_seasurfacetemperature_data$logical)) != nrow_first) {
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="activity"){text_object_more_or_less(select,activity_seasurfacetemperature_data$activity_id)},
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!activity_seasurfacetemperature_data$logical), " activity with sea surface temperature outside defined thresholds")))
+  }
+  if (output == "report") {
+    return(activity_seasurfacetemperature_data)
+  }
+  if (output == "logical") {
+    if (sum(!activity_seasurfacetemperature_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
   moduleServer(id, function(input, output, session) {
@@ -3439,6 +3643,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             select = sample_select$sample_id,
             output = "report"
           )
+          # Uses a function which indicates whether that sea surface temperature is consistent with the valid limits
+          check_temperature_inspector_data<-check_temperature_inspector(
+            data_connection = data_connection,
+            type_select = "activity",
+            select = activity_select$activity_id,
+            output = "report"
+          )
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           # Uses a function to format the table
@@ -3558,7 +3769,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Number individuals measured sample` = sum_measuredcount,
             `Sum numbers individuals size class` = sum_count
           )
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure))
+          # Uses a function to format the table
+          check_temperature <- table_display_trip(check_temperature_inspector_data, activity_select, type_inconsistency = "error")
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature))
         }
       }
     })

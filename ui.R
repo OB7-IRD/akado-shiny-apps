@@ -161,7 +161,8 @@ body <- dashboardBody(
                  <li>If the weight is not 0 then success type must be \"Positive\" (code 1) or \"Unknown\" (code 2), otherwise, if it exists, must be 0 .</li></ul>"),
       table_ui(id = "check_position", title = "Position", text = "<ul><li>If the position is on land, you need to check the latitude and longitude</li>
                  <li>If the position and ocean are different, you need to check these fields with the logbook.</li></ul>"),
-      table_ui(id = "check_weight", title = "Total Catch Weight", text = "<ul><li>If the values are different, you must transfer the sum of the elementary captures to the activity.</li></ul>")
+      table_ui(id = "check_weight", title = "Total Catch Weight", text = "<ul><li>If the values are different, you must transfer the sum of the elementary captures to the activity.</li></ul>"),
+      table_ui(id = "check_temperature", title = "Temperature", text = "<ul><li>Indicates whether the temperature is between 15 and 32 for the activity.</li></ul>")
       )
     ),
     tabItem(
