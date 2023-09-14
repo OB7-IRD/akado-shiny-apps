@@ -3356,6 +3356,199 @@ check_temperature_inspector <- function(data_connection,
   }
 }
 
+# Function the species sampled is consistent with species authorized, in the future integrated in the pakage codama
+check_species_inspector <- function(data_connection,
+                                    type_select,
+                                    select,
+                                    output,
+                                    species = c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT")) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_type_checking(
+    r_object = data_connection,
+    type = "list",
+    length = 2L,
+    output = "logical"
+  ) != TRUE & class(data_connection) != "data.frame") {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
+      sep = ""
+    )
+  } else {
+    if (r_type_checking(
+      r_object = data_connection,
+      type = "list",
+      length = 2L,
+      output = "logical"
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+      r_object = data_connection[[2]],
+      type = "PostgreSQLConnection",
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = data_connection[[2]],
+        type = "PostgreSQLConnection",
+        output = "message"
+      ))
+    }
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (any(grep("observe_", data_connection[1]))) {
+    # Checks the type and values of type_select
+    if (r_type_checking(
+      r_object = type_select,
+      type = "character",
+      allowed_value = c("sample", "year"),
+      output = "logical"
+    ) != TRUE) {
+      return(r_type_checking(
+        r_object = type_select,
+        type = "character",
+        allowed_value = c("sample", "year"),
+        output = "message"
+      ))
+    }
+    # Checks the type of select according to type_select
+    if (type_select == "sample" &&
+        r_type_checking(
+          r_object = select,
+          type = "character",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "message"
+      ))
+    }
+    if (type_select == "year" &&
+        r_type_checking(
+          r_object = select,
+          type = "numeric",
+          output = "logical"
+        ) != TRUE) {
+      return(r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "message"
+      ))
+    }
+    # 2 - Data extraction ----
+    # Sample selection in the SQL query
+    if (type_select == "sample") {
+      select_sql <- paste0("'", select, "'")
+    }
+    # Year selection in the SQL query
+    if (type_select == "year") {
+      # Sample with date in the selected year
+      sample_id_selected_by_year_sql <- paste(
+        readLines(file.path(
+          "sql",
+          "sample_id_selected_by_year.sql"
+        )),
+        collapse = "\n"
+      )
+      sample_id_selected_by_year_sql <- DBI::sqlInterpolate(
+        conn = data_connection[[2]],
+        sql = sample_id_selected_by_year_sql,
+        select_item = DBI::SQL(paste(select,
+                                     collapse = ", "
+        ))
+      )
+      sample_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
+        conn = data_connection[[2]],
+        statement = sample_id_selected_by_year_sql
+      ))
+      select_sql <- paste0("'", sample_id_selected_by_year_data$sample_id, "'")
+    }
+    # Retrieves the species of the samples
+    samplespecies_specie_sql <- paste(
+      readLines(file.path("sql", "samplespecies_specie.sql")),
+      collapse = "\n"
+    )
+    samplespecies_specie_sql <- DBI::sqlInterpolate(
+      conn = data_connection[[2]],
+      sql = samplespecies_specie_sql,
+      select_item = DBI::SQL(paste(select_sql,
+                                   collapse = ", "
+      ))
+    )
+    samplespecies_specie_data <- dplyr::tibble(DBI::dbGetQuery(
+      conn = data_connection[[2]],
+      statement = samplespecies_specie_sql
+    ))
+    nrow_first <- length(unique(select_sql))
+  } else {
+    if (is.data.frame(data_connection) == TRUE) {
+      samplespecies_specie_data <- data_connection
+      nrow_first <- nrow(samplespecies_specie_data)
+    } else {
+      warning(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
+        sep = ""
+      )
+    }
+  }
+  # 3 - Data design ----
+  # Compare specie of the samples
+  comparison_species <- vector_comparison(
+    first_vector = samplespecies_specie_data$specie_name,
+    second_vector = species,
+    comparison_type = "difference",
+    output = "report"
+  )
+  samplespecies_specie_data$logical <- comparison_species$logical
+  # Modify the table for display purposes: add, remove and order column
+  samplespecies_specie_data <- dplyr::relocate(.data = samplespecies_specie_data, specie_name, .after = logical)
+  if ((sum(samplespecies_specie_data$logical) + sum(!samplespecies_specie_data$logical)) != nrow_first) {
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      if(type_select=="sample"){text_object_more_or_less(select,samplespecies_specie_data$samplespecies_id)},
+      sep = ""
+    )
+  }
+  
+  # 4 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!samplespecies_specie_data$logical), " samples with species not included in the authorized list (",paste0(species, collapse = ", "),")", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(samplespecies_specie_data)
+  }
+  if (output == "logical") {
+    if (sum(!samplespecies_specie_data$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
   moduleServer(id, function(input, output, session) {
@@ -3526,6 +3719,23 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = sample_id_sql
           ))
+          # Retrieve trip sample species
+          # Read the SQL query to retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
+          samplespecies_id_sql <- paste(
+            readLines(file.path("sql", "samplespecies_id.sql")),
+            collapse = "\n"
+          )
+          # Replaces the anchors with the selected values
+          samplespecies_id_sql <- DBI::sqlInterpolate(
+            conn = data_connection[[2]],
+            sql = samplespecies_id_sql,
+            select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"), collapse = ", "))
+          )
+          # Execute the SQL query
+          samplespecies_select <- dplyr::tibble(DBI::dbGetQuery(
+            conn = data_connection[[2]],
+            statement = samplespecies_id_sql
+          ))
           # Retrieve trip sample species measure
           # Read the SQL query to retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
           samplespeciesmeasure_id_sql <- paste(
@@ -3652,6 +3862,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             select = activity_select$activity_id,
             output = "report"
           )
+          # Uses a function which indicates whether that species sampled is consistent with species authorized
+          check_species_inspector_data<-check_species_inspector(
+            data_connection = data_connection,
+            type_select = "sample",
+            select = samplespecies_select$samplespecies_id,
+            output = "report"
+          )
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           # Uses a function to format the table
@@ -3758,11 +3975,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function to format the table
           check_length_class <- table_display_trip(check_length_class_inspector_data, samplespeciesmeasure_select, type_inconsistency = "error")
-          # Modify the table for display purposes: rename column
-          check_length_class <- dplyr::rename(
-            .data = check_length_class,
-            `Size class` = samplespeciesmeasure_sizeclass
-          )
           # Uses a function to format the table
           check_measure <- table_display_trip(check_measure_inspector_data, sample_select, type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -3773,7 +3985,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function to format the table
           check_temperature <- table_display_trip(check_temperature_inspector_data, activity_select, type_inconsistency = "error")
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature))
+          check_temperature <- dplyr::rename(
+            .data = check_temperature,
+            `Sea surface temperature` = activity_seasurfacetemperature
+          )
+          # Uses a function to format the table
+          check_species <- table_display_trip(check_species_inspector_data, samplespecies_select, type_inconsistency = "error")
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species))
         }
       }
     })
@@ -3852,10 +4070,13 @@ table_ui <- function(id, title, text = NULL) {
 table_display_trip <- function(data, data_info, type_inconsistency) {
   # Retrieves the name of the column containing the ID
   colname_id <- grep("_id$", colnames(data), value = TRUE)
+  # Deletes duplicate columns
+  all_colname<-c(colnames(data), colnames(data_info))
+  colname_double<-table(all_colname)[table(all_colname)>1]
+  colname_double<-names(colname_double)[!(names(colname_double) %in% colname_id)]
+  data<-data[,!(colnames(data) %in% colname_double)]
   # Combines the consistency test on the data and data identification information
   data <- merge(data_info, data, by = colname_id)
-  # Modify the table for display purposes: delete column
-  data <- subset(data, select = -c(eval(parse(text = colname_id))))
   # Sort rows by date
   data <- data[order(data$trip_enddate), ]
   # Add icons according to the success of the test
@@ -3884,21 +4105,32 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
       `Activity number` = activity_number
     )
   }
-  # Modify the table for display purposes specifically for activities : rename column
-  if (length(grep("^sample_", colnames(data), value = TRUE)) != 0) {
+  # Modify the table for display purposes specifically for samples : rename column
+  if (length(grep("^sample", colnames(data), value = TRUE)) != 0) {
     data <- dplyr::rename(
       .data = data,
       `Sample number` = sample_number
     )
   }
-  # Modify the table for display purposes specifically for activities : rename column
-  if (length(grep("^samplespeciesmeasure_", colnames(data), value = TRUE)) != 0) {
+  # Modify the table for display purposes specifically for samples species : rename column
+  if (length(grep("^samplespecies", colnames(data), value = TRUE)) != 0) {
     data <- dplyr::rename(
       .data = data,
       `FAO code` = specie_name,
-      `Size measure type` = sizemeasuretype_code
+     `Size measure type` = sizemeasuretype_code
     )
   }
+  # Modify the table for display purposes specifically for samples species measure : rename column
+  if (length(grep("^samplespeciesmeasure", colnames(data), value = TRUE)) != 0) {
+    data <- dplyr::rename(
+      .data = data,
+      `Size class` = samplespeciesmeasure_sizeclass
+    )
+  }
+  # Retrieves the name of the column containing the ID
+  colname_id <- grep("_id$", colnames(data), value = TRUE)
+  # Modify the table for display purposes: delete column
+  data <- subset(data, select = -c(eval(parse(text = colname_id))))
   return(data)
 }
 
