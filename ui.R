@@ -170,7 +170,8 @@ body <- dashboardBody(
       fluidPage(
         table_ui(id = "check_length_class", title = "Size class", text = "<ul><li>Indicates FL measurements of species 'YFT', 'BET', 'ALB' greater than 80.</li></ul>"),
         table_ui(id = "check_measure", title = "Measurement", text = "<ul><li>The number of individuals in the sample must correspond to the sum of individuals per size class.</li></ul>"),
-        table_ui(id = "check_species", title = "Species", text = "<ul><li>Indicates species not conforming to the following list:'YFT', 'SKJ', 'BET', 'ALB', 'LTA', 'FRI', 'TUN', 'KAW', 'LOT'.</li></ul>")
+        table_ui(id = "check_species", title = "Species", text = "<ul><li>Indicates species not conforming to the following list:'YFT', 'SKJ', 'BET', 'ALB', 'LTA', 'FRI', 'TUN', 'KAW', 'LOT'.</li></ul>"),
+        table_ui(id = "check_sample_without_measure", title = "Sample without measurement")
         )
     ),
     tabItem(
