@@ -3711,6 +3711,110 @@ check_sample_without_species_inspector <- function(dataframe1,
   }
 }
 
+# Function the sample is consistent with the subsample number, in the future integrated in the pakage codama
+check_super_sample_number_consistent_inspector <- function(dataframe1,
+                                                           dataframe2,
+                                                           output) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("sample_id", "sample_supersample"),
+    column_type = c("character", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("sample_id", "sample_supersample"),
+      column_type = c("character", "logical"),
+      output = "message"
+    )
+  }
+  if (r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id"),
+    column_type = c("character", "numeric", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id"),
+      column_type = c("character", "numeric", "character"),
+      output = "message"
+    )
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  select <- dataframe1$sample_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Search subsample number in the associations samples ID
+  dataframe2 <- dataframe2 %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::summarise(count_subsamplenumber_N0 = sum(samplespecies_subsamplenumber != 0), count_subsamplenumber_0 = sum(samplespecies_subsamplenumber == 0), count_samplespecies = sum(!is.na(unique(samplespecies_id))), count_subsamplenumber_1 = sum(samplespecies_subsamplenumber == 1))
+  # merge
+  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
+  dataframe1$logical <- TRUE
+  dataframe1[dataframe1$count_samplespecies == 0, "logical"] <- FALSE
+  dataframe1$only_one_subsampling <- dataframe1$sample_supersample == FALSE & dataframe1$count_subsamplenumber_N0 == 0
+  dataframe1$many_subsampling <- dataframe1$sample_supersample == TRUE & dataframe1$count_subsamplenumber_0 == 0 & dataframe1$count_samplespecies > 1
+  dataframe1[!(dataframe1$only_one_subsampling | dataframe1$many_subsampling), "logical"] <- FALSE
+  dataframe1[dataframe1$count_samplespecies == 1 & dataframe1$count_subsamplenumber_1 > 0, "logical"] <- FALSE
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- subset(dataframe1, select = -c(only_one_subsampling, many_subsampling))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_supersample, count_subsamplenumber_N0, count_subsamplenumber_0, count_subsamplenumber_1, count_samplespecies, .after = logical)
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " samples inconsistency with subsample number", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
@@ -4044,6 +4148,18 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             file_path = file.path("sql","sample_samplespecies.sql"), 
             database_connection = data_connection, 
             anchor = list(select_item = sample_select$sample_id))
+          # Uses a function to extract data from sample
+          data_sample<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","sample_supersample.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = sample_select$sample_id))
+          # Uses a function to extract data from sample species
+          data_samplespecies<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","samplespecies_subsamplenumber.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = samplespecies_select$samplespecies_id))
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           # Uses a function to format the table
@@ -4174,7 +4290,22 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_sample_without_species_inspector_data<-check_sample_without_species_inspector(dataframe1=data_sample_samplespecies, output="report")
           # Uses a function to format the table
           check_sample_without_species <- table_display_trip(check_sample_without_species_inspector_data, sample_select, type_inconsistency = "error")
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species))
+          # Checks data consistency
+          if(nrow(data_sample)!=length(sample_select$sample_id)){warning(text_object_more_or_less(id=sample_select$sample_id ,result_check=data_sample$sample_id))}
+          if(nrow(data_samplespecies)!=length(samplespecies_select$samplespecies_id)){warning(text_object_more_or_less(id=samplespecies_select$samplespecies_id, result_check=data_sample$samplespecies_id))}
+          # Uses a function which indicates whether the sample is consistent with the subsample number
+          check_super_sample_number_consistent_inspector_data<-check_super_sample_number_consistent_inspector(dataframe1=data_sample, dataframe2=data_samplespecies, output="report")
+          # Uses a function to format the table
+          check_super_sample_number_consistent <- table_display_trip(check_super_sample_number_consistent_inspector_data, sample_select, type_inconsistency = "error")
+          check_super_sample_number_consistent <- dplyr::rename(
+            .data = check_super_sample_number_consistent,
+            `Super sample` = sample_supersample,
+            `Counts number sub-sample numbers not 0` = count_subsamplenumber_N0,
+            `Counts number sub-sample numbers equal 0` = count_subsamplenumber_0,
+            `Counts number sub-sample numbers equal 1` = count_subsamplenumber_1,
+            `Counts number sample species` = count_samplespecies
+          )
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent))
         }
       }
     })
