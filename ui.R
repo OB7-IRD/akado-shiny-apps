@@ -173,7 +173,8 @@ body <- dashboardBody(
         table_ui(id = "check_species", title = "Species", text = "<ul><li>Indicates species not conforming to the following list:'YFT', 'SKJ', 'BET', 'ALB', 'LTA', 'FRI', 'TUN', 'KAW', 'LOT'.</li></ul>"),
         table_ui(id = "check_sample_without_measure", title = "Sample without measurement"),
         table_ui(id = "check_sample_without_species", title = "Sample without species"),
-        table_ui(id = "check_super_sample_number", title = "Super sample", text = "Sub-sample numbers must be consistent")
+        table_ui(id = "check_super_sample_number", title = "Super sample", text = "Sub-sample numbers must be consistent"),
+        table_ui(id = "check_well_number", title = "Well", text = "The sample well must exist in the trip well plan")
         )
     ),
     tabItem(
