@@ -3922,6 +3922,254 @@ check_well_number_consistent_inspector <- function(dataframe1,
   }
 }
 
+# Function the sample is consistent for the percentage of little and big fish sampled, in the future integrated in the pakage codama
+check_little_big_inspector <- function(dataframe1,
+                                       dataframe2,
+                                       dataframe3,
+                                       output,
+                                       species = c("YFT", "YFT", "BET", "BET", "ALB", "ALB"),
+                                       measuretype = c("PD1", "FL", "PD1", "FL", "PD1", "FL"),
+                                       sizelimit = c(24, 80, 24, 77, 23.5, 78),
+                                       measuretype_size = c("FL", "PD1"),
+                                       threshold = 0.9) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
+    column_type = c("character", "numeric", "numeric", "numeric"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
+      column_type = c("character", "numeric", "numeric", "numeric"), output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
+  }
+  if (r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
+    column_type = c("character", "character", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
+      column_type = c("character", "character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id")]
+  }
+  if (r_table_checking(
+    r_table = dataframe3,
+    type = "data.frame",
+    column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id"),
+    column_type = c("character", "numeric", "numeric", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe3,
+      type = "data.frame",
+      column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id"),
+      column_type = c("character", "numeric", "numeric", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe3 <- dataframe3[, c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id")]
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = species,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = species,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = measuretype,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = measuretype,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = sizelimit,
+    type = "numeric",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = sizelimit,
+      type = "numeric",
+      output = "message"
+    ))
+  }
+  if (length(species) != length(measuretype) | length(species) != length(sizelimit)) {
+    stop(
+      format(
+        x = Sys.time(),
+        "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Error, the following arguments must be of the same size : \"species\", \"measuretype\" and \"sizelimit\"\n"
+    )
+  }
+  select <- dataframe1$sample_id
+  nrow_first <- length(unique(select))
+  if (r_type_checking(
+    r_object = measuretype_size,
+    type = "character",
+    length = 2L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = measuretype_size,
+      type = "character",
+      length = 2L,
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = threshold,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = threshold,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  # 2 - Data design ----
+  # Merge
+  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe3, by = "samplespecies_id", all.x = TRUE)
+  # Calculate the number of the measure per sample (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  total_count <- dataframe1 %>%
+    dplyr::group_by(sample_id, sample_smallsweight, sample_bigsweight, sample_totalweight) %>%
+    dplyr::summarise(total_count = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)), .groups = "keep")
+  # Small and large category conditions
+  condition <- as.list(as.data.frame(t(data.frame(species, measuretype, sizelimit))))
+  # Measurement selection of small individuals
+  little <- purrr::map(condition, ~ dataframe1 %>%
+                         dplyr::filter(specie_name == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass < as.numeric(.x[3])))
+  little <- do.call(rbind.data.frame, little)
+  # Calculation of the number of measurements of small individuals (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  little <- little %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::summarise(little = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)))
+  # Measurement selection of big individuals
+  big <- purrr::map(condition, ~ dataframe1 %>%
+                      dplyr::filter(specie_name == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass >= as.numeric(.x[3])))
+  big <- do.call(rbind.data.frame, big)
+  # Calculation of the number of measurements of big individuals (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  big <- big %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::summarise(big = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)))
+  # Calculation of the number of measurements of type measurements 1 (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  measure1 <- dataframe1 %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::filter(sizemeasuretype_code == measuretype_size[1]) %>%
+    dplyr::summarise(measure1 = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)))
+  # Calculation of the number of measurements of type measurements 2 (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  measure2 <- dataframe1 %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::filter(sizemeasuretype_code == measuretype_size[2]) %>%
+    dplyr::summarise(measure2 = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)))
+  # Merge
+  total_count <- merge(total_count, little, by = "sample_id", all.x = TRUE)
+  total_count <- merge(total_count, big, by = "sample_id", all.x = TRUE)
+  total_count <- merge(total_count, measure1, by = "sample_id", all.x = TRUE)
+  total_count <- merge(total_count, measure2, by = "sample_id", all.x = TRUE)
+  # Calculates percentages
+  total_count <- total_count %>%
+    dplyr::mutate(little_percentage = little / total_count, big_percentage = big / total_count, measure1_percentage = measure1 / total_count, measure2_percentage = measure2 / total_count)
+  # Case of NA sample_smallsweight, sample_bigsweight or sample_totalweight
+  total_count <- total_count %>%
+    mutate(
+      sample_smallsweight_bis = coalesce(sample_smallsweight, 0),
+      sample_bigsweight_bis = coalesce(sample_bigsweight, 0),
+      sample_totalweight_bis = coalesce(sample_totalweight, 0)
+    )
+  # Case of NA little_percentage, big_percentage, measure1_percentage, measure2_percentage
+   total_count[is.na(total_count$little_percentage), "little_percentage"]<-0
+   total_count[is.na(total_count$big_percentage), "big_percentage"]<-0
+   total_count[is.na(total_count$measure1_percentage), "measure1_percentage"]<-0
+   total_count[is.na(total_count$measure2_percentage), "measure2_percentage"]<-0
+  # Check
+  total_count$logical <- !((total_count$sample_smallsweight_bis > 0 & total_count$sample_bigsweight_bis == 0 & total_count$little_percentage < threshold) |
+                             ((total_count$sample_totalweight_bis != 0 | (total_count$sample_smallsweight_bis > 0 & total_count$sample_bigsweight_bis > 0)) & total_count$measure1_percentage > total_count$measure2_percentage & total_count$little_percentage < threshold) |
+                             (total_count$sample_smallsweight_bis == 0 & total_count$sample_bigsweight_bis > 0 & total_count$big_percentage < threshold) |
+                             ((total_count$sample_totalweight_bis != 0 | (total_count$sample_smallsweight_bis > 0 & total_count$sample_bigsweight_bis > 0)) & total_count$measure1_percentage < total_count$measure2_percentage & total_count$big_percentage < threshold))
+  # Case of NA
+  total_count[is.na(total_count$logical), "logical"] <- FALSE
+  # Modify the table for display purposes: add, remove and order column
+  total_count <- subset(total_count, select = -c(total_count, little, big, measure1, measure2, sample_smallsweight_bis, sample_bigsweight_bis, sample_totalweight_bis))
+  total_count <- dplyr::relocate(.data = total_count, sample_smallsweight, sample_bigsweight, sample_totalweight, little_percentage, big_percentage, measure1_percentage, measure2_percentage, .after = logical)
+  if ((sum(total_count$logical) + sum(!total_count$logical)) != nrow_first) {
+    all <- c(select, total_count$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!total_count$logical), " samples inconsistency with percentage of little and big fish", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(total_count)
+  }
+  if (output == "logical") {
+    if (sum(!total_count$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
@@ -4264,7 +4512,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function to extract data from sample species
           data_samplespecies<-furdeb::data_extraction(
             type = "database", 
-            file_path = file.path("sql","samplespecies_subsamplenumber.sql"), 
+            file_path = file.path("sql","samplespecies.sql"), 
             database_connection = data_connection, 
             anchor = list(select_item = samplespecies_select$samplespecies_id))
           # Uses a function to extract data from well
@@ -4273,6 +4521,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             file_path = file.path("sql","well.sql"), 
             database_connection = data_connection, 
             anchor = list(select_item = trip_select()$trip_id))
+          # Uses a function to extract data from sample species measure
+          data_samplespeciesmeasure<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","samplespeciesmeasure.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = samplespeciesmeasure_select$samplespeciesmeasure_id))
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           # Uses a function to format the table
@@ -4420,12 +4674,33 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function which indicates whether the sample well number is consistent with the associated trip well numbers
           check_well_number_consistent_inspector_data<-check_well_number_consistent_inspector(dataframe1=data_sample, dataframe2=data_well, output="report")
+          # Uses a function to format the table
           check_well_number_consistent <- table_display_trip(check_well_number_consistent_inspector_data, sample_select, type_inconsistency = "error")
           check_well_number_consistent <- dplyr::rename(
             .data = check_well_number_consistent,
             `Sample well` = sample_well
           )
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent))
+          # Checks data consistency
+          if(nrow(data_samplespeciesmeasure)!=length(samplespeciesmeasure_select$samplespeciesmeasure_id)){warning(text_object_more_or_less(id=samplespeciesmeasure_select$samplespeciesmeasure_id ,result_check=data_samplespeciesmeasure$samplespeciesmeasure_id))}
+          # Uses a function which indicates whether the sample is consistent for the percentage of little and big fish sampled
+          check_little_big_inspector_data<-check_little_big_inspector(dataframe1=data_sample, dataframe2=data_samplespecies, dataframe3 = data_samplespeciesmeasure , output="report")
+          # Uses a function to format the table
+          check_little_big <- table_display_trip(check_little_big_inspector_data, sample_select, type_inconsistency = "error")
+          check_little_big$little_percentage <- trunc(check_little_big$little_percentage * 1000) / 1000
+          check_little_big$big_percentage <- trunc(check_little_big$big_percentage * 1000) / 1000
+          check_little_big$measure1_percentage <- trunc(check_little_big$measure1_percentage * 1000) / 1000
+          check_little_big$measure2_percentage <- trunc(check_little_big$measure2_percentage * 1000) / 1000
+          check_little_big <- dplyr::rename(
+            .data = check_little_big,
+            `Counts smalls weight` = sample_smallsweight,
+            `Counts bigs weight` = sample_bigsweight,
+            `Counts total weight` = sample_totalweight,
+            `Little %` = little_percentage,
+            `Big %` = big_percentage,
+            `Measurement type FL %` = measure1_percentage,
+            `Measurement type PD1 %` = measure2_percentage
+          )
+           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big))
         }
       }
     })

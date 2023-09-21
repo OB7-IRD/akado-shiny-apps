@@ -174,7 +174,8 @@ body <- dashboardBody(
         table_ui(id = "check_sample_without_measure", title = "Sample without measurement"),
         table_ui(id = "check_sample_without_species", title = "Sample without species"),
         table_ui(id = "check_super_sample_number", title = "Super sample", text = "Sub-sample numbers must be consistent"),
-        table_ui(id = "check_well_number", title = "Well", text = "The sample well must exist in the trip well plan")
+        table_ui(id = "check_well_number", title = "Well", text = "The sample well must exist in the trip well plan"),
+        table_ui(id = "check_little_big", title = "Ratio of small to big fish", text = "The percentages of small and big fish must be consistent within the sample"),
         )
     ),
     tabItem(
