@@ -3,7 +3,7 @@ SELECT
     sa.topiaid::text AS sample_id,
     sa.supersample::boolean AS sample_supersample,
     sa.well::text AS sample_well,
-    sa.trip::text AS sample_trip,
+    sa.trip::text AS trip_id,
     sa.smallsweight::numeric AS sample_smallsweight, 
     sa.bigsweight::numeric AS sample_bigsweight,
     sa.totalweight::numeric AS sample_totalweight

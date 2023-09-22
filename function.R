@@ -3828,36 +3828,36 @@ check_well_number_consistent_inspector <- function(dataframe1,
   if (r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("sample_id", "sample_well", "sample_trip"),
+    column_name = c("sample_id", "sample_well", "trip_id"),
     column_type = c("character", "character", "character"),
     output = "logical"
   ) != TRUE) {
     r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("sample_id", "sample_well", "sample_trip"),
+      column_name = c("sample_id", "sample_well", "trip_id"),
       column_type = c("character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("sample_id", "sample_well", "sample_trip")]
+    dataframe1 <- dataframe1[, c("sample_id", "sample_well", "trip_id")]
   }
   if (r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("well_trip", "well_well"),
+    column_name = c("trip_id", "well_well"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
     r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("well_trip", "well_well"),
+      column_name = c("trip_id", "well_well"),
       column_type = c("character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("well_trip", "well_well")]
+    dataframe2 <- dataframe2[, c("trip_id", "well_well")]
   }
   # Checks the type and values of output
   if (r_type_checking(
@@ -3878,13 +3878,13 @@ check_well_number_consistent_inspector <- function(dataframe1,
   # 2 - Data design ----
   # merge
   dataframe2$logical <- TRUE
-  dataframe1 <- merge(dataframe1, dataframe2, by.x = c("sample_trip", "sample_well"), by.y = c("well_trip", "well_well"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_well"), all.x = TRUE)
   # Search well not link
   dataframe1[is.na(dataframe1$logical), "logical"] <- FALSE
   # Case the well number is empty
   dataframe1[is.na(dataframe1$sample_well), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(sample_trip))
+  dataframe1 <- subset(dataframe1, select = -c(trip_id))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_well, .after = logical)
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$sample_id)
