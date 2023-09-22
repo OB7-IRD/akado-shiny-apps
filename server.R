@@ -162,6 +162,9 @@ shinyServer(function(input, output, session) {
   # Table of consistency test the sample is consistent for the percentage of little and big fish sampled 
   table_server(id = "check_little_big", data = calcul_check, number = 21, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
 
+  # Table of consistency test the sample is consistent for the weighting 
+  table_server(id = "check_weighting", data = calcul_check, number = 22, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
     if (input$type_check_trip == "All") {
@@ -204,6 +207,8 @@ shinyServer(function(input, output, session) {
       insertUI(selector = "#div_check_super_sample_number", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_well_number", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_little_big", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_little_big", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      shinyjs::show(id = "div_check_weighting", anim = TRUE, animType = "fade")
       }
     if (input$type_check_trip == "Info") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -228,6 +233,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_super_sample_number", anim = FALSE)
       shinyjs::hide(id = "div_check_well_number", anim = FALSE)
       shinyjs::hide(id = "div_check_little_big", anim = FALSE)
+      shinyjs::hide(id = "div_check_weighting", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
     }
@@ -253,6 +259,7 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_super_sample_number", anim = FALSE)
       shinyjs::hide(id = "div_check_well_number", anim = FALSE)
       shinyjs::hide(id = "div_check_little_big", anim = FALSE)
+      shinyjs::hide(id = "div_check_weighting", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
@@ -295,6 +302,8 @@ shinyServer(function(input, output, session) {
       insertUI(selector = "#div_check_super_sample_number", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_well_number", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_little_big", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_little_big", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      shinyjs::show(id = "div_check_weighting", anim = TRUE, animType = "fade")
     }
   })
   

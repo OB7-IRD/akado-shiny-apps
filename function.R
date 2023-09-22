@@ -4114,10 +4114,10 @@ check_little_big_inspector <- function(dataframe1,
     dplyr::mutate(little_percentage = little / total_count, big_percentage = big / total_count, measure1_percentage = measure1 / total_count, measure2_percentage = measure2 / total_count)
   # Case of NA sample_smallsweight, sample_bigsweight or sample_totalweight
   total_count <- total_count %>%
-    mutate(
-      sample_smallsweight_bis = coalesce(sample_smallsweight, 0),
-      sample_bigsweight_bis = coalesce(sample_bigsweight, 0),
-      sample_totalweight_bis = coalesce(sample_totalweight, 0)
+    dplyr::mutate(
+      sample_smallsweight_bis = dplyr::coalesce(sample_smallsweight, 0),
+      sample_bigsweight_bis = dplyr::coalesce(sample_bigsweight, 0),
+      sample_totalweight_bis = dplyr::coalesce(sample_totalweight, 0)
     )
   # Case of NA little_percentage, big_percentage, measure1_percentage, measure2_percentage
    total_count[is.na(total_count$little_percentage), "little_percentage"]<-0
@@ -4169,6 +4169,240 @@ check_little_big_inspector <- function(dataframe1,
     }
   }
 }
+
+# Function the sample is consistent for the weighting, in the future integrated in the pakage codama
+check_weighting_inspector <- function(dataframe1,
+                                      dataframe2,
+                                      dataframe3,
+                                      dataframe4,
+                                      output,
+                                      vessel_type = c("6", "2"), # Seine, baitboat/canneur
+                                      weight_limit = 100,
+                                      threshold = 0.95,
+                                      sampletype_code_landing_baitboat = c("11"),
+                                      landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10")) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code"),
+    column_type = c("character", "numeric", "numeric", "numeric", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code"),
+      column_type = c("character", "numeric", "numeric", "numeric", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code")]
+  }
+  if (r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("sample_id", "sampleactivity_weightedweight"),
+    column_type = c("character", "numeric"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("sample_id", "sampleactivity_weightedweight"),
+      column_type = c("character", "numeric"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("sample_id", "sampleactivity_weightedweight")]
+  }
+  if (r_table_checking(
+    r_table = dataframe3,
+    type = "data.frame",
+    column_name = c("trip_id", "vesseltype_code", "vesseltype_label1"),
+    column_type = c("character", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe3,
+      type = "data.frame",
+      column_name = c("trip_id", "vesseltype_code", "vesseltype_label1"),
+      column_type = c("character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe3 <- dataframe3[, c("trip_id", "vesseltype_code", "vesseltype_label1")]
+  }
+  if (r_table_checking(
+    r_table = dataframe4,
+    type = "data.frame",
+    column_name = c("trip_id", "landing_weight", "weightcategory_code"),
+    column_type = c("character", "numeric", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe4,
+      type = "data.frame",
+      column_name = c("trip_id", "landing_weight", "weightcategory_code"),
+      column_type = c("character", "numeric", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe4 <- dataframe4[, c("trip_id", "landing_weight", "weightcategory_code")]
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = vessel_type,
+    type = "character",
+    length = 2L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = vessel_type,
+      type = "character",
+      length = 2L,
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = weight_limit,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = weight_limit,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = threshold,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = threshold,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = landingtype_baitboat,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = landingtype_baitboat,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = sampletype_code_landing_baitboat,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = sampletype_code_landing_baitboat,
+      type = "character",
+      output = "message"
+    ))
+  }
+  select <- dataframe1$sample_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Calculation weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  dataframe1 <- dataframe1 %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::mutate(weight_calculation = ifelse(all(is.na(c(sample_smallsweight, sample_bigsweight))), 0, sum(c(sample_smallsweight, sample_bigsweight), na.rm = TRUE)))
+  dataframe1 <- dataframe1 %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::mutate(weight = ifelse(is.na(sample_totalweight) | sample_totalweight == 0, weight_calculation, sample_totalweight))
+  # Calculation weightedweight for sample (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  dataframe2 <- dataframe2 %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::summarise(weightedweight = ifelse(all(is.na(sampleactivity_weightedweight)), 0, sum(sampleactivity_weightedweight, na.rm = TRUE)))
+  # Calculation fresh landing baitboat (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  dataframe4 <- dataframe4 %>%
+    dplyr::group_by(trip_id) %>%
+    dplyr::filter(weightcategory_code %in% landingtype_baitboat) %>%
+    dplyr::summarise(sum_landing_weight = ifelse(all(is.na(landing_weight)), 0, sum(landing_weight, na.rm = TRUE)))
+  # Merge
+  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe3, by = "trip_id", all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe4, by = "trip_id", all.x = TRUE)
+  # Case of NA sample_smallsweight, sample_bigsweight or sum_landing_weight
+  dataframe1 <- dataframe1 %>%
+    dplyr::mutate(
+      weightedweight_bis = dplyr::coalesce(weightedweight, 0),
+      sum_landing_weight_bis = dplyr::coalesce(sum_landing_weight, 0)
+    )
+  # Check
+  dataframe1$logical <- TRUE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weight > weight_limit, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold), "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > 1, "logical"] <- FALSE
+  # Case NA vesseltype_code sampletype_code
+  dataframe1[is.na(dataframe1$vesseltype_code), "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vesseltype_code, weightedweight_bis, sum_landing_weight_bis))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_label1, sum_landing_weight, .after = logical)
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " samples inconsistency with weighted weight", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
@@ -4527,6 +4761,24 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             file_path = file.path("sql","samplespeciesmeasure.sql"), 
             database_connection = data_connection, 
             anchor = list(select_item = samplespeciesmeasure_select$samplespeciesmeasure_id))
+          # Uses a function to extract data from landing
+          data_landing<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","landing.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = trip_select()$trip_id))
+          # Uses a function to extract data from sample activity
+          data_sampleactivity<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","sampleactivity.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = sample_select$sample_id))
+          # Uses a function to extract data from sample trip
+          data_trip<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","trip.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = trip_select()$trip_id))
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           # Uses a function to format the table
@@ -4700,7 +4952,23 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Measurement type FL %` = measure1_percentage,
             `Measurement type PD1 %` = measure2_percentage
           )
-           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big))
+          # Checks data consistency
+          if(nrow(data_trip)!=length(trip_select()$trip_id)){warning(text_object_more_or_less(id=trip_select()$trip_id ,result_check=data_trip$trip_id))}
+          # Uses a function which indicates whether the sample is consistent for the weighting
+          check_weighting_inspector_data<-check_weighting_inspector(dataframe1=data_sample, dataframe2=data_sampleactivity, dataframe3 = data_trip, dataframe4 = data_landing , output="report")
+          # Uses a function to format the table
+          check_weighting <- table_display_trip(check_weighting_inspector_data, sample_select, type_inconsistency = "error")
+          check_weighting <- dplyr::rename(
+            .data = check_weighting,
+            `Counts smalls weight` = sample_smallsweight,
+            `Counts bigs weight` = sample_bigsweight,
+            `Counts total weight` = sample_totalweight,
+            `Sample type` = sampletype_code,
+            `Sum weighted weights` = weightedweight,
+            `Vessel type` = vesseltype_label1,
+            `Sum weight fresh landings baitboats` = sum_landing_weight
+            )
+           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting))
         }
       }
     })
