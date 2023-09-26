@@ -4176,7 +4176,7 @@ check_weighting_inspector <- function(dataframe1,
                                       dataframe3,
                                       dataframe4,
                                       output,
-                                      vessel_type = c("6", "2"), # Seine, baitboat/canneur
+                                      vessel_type = c("6", "2"), 
                                       weight_limit = 100,
                                       threshold = 0.95,
                                       sampletype_code_landing_baitboat = c("11"),
@@ -4403,6 +4403,102 @@ check_weighting_inspector <- function(dataframe1,
   }
 }
 
+
+# Function the sample weight (m10 and p10) is consistent for the global weight, in the future integrated in the pakage codama
+check_weight_sample_inspector <- function(dataframe1,
+                                          output) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
+    column_type = c("character", "numeric", "numeric", "numeric"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
+      column_type = c("character", "numeric", "numeric", "numeric"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  select <- dataframe1$sample_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Calculation weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
+  dataframe1 <- dataframe1 %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::mutate(weight_calculation = ifelse(all(is.na(c(sample_smallsweight, sample_bigsweight))), NA, sum(c(sample_smallsweight, sample_bigsweight), na.rm = TRUE)))
+  # Check
+  comparison_weight_calculation <- vector_comparison(
+    first_vector = dataframe1$weight_calculation,
+    second_vector = c(0),
+    comparison_type = "difference",
+    output = "report"
+  )
+  comparison_totalweight <- vector_comparison(
+    first_vector = dataframe1$sample_totalweight,
+    second_vector = c(0),
+    comparison_type = "difference",
+    output = "report"
+  )
+  dataframe1$logical<- !(comparison_weight_calculation$logical & comparison_totalweight$logical) & !(is.na(dataframe1$weight_calculation) & is.na(dataframe1$sample_totalweight))
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- subset(dataframe1, select = -c(weight_calculation))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_totalweight, sample_smallsweight, sample_bigsweight, .after = logical)
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " sample weight (m10 and p10) inconsistency with the global weight", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
 
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
@@ -4968,7 +5064,17 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Vessel type` = vesseltype_label1,
             `Sum weight fresh landings baitboats` = sum_landing_weight
             )
-           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting))
+          # Uses a function which indicates whether the sample weight (m10 and p10) is consistent for the global weight
+          check_weight_sample_inspector_data<-check_weight_sample_inspector(dataframe1=data_sample, output="report")
+          # Uses a function to format the table
+          check_weight_sample <- table_display_trip(check_weight_sample_inspector_data, sample_select, type_inconsistency = "error")
+          check_weight_sample <- dplyr::rename(
+            .data = check_weight_sample,
+            `Counts smalls weight` = sample_smallsweight,
+            `Counts bigs weight` = sample_bigsweight,
+            `Counts total weight` = sample_totalweight
+          )
+           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample))
         }
       }
     })
