@@ -3773,8 +3773,8 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
     dplyr::group_by(sample_id) %>%
     dplyr::summarise(count_subsamplenumber_N0 = sum(samplespecies_subsamplenumber != 0), count_subsamplenumber_0 = sum(samplespecies_subsamplenumber == 0), count_samplespecies = sum(!is.na(unique(samplespecies_id))), count_subsamplenumber_1 = sum(samplespecies_subsamplenumber == 1))
   # merge
-  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
   dataframe1$logical <- TRUE
+  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
   dataframe1[dataframe1$count_samplespecies == 0, "logical"] <- FALSE
   dataframe1$only_one_subsampling <- dataframe1$sample_supersample == FALSE & dataframe1$count_subsamplenumber_N0 == 0
   dataframe1$many_subsampling <- dataframe1$sample_supersample == TRUE & dataframe1$count_subsamplenumber_0 == 0 & dataframe1$count_samplespecies > 1
@@ -4346,6 +4346,7 @@ check_weighting_inspector <- function(dataframe1,
     dplyr::filter(weightcategory_code %in% landingtype_baitboat) %>%
     dplyr::summarise(sum_landing_weight = ifelse(all(is.na(landing_weight)), 0, sum(landing_weight, na.rm = TRUE)))
   # Merge
+  dataframe1$logical <- TRUE
   dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
   dataframe1 <- merge(dataframe1, dataframe3, by = "trip_id", all.x = TRUE)
   dataframe1 <- merge(dataframe1, dataframe4, by = "trip_id", all.x = TRUE)
@@ -4356,7 +4357,6 @@ check_weighting_inspector <- function(dataframe1,
       sum_landing_weight_bis = dplyr::coalesce(sum_landing_weight, 0)
     )
   # Check
-  dataframe1$logical <- TRUE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weight > weight_limit, "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold), "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
@@ -4446,7 +4446,7 @@ check_weight_sample_inspector <- function(dataframe1,
   # Calculation weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe1 <- dataframe1 %>%
     dplyr::group_by(sample_id) %>%
-    dplyr::mutate(weight_calculation = ifelse(all(is.na(c(sample_smallsweight, sample_bigsweight))), NA, sum(c(sample_smallsweight, sample_bigsweight), na.rm = TRUE)))
+    dplyr::mutate(weight_calculation = ifelse(all(is.na(c(sample_smallsweight, sample_bigsweight))), NaN, sum(c(sample_smallsweight, sample_bigsweight), na.rm = TRUE)))
   # Check
   comparison_weight_calculation <- vector_comparison(
     first_vector = dataframe1$weight_calculation,
