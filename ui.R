@@ -177,8 +177,9 @@ body <- dashboardBody(
         table_ui(id = "check_well_number", title = "Well", text = "The sample well must exist in the trip well plan"),
         table_ui(id = "check_little_big", title = "Ratio of small to big fish", text = "The percentages of small and big fish must be consistent within the sample"),
         table_ui(id = "check_weighting", title = "Weighting", text = "The weighting for each sample must be coherent"),
-        table_ui(id = "check_weight_sample", title = "Weight sample", text = "The counts of total weights must equal 0 if there are values other than 0 for the counts of small or big weights, and vice versa")
-        )
+        table_ui(id = "check_weight_sample", title = "Weight sample", text = "The counts of total weights must equal 0 if there are values other than 0 for the counts of small or big weights, and vice versa"),
+        table_ui(id = "check_activity_sample", title = "Sample activity", text = "Samples must be linked to an activity")
+         )
     ),
     tabItem(
       tabName = "summary",

@@ -4500,6 +4500,95 @@ check_weight_sample_inspector <- function(dataframe1,
   }
 }
 
+# Function the sample and the existence of the activity, in the future integrated in the pakage codama
+check_activity_sample_inspector <- function(dataframe1,
+                                            output) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("sample_id", "activity_id"),
+    column_type = c("character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("sample_id", "activity_id"),
+      column_type = c("character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("sample_id", "activity_id")]
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  select <- dataframe1$sample_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Calculation activity_id (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  dataframe1 <- dataframe1 %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::summarise(count_activity = ifelse(all(is.na(activity_id)), 0L, sum(!is.na(activity_id))))
+  # Check
+  comparison <- vector_comparison(
+    first_vector = dataframe1$count_activity,
+    second_vector = c(0L),
+    comparison_type = "difference",
+    output = "report"
+  )
+  dataframe1$logical <- !comparison$logical
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- dplyr::relocate(.data = dataframe1, count_activity, .after = logical)
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " sample not linked to any activity", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
@@ -4869,12 +4958,18 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             file_path = file.path("sql","sampleactivity.sql"), 
             database_connection = data_connection, 
             anchor = list(select_item = sample_select$sample_id))
-          # Uses a function to extract data from sample trip
+          # Uses a function to extract data from trip
           data_trip<-furdeb::data_extraction(
             type = "database", 
             file_path = file.path("sql","trip.sql"), 
             database_connection = data_connection, 
             anchor = list(select_item = trip_select()$trip_id))
+          # Uses a function to extract data from activity in connection with sample
+          data_sample_activity<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","sample_activity.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = sample_select$sample_id))
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           # Uses a function to format the table
@@ -5074,7 +5169,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Counts bigs weight` = sample_bigsweight,
             `Counts total weight` = sample_totalweight
           )
-           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample))
+          # Uses a function which indicates whether the sample and the existence of the activity 
+          check_activity_sample_inspector_data<-check_activity_sample_inspector(dataframe1=data_sample_activity, output="report")
+          # Uses a function to format the table
+          check_activity_sample <- table_display_trip(check_activity_sample_inspector_data, sample_select, type_inconsistency = "error")
+          check_activity_sample <- dplyr::rename(
+            .data = check_activity_sample,
+            `Counts activity` = count_activity
+          )
+           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample))
         }
       }
     })
