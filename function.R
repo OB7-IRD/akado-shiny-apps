@@ -5231,9 +5231,21 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
         }
       },
       escape = FALSE, rownames = FALSE,
-      options = list(lengthChange = FALSE, scrollX = TRUE, autoWidth= autoWidth, columnDefs = unlist(list(list(list(className = 'dt-left', targets = "_all")),columnDefs ),recursive = F)
-    ))
+      extensions = "Buttons", 
+      options = list(lengthChange = FALSE, scrollX = TRUE, autoWidth= autoWidth, columnDefs = unlist(list(list(list(className = 'dt-left', targets = "_all")),columnDefs ),recursive = F),  dom = 'Bfrtip',
+                     buttons = 
+                       list(list(extend = "copy", text ="Copy data display"),
+                       list(extend = "collection", text = "Download data all", action = DT::JS(paste0("function ( e, dt, node, config ) {Shiny.setInputValue('button_download', ",number,", {priority: 'event'});}"))))))
   })
+}
+
+window_button_download <- function(number) {
+      modalDialog(downloadButton(outputId="download_csv",label="CSV"),
+                  downloadButton(outputId="download_excel",label="Excel"),
+                  fade = TRUE,
+                  easyClose = TRUE,
+                  footer = NULL, 
+                  title = "Download Table")
 }
 
 # Shiny function : table display

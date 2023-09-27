@@ -333,4 +333,44 @@ shinyServer(function(input, output, session) {
     paste0("Number of trips analyzed : ", length(trip_select()$trip_id), " ; Number of trip reports :  ", nrow(unique(data_regroup[,c("Vessel code","Trip enddate")]))," ; Number of check : ", length(calcul_check()), " ; Number of check with trip reports :  ", length(unique(data_regroup[,"group_id"])))
       })
   
+  # Date control window
+  observeEvent(input$button_download, {
+    showModal(window_button_download())
+    # Download CSV 
+    output$download_csv <- downloadHandler(
+      filename = function() {
+        paste("data-", gsub(" |:|-", "-",Sys.time()), ".csv", sep="")
+      },
+      content = function(file) {
+        data<-calcul_check()[[input$button_download]]
+        # Delete icons
+        data[data$Check == "<i class=\"fas fa-check\" role=\"presentation\" aria-label=\"check icon\"></i>","Check"]<-TRUE
+        data[data$Check != TRUE,"Check"]<-FALSE
+        # Deletes graphics
+        if("Details problem" %in% colnames(data)){
+          data[!is.na(data$`Details problem`),"Details problem"]<-"Detail"
+        }
+        write.csv(x = data, file = file, row.names = FALSE)
+      }
+    )
+    # Download Excel
+    output$download_excel <- downloadHandler(
+      filename = function() {
+        paste("data-", gsub(" |:|-", "-",Sys.time()), ".xlsx", sep="")
+      },
+      content = function(file) {
+        data<-calcul_check()[[input$button_download]]
+        # Delete icons
+        data[data$Check == "<i class=\"fas fa-check\" role=\"presentation\" aria-label=\"check icon\"></i>","Check"]<-TRUE
+        data[data$Check != TRUE,"Check"]<-FALSE
+        # Deletes graphics
+        if("Details problem" %in% colnames(data)){
+          data[!is.na(data$`Details problem`),"Details problem"]<-"Detail"
+        }
+        xlsx::write.xlsx2(x=data, file =file, row.names = FALSE)
+      }
+    )
+  })
+  
+  
 })
