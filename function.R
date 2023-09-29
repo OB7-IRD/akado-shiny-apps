@@ -1232,7 +1232,7 @@ check_temporal_limit_inspector <- function(data_connection,
   trip_date_activity_data_detail$exter_activity_date <- trip_date_activity_data_detail$trip_startdate_less | trip_date_activity_data_detail$trip_enddate_greater
   # Calculates the number of occurrences of each activity date
   trip_date_activity_data_detail <- trip_date_activity_data_detail %>%
-    dplyr::group_by(trip_id, trip_startdate, trip_enddate, activity_date, inter_activity_date, exter_activity_date, ) %>%
+    dplyr::group_by(trip_id, trip_startdate, trip_enddate, activity_date, inter_activity_date, exter_activity_date) %>%
     dplyr::summarise(count_freq = length(activity_date), .groups = "keep")
   # Calculation if an inconsistency among the different tests on the date has been found
   trip_date_activity_data_detail$logical <- trip_date_activity_data_detail$inter_activity_date & !trip_date_activity_data_detail$exter_activity_date & trip_date_activity_data_detail$count_freq == 1
@@ -4500,7 +4500,7 @@ check_weight_sample_inspector <- function(dataframe1,
   }
 }
 
-# Function the sample and the existence of the activity, in the future integrated in the pakage codama
+# Function the sample is consistent for the existence of the activity, in the future integrated in the pakage codama
 check_activity_sample_inspector <- function(dataframe1,
                                             output) {
   # 0 - Global variables assignement ----
@@ -4576,6 +4576,184 @@ check_activity_sample_inspector <- function(dataframe1,
   # 3 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!dataframe1$logical), " sample not linked to any activity", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
+# Function the sample measurement types is consistent for the species or weight values, in the future integrated in the pakage codama
+check_ldlf_inspector <- function(dataframe1,
+                                 dataframe2,
+                                 output,
+                                 species = c("SKJ", "LTA", "FRI"),
+                                 measuretype_species = c("PD1"),
+                                 measuretype_bigsweight = c("PD1"),
+                                 measuretype_smallsweight = c("FL")) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
+    column_type = c("character", "character", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
+      column_type = c("character", "character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id")]
+  }
+  if (r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
+    column_type = c("character", "numeric", "numeric", "numeric"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
+      column_type = c("character", "numeric", "numeric", "numeric"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = species,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = species,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = measuretype_species,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = measuretype_species,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = measuretype_bigsweight,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = measuretype_bigsweight,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = measuretype_smallsweight,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = measuretype_smallsweight,
+      type = "character",
+      output = "message"
+    ))
+  }
+  select <- dataframe1$samplespecies_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Check species and measuretype
+  comparison_species <- vector_comparison(
+    first_vector = dataframe1$specie_name,
+    second_vector = species,
+    comparison_type = "difference",
+    output = "report"
+  )
+  comparison_measuretype_species <- vector_comparison(
+    first_vector = dataframe1$sizemeasuretype_code,
+    second_vector = measuretype_species,
+    comparison_type = "difference",
+    output = "report"
+  )
+  dataframe1$logical_species <- !(comparison_species$logical & comparison_measuretype_species$logical)
+  # Merge
+  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
+  # Check bigs weight and measuretype
+  comparison_measuretype_bigsweight <- vector_comparison(
+    first_vector = dataframe1$sizemeasuretype_code,
+    second_vector = measuretype_bigsweight,
+    comparison_type = "difference",
+    output = "report"
+  )
+  dataframe1$logical_bigsweight <- !(comparison_measuretype_bigsweight$logical & ((dataframe1$sample_bigsweight == 0 & dataframe1$sample_totalweight == 0) | (is.na(dataframe1$sample_bigsweight) & is.na(dataframe1$sample_totalweight))))
+  # Check smalls weight and measuretype
+  comparison_measuretype_smallsweight <- vector_comparison(
+    first_vector = dataframe1$sizemeasuretype_code,
+    second_vector = measuretype_smallsweight,
+    comparison_type = "difference",
+    output = "report"
+  )
+  dataframe1$logical_smallsweight <- !(comparison_measuretype_smallsweight$logical & ((dataframe1$sample_smallsweight == 0 & dataframe1$sample_totalweight == 0) | (is.na(dataframe1$sample_smallsweight) & is.na(dataframe1$sample_totalweight))))
+  # Check
+  dataframe1$logical <- dataframe1$logical_species & dataframe1$logical_bigsweight & dataframe1$logical_smallsweight
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- subset(dataframe1, select = -c(logical_species, logical_bigsweight, logical_smallsweight, sample_id))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sizemeasuretype_code, specie_name, sample_bigsweight, sample_smallsweight, sample_totalweight, .after = logical)
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " sample with inconsistency between the sample measurement types and species or weight values", collapse = ", ")))
   }
   if (output == "report") {
     return(dataframe1)
@@ -5177,7 +5355,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             .data = check_activity_sample,
             `Counts activity` = count_activity
           )
-           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample))
+          # Uses a function which indicates whether the sample measurement types is consistent for the species or weight values
+          check_ldlf_inspector_data<-check_ldlf_inspector(dataframe1=data_samplespecies, dataframe2 = data_sample, output="report")
+          # Uses a function to format the table
+          check_ldlf <- table_display_trip(check_ldlf_inspector_data, samplespecies_select, type_inconsistency = "error")
+           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf))
         }
       }
     })
