@@ -4350,7 +4350,7 @@ check_weighting_inspector <- function(dataframe1,
   dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
   dataframe1 <- merge(dataframe1, dataframe3, by = "trip_id", all.x = TRUE)
   dataframe1 <- merge(dataframe1, dataframe4, by = "trip_id", all.x = TRUE)
-  # Case of NA sample_smallsweight, sample_bigsweight or sum_landing_weight
+  # Case of NA weightedweight or sum_landing_weight
   dataframe1 <- dataframe1 %>%
     dplyr::mutate(
       weightedweight_bis = dplyr::coalesce(weightedweight, 0),
@@ -4767,6 +4767,238 @@ check_ldlf_inspector <- function(dataframe1,
   }
 }
 
+# Function the small and large sample weights is consistent for the sum of the small and big weights of the associated well, in the future integrated in the pakage codama
+check_distribution_inspector <- function(dataframe1,
+                                         dataframe2,
+                                         dataframe3,
+                                         dataframe4,
+                                         output,
+                                         species = c("SKJ"),
+                                         weightcategory_small = c("W-1"),
+                                         weightcategory_big = c("W-2"),
+                                         weightcategory_unknown = c("W-9")) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight"),
+    column_type = c("character", "character", "character", "numeric", "numeric"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight"),
+      column_type = c("character", "character", "character", "numeric", "numeric"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight")]
+  }
+  if (r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("well_id", "well_well", "trip_id"),
+    column_type = c("character", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("well_id", "well_well", "trip_id"),
+      column_type = c("character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("well_id", "well_well", "trip_id")]
+  }
+  if (r_table_checking(
+    r_table = dataframe3,
+    type = "data.frame",
+    column_name = c("wellactivity_id", "well_id"),
+    column_type = c("character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe3,
+      type = "data.frame",
+      column_name = c("wellactivity_id", "well_id"),
+      column_type = c("character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe3 <- dataframe3[, c("wellactivity_id", "well_id")]
+  }
+  if (r_table_checking(
+    r_table = dataframe4,
+    type = "data.frame",
+    column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "specie_name", "wellactivityspecies_weight"),
+    column_type = c("character", "character", "character", "character", "numeric"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe4,
+      type = "data.frame",
+      column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "specie_name", "wellactivityspecies_weight"),
+      column_type = c("character", "character", "character", "character", "numeric"),
+      output = "message"
+    )
+  } else {
+    dataframe4 <- dataframe4[, c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "specie_name", "wellactivityspecies_weight")]
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = species,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = species,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = weightcategory_small,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = weightcategory_small,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = weightcategory_big,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = weightcategory_big,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = weightcategory_unknown,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = weightcategory_unknown,
+      type = "character",
+      output = "message"
+    ))
+  }
+  select <- dataframe1$sample_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Merge
+  dataframe2 <- merge(dataframe2, dataframe3, by = "well_id", all.x = TRUE)
+  dataframe2 <- merge(dataframe2, dataframe4, by = "wellactivity_id", all.x = TRUE)
+  # Calculation small weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
+  dataframe2_small <- dataframe2 %>%
+    dplyr::group_by(well_id, trip_id, well_well) %>%
+    dplyr::filter(weightcategory_code %in% weightcategory_small) %>%
+    dplyr::reframe(weight_small = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
+    dplyr::select(-well_id)
+  dataframe2_small_unknown <- dataframe2 %>%
+    dplyr::group_by(well_id, trip_id, well_well) %>%
+    dplyr::filter(weightcategory_code %in% weightcategory_unknown & specie_name %in% species) %>%
+    dplyr::reframe(weight_small_unknown = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
+    dplyr::select(-well_id)
+  # Calculation big weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
+  dataframe2_big <- dataframe2 %>%
+    dplyr::group_by(well_id, trip_id, well_well) %>%
+    dplyr::filter(weightcategory_code %in% weightcategory_big) %>%
+    dplyr::reframe(weight_big = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
+    dplyr::select(-well_id)
+  # Merge
+  dataframe1 <- merge(dataframe1, dataframe2_small, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_well"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2_small_unknown, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_well"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2_big, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_well"), all.x = TRUE)
+  # Calculation small weight total (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
+  dataframe1 <- dataframe1 %>%
+    dplyr::group_by(sample_id) %>%
+    dplyr::mutate(weight_small_total = ifelse(all(is.na(c(weight_small, weight_small_unknown))), NaN, sum(c(weight_small, weight_small_unknown), na.rm = TRUE)))
+  # Case of NA
+  dataframe1 <- dataframe1 %>%
+    dplyr::mutate(
+      sample_smallsweight_bis = dplyr::coalesce(sample_smallsweight, 0),
+      sample_bigsweight_bis = dplyr::coalesce(sample_bigsweight, 0),
+      weight_big_bis = dplyr::coalesce(weight_big, 0),
+      weight_small_total_bis = dplyr::coalesce(weight_small_total, 0)
+    )
+  # Check small weight
+  comparison_smallsweight <- vector_comparison(
+    first_vector = dataframe1$weight_small_total_bis,
+    second_vector = dataframe1$sample_smallsweight_bis,
+    comparison_type = "equal",
+    output = "report"
+  )
+  # Check smalls weight
+  comparison_bigsweight <- vector_comparison(
+    first_vector = dataframe1$weight_big_bis,
+    second_vector = dataframe1$sample_bigsweight_bis,
+    comparison_type = "equal",
+    output = "report"
+  )
+  # Check
+  dataframe1$logical <- comparison_smallsweight$logical & comparison_bigsweight$logical
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_small_unknown, weight_small, sample_smallsweight_bis, sample_bigsweight_bis, weight_small_total_bis, weight_big_bis))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_well, weight_small_total, weight_big, .after = logical)
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " sample with inconsistencies in distribution with the well", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
@@ -5148,6 +5380,24 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             file_path = file.path("sql","sample_activity.sql"), 
             database_connection = data_connection, 
             anchor = list(select_item = sample_select$sample_id))
+          # Uses a function to extract data from wellactivity in connection with trip
+          wellactivity_select<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","trip_wellactivity.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = trip_select()$trip_id))
+          # Uses a function to extract data from wellactivity
+          data_wellactivity<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","wellactivity.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = wellactivity_select$wellactivity_id))
+          # Uses a function to extract data from wellactivityspecies
+          data_wellactivityspecies<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","wellactivityspecies.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = wellactivity_select$wellactivity_id))
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           # Uses a function to format the table
@@ -5299,7 +5549,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_well_number_consistent <- table_display_trip(check_well_number_consistent_inspector_data, sample_select, type_inconsistency = "error")
           check_well_number_consistent <- dplyr::rename(
             .data = check_well_number_consistent,
-            `Sample well` = sample_well
+            `Well` = sample_well
           )
           # Checks data consistency
           if(nrow(data_samplespeciesmeasure)!=length(samplespeciesmeasure_select$samplespeciesmeasure_id)){warning(text_object_more_or_less(id=samplespeciesmeasure_select$samplespeciesmeasure_id ,result_check=data_samplespeciesmeasure$samplespeciesmeasure_id))}
@@ -5313,9 +5563,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_little_big$measure2_percentage <- trunc(check_little_big$measure2_percentage * 1000) / 1000
           check_little_big <- dplyr::rename(
             .data = check_little_big,
-            `Counts smalls weight` = sample_smallsweight,
-            `Counts bigs weight` = sample_bigsweight,
-            `Counts total weight` = sample_totalweight,
+            `Smalls weight` = sample_smallsweight,
+            `Bigs weight` = sample_bigsweight,
+            `Total weight` = sample_totalweight,
             `Little %` = little_percentage,
             `Big %` = big_percentage,
             `Measurement type FL %` = measure1_percentage,
@@ -5329,9 +5579,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_weighting <- table_display_trip(check_weighting_inspector_data, sample_select, type_inconsistency = "error")
           check_weighting <- dplyr::rename(
             .data = check_weighting,
-            `Counts smalls weight` = sample_smallsweight,
-            `Counts bigs weight` = sample_bigsweight,
-            `Counts total weight` = sample_totalweight,
+            `Smalls weight` = sample_smallsweight,
+            `Bigs weight` = sample_bigsweight,
+            `Total weight` = sample_totalweight,
             `Sample type` = sampletype_code,
             `Sum weighted weights` = weightedweight,
             `Vessel type` = vesseltype_label1,
@@ -5343,9 +5593,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_weight_sample <- table_display_trip(check_weight_sample_inspector_data, sample_select, type_inconsistency = "error")
           check_weight_sample <- dplyr::rename(
             .data = check_weight_sample,
-            `Counts smalls weight` = sample_smallsweight,
-            `Counts bigs weight` = sample_bigsweight,
-            `Counts total weight` = sample_totalweight
+            `Smalls weight` = sample_smallsweight,
+            `Bigs weight` = sample_bigsweight,
+            `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the sample and the existence of the activity 
           check_activity_sample_inspector_data<-check_activity_sample_inspector(dataframe1=data_sample_activity, output="report")
@@ -5359,7 +5609,25 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_ldlf_inspector_data<-check_ldlf_inspector(dataframe1=data_samplespecies, dataframe2 = data_sample, output="report")
           # Uses a function to format the table
           check_ldlf <- table_display_trip(check_ldlf_inspector_data, samplespecies_select, type_inconsistency = "error")
-           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf))
+          check_ldlf <- dplyr::rename(
+            .data = check_ldlf,
+            `Smalls weight` = sample_smallsweight,
+            `Bigs weight` = sample_bigsweight,
+            `Total weight` = sample_totalweight
+          )
+          # Uses a function which indicates whether the small and large sample weights is consistent for the sum of the small and big weights of the associated well
+          check_distribution_inspector_data<-check_distribution_inspector(dataframe1=data_sample,dataframe2 = data_well, dataframe3 = data_wellactivity, dataframe4 = data_wellactivityspecies, output="report")
+          # Uses a function to format the table
+          check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select, type_inconsistency = "error")
+          check_distribution <- dplyr::rename(
+            .data = check_distribution,
+            `Smalls weight` = sample_smallsweight,
+            `Bigs weight` = sample_bigsweight,
+            `Well` = sample_well,
+            `Smalls weight well` = weight_small_total,
+            `Bigs weight well` = weight_big
+          )
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution))
         }
       }
     })
