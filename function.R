@@ -1763,7 +1763,7 @@ check_raising_factor_inspector <- function(data_connection,
   # RF1 calculation
   tide_id_data_RF1 <- tide_id_data %>%
     dplyr::group_by(tide_id) %>%
-    dplyr::summarise(RF1 = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
+    dplyr::summarise(RF1 = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), tide_landingtotalweight = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)), tide_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
   tide_id_data$lower_limit <- limit[1]
   tide_id_data$upper_limit <- limit[2]
   # Selection of user-supplied trips
@@ -1785,12 +1785,12 @@ check_raising_factor_inspector <- function(data_connection,
   )
   tide_id_data$logical <- comparison_less$logical & comparison_greater$logical
   # Corrects missing RF1s when nothing has been landed and there is no capture
-  tide_id_data[(is.na(tide_id_data$trip_landingtotalweight) | tide_id_data$trip_landingtotalweight == 0) & is.na(tide_id_data$sum_catch_weight), "logical"] <- TRUE
+  tide_id_data[(is.na(tide_id_data$tide_landingtotalweight) | tide_id_data$tide_landingtotalweight == 0) & is.na(tide_id_data$tide_sum_catch_weight),"logical"]<-TRUE
   # Correction of complete tides not yet finished
   tide_id_data[(is.na(tide_id_data$trip_end_tide_id)),"logical"]<-TRUE
   tide_id_data <- dplyr::relocate(.data = tide_id_data, RF1, .after = logical)
   trip_end_tide_id<-tide_id_data$trip_end_tide_id
-  tide_id_data <- subset(tide_id_data, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, vessel_capacity, sum_catch_weight, trip_landingtotalweight, trip_localmarkettotalweight, lower_limit, upper_limit))
+  tide_id_data <- subset(tide_id_data, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, vessel_capacity, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight,tide_sum_catch_weight, trip_localmarkettotalweight, lower_limit, upper_limit))
   if ((sum(tide_id_data$logical) + sum(!tide_id_data$logical)) != nrow_first) {
     warning(
       format(
@@ -3772,16 +3772,24 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(sample_id) %>%
     dplyr::summarise(count_subsamplenumber_N0 = sum(samplespecies_subsamplenumber != 0), count_subsamplenumber_0 = sum(samplespecies_subsamplenumber == 0), count_samplespecies = sum(!is.na(unique(samplespecies_id))), count_subsamplenumber_1 = sum(samplespecies_subsamplenumber == 1))
-  # merge
+  # Merge
   dataframe1$logical <- TRUE
   dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
-  dataframe1[dataframe1$count_samplespecies == 0, "logical"] <- FALSE
-  dataframe1$only_one_subsampling <- dataframe1$sample_supersample == FALSE & dataframe1$count_subsamplenumber_N0 == 0
-  dataframe1$many_subsampling <- dataframe1$sample_supersample == TRUE & dataframe1$count_subsamplenumber_0 == 0 & dataframe1$count_samplespecies > 1
+  # Case of NA count_subsamplenumber_N0, count_subsamplenumber_0, count_samplespecies or count_subsamplenumber_1
+  dataframe1 <- dataframe1 %>%
+    dplyr::mutate(
+      count_subsamplenumber_N0_bis = dplyr::coalesce(count_subsamplenumber_N0, 0),
+      count_subsamplenumber_0_bis = dplyr::coalesce(count_subsamplenumber_0, 0),
+      count_samplespecies_bis = dplyr::coalesce(count_samplespecies, 0),
+      count_subsamplenumber_1_bis = dplyr::coalesce(count_subsamplenumber_1, 0),
+    )
+  dataframe1[dataframe1$count_samplespecies_bis == 0, "logical"] <- FALSE
+  dataframe1$only_one_subsampling <- dataframe1$sample_supersample == FALSE & dataframe1$count_subsamplenumber_N0_bis == 0
+  dataframe1$many_subsampling <- dataframe1$sample_supersample == TRUE & dataframe1$count_subsamplenumber_0_bis == 0 & dataframe1$count_samplespecies_bis > 1
   dataframe1[!(dataframe1$only_one_subsampling | dataframe1$many_subsampling), "logical"] <- FALSE
-  dataframe1[dataframe1$count_samplespecies == 1 & dataframe1$count_subsamplenumber_1 > 0, "logical"] <- FALSE
+  dataframe1[dataframe1$count_samplespecies_bis == 1 & dataframe1$count_subsamplenumber_1_bis > 0, "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(only_one_subsampling, many_subsampling))
+  dataframe1 <- subset(dataframe1, select = -c(only_one_subsampling, many_subsampling, count_samplespecies_bis, count_subsamplenumber_N0_bis, count_subsamplenumber_0_bis, count_subsamplenumber_1_bis))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_supersample, count_subsamplenumber_N0, count_subsamplenumber_0, count_subsamplenumber_1, count_samplespecies, .after = logical)
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$sample_id)
