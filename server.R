@@ -385,7 +385,7 @@ shinyServer(function(input, output, session) {
         if("Details problem" %in% colnames(data)){
           data[!is.na(data$`Details problem`),"Details problem"]<-"Detail"
         }
-        xlsx::write.xlsx2(x=data, file =file, row.names = FALSE)
+        writexl::write_xlsx(x = data, path = file)
       }
     )
   })

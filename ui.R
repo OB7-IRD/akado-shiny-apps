@@ -1,5 +1,5 @@
 # package
-packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "shinycssloaders", "DT", "shinyjs", "plotly", "xlsx")
+packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "shinycssloaders", "DT", "shinyjs", "plotly", "writexl")
 install.packages(setdiff(packages, rownames(installed.packages())), dependencies = TRUE)
 if (length(setdiff("codama", rownames(installed.packages()))) > 0) {
   devtools::install_github("https://github.com/OB7-IRD/codama", ref = "development", INSTALL_opts = c("--no-multiarch"))

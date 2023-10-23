@@ -5842,7 +5842,7 @@ plot_temporal_limit <- function(data, startdate, enddate) {
 # Function to create the plot of the consistency of the position for the activity
 plot_position<- function(data){
   # Spatial formatting
-  data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+  data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
   # Plot
   plotly::plot_ly(
     data = data_geo,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers",  marker = list(size = 10), hovertemplate = "(%{lat}°,%{lon}°)<extra></extra>")%>%
