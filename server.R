@@ -177,6 +177,36 @@ shinyServer(function(input, output, session) {
   # Table of consistency test the small and large sample weights is consistent for the sum of the small and big weights of the associated well 
   table_server(id = "check_distribution", data = calcul_check, number = 26, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
   
+  # Table of consistency test the activity position is consistent for VMS position
+  table_server(id = "check_anapo", data = calcul_check, number = 27, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"),list(targets = c(2), width = "73px")))
+
+  # Anapo control plot, display in a window
+  output$plot_anapo <- renderPlotly({
+    splitID <- strsplit(input$button_anapo, "&")[[1]]
+    data <- eval(parse(text = splitID[[2]]))
+    activity_time  <- splitID[[4]]
+    activity_number  <- splitID[[5]]
+    activity_position <- splitID[[6]]
+    activity_crs <- splitID[[7]]
+    vms_crs<- splitID[[8]]
+    date<- splitID[[9]]
+    trip_data<- eval(parse(text = splitID[[10]]))
+    plot_anapo(data_vms = data, crs_vms = vms_crs, position_activity = activity_position, crs_activity = activity_crs, date = date, time_activity = activity_time, number_activity = activity_number, data_trip = trip_data)
+  })
+  
+  # Anapo control window
+  observeEvent(input$button_anapo, {
+    splitID <- strsplit(input$button_anapo, "&")[[1]]
+    showModal(modalDialog(
+      fluidRow(plotlyOutput("plot_anapo")),
+      title = "",
+      size = "l",
+      fade = TRUE,
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+  
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
     if (input$type_check_trip == "All") {
@@ -229,6 +259,8 @@ shinyServer(function(input, output, session) {
       insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_distribution", anim = TRUE, animType = "fade")
+      # Anapo
+      shinyjs::show(id = "div_check_anapo", anim = TRUE, animType = "fade")
       }
     if (input$type_check_trip == "Info") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -260,6 +292,8 @@ shinyServer(function(input, output, session) {
       shinyjs::hide(id = "div_check_distribution", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
+      # Anapo
+      shinyjs::hide(id = "div_check_anapo", anim = FALSE)
     }
     if (input$type_check_trip == "Warning") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -291,6 +325,8 @@ shinyServer(function(input, output, session) {
       # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
+      # Anapo
+      shinyjs::hide(id = "div_check_anapo", anim = FALSE)
     }
     if (input$type_check_trip == "Error") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -340,6 +376,8 @@ shinyServer(function(input, output, session) {
       insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_distribution", anim = TRUE, animType = "fade")
+      # Anapo
+      shinyjs::show(id = "div_check_anapo", anim = TRUE, animType = "fade")
     }
   })
   

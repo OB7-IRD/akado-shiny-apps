@@ -1,5 +1,5 @@
 # package
-packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "shinycssloaders", "DT", "shinyjs", "plotly", "writexl")
+packages <- c("shinydashboard", "shinyWidgets", "furdeb", "DBI", "dplyr", "shinycssloaders", "DT", "shinyjs", "plotly", "writexl", "sf", "units")
 install.packages(setdiff(packages, rownames(installed.packages())), dependencies = TRUE)
 if (length(setdiff("codama", rownames(installed.packages()))) > 0) {
   devtools::install_github("https://github.com/OB7-IRD/codama", ref = "development", INSTALL_opts = c("--no-multiarch"))
@@ -183,6 +183,13 @@ body <- dashboardBody(
         table_ui(id = "check_distribution", title = "Distribution +10/-10", text = "Samples must have -10/+10 distribution values consistent with those of the reported well.")
          )
     ),
+    tabItem(
+      tabName = "anapo",
+      fluidPage(
+        table_ui(id = "check_anapo", title = "Anapo", text = "<ul><li>There must be at least 20 VMS positions during the day</li>
+                 <li>There must be at least one VMS position less than 10 miles away OR the score resulting from geographical and temporal distance must be greater than or equal to 0.5 OR must be in a harbour</li></ul>")
+      )
+      ),
     tabItem(
       tabName = "summary",
       fluidPage(

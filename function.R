@@ -5007,6 +5007,255 @@ check_distribution_inspector <- function(dataframe1,
   }
 }
 
+# Function the activity position is consistent for VMS position, in the future integrated in the pakage codama
+check_anapo_inspector <- function(dataframe1,
+                                  dataframe2,
+                                  dataframe3,
+                                  activity_crs,
+                                  vms_crs,
+                                  output,
+                                  nb_positions_vms_min = 20,
+                                  threshold = 10) {
+  # 0 - Global variables assignement ----
+  # 1 - Arguments verification ----
+  if (r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code"),
+    column_type = c("character", "Date", "character", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code"),
+      column_type = c("character", "Date", "character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code")]
+  }
+  if (r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("activity_id", "harbour_id"),
+    column_type = c("character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("activity_id", "harbour_id"),
+      column_type = c("character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("activity_id", "harbour_id")]
+  }
+  if (r_table_checking(
+    r_table = dataframe3,
+    type = "data.frame",
+    column_name = c("vms_date", "vms_time", "vms_position", "vessel_code"),
+    column_type = c("Date", "character", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    r_table_checking(
+      r_table = dataframe3,
+      type = "data.frame",
+      column_name = c("vms_date", "vms_time", "vms_position", "vessel_code"),
+      column_type = c("Date", "character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe3 <- dataframe3[, c("vms_date", "vms_time", "vms_position", "vessel_code")]
+  }
+  if (r_type_checking(
+    r_object = activity_crs,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = activity_crs,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = vms_crs,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = vms_crs,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  # Checks the type and values of output
+  if (r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = nb_positions_vms_min,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = nb_positions_vms_min,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  if (r_type_checking(
+    r_object = threshold,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  ) != TRUE) {
+    return(r_type_checking(
+      r_object = threshold,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  select <- dataframe1$activity_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Calculation number vms (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  dataframe3_nb_vms <- dataframe3 %>%
+    dplyr::group_by(vms_date, vessel_code) %>%
+    dplyr::summarise(nb_vms = dplyr::n(), .groups = "keep")
+  # Merge
+  dataframe1$logical <- FALSE
+  dataframe1 <- merge(dataframe1, dataframe3_nb_vms, by.x = c("activity_date", "vessel_code"), by.y = c("vms_date", "vessel_code"), all.x = TRUE)
+  # Case of NA nb_vms
+  dataframe1 <- dataframe1 %>%
+    dplyr::mutate(
+      nb_vms_bis = dplyr::coalesce(nb_vms, 0),
+    )
+  # Indicates activity whether in harbour
+  comparison_harbour <- vector_comparison(
+    first_vector = dataframe1$activity_id,
+    second_vector = dataframe2$activity_id,
+    comparison_type = "difference",
+    output = "report"
+  )
+  dataframe1[comparison_harbour$logical, "logical"] <- TRUE
+  dataframe_detail <- merge(dataframe3, dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], by.x = c("vms_date", "vessel_code"), by.y = c("activity_date", "vessel_code"))
+  # Check if activity whether not in harbour
+  dataframe1_Nharbour <- dataframe1[!comparison_harbour$logical, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")]
+  dataframe3 <- merge(dataframe3, dataframe1_Nharbour, by.x = c("vms_date", "vessel_code"), by.y = c("activity_date", "vessel_code"))
+  # Formats spatial data
+  dataframe_calcul <- dataframe3 %>%
+    sf::st_as_sf(wkt = "vms_position", crs = vms_crs, remove = F)
+  sf::st_geometry(dataframe_calcul) <- "vms_position_geom"
+  dataframe_calcul$activity_position_geom <- dataframe3 %>%
+    sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = F) %>%
+    sf::st_geometry()
+  # Calculation of the minimum distance between the activity and the nearest day's VMS
+  dataframe_calcul <- dataframe_calcul %>%
+    dplyr::mutate(distance = units::drop_units(sf::st_distance(x = activity_position_geom, y = vms_position_geom, by_element = TRUE)/1852))
+  # Remove formats spatial data
+  dataframe_calcul <- dataframe_calcul %>%
+    sf::st_drop_geometry() %>%
+    dplyr::select(-activity_position_geom)
+  dataframe_calcul_min <- dataframe_calcul %>%
+    dplyr::group_by(activity_id) %>%
+    dplyr::summarise(min_distance = min(distance))
+  dataframe1 <- merge(dataframe1, dataframe_calcul_min, by = "activity_id", all.x = TRUE)
+  # Check if distance between activity and nearest VMS point below threshold
+  dataframe1[!is.na(dataframe1$min_distance) & dataframe1$min_distance < threshold, "logical"] <- TRUE
+  dataframe_calcul <- merge(dataframe_calcul, dataframe_calcul_min, by = "activity_id", all.x = TRUE)
+  dataframe_calcul <- dataframe_calcul %>% dplyr::filter(min_distance >= threshold)
+  # Gives a temporary hour for activities that are missing an hour
+  dataframe_calcul$activity_time_bis <- dataframe_calcul$activity_time
+  dataframe_calcul[is.na(dataframe_calcul$activity_time), "activity_time_bis"] <- "00:00:00"
+  # Calculates time between activity and VMS point
+  dataframe_calcul <- dataframe_calcul %>%
+    dplyr::mutate(activity_date_time = as.POSIXct(paste(vms_date, activity_time_bis)), vms_date_time = as.POSIXct(paste(vms_date, vms_time)))
+  dataframe_calcul <- dataframe_calcul %>%
+    dplyr::mutate(duration = abs(activity_date_time - vms_date_time))
+  # Gives a duration for activities that are missing an hour
+  dataframe_calcul[is.na(dataframe_calcul$activity_time), "duration"] <- 1
+  # Score calculation
+  dataframe_calcul <- dataframe_calcul %>%
+    dplyr::mutate(score = (2^(-distance / threshold)) * (2^(-as.numeric(duration) / 120)))
+  dataframe_calcul[dataframe_calcul$distance > threshold * 2, "score"] <- 0
+  dataframe_calcul[as.numeric(dataframe_calcul$duration) > 120 * 2, "score"] <- 0
+  dataframe_score_max <- dataframe_calcul %>%
+    dplyr::group_by(activity_id) %>%
+    dplyr::summarise(max_score = max(score))
+  dataframe1 <- merge(dataframe1, dataframe_score_max, by = "activity_id", all.x = TRUE)
+  # Check the maximum score between activity and VMS
+  dataframe1[!is.na(dataframe1$max_score) & dataframe1$max_score >= 0.5, "logical"] <- TRUE
+  # Check if the number of vms for the day exceeds the threshold
+  dataframe1[dataframe1$nb_vms_bis < nb_positions_vms_min, "logical"] <- FALSE
+  # Recovers all activity positions for the detailed table
+  # Data with calcul VMS
+  dataframe_detail <- merge(dataframe_detail, dataframe_calcul, by = c("activity_id", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position"), all.x = TRUE)
+  # Data without calcul VMS
+  dataframe_detail<- dataframe_detail %>% dplyr::rename(
+    activity_date = vms_date,
+  )
+  dataframe_detail<-dplyr::bind_rows(dataframe_detail,dplyr::anti_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by = c("activity_date" = "vms_date","vessel_code" = "vessel_code")))
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- subset(dataframe1, select = -c(nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
+  dataframe_detail <- subset(dataframe_detail, select = -c(vessel_code, min_distance, activity_time_bis, activity_date_time, vms_date_time))
+  dataframe_detail <- dataframe_detail %>% dplyr::mutate(vms_crs = vms_crs, activity_crs = activity_crs)
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " activity with missing VMS", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(list(dataframe1, dataframe_detail))
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
+
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
@@ -5406,8 +5655,40 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             file_path = file.path("sql","wellactivityspecies.sql"), 
             database_connection = data_connection, 
             anchor = list(select_item = wellactivity_select$wellactivity_id))
+          # Uses a function to extract data from activity
+          data_activity<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","activity.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = activity_select$activity_id))
+          # Uses a function to extract data from activity_harbour
+          data_activity_harbour<-furdeb::data_extraction(
+            type = "database", 
+            file_path = file.path("sql","activity_harbour.sql"), 
+            database_connection = data_connection, 
+            anchor = list(select_item = activity_select$activity_id))
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
+          if (!is.null(config_data()[["databases_configuration"]][["vms"]])) {
+            # Connection to the base VMS
+            data_connection_vms <- furdeb::postgresql_dbconnection(
+              db_user = config_data()[["databases_configuration"]][["vms"]][["login"]],
+              db_password = config_data()[["databases_configuration"]][["vms"]][["password"]],
+              db_dbname = config_data()[["databases_configuration"]][["vms"]][["dbname"]],
+              db_host = config_data()[["databases_configuration"]][["vms"]][["host"]],
+              db_port = config_data()[["databases_configuration"]][["vms"]][["port"]]
+            )
+            # Uses a function to extract data from VMS
+            data_vms<-furdeb::data_extraction(
+              type = "database", 
+              file_path = file.path("sql","vms.sql"), 
+              database_connection = data_connection_vms, 
+              anchor = list(select_item = unique(paste(data_activity$vessel_code, data_activity$activity_date,sep = "_"))))
+            # Force date type, otherwise empty dataframe sets to charactere format
+            data_vms$vms_date<-as.Date(data_vms$vms_date)
+            # Disconnection to the bases
+            DBI::dbDisconnect(data_connection_vms[[2]])
+            }
           # Uses a function to format the table
           check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
           # Uses a function to format the table
@@ -5635,7 +5916,36 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Smalls weight well` = weight_small_total,
             `Bigs weight well` = weight_big
           )
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution))
+          # Uses a function which indicates whether the activity position is consistent for VMS position
+          # Checks data consistency
+          if(nrow(data_activity)!=length(activity_select$activity_id)){warning(text_object_more_or_less(id=activity_select$activity_id ,result_check=data_activity$activity_id))}
+          if(exists("data_vms")){
+            # Recovers all trip positions
+            check_anapo_inspector_data<-check_anapo_inspector(dataframe1 = data_activity, dataframe2 = data_activity_harbour, dataframe3 = data_vms, activity_crs = unique(data_activity$activity_crs), vms_crs = ifelse(length(unique(data_vms$vms_crs))==0,4326,unique(data_vms$vms_crs)), output = "report" )
+            check_anapo_inspector_dataplot<-merge(check_anapo_inspector_data[[2]],data_activity[,c("activity_id", "trip_id", "activity_number")], by= "activity_id")
+            check_anapo_inspector_dataplot_trip<- check_anapo_inspector_dataplot %>% dplyr::select("trip_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs") %>% dplyr::group_by(trip_id) %>% dplyr::distinct()
+            # Retrieves activity positions for the previous, current and next day
+            check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group=activity_date)
+            check_anapo_inspector_dataplot_trip_prior <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group=activity_date-1)
+            check_anapo_inspector_dataplot_trip_post <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group=activity_date+1)
+            check_anapo_inspector_dataplot_range_date<-rbind(check_anapo_inspector_dataplot_trip, check_anapo_inspector_dataplot_trip_prior, check_anapo_inspector_dataplot_trip_post) %>% dplyr::group_by(date_group, trip_id)%>% dplyr::distinct()
+            check_anapo_inspector_dataplot_range_date <- merge(check_anapo_inspector_dataplot_range_date, data_activity[,c("activity_date","trip_id","activity_id")], by.x = c("date_group", "trip_id"), by.y = c("activity_date", "trip_id") )
+            check_anapo_inspector_dataplot_range_date %>% dplyr::group_by(date_group, trip_id, activity_id)%>% dplyr::distinct() 
+            code_txt<-data_to_text(name_data = "check_anapo_inspector_dataplot_range_date",name_col="trip_data",name_button="NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number"), colname_info = "NULL")
+            eval(parse(text=code_txt))
+            check_anapo_inspector_dataplot <-check_anapo_inspector_dataplot%>% dplyr::select(-c("activity_number","activity_date"))
+            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by= "activity_id")
+            check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
+            # Add button and data for plot in table
+            check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data[[1]], data_id = activity_select, colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_time", "activity_number","activity_position", "activity_crs", "vms_crs", "activity_date", "trip_data"), name_button = "button_anapo")
+            # Uses a function to format the table
+            check_anapo <- table_display_trip(check_anapo, activity_select, type_inconsistency = "error")
+            check_anapo$min_distance <- trunc(check_anapo$min_distance * 1000) / 1000
+            check_anapo$max_score <- trunc(check_anapo$max_score * 1000) / 1000
+          }else{
+            check_anapo <- data.frame()
+            }
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo))
         }
       }
     })
@@ -5853,6 +6163,39 @@ plot_position<- function(data){
   plotly::plot_ly(
     data = data_geo,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers",  marker = list(size = 10), hovertemplate = "(%{lat}°,%{lon}°)<extra></extra>")%>%
     plotly::layout(showlegend=FALSE,mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
+}
+
+# Function to create the plot of the consistency of the position for the activity and VMS
+plot_anapo<- function(data_vms, crs_vms, position_activity, crs_activity, date, time_activity, number_activity, data_trip){
+  # Format date time and order
+  if(!all(is.na(data_vms$vms_position))){
+    data_vms<- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(date, vms_time))) 
+    data_vms<-data_vms[order(data_vms$date_time),]
+  }
+  data_trip<- data_trip %>% dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time)))
+  data_trip<-data_trip[order(data_trip$date_time),]
+  # Spatial formatting
+  if(!all(is.na(data_vms$vms_position))){
+    data_geo_vms <- sf::st_as_sf(data_vms, wkt = "vms_position", crs = as.numeric(crs_vms)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+  }
+  data_geo_activity <- sf::st_as_sfc(x = position_activity, crs = as.numeric(crs_activity)) %>% sf::st_coordinates() %>% tibble::as_tibble()
+  data_geo_trip <- sf::st_as_sf(data_trip, wkt = "activity_position", crs = as.numeric(crs_activity)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+  # text hovertemplate
+  if(!all(is.na(data_vms$vms_position))){
+    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text =paste("Date:",date,"<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000,"miles<br>Duration:",trunc(duration * 1000) / 1000,"minutes<br>Score:",trunc(score * 1000) / 1000))
+  }
+  data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:",date,"<br>Time:", time_activity,"<br>Activity number:", number_activity, "<br>Position:%{lat}°,%{lon}°<extra></extra>"))
+  data_geo_trip <- data_geo_trip %>% dplyr::mutate(text =paste("Date:",activity_date,"<br>Time:", activity_time, "<br>Activity number:",activity_number))
+  # Plot
+  plot<-plotly::plot_ly() %>%
+    add_trace(name = 'Activity', data = data_geo_trip,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}°,%{lon}°<extra></extra>", marker = list(color = "rgb(0, 255, 66)", size = 10), line = list(color = "rgb(0, 255, 66)"))
+  if(!all(is.na(data_vms$vms_position))){
+    plot<- plot %>%
+      add_trace(name = 'VMS day', data = data_geo_vms,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}°,%{lon}°<extra></extra>", marker = list(color = "rgb(0, 50, 255)", size = 10), line = list(color = "rgb(0, 50, 255)"))
+    }
+  plot<- plot %>%
+    add_trace(name = 'Supecte activity', data = data_geo_activity,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", hovertemplate = ~text, marker = list(color = "rgb(255, 0, 0)", size = 10)) %>%
+     plotly::layout(mapbox = list(style = "carto-positron", center = list(lon = data_geo_activity$X, lat = data_geo_activity$Y), pitch=0, zoom=6))
 }
 
  # Function to list elements with a number of occurrences other than 2
