@@ -28,7 +28,6 @@ siderbar <-
       menuItem("Trip", tabName = "trip", icon = icon("ship")),
       menuItem("Activity", tabName = "activity", icon = icon("list-check")),
       menuItem("Sample", tabName = "sample", icon = icon("fish")),
-      menuItem("Well", tabName = "well", icon = icon("boxes-stacked")),
       menuItem("Anapo", tabName = "anapo", icon = icon("route")),
       menuItem("Summary", tabName = "summary", icon = icon("scroll")),
       hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #333, #ccc, #333); background-image: -moz-linear-gradient(left, #333, #ccc, #333); background-image: -ms-linear-gradient(left,#333, #ccc, #333); background-image: -o-linear-gradient(left, #333, #ccc, #333);"),

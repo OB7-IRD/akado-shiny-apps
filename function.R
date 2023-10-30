@@ -5471,7 +5471,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function to format the table
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
-          check_raising_factor$RF1 <- trunc(check_raising_factor$RF1 * 1000) / 1000
+          check_raising_factor$RF1 <- trunc(check_raising_factor$RF1 * 100000) / 100000
           # Uses a function to format the table
           check_fishing_context <- table_display_trip(check_fishing_context_inspector_data, activity_select, type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5790,14 +5790,20 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   return(data)
 }
 
+# Function to create a data.frame in character
+data_to_text <- function(name_data,name_col,name_button, colname_id, colname_plot, colname_info){
+   code_txt<-paste0(name_data,' <-', name_data ,'%>%dplyr::group_by(',colname_id,') %>%
+            dplyr::reframe(',name_col," = paste0(",name_button,",paste0(deparse(dplyr::across(.cols=c(",paste0(colname_plot,collapse= ","),'))), collapse = ""), "&",',paste0(colname_info,collapse= ', "&",'),'))%>%
+            dplyr::group_by(',colname_id,') %>% dplyr::filter(dplyr::row_number() == 1)')
+  return(code_txt)
+}
+
 # Function to create the button in the table that will create the plot
 data_button_plot <- function(data_plot, data_display, data_id, colname_id, colname_plot, colname_info,name_button){
   # Add line identification 
-  data_plot <- merge(data_id, data_plot, by.x = colname_id, by.y = colname_id)
+  data_plot <- merge(data_id, data_plot, by.x = colname_id, by.y = colname_id, all.x = TRUE)
   # Add button and data for plot in table
-  code_txt<-paste0('data_plot <- data_plot %>%dplyr::group_by(',colname_id,') %>%
-  dplyr::reframe(buttontmp = paste0("button&", paste0(deparse(dplyr::across(.cols=c(',paste0(colname_plot,collapse= ','),'))), collapse = ""), "&",',paste0(colname_info,collapse= ', "&",'),'))%>%
-  dplyr::group_by(',colname_id,') %>% dplyr::filter(dplyr::row_number() == 1)')
+  code_txt<-data_to_text(name_data = "data_plot",name_col = "buttontmp",name_button = '"button&"', colname_id = colname_id, colname_plot = colname_plot, colname_info = colname_info)
   eval(parse(text=code_txt))
   data_display <- merge(data_display, data_plot, by = colname_id)
   data_display$button <- NA
@@ -5824,7 +5830,7 @@ plot_temporal_limit <- function(data, startdate, enddate) {
     plotly::add_markers(data = subset(data, logical == FALSE), x = ~activity_date, y = ~count_freq, marker = list(
       color = "#FF7320", symbol = "x-thin-open"
     ), name = "date activity bad", hovertemplate = paste("%{x|%b %d, %Y}<extra></extra>")) %>%
-    layout(
+    plotly::layout(
       xaxis = list(
         title = "Date",
         dtick = 86400000.0 * 5,
@@ -5847,7 +5853,6 @@ plot_position<- function(data){
   plotly::plot_ly(
     data = data_geo,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers",  marker = list(size = 10), hovertemplate = "(%{lat}°,%{lon}°)<extra></extra>")%>%
     plotly::layout(showlegend=FALSE,mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
-  
 }
 
  # Function to list elements with a number of occurrences other than 2
