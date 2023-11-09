@@ -198,7 +198,7 @@ shinyServer(function(input, output, session) {
   observeEvent(input$button_anapo, {
     splitID <- strsplit(input$button_anapo, "&")[[1]]
     showModal(modalDialog(
-      fluidRow(plotlyOutput("plot_anapo")),
+      fluidRow(plotlyOutput("plot_anapo", height = "75vh")),
       title = "",
       size = "l",
       fade = TRUE,

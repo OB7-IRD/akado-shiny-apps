@@ -5852,8 +5852,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_little_big$measure2_percentage <- trunc(check_little_big$measure2_percentage * 1000) / 1000
           check_little_big <- dplyr::rename(
             .data = check_little_big,
-            `Smalls weight` = sample_smallsweight,
-            `Bigs weight` = sample_bigsweight,
+            `Small fish weight` = sample_smallsweight,
+            `Big fish weight` = sample_bigsweight,
             `Total weight` = sample_totalweight,
             `Little %` = little_percentage,
             `Big %` = big_percentage,
@@ -5868,8 +5868,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_weighting <- table_display_trip(check_weighting_inspector_data, sample_select, type_inconsistency = "error")
           check_weighting <- dplyr::rename(
             .data = check_weighting,
-            `Smalls weight` = sample_smallsweight,
-            `Bigs weight` = sample_bigsweight,
+            `Small fish weight` = sample_smallsweight,
+            `Big fish weight` = sample_bigsweight,
             `Total weight` = sample_totalweight,
             `Sample type` = sampletype_code,
             `Sum weighted weights` = weightedweight,
@@ -5882,8 +5882,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_weight_sample <- table_display_trip(check_weight_sample_inspector_data, sample_select, type_inconsistency = "error")
           check_weight_sample <- dplyr::rename(
             .data = check_weight_sample,
-            `Smalls weight` = sample_smallsweight,
-            `Bigs weight` = sample_bigsweight,
+            `Small fish weight` = sample_smallsweight,
+            `Big fish weight` = sample_bigsweight,
             `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the sample and the existence of the activity 
@@ -5892,7 +5892,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_activity_sample <- table_display_trip(check_activity_sample_inspector_data, sample_select, type_inconsistency = "error")
           check_activity_sample <- dplyr::rename(
             .data = check_activity_sample,
-            `Counts activity` = count_activity
+            `Activity Count` = count_activity
           )
           # Uses a function which indicates whether the sample measurement types is consistent for the species or weight values
           check_ldlf_inspector_data<-check_ldlf_inspector(dataframe1=data_samplespecies, dataframe2 = data_sample, output="report")
@@ -5900,8 +5900,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_ldlf <- table_display_trip(check_ldlf_inspector_data, samplespecies_select, type_inconsistency = "error")
           check_ldlf <- dplyr::rename(
             .data = check_ldlf,
-            `Smalls weight` = sample_smallsweight,
-            `Bigs weight` = sample_bigsweight,
+            `Small fish weight` = sample_smallsweight,
+            `Big fish weight` = sample_bigsweight,
             `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the small and large sample weights is consistent for the sum of the small and big weights of the associated well
@@ -5910,11 +5910,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select, type_inconsistency = "error")
           check_distribution <- dplyr::rename(
             .data = check_distribution,
-            `Smalls weight` = sample_smallsweight,
-            `Bigs weight` = sample_bigsweight,
+            `Small fish weight` = sample_smallsweight,
+            `Big fish weight` = sample_bigsweight,
             `Well` = sample_well,
-            `Smalls weight well` = weight_small_total,
-            `Bigs weight well` = weight_big
+            `Small fish weight well` = weight_small_total,
+            `Big fish weight well` = weight_big
           )
           # Uses a function which indicates whether the activity position is consistent for VMS position
           # Checks data consistency
@@ -5942,6 +5942,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo <- table_display_trip(check_anapo, activity_select, type_inconsistency = "error")
             check_anapo$min_distance <- trunc(check_anapo$min_distance * 1000) / 1000
             check_anapo$max_score <- trunc(check_anapo$max_score * 1000) / 1000
+            check_anapo <- dplyr::rename(
+              .data = check_anapo,
+              `Number of VMS` = nb_vms, 
+              `Minimale distance` = min_distance,
+              `Maximum score` = max_score,
+              `Details problem` = button
+            )
           }else{
             check_anapo <- data.frame()
             }
@@ -5975,7 +5982,7 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
       }
       # If the different manipulations on the data are finished
       if (isTruthy(calcul_check())) {
-        text <- "Finished calculation"
+        text <- "Calculation finished"
         showNotification(id = "notif_default", ui = text, type = "default")
         return(paste0("<span style=\"color:#34C909\">", text, "</span>"))
       }
@@ -6002,8 +6009,8 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
       extensions = "Buttons", 
       options = list(lengthChange = FALSE, scrollX = TRUE, autoWidth= autoWidth, columnDefs = unlist(list(list(list(className = 'dt-left', targets = "_all")),columnDefs ),recursive = F),  dom = 'Bfrtip',
                      buttons = 
-                       list(list(extend = "copy", text ="Copy data display"),
-                       list(extend = "collection", text = "Download data all", action = DT::JS(paste0("function ( e, dt, node, config ) {Shiny.setInputValue('button_download', ",number,", {priority: 'event'});}"))))))
+                       list(list(extend = "copy", text ="Copy data displayed"),
+                       list(extend = "collection", text = "Download all data", action = DT::JS(paste0("function ( e, dt, node, config ) {Shiny.setInputValue('button_download', ",number,", {priority: 'event'});}"))))))
   })
 }
 
