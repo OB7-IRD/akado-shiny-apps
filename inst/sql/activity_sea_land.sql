@@ -2,7 +2,7 @@
 SELECT 
     a.topiaid::text AS activity_id, 
     o.label1::text AS ocean_name, 
-    tmp_geo.ocean::text AS ocean_name_pos, 
+    tmp_geo.ocean::text AS zfao_ocean, 
     st_asText(a.the_geom)::text AS activity_position,
     ST_SRID(a.the_geom)::numeric AS activity_crs
 FROM 

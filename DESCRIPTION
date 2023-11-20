@@ -1,0 +1,50 @@
+Package: AkadoR
+Title: AkadoR
+Version: 0.0.0.9000
+Authors@R: 
+    person("Oceane", "Bouhineau", , "oceane.bouhineau@ird.fr", role = c("cre", "aut"),
+           comment = c(ORCID = "0000-0001-7418-2925"))
+Description: The AKADO application performs a series of tests on the data
+    to check its consistency. The aim is to determine the quality of the
+    data according to specific business rules defined by experts.
+License: CC BY 4.0
+URL: https://forge.ird.fr/marbec/ob7/quality/akador
+BugReports: https://forge.ird.fr/marbec/ob7/quality/akador/issues
+Imports: 
+    codama,
+    config (>= 0.3.2),
+    DBI,
+    dplyr,
+    DT,
+    furdeb,
+    golem (>= 0.4.1),
+    magrittr,
+    plotly,
+    purrr,
+    sf,
+    shiny (>= 1.7.3),
+    shinycssloaders,
+    shinydashboard,
+    shinyjs,
+    tibble,
+    tidyr,
+    units,
+    tibble,
+    tidyr,
+    units,
+    writexl
+Suggests: 
+    knitr,
+    rmarkdown,
+    spelling,
+    testthat (>= 3.0.0)
+VignetteBuilder: 
+    knitr
+Remotes: 
+    github::OB7-IRD/codama,
+    github::OB7-IRD/furdeb
+Config/testthat/edition: 3
+Encoding: UTF-8
+Language: en-US
+LazyData: true
+RoxygenNote: 7.2.3

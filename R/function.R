@@ -6,12 +6,12 @@ check_trip_activity_inspector <- function(data_connection,
   # 0 - Global variables assignement ----
   first_vector <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
-  ) != TRUE & class(data_connection) != "data.frame") {
+  ) != TRUE & !inherits(data_connection, "data.frame")) {
     stop(
       format(
         x = Sys.time(),
@@ -21,17 +21,17 @@ check_trip_activity_inspector <- function(data_connection,
       sep = ""
     )
   } else {
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = data_connection[[2]],
         type = "PostgreSQLConnection",
         output = "message"
@@ -39,13 +39,13 @@ check_trip_activity_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -54,13 +54,13 @@ check_trip_activity_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("trip", "year"),
@@ -69,24 +69,24 @@ check_trip_activity_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "trip" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -103,8 +103,8 @@ check_trip_activity_inspector <- function(data_connection,
       # Trip with a departure or arrival date in the selected year
       trip_id_selected_by_year_sql <- paste(
         readLines(con = system.file("sql",
-                                    "trip_id_selected_by_year.sql",
-                                    package = "codama"
+          "trip_id_selected_by_year.sql",
+          package = "codama"
         )),
         collapse = "\n"
       )
@@ -112,7 +112,7 @@ check_trip_activity_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = trip_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -124,14 +124,17 @@ check_trip_activity_inspector <- function(data_connection,
     }
     # Trip associated with route and activity
     trip_with_activity_sql <- paste(
-      readLines(file.path(".", "sql", "trip_with_activity.sql")),
+      readLines(con = system.file("sql",
+        "trip_with_activity.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     trip_with_activity_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_with_activity_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     trip_with_activity_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -156,7 +159,7 @@ check_trip_activity_inspector <- function(data_connection,
   }
   # 3 - Data design ----
   # Search trip ID in the associations trip, route, activity
-  comparison <- vector_comparison(
+  comparison <- codama::vector_comparison(
     first_vector = trip_id,
     second_vector = trip_with_activity_data$trip_id,
     comparison_type = "difference",
@@ -170,7 +173,9 @@ check_trip_activity_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="trip"){text_object_more_or_less(select,trip_id$trip_id)},
+      if (type_select == "trip") {
+        text_object_more_or_less(select, trip_id$trip_id)
+      },
       sep = ""
     )
   }
@@ -202,21 +207,24 @@ check_fishing_time_inspector <- function(data_connection,
   trip_fishingtime_data <- NULL
   trip_fishingtime <- NULL
   trip_idfishingtime <- NULL
+  sum_route_fishingtime <- NULL
+  first_vector <- NULL
+  second_vector <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "message"
     ))
   } else {
-    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -232,13 +240,13 @@ check_fishing_time_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -247,13 +255,13 @@ check_fishing_time_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("trip", "year"),
@@ -262,24 +270,24 @@ check_fishing_time_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "trip" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -295,8 +303,8 @@ check_fishing_time_inspector <- function(data_connection,
       # Trip with a departure or arrival date in the selected year
       trip_id_selected_by_year_sql <- paste(
         readLines(con = system.file("sql",
-                                    "trip_id_selected_by_year.sql",
-                                    package = "codama"
+          "trip_id_selected_by_year.sql",
+          package = "codama"
         )),
         collapse = "\n"
       )
@@ -304,7 +312,7 @@ check_fishing_time_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = trip_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -315,14 +323,17 @@ check_fishing_time_inspector <- function(data_connection,
     }
     # Fishing time link to trip
     trip_fishingtime_sql <- paste(
-      readLines(file.path(".", "sql", "trip_fishingtime.sql")),
+      readLines(con = system.file("sql",
+        "trip_fishingtime.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     trip_fishingtime_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_fishingtime_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     trip_fishingtime_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -331,14 +342,17 @@ check_fishing_time_inspector <- function(data_connection,
     ))
     # Fishing time link to route
     route_fishingtime_sql <- paste(
-      readLines(file.path(".", "sql", "route_fishingtime.sql")),
+      readLines(con = system.file("sql",
+        "route_fishingtime.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     route_fishingtime_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = route_fishingtime_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     route_fishingtime_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -370,9 +384,9 @@ check_fishing_time_inspector <- function(data_connection,
   # Group the pair to compare
   trip_fishingtime_data <- merge(trip_fishingtime_data, route_fishingtime_data, by = "trip_id", all.x = TRUE)
   # Compare fishing time of the trip or the sum of the route
-  comparison <- vector_comparison(
-    trip_fishingtime_data$trip_fishingtime,
-    trip_fishingtime_data$sum_route_fishingtime,
+  comparison <- codama::vector_comparison(
+    first_vector = trip_fishingtime_data$trip_fishingtime,
+    second_vector = trip_fishingtime_data$sum_route_fishingtime,
     comparison_type = "equal",
     output = "report"
   )
@@ -387,11 +401,13 @@ check_fishing_time_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="trip"){text_object_more_or_less(select,trip_fishingtime_data$trip_id)},
+      if (type_select == "trip") {
+        text_object_more_or_less(select, trip_fishingtime_data$trip_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!trip_fishingtime_data$logical), " trip with a fishing time different from the sum of the fishing times of each activity")))
@@ -419,21 +435,24 @@ check_sea_time_inspector <- function(data_connection,
   trip_seatime_data <- NULL
   trip_seatime <- NULL
   trip_idseatime <- NULL
+  sum_route_seatime <- NULL
+  first_vector <- NULL
+  second_vector <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "message"
     ))
   } else {
-    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -449,13 +468,13 @@ check_sea_time_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -464,13 +483,13 @@ check_sea_time_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("trip", "year"),
@@ -479,24 +498,24 @@ check_sea_time_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "trip" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -512,8 +531,8 @@ check_sea_time_inspector <- function(data_connection,
       # Trip with a departure or arrival date in the selected year
       trip_id_selected_by_year_sql <- paste(
         readLines(con = system.file("sql",
-                                    "trip_id_selected_by_year.sql",
-                                    package = "codama"
+          "trip_id_selected_by_year.sql",
+          package = "codama"
         )),
         collapse = "\n"
       )
@@ -521,7 +540,7 @@ check_sea_time_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = trip_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -532,14 +551,17 @@ check_sea_time_inspector <- function(data_connection,
     }
     # sea time link to trip
     trip_seatime_sql <- paste(
-      readLines(file.path(".", "sql", "trip_seatime.sql")),
+      readLines(con = system.file("sql",
+        "trip_seatime.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     trip_seatime_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_seatime_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     trip_seatime_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -548,14 +570,17 @@ check_sea_time_inspector <- function(data_connection,
     ))
     # sea time link to route
     route_seatime_sql <- paste(
-      readLines(file.path(".", "sql", "route_seatime.sql")),
+      readLines(con = system.file("sql",
+        "route_seatime.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     route_seatime_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = route_seatime_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     route_seatime_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -587,7 +612,7 @@ check_sea_time_inspector <- function(data_connection,
   # Group the pair to compare
   trip_seatime_data <- merge(trip_seatime_data, route_seatime_data, by = "trip_id", all.x = TRUE)
   # Compare trip IDs and sea time of the trip or the sum of the route
-  comparison <- vector_comparison(
+  comparison <- codama::vector_comparison(
     first_vector = trip_seatime_data$trip_seatime,
     second_vector = trip_seatime_data$sum_route_seatime,
     comparison_type = "equal",
@@ -606,11 +631,13 @@ check_sea_time_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="trip"){text_object_more_or_less(select,trip_seatime_data$trip_id)},
+      if (type_select == "trip") {
+        text_object_more_or_less(select, trip_seatime_data$trip_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!trip_seatime_data$logical), " trip with a sea time different from the sum of the sea times of each activity")))
@@ -634,13 +661,17 @@ check_landing_consistent_inspector <- function(data_connection,
                                                select,
                                                output) {
   # 0 - Global variables assignement ----
+  vessel_capacity <- NULL
+  trip_weighttotal <- NULL
+  trip_landingtotalweight <- NULL
+  trip_localmarkettotalweight <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
-  ) != TRUE & class(data_connection) != "data.frame") {
+  ) != TRUE & !inherits(data_connection, "data.frame")) {
     stop(
       format(
         x = Sys.time(),
@@ -650,17 +681,17 @@ check_landing_consistent_inspector <- function(data_connection,
       sep = ""
     )
   } else {
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = data_connection[[2]],
         type = "PostgreSQLConnection",
         output = "message"
@@ -668,13 +699,13 @@ check_landing_consistent_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -683,13 +714,13 @@ check_landing_consistent_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("trip", "year"),
@@ -698,24 +729,24 @@ check_landing_consistent_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "trip" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -731,8 +762,8 @@ check_landing_consistent_inspector <- function(data_connection,
       # Trip with a departure or arrival date in the selected year
       trip_id_selected_by_year_sql <- paste(
         readLines(con = system.file("sql",
-                                    "trip_id_selected_by_year.sql",
-                                    package = "codama"
+          "trip_id_selected_by_year.sql",
+          package = "codama"
         )),
         collapse = "\n"
       )
@@ -740,7 +771,7 @@ check_landing_consistent_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = trip_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -751,14 +782,17 @@ check_landing_consistent_inspector <- function(data_connection,
     }
     # landing total weight and vessel capacity link to trip
     trip_weight_capacity_sql <- paste(
-      readLines(file.path("sql", "trip_weight_vessel_capacity.sql")),
+      readLines(con = system.file("sql",
+        "trip_weight_vessel_capacity.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     trip_weight_capacity_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_weight_capacity_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     trip_weight_capacity_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -787,7 +821,7 @@ check_landing_consistent_inspector <- function(data_connection,
   # Converts cubic meters to tons
   trip_weight_capacity_data$vessel_capacity <- trip_weight_capacity_data$vessel_capacity * 0.7
   # Compare landing total weight of the trip with vessel capacity
-  comparison <- vector_comparison(
+  comparison <- codama::vector_comparison(
     first_vector = trip_weight_capacity_data$trip_weighttotal,
     second_vector = trip_weight_capacity_data$vessel_capacity,
     comparison_type = "less",
@@ -807,11 +841,13 @@ check_landing_consistent_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="trip"){text_object_more_or_less(select,trip_weight_capacity_data$trip_id)},
+      if (type_select == "trip") {
+        text_object_more_or_less(select, trip_weight_capacity_data$trip_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!trip_weight_capacity_data$logical), " trips with vessel capacity smaller than the landing total weight")))
@@ -835,21 +871,28 @@ check_landing_total_weight_inspector <- function(data_connection,
                                                  output,
                                                  epsilon = 0.01) {
   # 0 - Global variables assignement ----
+  trip_id <- NULL
+  landing_weight <- NULL
+  trip_landingtotalweight <- NULL
+  sum_weightlanding <- NULL
+  vessel_capacity <- NULL
+  trip_localmarkettotalweight <- NULL
+  difference <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "message"
     ))
   } else {
-    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -865,13 +908,13 @@ check_landing_total_weight_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -880,13 +923,13 @@ check_landing_total_weight_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("trip", "year"),
@@ -895,24 +938,24 @@ check_landing_total_weight_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "trip" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -928,8 +971,8 @@ check_landing_total_weight_inspector <- function(data_connection,
       # Trip with a departure or arrival date in the selected year
       trip_id_selected_by_year_sql <- paste(
         readLines(con = system.file("sql",
-                                    "trip_id_selected_by_year.sql",
-                                    package = "codama"
+          "trip_id_selected_by_year.sql",
+          package = "codama"
         )),
         collapse = "\n"
       )
@@ -937,7 +980,7 @@ check_landing_total_weight_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = trip_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -948,14 +991,17 @@ check_landing_total_weight_inspector <- function(data_connection,
     }
     # landing total weight and vessel capacity link to trip
     trip_weight_capacity_sql <- paste(
-      readLines(file.path("sql", "trip_weight_vessel_capacity.sql")),
+      readLines(con = system.file("sql",
+        "trip_weight_vessel_capacity.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     trip_weight_capacity_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_weight_capacity_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     trip_weight_capacity_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -963,14 +1009,17 @@ check_landing_total_weight_inspector <- function(data_connection,
       statement = trip_weight_capacity_sql
     ))
     trip_weight_landing_sql <- paste(
-      readLines(file.path("sql", "trip_weight_landing.sql")),
+      readLines(con = system.file("sql",
+        "trip_weight_landing.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     trip_weight_landing_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_weight_landing_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     trip_weight_landing_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1005,7 +1054,7 @@ check_landing_total_weight_inspector <- function(data_connection,
   trip_weight_capacity_data$difference <- abs(trip_weight_capacity_data$difference)
   trip_weight_capacity_data$epsilon <- epsilon
   # Compare sum difference with epsilon
-  comparison <- vector_comparison(
+  comparison <- codama::vector_comparison(
     first_vector = trip_weight_capacity_data$difference,
     second_vector = trip_weight_capacity_data$epsilon,
     comparison_type = "less_equal",
@@ -1025,11 +1074,13 @@ check_landing_total_weight_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="trip"){text_object_more_or_less(select,trip_weight_capacity_data$trip_id)},
+      if (type_select == "trip") {
+        text_object_more_or_less(select, trip_weight_capacity_data$trip_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!trip_weight_capacity_data$logical), " trips with a landing weight for the canneries different from the sum of the weights of each landing for the canneries")))
@@ -1052,13 +1103,21 @@ check_temporal_limit_inspector <- function(data_connection,
                                            select,
                                            output) {
   # 0 - Global variables assignement ----
+  trip_id <- NULL
+  trip_startdate <- NULL
+  trip_enddate <- NULL
+  activity_date <- NULL
+  inter_activity_date <- NULL
+  exter_activity_date <- NULL
+  nb_day <- NULL
+  logical_tmp <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
-  ) != TRUE & class(data_connection) != "data.frame") {
+  ) != TRUE & !inherits(data_connection, "data.frame")) {
     stop(
       format(
         x = Sys.time(),
@@ -1068,17 +1127,17 @@ check_temporal_limit_inspector <- function(data_connection,
       sep = ""
     )
   } else {
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = data_connection[[2]],
         type = "PostgreSQLConnection",
         output = "message"
@@ -1086,13 +1145,13 @@ check_temporal_limit_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -1101,13 +1160,13 @@ check_temporal_limit_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("trip", "year"),
@@ -1116,24 +1175,24 @@ check_temporal_limit_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "trip" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -1148,9 +1207,9 @@ check_temporal_limit_inspector <- function(data_connection,
     if (type_select == "year") {
       # Trip with a departure or arrival date in the selected year
       trip_id_selected_by_year_sql <- paste(
-        readLines(con = file.path(
-          "sql",
-          "trip_id_selected_by_year.sql"
+        readLines(con = system.file("sql",
+          "trip_id_selected_by_year.sql",
+          package = "AkadoR"
         )),
         collapse = "\n"
       )
@@ -1158,7 +1217,7 @@ check_temporal_limit_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = trip_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1169,14 +1228,17 @@ check_temporal_limit_inspector <- function(data_connection,
     }
     # trip start and end date and date of route
     trip_date_activity_sql <- paste(
-      readLines(file.path("sql", "trip_date_activity.sql")),
+      readLines(con = system.file("sql",
+        "trip_date_activity.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     trip_date_activity_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_date_activity_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     trip_date_activity_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1203,13 +1265,13 @@ check_temporal_limit_inspector <- function(data_connection,
   # Calculate the temporal indicator per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   trip_date_activity_data_detail <- trip_date_activity_data
   # Calculation if the date is in the interval of the beginning of the trip and the end of the trip
-  trip_date_activity_data_detail$trip_startdate_greater_equal <- vector_comparison(
+  trip_date_activity_data_detail$trip_startdate_greater_equal <- codama::vector_comparison(
     first_vector = trip_date_activity_data$activity_date,
     second_vector = trip_date_activity_data$trip_startdate,
     comparison_type = "greater_equal",
     output = "report"
   )$logical
-  trip_date_activity_data_detail$trip_enddate_less_equal <- vector_comparison(
+  trip_date_activity_data_detail$trip_enddate_less_equal <- codama::vector_comparison(
     first_vector = trip_date_activity_data$activity_date,
     second_vector = trip_date_activity_data$trip_enddate,
     comparison_type = "less_equal",
@@ -1217,13 +1279,13 @@ check_temporal_limit_inspector <- function(data_connection,
   )$logical
   trip_date_activity_data_detail$inter_activity_date <- trip_date_activity_data_detail$trip_startdate_greater_equal & trip_date_activity_data_detail$trip_enddate_less_equal
   # Calculation if the date is outside the interval of the beginning of the trip and the end of the trip
-  trip_date_activity_data_detail$trip_startdate_less <- vector_comparison(
+  trip_date_activity_data_detail$trip_startdate_less <- codama::vector_comparison(
     first_vector = trip_date_activity_data$activity_date,
     second_vector = trip_date_activity_data$trip_startdate,
     comparison_type = "less",
     output = "report"
   )$logical
-  trip_date_activity_data_detail$trip_enddate_greater <- vector_comparison(
+  trip_date_activity_data_detail$trip_enddate_greater <- codama::vector_comparison(
     first_vector = trip_date_activity_data$activity_date,
     second_vector = trip_date_activity_data$trip_enddate,
     comparison_type = "greater",
@@ -1253,11 +1315,13 @@ check_temporal_limit_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="trip"){text_object_more_or_less(select,trip_date_activity_data$trip_id)},
+      if (type_select == "trip") {
+        text_object_more_or_less(select, trip_date_activity_data$trip_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!trip_date_activity_data$logical), " trips with missing or surplus days")))
@@ -1281,21 +1345,27 @@ check_harbour_inspector <- function(data_connection,
                                     output,
                                     logbook_program) {
   # 0 - Global variables assignement ----
+  harbour_id <- NULL
+  harbour_name_landing <- NULL
+  harbour_name_departure <- NULL
+  trip_previous_id <- NULL
+  harbour_id_landing <- NULL
+  harbour_id_departure <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "message"
     ))
   } else {
-    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -1311,13 +1381,13 @@ check_harbour_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -1326,13 +1396,13 @@ check_harbour_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("trip", "year"),
@@ -1341,36 +1411,36 @@ check_harbour_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "trip" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
       ))
     }
     # Checks the type of logbook_program
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = logbook_program,
       type = "character",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = logbook_program,
         type = "character",
         output = "message"
@@ -1386,8 +1456,8 @@ check_harbour_inspector <- function(data_connection,
       # Trip with a departure or arrival date in the selected year
       trip_id_selected_by_year_sql <- paste(
         readLines(con = system.file("sql",
-                                    "trip_id_selected_by_year.sql",
-                                    package = "codama"
+          "trip_id_selected_by_year.sql",
+          package = "codama"
         )),
         collapse = "\n"
       )
@@ -1395,7 +1465,7 @@ check_harbour_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = trip_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1406,7 +1476,10 @@ check_harbour_inspector <- function(data_connection,
     }
     # Retrieves the identifier of the previous trip
     trip_previous_trip_sql <- paste(
-      readLines(file.path("sql", "trip_previous.sql")),
+      readLines(con = system.file("sql",
+        "trip_previous.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     trip_previous_trip_sql <- DBI::sqlInterpolate(
@@ -1414,7 +1487,7 @@ check_harbour_inspector <- function(data_connection,
       sql = trip_previous_trip_sql,
       select_item_1 = DBI::SQL(paste(paste0("'", logbook_program, "'"), collapse = ", ")),
       select_item_2 = DBI::SQL(paste(select_sql,
-                                     collapse = ", "
+        collapse = ", "
       ))
     )
     trip_previous_trip_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1424,14 +1497,17 @@ check_harbour_inspector <- function(data_connection,
     # Retrieves the port of landing of the previous trip
     select_sql <- paste0("'", trip_previous_trip_data$trip_previous_id, "'")
     landing_harbour_sql <- paste(
-      readLines(file.path("sql", "trip_landing_harbour.sql")),
+      readLines(con = system.file("sql",
+        "trip_landing_harbour.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     landing_harbour_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = landing_harbour_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     landing_harbour_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1445,14 +1521,17 @@ check_harbour_inspector <- function(data_connection,
     # Retrieves the port of departure of the trip
     select_sql <- paste0("'", trip_previous_trip_data$trip_id, "'")
     departure_harbour_sql <- paste(
-      readLines(file.path("sql", "trip_departure_harbour.sql")),
+      readLines(con = system.file("sql",
+        "trip_departure_harbour.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     departure_harbour_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = departure_harbour_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     departure_harbour_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1486,7 +1565,7 @@ check_harbour_inspector <- function(data_connection,
   trip_previous_trip_data <- merge(trip_previous_trip_data, landing_harbour_data, by.x = "trip_previous_id", by.y = "trip_id", all.x = TRUE)
   trip_previous_trip_data <- merge(trip_previous_trip_data, departure_harbour_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE, suffixes = c("_landing", "_departure"))
   # Compare landing total weight of the trip with vessel capacity
-  comparison <- vector_comparison(
+  comparison <- codama::vector_comparison(
     first_vector = trip_previous_trip_data$harbour_id_departure,
     second_vector = trip_previous_trip_data$harbour_id_landing,
     comparison_type = "equal",
@@ -1505,11 +1584,13 @@ check_harbour_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="trip"){text_object_more_or_less(select,trip_previous_trip_data$trip_id)},
+      if (type_select == "trip") {
+        text_object_more_or_less(select, trip_previous_trip_data$trip_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!trip_previous_trip_data$logical), " trips with departure port different from the landing harbour of a previous trip")))
@@ -1535,21 +1616,34 @@ check_raising_factor_inspector <- function(data_connection,
                                            species,
                                            limit = c(0.9, 1.1)) {
   # 0 - Global variables assignement ----
+  trip_id <- NULL
+  catch_weight <- NULL
+  tide_id <- NULL
+  trip_landingtotalweight <- NULL
+  sum_catch_weight <- NULL
+  RF1 <- NULL
+  trip_previous_end_tide_id <- NULL
+  vessel_capacity <- NULL
+  tide_landingtotalweight <- NULL
+  tide_sum_catch_weight <- NULL
+  trip_localmarkettotalweight <- NULL
+  lower_limit <- NULL
+  upper_limit <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "message"
     ))
   } else {
-    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -1565,13 +1659,13 @@ check_raising_factor_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -1579,13 +1673,13 @@ check_raising_factor_inspector <- function(data_connection,
     ))
   }
   # Checks the type of limit
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = limit,
     type = "numeric",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = limit,
       type = "numeric",
       length = 2L,
@@ -1594,13 +1688,13 @@ check_raising_factor_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("trip", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("trip", "year"),
@@ -1609,48 +1703,48 @@ check_raising_factor_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "trip" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
       ))
     }
     # Checks the type of logbook_program
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = logbook_program,
       type = "character",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = logbook_program,
         type = "character",
         output = "message"
       ))
     }
     # Checks the type of species
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = species,
       type = "character",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = species,
         type = "character",
         output = "message"
@@ -1666,8 +1760,8 @@ check_raising_factor_inspector <- function(data_connection,
       # Trip with a departure or arrival date in the selected year
       trip_id_selected_by_year_sql <- paste(
         readLines(con = system.file("sql",
-                                    "trip_id_selected_by_year.sql",
-                                    package = "codama"
+          "trip_id_selected_by_year.sql",
+          package = "codama"
         )),
         collapse = "\n"
       )
@@ -1675,7 +1769,7 @@ check_raising_factor_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = trip_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1686,7 +1780,10 @@ check_raising_factor_inspector <- function(data_connection,
     }
     # Retrieves all identifiers for the entire tide
     tide_id_sql <- paste(
-      readLines(file.path("sql", "tide_id.sql")),
+      readLines(con = system.file("sql",
+        "tide_id.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     tide_id_sql <- DBI::sqlInterpolate(
@@ -1702,7 +1799,10 @@ check_raising_factor_inspector <- function(data_connection,
     # Retrieves the weight of each catch in the tide
     select_trip_tide_sql <- paste0("'", tide_id_data$trip_id, "'")
     catch_weight_RF1_sql <- paste(
-      readLines(file.path("sql", "trip_catch_weight_RF1.sql")),
+      readLines(con = system.file("sql",
+        "trip_catch_weight_RF1.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     catch_weight_RF1_sql <- DBI::sqlInterpolate(
@@ -1717,14 +1817,17 @@ check_raising_factor_inspector <- function(data_connection,
     ))
     # Retrieves the landing total weight
     trip_weight_capacity_sql <- paste(
-      readLines(file.path("sql", "trip_weight_vessel_capacity.sql")),
+      readLines(con = system.file("sql",
+        "trip_weight_vessel_capacity.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     trip_weight_capacity_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = trip_weight_capacity_sql,
       select_item = DBI::SQL(paste(select_trip_tide_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     trip_weight_capacity_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1771,13 +1874,13 @@ check_raising_factor_inspector <- function(data_connection,
   # Merge data
   tide_id_data <- merge(tide_id_data, tide_id_data_RF1, by.x = "tide_id", by.y = "tide_id", all.x = TRUE)
   # Compare RF1 to valid limits
-  comparison_less <- vector_comparison(
+  comparison_less <- codama::vector_comparison(
     first_vector = tide_id_data$RF1,
     second_vector = tide_id_data$upper_limit,
     comparison_type = "less",
     output = "report"
   )
-  comparison_greater <- vector_comparison(
+  comparison_greater <- codama::vector_comparison(
     first_vector = tide_id_data$RF1,
     second_vector = tide_id_data$lower_limit,
     comparison_type = "greater",
@@ -1785,12 +1888,12 @@ check_raising_factor_inspector <- function(data_connection,
   )
   tide_id_data$logical <- comparison_less$logical & comparison_greater$logical
   # Corrects missing RF1s when nothing has been landed and there is no capture
-  tide_id_data[(is.na(tide_id_data$tide_landingtotalweight) | tide_id_data$tide_landingtotalweight == 0) & is.na(tide_id_data$tide_sum_catch_weight),"logical"]<-TRUE
+  tide_id_data[(is.na(tide_id_data$tide_landingtotalweight) | tide_id_data$tide_landingtotalweight == 0) & is.na(tide_id_data$tide_sum_catch_weight), "logical"] <- TRUE
   # Correction of complete tides not yet finished
-  tide_id_data[(is.na(tide_id_data$trip_end_tide_id)),"logical"]<-TRUE
+  tide_id_data[(is.na(tide_id_data$trip_end_tide_id)), "logical"] <- TRUE
   tide_id_data <- dplyr::relocate(.data = tide_id_data, RF1, .after = logical)
-  trip_end_tide_id<-tide_id_data$trip_end_tide_id
-  tide_id_data <- subset(tide_id_data, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, vessel_capacity, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight,tide_sum_catch_weight, trip_localmarkettotalweight, lower_limit, upper_limit))
+  trip_end_tide_id <- tide_id_data$trip_end_tide_id
+  tide_id_data <- subset(tide_id_data, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, vessel_capacity, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, trip_localmarkettotalweight, lower_limit, upper_limit))
   if ((sum(tide_id_data$logical) + sum(!tide_id_data$logical)) != nrow_first) {
     warning(
       format(
@@ -1798,11 +1901,13 @@ check_raising_factor_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="trip"){text_object_more_or_less(select,tide_id_data$trip_id)},
+      if (type_select == "trip") {
+        text_object_more_or_less(select, tide_id_data$trip_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!tide_id_data$logical), " trips with RF1 outside defined thresholds or missing")))
@@ -1825,21 +1930,25 @@ check_fishing_context_inspector <- function(data_connection,
                                             select,
                                             output) {
   # 0 - Global variables assignement ----
+  activity_id <- NULL
+  schooltype_code <- NULL
+  association_object_count <- NULL
+  seuil <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "message"
     ))
   } else {
-    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -1855,13 +1964,13 @@ check_fishing_context_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -1870,13 +1979,13 @@ check_fishing_context_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("activity", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("activity", "year"),
@@ -1885,24 +1994,24 @@ check_fishing_context_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "activity" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -1917,9 +2026,9 @@ check_fishing_context_inspector <- function(data_connection,
     if (type_select == "year") {
       # Activity with date in the selected year
       activity_id_selected_by_year_sql <- paste(
-        readLines(file.path(
-          "sql",
-          "activity_id_selected_by_year.sql"
+        readLines(con = system.file("sql",
+          "activity_id_selected_by_year.sql",
+          package = "AkadoR"
         )),
         collapse = "\n"
       )
@@ -1927,7 +2036,7 @@ check_fishing_context_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = activity_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1938,14 +2047,17 @@ check_fishing_context_inspector <- function(data_connection,
     }
     # Retrieves the schooltype of activity
     activity_schooltype_sql <- paste(
-      readLines(file.path("sql", "activity_schooltype.sql")),
+      readLines(con = system.file("sql",
+        "activity_schooltype.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     activity_schooltype_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = activity_schooltype_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     activity_schooltype_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1954,14 +2066,17 @@ check_fishing_context_inspector <- function(data_connection,
     ))
     # Retrieves activities with object-type associations
     activity_association_object_sql <- paste(
-      readLines(file.path("sql", "activity_association_object.sql")),
+      readLines(con = system.file("sql",
+        "activity_association_object.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     activity_association_object_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = activity_association_object_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     activity_association_object_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -1995,7 +2110,7 @@ check_fishing_context_inspector <- function(data_connection,
   activity_schooltype_data$seuil <- 0
   activity_schooltype_data$association_object_count[is.na(activity_schooltype_data$association_object_count)] <- 0
   # Indicates whether or not an object-type association exists
-  comparison <- vector_comparison(
+  comparison <- codama::vector_comparison(
     first_vector = activity_schooltype_data$association_object_count,
     second_vector = activity_schooltype_data$seuil,
     comparison_type = "greater",
@@ -2015,11 +2130,13 @@ check_fishing_context_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="activity"){text_object_more_or_less(select,activity_schooltype_data$activity_id)},
+      if (type_select == "activity") {
+        text_object_more_or_less(select, activity_schooltype_data$activity_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!activity_schooltype_data$logical), " activity with school types that do not correspond to the observed associations")))
@@ -2042,13 +2159,21 @@ check_operationt_inspector <- function(data_connection,
                                        select,
                                        output) {
   # 0 - Global variables assignement ----
+  vesselactivity_code <- NULL
+  successstatus_code <- NULL
+  schooltype_code <- NULL
+  activity_weight <- NULL
+  seuil <- NULL
+  logical_successstatus_vesselactivity <- NULL
+  logical_successstatus_schooltype <- NULL
+  logical_successstatus_weight <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
-  ) != TRUE & class(data_connection) != "data.frame") {
+  ) != TRUE & !inherits(data_connection, "data.frame")) {
     stop(
       format(
         x = Sys.time(),
@@ -2058,17 +2183,17 @@ check_operationt_inspector <- function(data_connection,
       sep = ""
     )
   } else {
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = data_connection[[2]],
         type = "PostgreSQLConnection",
         output = "message"
@@ -2076,13 +2201,13 @@ check_operationt_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -2091,13 +2216,13 @@ check_operationt_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("activity", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("activity", "year"),
@@ -2106,24 +2231,24 @@ check_operationt_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "activity" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -2138,9 +2263,9 @@ check_operationt_inspector <- function(data_connection,
     if (type_select == "year") {
       # Activity with date in the selected year
       activity_id_selected_by_year_sql <- paste(
-        readLines(file.path(
-          "sql",
-          "activity_id_selected_by_year.sql"
+        readLines(con = system.file("sql",
+          "activity_id_selected_by_year.sql",
+          package = "AkadoR"
         )),
         collapse = "\n"
       )
@@ -2148,7 +2273,7 @@ check_operationt_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = activity_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2159,14 +2284,17 @@ check_operationt_inspector <- function(data_connection,
     }
     # Retrieves the schooltype of activity
     activity_sql <- paste(
-      readLines(file.path("sql", "activity_schooltype_successstatus_weight_vesselactivity.sql")),
+      readLines(con = system.file("sql",
+        "activity_schooltype_successstatus_weight_vesselactivity.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     activity_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = activity_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     activity_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2192,7 +2320,7 @@ check_operationt_inspector <- function(data_connection,
   # 3 - Data design ----
   # Indicates whether the vessel activity requires a success status
   activity_data$seuil <- "6"
-  comparison_successstatus_vesselactivity <- vector_comparison(
+  comparison_successstatus_vesselactivity <- codama::vector_comparison(
     first_vector = activity_data$vesselactivity_code,
     second_vector = activity_data$seuil,
     comparison_type = "equal",
@@ -2203,7 +2331,7 @@ check_operationt_inspector <- function(data_connection,
   activity_data$logical_successstatus_vesselactivity[is.na(activity_data$successstatus_code)] <- !activity_data$logical_successstatus_vesselactivity[is.na(activity_data$successstatus_code)]
   # Indicates indeterminate school must not have positive or negative success status
   activity_data$seuil <- "0"
-  logical_successstatus_schooltype_indeterminate <- vector_comparison(
+  logical_successstatus_schooltype_indeterminate <- codama::vector_comparison(
     first_vector = activity_data$schooltype_code,
     second_vector = activity_data$seuil,
     comparison_type = "difference",
@@ -2212,13 +2340,13 @@ check_operationt_inspector <- function(data_connection,
   activity_data$logical_successstatus_schooltype_indeterminate <- !logical_successstatus_schooltype_indeterminate$logical
   # Case of success status indeterminate or NA: no constraints
   activity_data$logical_successstatus_schooltype_indeterminate[is.na(activity_data$successstatus_code) | activity_data$successstatus_code == "2"] <- TRUE
-  # Indicates whether the success status requires a school type 
-  activity_data$logical_successstatus_schooltype<-!is.na(activity_data$schooltype_code) 
+  # Indicates whether the success status requires a school type
+  activity_data$logical_successstatus_schooltype <- !is.na(activity_data$schooltype_code)
   # Case of success status NA: no constraints
   activity_data$logical_successstatus_schooltype[is.na(activity_data$successstatus_code)] <- TRUE
   # Indicates whether captured weight is greater than 0
   activity_data$seuil <- 0
-  comparison_successstatus_weight <- vector_comparison(
+  comparison_successstatus_weight <- codama::vector_comparison(
     first_vector = activity_data$activity_weight,
     second_vector = activity_data$seuil,
     comparison_type = "greater",
@@ -2242,11 +2370,13 @@ check_operationt_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="activity"){text_object_more_or_less(select,activity_data$activity_id)},
+      if (type_select == "activity") {
+        text_object_more_or_less(select, activity_data$activity_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!activity_data$logical), " activity with a succes status that doesn't match either the vessel activity, the type of school or the weight caught.")))
@@ -2270,21 +2400,31 @@ check_position_inspector <- function(data_connection,
                                      output,
                                      ocean_name_nonpriority = "Atlantic") {
   # 0 - Global variables assignement ----
+  activity_schooltype_data <- NULL
+  activity_id <- NULL
+  zfao_ocean <- NULL
+  count_ocean <- NULL
+  type <- NULL
+  ocean_name <- NULL
+  activity_position <- NULL
+  activity_crs <- NULL
+  logical_ocean <- NULL
+  logical_harbour <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "message"
     ))
   } else {
-    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -2300,13 +2440,13 @@ check_position_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -2315,13 +2455,13 @@ check_position_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("activity", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("activity", "year"),
@@ -2330,35 +2470,35 @@ check_position_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "activity" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
       ))
     }
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = ocean_name_nonpriority,
       type = "character",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = ocean_name_nonpriority,
         type = "character",
         output = "message"
@@ -2373,9 +2513,9 @@ check_position_inspector <- function(data_connection,
     if (type_select == "year") {
       # Activity with date in the selected year
       activity_id_selected_by_year_sql <- paste(
-        readLines(file.path(
-          "sql",
-          "activity_id_selected_by_year.sql"
+        readLines(con = system.file("sql",
+          "activity_id_selected_by_year.sql",
+          package = "AkadoR"
         )),
         collapse = "\n"
       )
@@ -2383,7 +2523,7 @@ check_position_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = activity_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2394,14 +2534,17 @@ check_position_inspector <- function(data_connection,
     }
     # Retrieves the position of activity
     activity_sea_land_sql <- paste(
-      readLines(file.path("sql", "activity_sea_land.sql")),
+      readLines(con = system.file("sql",
+        "activity_sea_land.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     activity_sea_land_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = activity_sea_land_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     activity_sea_land_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2410,14 +2553,17 @@ check_position_inspector <- function(data_connection,
     ))
     # Retrieves the position of activity in harbour
     activity_harbour_sql <- paste(
-      readLines(file.path("sql", "activity_harbour.sql")),
+      readLines(con = system.file("sql",
+        "activity_harbour.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     activity_harbour_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = activity_harbour_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     activity_harbour_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2443,15 +2589,15 @@ check_position_inspector <- function(data_connection,
   }
   # 3 - Data design ----
   # Indicates whether the ocean is the same
-  comparison_ocean <- vector_comparison(
+  comparison_ocean <- codama::vector_comparison(
     first_vector = activity_sea_land_data$ocean_name,
-    second_vector = activity_sea_land_data$ocean_name_pos,
+    second_vector = activity_sea_land_data$zfao_ocean,
     comparison_type = "equal",
     output = "report"
   )
   activity_sea_land_data$logical_ocean <- comparison_ocean$logical
   # Indicates whether in land harbour
-  comparison_harbour <- vector_comparison(
+  comparison_harbour <- codama::vector_comparison(
     first_vector = activity_sea_land_data$activity_id,
     second_vector = activity_harbour_data$activity_id,
     comparison_type = "difference",
@@ -2459,21 +2605,21 @@ check_position_inspector <- function(data_connection,
   )
   activity_sea_land_data$logical_harbour <- comparison_harbour$logical
   # Case of harbour in sea : not in harbour
-  activity_sea_land_data$logical_harbour[!is.na(activity_sea_land_data$ocean_name_pos)] <- FALSE
+  activity_sea_land_data$logical_harbour[!is.na(activity_sea_land_data$zfao_ocean)] <- FALSE
   activity_sea_land_data$logical <- activity_sea_land_data$logical_ocean | activity_sea_land_data$logical_harbour
   # Case case where the position is exactly on the boundary of the two oceans: focus on the Indian Ocean
   count_ocean_activity <- activity_sea_land_data %>%
     dplyr::group_by(activity_id) %>%
-    dplyr::summarise(count_ocean = length(unique(ocean_name_pos))) %>%
+    dplyr::summarise(count_ocean = length(unique(zfao_ocean))) %>%
     dplyr::filter(count_ocean == 2)
-  activity_sea_land_data <- activity_sea_land_data[!(activity_sea_land_data$activity_id %in% count_ocean_activity$activity_id & activity_sea_land_data$ocean_name_pos == ocean_name_nonpriority), ]
+  activity_sea_land_data <- activity_sea_land_data[!(activity_sea_land_data$activity_id %in% count_ocean_activity$activity_id & activity_sea_land_data$zfao_ocean == ocean_name_nonpriority), ]
   # Gives the type of location
   activity_sea_land_data$type <- "Sea"
-  activity_sea_land_data$type[is.na(activity_sea_land_data$ocean_name_pos)] <- "Land"
+  activity_sea_land_data$type[is.na(activity_sea_land_data$zfao_ocean)] <- "Land"
   activity_sea_land_data$type[activity_sea_land_data$logical_harbour] <- "Harbour"
   # Case of ocean trip is null :
   activity_sea_land_data$logical[is.na(activity_sea_land_data$ocean_name)] <- FALSE
-  activity_sea_land_data <- dplyr::relocate(.data = activity_sea_land_data, type, ocean_name, ocean_name_pos, .after = logical)
+  activity_sea_land_data <- dplyr::relocate(.data = activity_sea_land_data, type, ocean_name, zfao_ocean, .after = logical)
   activity_sea_land_data_detail <- activity_sea_land_data
   activity_sea_land_data <- subset(activity_sea_land_data, select = -c(activity_position, activity_crs, logical_ocean, logical_harbour))
   if ((sum(activity_sea_land_data$logical) + sum(!activity_sea_land_data$logical)) != nrow_first) {
@@ -2483,11 +2629,13 @@ check_position_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="activity"){text_object_more_or_less(select,activity_sea_land_data$activity_id)},
+      if (type_select == "activity") {
+        text_object_more_or_less(select, activity_sea_land_data$activity_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!activity_sea_land_data$logical), " activity with school types that do not correspond to the observed associations")))
@@ -2510,21 +2658,28 @@ check_weight_inspector <- function(data_connection,
                                    select,
                                    output) {
   # 0 - Global variables assignement ----
+  activity_schooltype_data <- NULL
+  activity_id <- NULL
+  catch_weight <- NULL
+  activity_weight <- NULL
+  sum_catch_weight <- NULL
+  first_vector <- NULL
+  second_vector <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "message"
     ))
   } else {
-    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -2540,13 +2695,13 @@ check_weight_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -2555,13 +2710,13 @@ check_weight_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("activity", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("activity", "year"),
@@ -2570,24 +2725,24 @@ check_weight_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "activity" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -2602,9 +2757,9 @@ check_weight_inspector <- function(data_connection,
     if (type_select == "year") {
       # Activity with date in the selected year
       activity_id_selected_by_year_sql <- paste(
-        readLines(file.path(
-          "sql",
-          "activity_id_selected_by_year.sql"
+        readLines(con = system.file("sql",
+          "activity_id_selected_by_year.sql",
+          package = "AkadoR"
         )),
         collapse = "\n"
       )
@@ -2612,7 +2767,7 @@ check_weight_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = activity_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2623,14 +2778,17 @@ check_weight_inspector <- function(data_connection,
     }
     # Retrieves the weigth catch of the activity
     activity_weight_sql <- paste(
-      readLines(file.path("sql", "activity_weight.sql")),
+      readLines(con = system.file("sql",
+        "activity_weight.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     activity_weight_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = activity_weight_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     activity_weight_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2639,14 +2797,17 @@ check_weight_inspector <- function(data_connection,
     ))
     # Retrieves the weight of each capture of the activity
     catch_weight_sql <- paste(
-      readLines(file.path("sql", "catch_weight.sql")),
+      readLines(con = system.file("sql",
+        "catch_weight.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     catch_weight_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = catch_weight_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     catch_weight_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2678,7 +2839,7 @@ check_weight_inspector <- function(data_connection,
   # Group the pair to compare
   activity_weight_data <- merge(activity_weight_data, catch_weight_data, by = "activity_id", all.x = TRUE)
   # Compare weight of the activity or the sum of the catch
-  comparison <- vector_comparison(
+  comparison <- codama::vector_comparison(
     first_vector = activity_weight_data$activity_weight,
     second_vector = activity_weight_data$sum_catch_weight,
     comparison_type = "equal",
@@ -2699,11 +2860,13 @@ check_weight_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="activity"){text_object_more_or_less(select,activity_weight_data$activity_id)},
+      if (type_select == "activity") {
+        text_object_more_or_less(select, activity_weight_data$activity_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!activity_weight_data$logical), " activity with a weight different from the sum of the weight of each catch")))
@@ -2726,16 +2889,23 @@ check_length_class_inspector <- function(data_connection,
                                          select,
                                          output,
                                          species = c("YFT", "BET", "ALB"),
-                                         size_measure_type="FL",
-                                         limit=80) {
+                                         size_measure_type = "FL",
+                                         limit = 80) {
   # 0 - Global variables assignement ----
+  specie_code <- NULL
+  sizemeasuretype_code <- NULL
+  samplespeciesmeasure_sizeclass <- NULL
+  logical_sizeclass <- NULL
+  logical_sizemeasuretype <- NULL
+  logical_species <- NULL
+  seuil <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
-  ) != TRUE & class(data_connection) != "data.frame") {
+  ) != TRUE & !inherits(data_connection, "data.frame")) {
     stop(
       format(
         x = Sys.time(),
@@ -2745,17 +2915,17 @@ check_length_class_inspector <- function(data_connection,
       sep = ""
     )
   } else {
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = data_connection[[2]],
         type = "PostgreSQLConnection",
         output = "message"
@@ -2763,13 +2933,13 @@ check_length_class_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -2778,13 +2948,13 @@ check_length_class_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("sample", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("sample", "year"),
@@ -2793,24 +2963,24 @@ check_length_class_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "sample" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -2825,9 +2995,9 @@ check_length_class_inspector <- function(data_connection,
     if (type_select == "year") {
       # Sample with date in the selected year
       sample_id_selected_by_year_sql <- paste(
-        readLines(file.path(
-          "sql",
-          "sample_id_selected_by_year.sql"
+        readLines(con = system.file("sql",
+          "sample_id_selected_by_year.sql",
+          package = "AkadoR"
         )),
         collapse = "\n"
       )
@@ -2835,7 +3005,7 @@ check_length_class_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = sample_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       sample_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2846,14 +3016,17 @@ check_length_class_inspector <- function(data_connection,
     }
     # Retrieves the species, measurement type and size class of the samples
     samplespeciesmeasure_sizeclass_sql <- paste(
-      readLines(file.path("sql", "samplespeciesmeasure_sizeclass.sql")),
+      readLines(con = system.file("sql",
+        "samplespeciesmeasure_sizeclass.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     samplespeciesmeasure_sizeclass_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = samplespeciesmeasure_sizeclass_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     samplespeciesmeasure_sizeclass_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -2877,17 +3050,17 @@ check_length_class_inspector <- function(data_connection,
     }
   }
   # 3 - Data design ----
-  samplespeciesmeasure_sizeclass_data$seuil<-limit
+  samplespeciesmeasure_sizeclass_data$seuil <- limit
   # Compare size class of the samples
-  comparison_sizeclass <- vector_comparison(
+  comparison_sizeclass <- codama::vector_comparison(
     first_vector = samplespeciesmeasure_sizeclass_data$samplespeciesmeasure_sizeclass,
     second_vector = samplespeciesmeasure_sizeclass_data$seuil,
     comparison_type = "less_equal",
     output = "report"
   )
-  samplespeciesmeasure_sizeclass_data$logical_sizeclass  <- comparison_sizeclass$logical
+  samplespeciesmeasure_sizeclass_data$logical_sizeclass <- comparison_sizeclass$logical
   # Compare specie of the samples
-  comparison_species <- vector_comparison(
+  comparison_species <- codama::vector_comparison(
     first_vector = samplespeciesmeasure_sizeclass_data$specie_code,
     second_vector = species,
     comparison_type = "difference",
@@ -2895,7 +3068,7 @@ check_length_class_inspector <- function(data_connection,
   )
   samplespeciesmeasure_sizeclass_data$logical_species <- comparison_species$logical
   # Compare size measure type of the samples
-  comparison_sizemeasuretype <- vector_comparison(
+  comparison_sizemeasuretype <- codama::vector_comparison(
     first_vector = samplespeciesmeasure_sizeclass_data$sizemeasuretype_code,
     second_vector = size_measure_type,
     comparison_type = "difference",
@@ -2913,11 +3086,13 @@ check_length_class_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="sample"){text_object_more_or_less(select,samplespeciesmeasure_sizeclass_data$samplespeciesmeasure_id)},
+      if (type_select == "sample") {
+        text_object_more_or_less(select, samplespeciesmeasure_sizeclass_data$samplespeciesmeasure_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!samplespeciesmeasure_sizeclass_data$logical), " samples with measurements ", paste0(size_measure_type, collapse = ", "), ", for species ", paste0(species, collapse = ", "), ", greater than ", limit)))
@@ -2935,26 +3110,32 @@ check_length_class_inspector <- function(data_connection,
 }
 
 # Function the total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class, in the future integrated in the pakage codama
-check_measure_inspector  <- function(data_connection,
-                                     type_select,
-                                     select,
-                                     output) {
+check_measure_inspector <- function(data_connection,
+                                    type_select,
+                                    select,
+                                    output) {
   # 0 - Global variables assignement ----
+  trip_weight_capacity_data <- NULL
+  sample_id <- NULL
+  samplespecies_measuredcount <- NULL
+  samplespeciesmeasure_count <- NULL
+  sum_measuredcount <- NULL
+  sum_count <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "message"
     ))
   } else {
-    if (!is.data.frame(data_connection[[1]]) && r_type_checking(
+    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
@@ -2970,28 +3151,28 @@ check_measure_inspector  <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
       output = "message"
     ))
   }
-  if (any(grep("observe_",data_connection[1]))) {
+  if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("sample", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("sample", "year"),
@@ -3000,24 +3181,24 @@ check_measure_inspector  <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "sample" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -3033,8 +3214,8 @@ check_measure_inspector  <- function(data_connection,
       # Trip with a departure or arrival date in the selected year
       sample_id_selected_by_year_sql <- paste(
         readLines(con = system.file("sql",
-                                    "sample_id_selected_by_year.sql",
-                                    package = "codama"
+          "sample_id_selected_by_year.sql",
+          package = "codama"
         )),
         collapse = "\n"
       )
@@ -3042,7 +3223,7 @@ check_measure_inspector  <- function(data_connection,
         conn = data_connection[[2]],
         sql = sample_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       sample_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -3053,14 +3234,17 @@ check_measure_inspector  <- function(data_connection,
     }
     # number of individual measurements by sample and by species
     samplespecies_measuredcount_sql <- paste(
-      readLines(file.path("sql", "samplespecies_measuredcount.sql")),
+      readLines(con = system.file("sql",
+        "samplespecies_measuredcount.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     samplespecies_measuredcount_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = samplespecies_measuredcount_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     samplespecies_measuredcount_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -3069,21 +3253,24 @@ check_measure_inspector  <- function(data_connection,
     ))
     # number of individual measurements by sample and by species and by size class
     samplespeciesmeasure_count_sql <- paste(
-      readLines(file.path("sql", "samplespeciesmeasure_count.sql")),
+      readLines(con = system.file("sql",
+        "samplespeciesmeasure_count.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     samplespeciesmeasure_count_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = samplespeciesmeasure_count_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     samplespeciesmeasure_count_data <- dplyr::tibble(DBI::dbGetQuery(
       conn = data_connection[[2]],
       statement = samplespeciesmeasure_count_sql
     ))
-    nrow_first<-length(unique(select_sql))
+    nrow_first <- length(unique(select_sql))
   } else {
     if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
       samplespecies_measuredcount_data <- data_connection[[1]]
@@ -3111,7 +3298,7 @@ check_measure_inspector  <- function(data_connection,
   # Merge
   samplespecies_measuredcount_data <- merge(samplespecies_measuredcount_data, samplespeciesmeasure_count_data, by.x = "sample_id", by.y = "sample_id", all.x = TRUE)
   # Compare the two sums
-  comparison <- vector_comparison(
+  comparison <- codama::vector_comparison(
     first_vector = samplespecies_measuredcount_data$sum_measuredcount,
     second_vector = samplespecies_measuredcount_data$sum_count,
     comparison_type = "equal",
@@ -3130,11 +3317,13 @@ check_measure_inspector  <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="sample"){text_object_more_or_less(select,samplespecies_measuredcount_data$sample_id)},
+      if (type_select == "sample") {
+        text_object_more_or_less(select, samplespecies_measuredcount_data$sample_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!samplespecies_measuredcount_data$logical), " samples with number of individuals measured per species different from number measured per species and size class")))
@@ -3159,13 +3348,16 @@ check_temperature_inspector <- function(data_connection,
                                         output,
                                         limit = c(15, 32)) {
   # 0 - Global variables assignement ----
+  activity_seasurfacetemperature <- NULL
+  lower_limit <- NULL
+  upper_limit <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
-  ) != TRUE & class(data_connection) != "data.frame") {
+  ) != TRUE & !inherits(data_connection, "data.frame")) {
     stop(
       format(
         x = Sys.time(),
@@ -3175,17 +3367,17 @@ check_temperature_inspector <- function(data_connection,
       sep = ""
     )
   } else {
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = data_connection[[2]],
         type = "PostgreSQLConnection",
         output = "message"
@@ -3193,13 +3385,13 @@ check_temperature_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -3208,13 +3400,13 @@ check_temperature_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("activity", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("activity", "year"),
@@ -3223,24 +3415,24 @@ check_temperature_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "activity" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -3255,9 +3447,9 @@ check_temperature_inspector <- function(data_connection,
     if (type_select == "year") {
       # Activity with date in the selected year
       activity_id_selected_by_year_sql <- paste(
-        readLines(file.path(
-          "sql",
-          "activity_id_selected_by_year.sql"
+        readLines(con = system.file("sql",
+          "activity_id_selected_by_year.sql",
+          package = "AkadoR"
         )),
         collapse = "\n"
       )
@@ -3265,7 +3457,7 @@ check_temperature_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = activity_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -3276,14 +3468,17 @@ check_temperature_inspector <- function(data_connection,
     }
     # Retrieves the sea surface temperature of the activity
     activity_seasurfacetemperature_sql <- paste(
-      readLines(file.path("sql", "activity_seasurfacetemperature.sql")),
+      readLines(con = system.file("sql",
+        "activity_seasurfacetemperature.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     activity_seasurfacetemperature_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = activity_seasurfacetemperature_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     activity_seasurfacetemperature_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -3310,13 +3505,13 @@ check_temperature_inspector <- function(data_connection,
   # Compare RF1 to valid limits
   activity_seasurfacetemperature_data$lower_limit <- limit[1]
   activity_seasurfacetemperature_data$upper_limit <- limit[2]
-  comparison_less <- vector_comparison(
+  comparison_less <- codama::vector_comparison(
     first_vector = activity_seasurfacetemperature_data$activity_seasurfacetemperature,
     second_vector = activity_seasurfacetemperature_data$upper_limit,
     comparison_type = "less_equal",
     output = "report"
   )
-  comparison_greater <- vector_comparison(
+  comparison_greater <- codama::vector_comparison(
     first_vector = activity_seasurfacetemperature_data$activity_seasurfacetemperature,
     second_vector = activity_seasurfacetemperature_data$lower_limit,
     comparison_type = "greater_equal",
@@ -3335,11 +3530,13 @@ check_temperature_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="activity"){text_object_more_or_less(select,activity_seasurfacetemperature_data$activity_id)},
+      if (type_select == "activity") {
+        text_object_more_or_less(select, activity_seasurfacetemperature_data$activity_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!activity_seasurfacetemperature_data$logical), " activity with sea surface temperature outside defined thresholds")))
@@ -3363,13 +3560,14 @@ check_species_inspector <- function(data_connection,
                                     output,
                                     species = c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT")) {
   # 0 - Global variables assignement ----
+  specie_name <- NULL
   # 1 - Arguments verification ----
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = data_connection,
     type = "list",
     length = 2L,
     output = "logical"
-  ) != TRUE & class(data_connection) != "data.frame") {
+  ) != TRUE & !inherits(data_connection, "data.frame")) {
     stop(
       format(
         x = Sys.time(),
@@ -3379,17 +3577,17 @@ check_species_inspector <- function(data_connection,
       sep = ""
     )
   } else {
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = data_connection,
       type = "list",
       length = 2L,
       output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && r_type_checking(
+    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
       r_object = data_connection[[2]],
       type = "PostgreSQLConnection",
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = data_connection[[2]],
         type = "PostgreSQLConnection",
         output = "message"
@@ -3397,13 +3595,13 @@ check_species_inspector <- function(data_connection,
     }
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -3412,13 +3610,13 @@ check_species_inspector <- function(data_connection,
   }
   if (any(grep("observe_", data_connection[1]))) {
     # Checks the type and values of type_select
-    if (r_type_checking(
+    if (codama::r_type_checking(
       r_object = type_select,
       type = "character",
       allowed_value = c("sample", "year"),
       output = "logical"
     ) != TRUE) {
-      return(r_type_checking(
+      return(codama::r_type_checking(
         r_object = type_select,
         type = "character",
         allowed_value = c("sample", "year"),
@@ -3427,24 +3625,24 @@ check_species_inspector <- function(data_connection,
     }
     # Checks the type of select according to type_select
     if (type_select == "sample" &&
-        r_type_checking(
-          r_object = select,
-          type = "character",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "character",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "character",
         output = "message"
       ))
     }
     if (type_select == "year" &&
-        r_type_checking(
-          r_object = select,
-          type = "numeric",
-          output = "logical"
-        ) != TRUE) {
-      return(r_type_checking(
+      codama::r_type_checking(
+        r_object = select,
+        type = "numeric",
+        output = "logical"
+      ) != TRUE) {
+      return(codama::r_type_checking(
         r_object = select,
         type = "numeric",
         output = "message"
@@ -3459,9 +3657,9 @@ check_species_inspector <- function(data_connection,
     if (type_select == "year") {
       # Sample with date in the selected year
       sample_id_selected_by_year_sql <- paste(
-        readLines(file.path(
-          "sql",
-          "sample_id_selected_by_year.sql"
+        readLines(con = system.file("sql",
+          "sample_id_selected_by_year.sql",
+          package = "AkadoR"
         )),
         collapse = "\n"
       )
@@ -3469,7 +3667,7 @@ check_species_inspector <- function(data_connection,
         conn = data_connection[[2]],
         sql = sample_id_selected_by_year_sql,
         select_item = DBI::SQL(paste(select,
-                                     collapse = ", "
+          collapse = ", "
         ))
       )
       sample_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -3480,14 +3678,17 @@ check_species_inspector <- function(data_connection,
     }
     # Retrieves the species of the samples
     samplespecies_specie_sql <- paste(
-      readLines(file.path("sql", "samplespecies_specie.sql")),
+      readLines(con = system.file("sql",
+        "samplespecies_specie.sql",
+        package = "AkadoR"
+      )),
       collapse = "\n"
     )
     samplespecies_specie_sql <- DBI::sqlInterpolate(
       conn = data_connection[[2]],
       sql = samplespecies_specie_sql,
       select_item = DBI::SQL(paste(select_sql,
-                                   collapse = ", "
+        collapse = ", "
       ))
     )
     samplespecies_specie_data <- dplyr::tibble(DBI::dbGetQuery(
@@ -3512,7 +3713,7 @@ check_species_inspector <- function(data_connection,
   }
   # 3 - Data design ----
   # Compare specie of the samples
-  comparison_species <- vector_comparison(
+  comparison_species <- codama::vector_comparison(
     first_vector = samplespecies_specie_data$specie_name,
     second_vector = species,
     comparison_type = "difference",
@@ -3528,14 +3729,16 @@ check_species_inspector <- function(data_connection,
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if(type_select=="sample"){text_object_more_or_less(select,samplespecies_specie_data$samplespecies_id)},
+      if (type_select == "sample") {
+        text_object_more_or_less(select, samplespecies_specie_data$samplespecies_id)
+      },
       sep = ""
     )
   }
-  
+
   # 4 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!samplespecies_specie_data$logical), " samples with species not included in the authorized list (",paste0(species, collapse = ", "),")", collapse = ", ")))
+    return(print(paste0("There are ", sum(!samplespecies_specie_data$logical), " samples with species not included in the authorized list (", paste0(species, collapse = ", "), ")", collapse = ", ")))
   }
   if (output == "report") {
     return(samplespecies_specie_data)
@@ -3553,15 +3756,18 @@ check_species_inspector <- function(data_connection,
 check_sample_without_measure_inspector <- function(dataframe1,
                                                    output) {
   # 0 - Global variables assignement ----
+  samplespecies_id <- NULL
+  samplespeciesmeasure_id <- NULL
+  count <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("samplespecies_id", "samplespeciesmeasure_id"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("samplespecies_id", "samplespeciesmeasure_id"),
@@ -3570,13 +3776,13 @@ check_sample_without_measure_inspector <- function(dataframe1,
     )
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -3634,15 +3840,18 @@ check_sample_without_measure_inspector <- function(dataframe1,
 check_sample_without_species_inspector <- function(dataframe1,
                                                    output) {
   # 0 - Global variables assignement ----
+  sample_id <- NULL
+  samplespecies_id <- NULL
+  count <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "samplespecies_id"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "samplespecies_id"),
@@ -3651,13 +3860,13 @@ check_sample_without_species_inspector <- function(dataframe1,
     )
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -3716,49 +3925,63 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
                                                            dataframe2,
                                                            output) {
   # 0 - Global variables assignement ----
+  sample_id <- NULL
+  samplespecies_subsamplenumber <- NULL
+  samplespecies_id <- NULL
+  count_subsamplenumber_N0 <- NULL
+  count_subsamplenumber_0 <- NULL
+  count_samplespecies <- NULL
+  count_subsamplenumber_1 <- NULL
+  only_one_subsampling <- NULL
+  many_subsampling <- NULL
+  count_samplespecies_bis <- NULL
+  count_subsamplenumber_N0_bis <- NULL
+  count_subsamplenumber_0_bis <- NULL
+  count_subsamplenumber_1_bis <- NULL
+  sample_supersample <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_supersample"),
     column_type = c("character", "logical"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_supersample"),
       column_type = c("character", "logical"),
       output = "message"
     )
-  }else {
-    dataframe1<-dataframe1[,c("sample_id", "sample_supersample")]
+  } else {
+    dataframe1 <- dataframe1[, c("sample_id", "sample_supersample")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
       column_name = c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id"),
       column_type = c("character", "numeric", "character"),
       output = "message"
     )
-  }else{
-    dataframe2<-dataframe2[,c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id")]
+  } else {
+    dataframe2 <- dataframe2[, c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id")]
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -3832,15 +4055,17 @@ check_well_number_consistent_inspector <- function(dataframe1,
                                                    dataframe2,
                                                    output) {
   # 0 - Global variables assignement ----
+  trip_id <- NULL
+  sample_well <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_well", "trip_id"),
     column_type = c("character", "character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_well", "trip_id"),
@@ -3850,31 +4075,31 @@ check_well_number_consistent_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_well", "trip_id")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("trip_id", "well_well"),
+    column_name = c("trip_id", "well_name"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("trip_id", "well_well"),
+      column_name = c("trip_id", "well_name"),
       column_type = c("character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("trip_id", "well_well")]
+    dataframe2 <- dataframe2[, c("trip_id", "well_name")]
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -3886,7 +4111,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
   # 2 - Data design ----
   # merge
   dataframe2$logical <- TRUE
-  dataframe1 <- merge(dataframe1, dataframe2, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_well"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_name"), all.x = TRUE)
   # Search well not link
   dataframe1[is.na(dataframe1$logical), "logical"] <- FALSE
   # Case the well number is empty
@@ -3941,15 +4166,28 @@ check_little_big_inspector <- function(dataframe1,
                                        measuretype_size = c("FL", "PD1"),
                                        threshold = 0.9) {
   # 0 - Global variables assignement ----
+  sample_id <- NULL
+  sample_smallsweight <- NULL
+  sample_bigsweight <- NULL
+  sample_totalweight <- NULL
+  samplespeciesmeasure_count <- NULL
+  sizemeasuretype_code <- NULL
+  sample_smallsweight_bis <- NULL
+  sample_bigsweight_bis <- NULL
+  sample_totalweight_bis <- NULL
+  little_percentage <- NULL
+  big_percentage <- NULL
+  measure1_percentage <- NULL
+  measure2_percentage <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
     column_type = c("character", "numeric", "numeric", "numeric"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
@@ -3958,14 +4196,14 @@ check_little_big_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
     column_type = c("character", "character", "character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
       column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
@@ -3975,14 +4213,14 @@ check_little_big_inspector <- function(dataframe1,
   } else {
     dataframe2 <- dataframe2[, c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
     column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id"),
     column_type = c("character", "numeric", "numeric", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
       column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id"),
@@ -3993,47 +4231,47 @@ check_little_big_inspector <- function(dataframe1,
     dataframe3 <- dataframe3[, c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id")]
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = species,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = species,
       type = "character",
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = measuretype,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = measuretype,
       type = "character",
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = sizelimit,
     type = "numeric",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = sizelimit,
       type = "numeric",
       output = "message"
@@ -4050,26 +4288,26 @@ check_little_big_inspector <- function(dataframe1,
   }
   select <- dataframe1$sample_id
   nrow_first <- length(unique(select))
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = measuretype_size,
     type = "character",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = measuretype_size,
       type = "character",
       length = 2L,
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = threshold,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = threshold,
       type = "numeric",
       length = 1L,
@@ -4088,7 +4326,7 @@ check_little_big_inspector <- function(dataframe1,
   condition <- as.list(as.data.frame(t(data.frame(species, measuretype, sizelimit))))
   # Measurement selection of small individuals
   little <- purrr::map(condition, ~ dataframe1 %>%
-                         dplyr::filter(specie_name == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass < as.numeric(.x[3])))
+    dplyr::filter(specie_name == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass < as.numeric(.x[3])))
   little <- do.call(rbind.data.frame, little)
   # Calculation of the number of measurements of small individuals (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   little <- little %>%
@@ -4096,7 +4334,7 @@ check_little_big_inspector <- function(dataframe1,
     dplyr::summarise(little = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)))
   # Measurement selection of big individuals
   big <- purrr::map(condition, ~ dataframe1 %>%
-                      dplyr::filter(specie_name == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass >= as.numeric(.x[3])))
+    dplyr::filter(specie_name == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass >= as.numeric(.x[3])))
   big <- do.call(rbind.data.frame, big)
   # Calculation of the number of measurements of big individuals (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   big <- big %>%
@@ -4128,15 +4366,15 @@ check_little_big_inspector <- function(dataframe1,
       sample_totalweight_bis = dplyr::coalesce(sample_totalweight, 0)
     )
   # Case of NA little_percentage, big_percentage, measure1_percentage, measure2_percentage
-   total_count[is.na(total_count$little_percentage), "little_percentage"]<-0
-   total_count[is.na(total_count$big_percentage), "big_percentage"]<-0
-   total_count[is.na(total_count$measure1_percentage), "measure1_percentage"]<-0
-   total_count[is.na(total_count$measure2_percentage), "measure2_percentage"]<-0
+  total_count[is.na(total_count$little_percentage), "little_percentage"] <- 0
+  total_count[is.na(total_count$big_percentage), "big_percentage"] <- 0
+  total_count[is.na(total_count$measure1_percentage), "measure1_percentage"] <- 0
+  total_count[is.na(total_count$measure2_percentage), "measure2_percentage"] <- 0
   # Check
   total_count$logical <- !((total_count$sample_smallsweight_bis > 0 & total_count$sample_bigsweight_bis == 0 & total_count$little_percentage < threshold) |
-                             ((total_count$sample_totalweight_bis != 0 | (total_count$sample_smallsweight_bis > 0 & total_count$sample_bigsweight_bis > 0)) & total_count$measure1_percentage > total_count$measure2_percentage & total_count$little_percentage < threshold) |
-                             (total_count$sample_smallsweight_bis == 0 & total_count$sample_bigsweight_bis > 0 & total_count$big_percentage < threshold) |
-                             ((total_count$sample_totalweight_bis != 0 | (total_count$sample_smallsweight_bis > 0 & total_count$sample_bigsweight_bis > 0)) & total_count$measure1_percentage < total_count$measure2_percentage & total_count$big_percentage < threshold))
+    ((total_count$sample_totalweight_bis != 0 | (total_count$sample_smallsweight_bis > 0 & total_count$sample_bigsweight_bis > 0)) & total_count$measure1_percentage > total_count$measure2_percentage & total_count$little_percentage < threshold) |
+    (total_count$sample_smallsweight_bis == 0 & total_count$sample_bigsweight_bis > 0 & total_count$big_percentage < threshold) |
+    ((total_count$sample_totalweight_bis != 0 | (total_count$sample_smallsweight_bis > 0 & total_count$sample_bigsweight_bis > 0)) & total_count$measure1_percentage < total_count$measure2_percentage & total_count$big_percentage < threshold))
   # Case of NA
   total_count[is.na(total_count$logical), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
@@ -4184,21 +4422,38 @@ check_weighting_inspector <- function(dataframe1,
                                       dataframe3,
                                       dataframe4,
                                       output,
-                                      vessel_type = c("6", "2"), 
+                                      vessel_type = c("6", "2"),
                                       weight_limit = 100,
                                       threshold = 0.95,
                                       sampletype_code_landing_baitboat = c("11"),
                                       landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10")) {
   # 0 - Global variables assignement ----
+  sample_id <- NULL
+  sample_smallsweight <- NULL
+  sample_bigsweight <- NULL
+  sample_totalweight <- NULL
+  weight_calculation <- NULL
+  sampleactivity_weightedweight <- NULL
+  trip_id <- NULL
+  weightcategory_code <- NULL
+  landing_weight <- NULL
+  weightedweight <- NULL
+  sum_landing_weight <- NULL
+  weight <- NULL
+  vessel_type_code <- NULL
+  weightedweight_bis <- NULL
+  sum_landing_weight_bis <- NULL
+  sampletype_code <- NULL
+  vesseltype_name <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code"),
     column_type = c("character", "numeric", "numeric", "numeric", "character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code"),
@@ -4208,14 +4463,14 @@ check_weighting_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("sample_id", "sampleactivity_weightedweight"),
     column_type = c("character", "numeric"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
       column_name = c("sample_id", "sampleactivity_weightedweight"),
@@ -4225,31 +4480,31 @@ check_weighting_inspector <- function(dataframe1,
   } else {
     dataframe2 <- dataframe2[, c("sample_id", "sampleactivity_weightedweight")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
-    column_name = c("trip_id", "vesseltype_code", "vesseltype_label1"),
+    column_name = c("trip_id", "vessel_type_code", "vesseltype_name"),
     column_type = c("character", "character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
-      column_name = c("trip_id", "vesseltype_code", "vesseltype_label1"),
+      column_name = c("trip_id", "vessel_type_code", "vesseltype_name"),
       column_type = c("character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe3 <- dataframe3[, c("trip_id", "vesseltype_code", "vesseltype_label1")]
+    dataframe3 <- dataframe3[, c("trip_id", "vessel_type_code", "vesseltype_name")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe4,
     type = "data.frame",
     column_name = c("trip_id", "landing_weight", "weightcategory_code"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe4,
       type = "data.frame",
       column_name = c("trip_id", "landing_weight", "weightcategory_code"),
@@ -4260,75 +4515,75 @@ check_weighting_inspector <- function(dataframe1,
     dataframe4 <- dataframe4[, c("trip_id", "landing_weight", "weightcategory_code")]
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = vessel_type,
     type = "character",
     length = 2L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = vessel_type,
       type = "character",
       length = 2L,
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = weight_limit,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = weight_limit,
       type = "numeric",
       length = 1L,
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = threshold,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = threshold,
       type = "numeric",
       length = 1L,
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = landingtype_baitboat,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = landingtype_baitboat,
       type = "character",
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = sampletype_code_landing_baitboat,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = sampletype_code_landing_baitboat,
       type = "character",
       output = "message"
@@ -4365,16 +4620,16 @@ check_weighting_inspector <- function(dataframe1,
       sum_landing_weight_bis = dplyr::coalesce(sum_landing_weight, 0)
     )
   # Check
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weight > weight_limit, "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold), "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > 1, "logical"] <- FALSE
-  # Case NA vesseltype_code sampletype_code
-  dataframe1[is.na(dataframe1$vesseltype_code), "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[1] & dataframe1$weight > weight_limit, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold), "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > 1, "logical"] <- FALSE
+  # Case NA vessel_type_code sampletype_code
+  dataframe1[is.na(dataframe1$vessel_type_code), "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vesseltype_code, weightedweight_bis, sum_landing_weight_bis))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_label1, sum_landing_weight, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vessel_type_code, weightedweight_bis, sum_landing_weight_bis))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_name, sum_landing_weight, .after = logical)
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -4416,15 +4671,20 @@ check_weighting_inspector <- function(dataframe1,
 check_weight_sample_inspector <- function(dataframe1,
                                           output) {
   # 0 - Global variables assignement ----
+  sample_id <- NULL
+  sample_smallsweight <- NULL
+  sample_bigsweight <- NULL
+  weight_calculation <- NULL
+  sample_totalweight <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
     column_type = c("character", "numeric", "numeric", "numeric"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
@@ -4435,13 +4695,13 @@ check_weight_sample_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -4456,19 +4716,19 @@ check_weight_sample_inspector <- function(dataframe1,
     dplyr::group_by(sample_id) %>%
     dplyr::mutate(weight_calculation = ifelse(all(is.na(c(sample_smallsweight, sample_bigsweight))), NaN, sum(c(sample_smallsweight, sample_bigsweight), na.rm = TRUE)))
   # Check
-  comparison_weight_calculation <- vector_comparison(
+  comparison_weight_calculation <- codama::vector_comparison(
     first_vector = dataframe1$weight_calculation,
     second_vector = c(0),
     comparison_type = "difference",
     output = "report"
   )
-  comparison_totalweight <- vector_comparison(
+  comparison_totalweight <- codama::vector_comparison(
     first_vector = dataframe1$sample_totalweight,
     second_vector = c(0),
     comparison_type = "difference",
     output = "report"
   )
-  dataframe1$logical<- !(comparison_weight_calculation$logical & comparison_totalweight$logical) & !(is.na(dataframe1$weight_calculation) & is.na(dataframe1$sample_totalweight))
+  dataframe1$logical <- !(comparison_weight_calculation$logical & comparison_totalweight$logical) & !(is.na(dataframe1$weight_calculation) & is.na(dataframe1$sample_totalweight))
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(weight_calculation))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_totalweight, sample_smallsweight, sample_bigsweight, .after = logical)
@@ -4512,15 +4772,18 @@ check_weight_sample_inspector <- function(dataframe1,
 check_activity_sample_inspector <- function(dataframe1,
                                             output) {
   # 0 - Global variables assignement ----
+  sample_id <- NULL
+  activity_id <- NULL
+  count_activity <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "activity_id"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "activity_id"),
@@ -4531,13 +4794,13 @@ check_activity_sample_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("sample_id", "activity_id")]
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
@@ -4552,7 +4815,7 @@ check_activity_sample_inspector <- function(dataframe1,
     dplyr::group_by(sample_id) %>%
     dplyr::summarise(count_activity = ifelse(all(is.na(activity_id)), 0L, sum(!is.na(activity_id))))
   # Check
-  comparison <- vector_comparison(
+  comparison <- codama::vector_comparison(
     first_vector = dataframe1$count_activity,
     second_vector = c(0L),
     comparison_type = "difference",
@@ -4606,15 +4869,24 @@ check_ldlf_inspector <- function(dataframe1,
                                  measuretype_bigsweight = c("PD1"),
                                  measuretype_smallsweight = c("FL")) {
   # 0 - Global variables assignement ----
+  logical_species <- NULL
+  logical_bigsweight <- NULL
+  logical_smallsweight <- NULL
+  sample_id <- NULL
+  sizemeasuretype_code <- NULL
+  specie_name <- NULL
+  sample_bigsweight <- NULL
+  sample_smallsweight <- NULL
+  sample_totalweight <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
     column_type = c("character", "character", "character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
@@ -4624,14 +4896,14 @@ check_ldlf_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
     column_type = c("character", "numeric", "numeric", "numeric"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
       column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
@@ -4642,58 +4914,58 @@ check_ldlf_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = species,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = species,
       type = "character",
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = measuretype_species,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = measuretype_species,
       type = "character",
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = measuretype_bigsweight,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = measuretype_bigsweight,
       type = "character",
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = measuretype_smallsweight,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = measuretype_smallsweight,
       type = "character",
       output = "message"
@@ -4703,13 +4975,13 @@ check_ldlf_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Check species and measuretype
-  comparison_species <- vector_comparison(
+  comparison_species <- codama::vector_comparison(
     first_vector = dataframe1$specie_name,
     second_vector = species,
     comparison_type = "difference",
     output = "report"
   )
-  comparison_measuretype_species <- vector_comparison(
+  comparison_measuretype_species <- codama::vector_comparison(
     first_vector = dataframe1$sizemeasuretype_code,
     second_vector = measuretype_species,
     comparison_type = "difference",
@@ -4719,7 +4991,7 @@ check_ldlf_inspector <- function(dataframe1,
   # Merge
   dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
   # Check bigs weight and measuretype
-  comparison_measuretype_bigsweight <- vector_comparison(
+  comparison_measuretype_bigsweight <- codama::vector_comparison(
     first_vector = dataframe1$sizemeasuretype_code,
     second_vector = measuretype_bigsweight,
     comparison_type = "difference",
@@ -4727,7 +4999,7 @@ check_ldlf_inspector <- function(dataframe1,
   )
   dataframe1$logical_bigsweight <- !(comparison_measuretype_bigsweight$logical & ((dataframe1$sample_bigsweight == 0 & dataframe1$sample_totalweight == 0) | (is.na(dataframe1$sample_bigsweight) & is.na(dataframe1$sample_totalweight))))
   # Check smalls weight and measuretype
-  comparison_measuretype_smallsweight <- vector_comparison(
+  comparison_measuretype_smallsweight <- codama::vector_comparison(
     first_vector = dataframe1$sizemeasuretype_code,
     second_vector = measuretype_smallsweight,
     comparison_type = "difference",
@@ -4786,15 +5058,33 @@ check_distribution_inspector <- function(dataframe1,
                                          weightcategory_big = c("W-2"),
                                          weightcategory_unknown = c("W-9")) {
   # 0 - Global variables assignement ----
+  well_id <- NULL
+  trip_id <- NULL
+  well_name <- NULL
+  weightcategory_code <- NULL
+  wellactivityspecies_weight <- NULL
+  specie_name <- NULL
+  sample_id <- NULL
+  weight_small <- NULL
+  weight_small_unknown <- NULL
+  sample_smallsweight <- NULL
+  sample_bigsweight <- NULL
+  weight_big <- NULL
+  weight_small_total <- NULL
+  sample_smallsweight_bis <- NULL
+  sample_bigsweight_bis <- NULL
+  weight_small_total_bis <- NULL
+  weight_big_bis <- NULL
+  sample_well <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight"),
     column_type = c("character", "character", "character", "numeric", "numeric"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight"),
@@ -4804,31 +5094,31 @@ check_distribution_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("well_id", "well_well", "trip_id"),
+    column_name = c("well_id", "well_name", "trip_id"),
     column_type = c("character", "character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("well_id", "well_well", "trip_id"),
+      column_name = c("well_id", "well_name", "trip_id"),
       column_type = c("character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("well_id", "well_well", "trip_id")]
+    dataframe2 <- dataframe2[, c("well_id", "well_name", "trip_id")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
     column_name = c("wellactivity_id", "well_id"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
       column_name = c("wellactivity_id", "well_id"),
@@ -4838,14 +5128,14 @@ check_distribution_inspector <- function(dataframe1,
   } else {
     dataframe3 <- dataframe3[, c("wellactivity_id", "well_id")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe4,
     type = "data.frame",
     column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "specie_name", "wellactivityspecies_weight"),
     column_type = c("character", "character", "character", "character", "numeric"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe4,
       type = "data.frame",
       column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "specie_name", "wellactivityspecies_weight"),
@@ -4856,58 +5146,58 @@ check_distribution_inspector <- function(dataframe1,
     dataframe4 <- dataframe4[, c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "specie_name", "wellactivityspecies_weight")]
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = species,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = species,
       type = "character",
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = weightcategory_small,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = weightcategory_small,
       type = "character",
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = weightcategory_big,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = weightcategory_big,
       type = "character",
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = weightcategory_unknown,
     type = "character",
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = weightcategory_unknown,
       type = "character",
       output = "message"
@@ -4921,25 +5211,25 @@ check_distribution_inspector <- function(dataframe1,
   dataframe2 <- merge(dataframe2, dataframe4, by = "wellactivity_id", all.x = TRUE)
   # Calculation small weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2_small <- dataframe2 %>%
-    dplyr::group_by(well_id, trip_id, well_well) %>%
+    dplyr::group_by(well_id, trip_id, well_name) %>%
     dplyr::filter(weightcategory_code %in% weightcategory_small) %>%
     dplyr::reframe(weight_small = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   dataframe2_small_unknown <- dataframe2 %>%
-    dplyr::group_by(well_id, trip_id, well_well) %>%
+    dplyr::group_by(well_id, trip_id, well_name) %>%
     dplyr::filter(weightcategory_code %in% weightcategory_unknown & specie_name %in% species) %>%
     dplyr::reframe(weight_small_unknown = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   # Calculation big weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2_big <- dataframe2 %>%
-    dplyr::group_by(well_id, trip_id, well_well) %>%
+    dplyr::group_by(well_id, trip_id, well_name) %>%
     dplyr::filter(weightcategory_code %in% weightcategory_big) %>%
     dplyr::reframe(weight_big = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   # Merge
-  dataframe1 <- merge(dataframe1, dataframe2_small, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_well"), all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe2_small_unknown, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_well"), all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe2_big, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_well"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2_small, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_name"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2_small_unknown, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_name"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2_big, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_name"), all.x = TRUE)
   # Calculation small weight total (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe1 <- dataframe1 %>%
     dplyr::group_by(sample_id) %>%
@@ -4953,14 +5243,14 @@ check_distribution_inspector <- function(dataframe1,
       weight_small_total_bis = dplyr::coalesce(weight_small_total, 0)
     )
   # Check small weight
-  comparison_smallsweight <- vector_comparison(
+  comparison_smallsweight <- codama::vector_comparison(
     first_vector = dataframe1$weight_small_total_bis,
     second_vector = dataframe1$sample_smallsweight_bis,
     comparison_type = "equal",
     output = "report"
   )
   # Check smalls weight
-  comparison_bigsweight <- vector_comparison(
+  comparison_bigsweight <- codama::vector_comparison(
     first_vector = dataframe1$weight_big_bis,
     second_vector = dataframe1$sample_bigsweight_bis,
     comparison_type = "equal",
@@ -5017,15 +5307,33 @@ check_anapo_inspector <- function(dataframe1,
                                   nb_positions_vms_min = 20,
                                   threshold = 10) {
   # 0 - Global variables assignement ----
+  vms_date <- NULL
+  vessel_code <- NULL
+  nb_vms <- NULL
+  activity_position_geom <- NULL
+  vms_position_geom <- NULL
+  activity_id <- NULL
+  distance <- NULL
+  min_distance <- NULL
+  activity_time_bis <- NULL
+  vms_time <- NULL
+  activity_date_time <- NULL
+  vms_date_time <- NULL
+  duration <- NULL
+  score <- NULL
+  nb_vms_bis <- NULL
+  activity_date <- NULL
+  activity_time <- NULL
+  activity_position <- NULL
   # 1 - Arguments verification ----
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code"),
     column_type = c("character", "Date", "character", "character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code"),
@@ -5035,14 +5343,14 @@ check_anapo_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("activity_id", "harbour_id"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
       column_name = c("activity_id", "harbour_id"),
@@ -5052,14 +5360,14 @@ check_anapo_inspector <- function(dataframe1,
   } else {
     dataframe2 <- dataframe2[, c("activity_id", "harbour_id")]
   }
-  if (r_table_checking(
+  if (codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
     column_name = c("vms_date", "vms_time", "vms_position", "vessel_code"),
     column_type = c("Date", "character", "character", "character"),
     output = "logical"
   ) != TRUE) {
-    r_table_checking(
+    codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
       column_name = c("vms_date", "vms_time", "vms_position", "vessel_code"),
@@ -5069,26 +5377,26 @@ check_anapo_inspector <- function(dataframe1,
   } else {
     dataframe3 <- dataframe3[, c("vms_date", "vms_time", "vms_position", "vessel_code")]
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = activity_crs,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = activity_crs,
       type = "numeric",
       length = 1L,
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = vms_crs,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = vms_crs,
       type = "numeric",
       length = 1L,
@@ -5096,39 +5404,39 @@ check_anapo_inspector <- function(dataframe1,
     ))
   }
   # Checks the type and values of output
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = nb_positions_vms_min,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = nb_positions_vms_min,
       type = "numeric",
       length = 1L,
       output = "message"
     ))
   }
-  if (r_type_checking(
+  if (codama::r_type_checking(
     r_object = threshold,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
-    return(r_type_checking(
+    return(codama::r_type_checking(
       r_object = threshold,
       type = "numeric",
       length = 1L,
@@ -5151,7 +5459,7 @@ check_anapo_inspector <- function(dataframe1,
       nb_vms_bis = dplyr::coalesce(nb_vms, 0),
     )
   # Indicates activity whether in harbour
-  comparison_harbour <- vector_comparison(
+  comparison_harbour <- codama::vector_comparison(
     first_vector = dataframe1$activity_id,
     second_vector = dataframe2$activity_id,
     comparison_type = "difference",
@@ -5171,7 +5479,7 @@ check_anapo_inspector <- function(dataframe1,
     sf::st_geometry()
   # Calculation of the minimum distance between the activity and the nearest day's VMS
   dataframe_calcul <- dataframe_calcul %>%
-    dplyr::mutate(distance = units::drop_units(sf::st_distance(x = activity_position_geom, y = vms_position_geom, by_element = TRUE)/1852))
+    dplyr::mutate(distance = units::drop_units(sf::st_distance(x = activity_position_geom, y = vms_position_geom, by_element = TRUE) / 1852))
   # Remove formats spatial data
   dataframe_calcul <- dataframe_calcul %>%
     sf::st_drop_geometry() %>%
@@ -5211,10 +5519,10 @@ check_anapo_inspector <- function(dataframe1,
   # Data with calcul VMS
   dataframe_detail <- merge(dataframe_detail, dataframe_calcul, by = c("activity_id", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position"), all.x = TRUE)
   # Data without calcul VMS
-  dataframe_detail<- dataframe_detail %>% dplyr::rename(
+  dataframe_detail <- dataframe_detail %>% dplyr::rename(
     activity_date = vms_date,
   )
-  dataframe_detail<-dplyr::bind_rows(dataframe_detail,dplyr::anti_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by = c("activity_date" = "vms_date","vessel_code" = "vessel_code")))
+  dataframe_detail <- dplyr::bind_rows(dataframe_detail, dplyr::anti_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by = c("activity_date" = "vms_date", "vessel_code" = "vessel_code")))
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
   dataframe_detail <- subset(dataframe_detail, select = -c(vessel_code, min_distance, activity_time_bis, activity_date_time, vms_date_time))
@@ -5322,7 +5630,10 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
         if (any(grep("observe_", data_connection[1]))) {
           # Read the SQL query
           trip_id_sql <- paste(
-            readLines(file.path(".", "sql", "trip_id.sql")),
+            readLines(con = system.file("sql",
+              "trip_id.sql",
+              package = "AkadoR"
+            )),
             collapse = "\n"
           )
           # Transform the SQL query
@@ -5380,6 +5691,59 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
 # Shiny function : Performs all calculations to test for inconsistencies
 calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data) {
   moduleServer(id, function(input, output, session) {
+    # Local binding global variables
+    trip_fishingtime <- NULL
+    sum_route_fishingtime <- NULL
+    trip_seatime <- NULL
+    sum_route_seatime <- NULL
+    vessel_capacity <- NULL
+    trip_weighttotal <- NULL
+    trip_landingtotalweight <- NULL
+    sum_weightlanding <- NULL
+    trip_id <- NULL
+    trip_startdate <- NULL
+    trip_enddate <- NULL
+    button <- NULL
+    harbour_name_landing <- NULL
+    harbour_name_departure <- NULL
+    schooltype_code <- NULL
+    association_object_count <- NULL
+    vesselactivity_code <- NULL
+    successstatus_code <- NULL
+    activity_weight <- NULL
+    type <- NULL
+    ocean_name <- NULL
+    zfao_ocean <- NULL
+    sum_catch_weight <- NULL
+    sum_measuredcount <- NULL
+    sum_count <- NULL
+    activity_seasurfacetemperature <- NULL
+    sample_supersample <- NULL
+    count_subsamplenumber_N0 <- NULL
+    count_subsamplenumber_0 <- NULL
+    count_subsamplenumber_1 <- NULL
+    count_samplespecies <- NULL
+    sample_well <- NULL
+    sample_smallsweight <- NULL
+    sample_bigsweight <- NULL
+    sample_totalweight <- NULL
+    little_percentage <- NULL
+    big_percentage <- NULL
+    measure1_percentage <- NULL
+    measure2_percentage <- NULL
+    sampletype_code <- NULL
+    weightedweight <- NULL
+    vesseltype_name <- NULL
+    sum_landing_weight <- NULL
+    count_activity <- NULL
+    weight_small_total <- NULL
+    weight_big <- NULL
+    activity_date <- NULL
+    date_group <- NULL
+    activity_id <- NULL
+    nb_vms <- NULL
+    min_distance <- NULL
+    max_score <- NULL
     calcul_check <- reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select())) {
@@ -5396,7 +5760,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Retrieve trip activity
           # Read the SQL query to retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
           activity_id_sql <- paste(
-            readLines(file.path("sql", "activity_id.sql")),
+            readLines(con = system.file("sql",
+              "activity_id.sql",
+              package = "AkadoR"
+            )),
             collapse = "\n"
           )
           # Replaces the anchors with the selected values
@@ -5413,7 +5780,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Retrieve trip sample
           # Read the SQL query to retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
           sample_id_sql <- paste(
-            readLines(file.path("sql", "sample_id.sql")),
+            readLines(con = system.file("sql",
+              "sample_id.sql",
+              package = "AkadoR"
+            )),
             collapse = "\n"
           )
           # Replaces the anchors with the selected values
@@ -5430,7 +5800,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Retrieve trip sample species
           # Read the SQL query to retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
           samplespecies_id_sql <- paste(
-            readLines(file.path("sql", "samplespecies_id.sql")),
+            readLines(con = system.file("sql",
+              "samplespecies_id.sql",
+              package = "AkadoR"
+            )),
             collapse = "\n"
           )
           # Replaces the anchors with the selected values
@@ -5447,7 +5820,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Retrieve trip sample species measure
           # Read the SQL query to retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
           samplespeciesmeasure_id_sql <- paste(
-            readLines(file.path("sql", "samplespeciesmeasure_id.sql")),
+            readLines(con = system.file("sql",
+              "samplespeciesmeasure_id.sql",
+              package = "AkadoR"
+            )),
             collapse = "\n"
           )
           # Replaces the anchors with the selected values
@@ -5543,130 +5919,190 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             output = "report"
           )
           # Uses a function which indicates whether that sum of the weight indicated for the catch is consistent with activity weight
-          check_weight_inspector_data<-check_weight_inspector(
+          check_weight_inspector_data <- check_weight_inspector(
             data_connection = data_connection,
             type_select = "activity",
             select = activity_select$activity_id,
             output = "report"
           )
           # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid limits
-          check_length_class_inspector_data<-check_length_class_inspector(
+          check_length_class_inspector_data <- check_length_class_inspector(
             data_connection = data_connection,
             type_select = "sample",
             select = samplespeciesmeasure_select$samplespeciesmeasure_id,
             output = "report"
           )
           # Uses a function which indicates whether that total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
-          check_measure_inspector_data<-check_measure_inspector(
+          check_measure_inspector_data <- check_measure_inspector(
             data_connection = data_connection,
             type_select = "sample",
             select = sample_select$sample_id,
             output = "report"
           )
           # Uses a function which indicates whether that sea surface temperature is consistent with the valid limits
-          check_temperature_inspector_data<-check_temperature_inspector(
+          check_temperature_inspector_data <- check_temperature_inspector(
             data_connection = data_connection,
             type_select = "activity",
             select = activity_select$activity_id,
             output = "report"
           )
           # Uses a function which indicates whether that species sampled is consistent with species authorized
-          check_species_inspector_data<-check_species_inspector(
+          check_species_inspector_data <- check_species_inspector(
             data_connection = data_connection,
             type_select = "sample",
             select = samplespecies_select$samplespecies_id,
             output = "report"
           )
           # Uses a function to extract data from samplespeciesmeasure in connection with samplespecies
-          data_samplespecies_samplespeciesmeasure<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","samplespecies_samplespeciesmeasure.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = samplespecies_select$samplespecies_id))
+          data_samplespecies_samplespeciesmeasure <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "samplespecies_samplespeciesmeasure.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = samplespecies_select$samplespecies_id)
+          )
           # Uses a function to extract data from samplespecies in connection with sample
-          data_sample_samplespecies<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","sample_samplespecies.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = sample_select$sample_id))
+          data_sample_samplespecies <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "sample_samplespecies.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = sample_select$sample_id)
+          )
           # Uses a function to extract data from sample
-          data_sample<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","sample.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = sample_select$sample_id))
+          data_sample <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "sample.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = sample_select$sample_id)
+          )
           # Uses a function to extract data from sample species
-          data_samplespecies<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","samplespecies.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = samplespecies_select$samplespecies_id))
+          data_samplespecies <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "samplespecies.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = samplespecies_select$samplespecies_id)
+          )
           # Uses a function to extract data from well
-          data_well<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","well.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = trip_select()$trip_id))
+          data_well <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "well.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = trip_select()$trip_id)
+          )
           # Uses a function to extract data from sample species measure
-          data_samplespeciesmeasure<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","samplespeciesmeasure.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = samplespeciesmeasure_select$samplespeciesmeasure_id))
+          data_samplespeciesmeasure <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "samplespeciesmeasure.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = samplespeciesmeasure_select$samplespeciesmeasure_id)
+          )
           # Uses a function to extract data from landing
-          data_landing<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","landing.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = trip_select()$trip_id))
+          data_landing <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "landing.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = trip_select()$trip_id)
+          )
           # Uses a function to extract data from sample activity
-          data_sampleactivity<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","sampleactivity.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = sample_select$sample_id))
+          data_sampleactivity <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "sampleactivity.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = sample_select$sample_id)
+          )
           # Uses a function to extract data from trip
-          data_trip<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","trip.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = trip_select()$trip_id))
+          data_trip <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "trip.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = trip_select()$trip_id)
+          )
           # Uses a function to extract data from activity in connection with sample
-          data_sample_activity<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","sample_activity.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = sample_select$sample_id))
+          data_sample_activity <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "sample_activity.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = sample_select$sample_id)
+          )
           # Uses a function to extract data from wellactivity in connection with trip
-          wellactivity_select<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","trip_wellactivity.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = trip_select()$trip_id))
+          wellactivity_select <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "trip_wellactivity.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = trip_select()$trip_id)
+          )
           # Uses a function to extract data from wellactivity
-          data_wellactivity<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","wellactivity.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = wellactivity_select$wellactivity_id))
+          data_wellactivity <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "wellactivity.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = wellactivity_select$wellactivity_id)
+          )
           # Uses a function to extract data from wellactivityspecies
-          data_wellactivityspecies<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","wellactivityspecies.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = wellactivity_select$wellactivity_id))
+          data_wellactivityspecies <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "wellactivityspecies.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = wellactivity_select$wellactivity_id)
+          )
           # Uses a function to extract data from activity
-          data_activity<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","activity.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = activity_select$activity_id))
+          data_activity <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "activity.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = activity_select$activity_id)
+          )
           # Uses a function to extract data from activity_harbour
-          data_activity_harbour<-furdeb::data_extraction(
-            type = "database", 
-            file_path = file.path("sql","activity_harbour.sql"), 
-            database_connection = data_connection, 
-            anchor = list(select_item = activity_select$activity_id))
+          data_activity_harbour <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+              "activity_harbour.sql",
+              package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = activity_select$activity_id)
+          )
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           if (!is.null(config_data()[["databases_configuration"]][["vms"]])) {
@@ -5679,16 +6115,20 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               db_port = config_data()[["databases_configuration"]][["vms"]][["port"]]
             )
             # Uses a function to extract data from VMS
-            data_vms<-furdeb::data_extraction(
-              type = "database", 
-              file_path = file.path("sql","vms.sql"), 
-              database_connection = data_connection_vms, 
-              anchor = list(select_item = unique(paste(data_activity$vessel_code, data_activity$activity_date,sep = "_"))))
+            data_vms <- furdeb::data_extraction(
+              type = "database",
+              file_path = system.file("sql",
+                "vms.sql",
+                package = "AkadoR"
+              ),
+              database_connection = data_connection_vms,
+              anchor = list(select_item = unique(paste(data_activity$vessel_code, data_activity$activity_date, sep = "_")))
+            )
             # Force date type, otherwise empty dataframe sets to charactere format
-            data_vms$vms_date<-as.Date(data_vms$vms_date)
+            data_vms$vms_date <- as.Date(data_vms$vms_date)
             # Disconnection to the bases
             DBI::dbDisconnect(data_connection_vms[[2]])
-            }
+          }
           # Uses a function to format the table
           check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
           # Uses a function to format the table
@@ -5729,12 +6169,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Add missing date
           check_temporal_limit_data_plot <- as.data.frame(check_temporal_limit_data_plot) %>%
             dplyr::group_by(trip_id) %>%
-            tidyr::complete(activity_date = seq.Date(min(trip_startdate[1],trip_enddate[1]), max(trip_startdate[1],trip_enddate[1]), by = "day"), trip_startdate = trip_startdate[1], trip_enddate = trip_enddate[1])
+            tidyr::complete(activity_date = seq.Date(min(trip_startdate[1], trip_enddate[1]), max(trip_startdate[1], trip_enddate[1]), by = "day"), trip_startdate = trip_startdate[1], trip_enddate = trip_enddate[1])
           # Replaces NA for missing dates
           check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date = TRUE, exter_activity_date = FALSE, count_freq = 0, logical = FALSE))
           check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
           # Add button and data for plot in table
-          check_temporal_limit <- data_button_plot(data_plot = check_temporal_limit_data_plot, data_display = check_temporal_limit, data_id = trip_select(), colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("trip_id","vessel_code","trip_startdate","trip_enddate"), name_button = "button_temporal_limit")
+          check_temporal_limit <- data_button_plot(data_plot = check_temporal_limit_data_plot, data_display = check_temporal_limit, data_id = trip_select(), colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("trip_id", "vessel_code", "trip_startdate", "trip_enddate"), name_button = "button_temporal_limit")
           # Uses a function to format the table
           check_temporal_limit <- table_display_trip(check_temporal_limit, trip_select(), type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5772,7 +6212,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Weigth` = activity_weight
           )
           # Add button and data for plot in table
-          check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select, colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id","vessel_code","trip_enddate", "activity_date", "activity_number", "type", "ocean_name", "ocean_name_pos"), name_button = "button_position")
+          check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select, colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_name", "zfao_ocean"), name_button = "button_position")
           # Uses a function to format the table
           check_position <- table_display_trip(check_position, activity_select, type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5780,7 +6220,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             .data = check_position,
             `Type` = type,
             `Ocean trip` = ocean_name,
-            `Ocean activity` = ocean_name_pos,
+            `Ocean activity` = zfao_ocean,
             `Details problem` = button
           )
           # Uses a function to format the table
@@ -5810,18 +6250,22 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function to format the table
           check_species <- table_display_trip(check_species_inspector_data, samplespecies_select, type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of measurement
-          check_sample_without_measure_inspector_data<-check_sample_without_measure_inspector(dataframe1=data_samplespecies_samplespeciesmeasure, output="report")
+          check_sample_without_measure_inspector_data <- check_sample_without_measure_inspector(dataframe1 = data_samplespecies_samplespeciesmeasure, output = "report")
           # Uses a function to format the table
           check_sample_without_measure <- table_display_trip(check_sample_without_measure_inspector_data, samplespecies_select, type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of species
-          check_sample_without_species_inspector_data<-check_sample_without_species_inspector(dataframe1=data_sample_samplespecies, output="report")
+          check_sample_without_species_inspector_data <- check_sample_without_species_inspector(dataframe1 = data_sample_samplespecies, output = "report")
           # Uses a function to format the table
           check_sample_without_species <- table_display_trip(check_sample_without_species_inspector_data, sample_select, type_inconsistency = "error")
           # Checks data consistency
-          if(nrow(data_sample)!=length(sample_select$sample_id)){warning(text_object_more_or_less(id=sample_select$sample_id ,result_check=data_sample$sample_id))}
-          if(nrow(data_samplespecies)!=length(samplespecies_select$samplespecies_id)){warning(text_object_more_or_less(id=samplespecies_select$samplespecies_id, result_check=data_sample$samplespecies_id))}
+          if (nrow(data_sample) != length(sample_select$sample_id)) {
+            warning(text_object_more_or_less(id = sample_select$sample_id, result_check = data_sample$sample_id))
+          }
+          if (nrow(data_samplespecies) != length(samplespecies_select$samplespecies_id)) {
+            warning(text_object_more_or_less(id = samplespecies_select$samplespecies_id, result_check = data_sample$samplespecies_id))
+          }
           # Uses a function which indicates whether the sample is consistent with the subsample number
-          check_super_sample_number_consistent_inspector_data<-check_super_sample_number_consistent_inspector(dataframe1=data_sample, dataframe2=data_samplespecies, output="report")
+          check_super_sample_number_consistent_inspector_data <- check_super_sample_number_consistent_inspector(dataframe1 = data_sample, dataframe2 = data_samplespecies, output = "report")
           # Uses a function to format the table
           check_super_sample_number_consistent <- table_display_trip(check_super_sample_number_consistent_inspector_data, sample_select, type_inconsistency = "error")
           check_super_sample_number_consistent <- dplyr::rename(
@@ -5833,7 +6277,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Counts number sample species` = count_samplespecies
           )
           # Uses a function which indicates whether the sample well number is consistent with the associated trip well numbers
-          check_well_number_consistent_inspector_data<-check_well_number_consistent_inspector(dataframe1=data_sample, dataframe2=data_well, output="report")
+          check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = data_sample, dataframe2 = data_well, output = "report")
           # Uses a function to format the table
           check_well_number_consistent <- table_display_trip(check_well_number_consistent_inspector_data, sample_select, type_inconsistency = "error")
           check_well_number_consistent <- dplyr::rename(
@@ -5841,9 +6285,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Well` = sample_well
           )
           # Checks data consistency
-          if(nrow(data_samplespeciesmeasure)!=length(samplespeciesmeasure_select$samplespeciesmeasure_id)){warning(text_object_more_or_less(id=samplespeciesmeasure_select$samplespeciesmeasure_id ,result_check=data_samplespeciesmeasure$samplespeciesmeasure_id))}
+          if (nrow(data_samplespeciesmeasure) != length(samplespeciesmeasure_select$samplespeciesmeasure_id)) {
+            warning(text_object_more_or_less(id = samplespeciesmeasure_select$samplespeciesmeasure_id, result_check = data_samplespeciesmeasure$samplespeciesmeasure_id))
+          }
           # Uses a function which indicates whether the sample is consistent for the percentage of little and big fish sampled
-          check_little_big_inspector_data<-check_little_big_inspector(dataframe1=data_sample, dataframe2=data_samplespecies, dataframe3 = data_samplespeciesmeasure , output="report")
+          check_little_big_inspector_data <- check_little_big_inspector(dataframe1 = data_sample, dataframe2 = data_samplespecies, dataframe3 = data_samplespeciesmeasure, output = "report")
           # Uses a function to format the table
           check_little_big <- table_display_trip(check_little_big_inspector_data, sample_select, type_inconsistency = "error")
           check_little_big$little_percentage <- trunc(check_little_big$little_percentage * 1000) / 1000
@@ -5861,9 +6307,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Measurement type PD1 %` = measure2_percentage
           )
           # Checks data consistency
-          if(nrow(data_trip)!=length(trip_select()$trip_id)){warning(text_object_more_or_less(id=trip_select()$trip_id ,result_check=data_trip$trip_id))}
+          if (nrow(data_trip) != length(trip_select()$trip_id)) {
+            warning(text_object_more_or_less(id = trip_select()$trip_id, result_check = data_trip$trip_id))
+          }
           # Uses a function which indicates whether the sample is consistent for the weighting
-          check_weighting_inspector_data<-check_weighting_inspector(dataframe1=data_sample, dataframe2=data_sampleactivity, dataframe3 = data_trip, dataframe4 = data_landing , output="report")
+          check_weighting_inspector_data <- check_weighting_inspector(dataframe1 = data_sample, dataframe2 = data_sampleactivity, dataframe3 = data_trip, dataframe4 = data_landing, output = "report")
           # Uses a function to format the table
           check_weighting <- table_display_trip(check_weighting_inspector_data, sample_select, type_inconsistency = "error")
           check_weighting <- dplyr::rename(
@@ -5873,11 +6321,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = sample_totalweight,
             `Sample type` = sampletype_code,
             `Sum weighted weights` = weightedweight,
-            `Vessel type` = vesseltype_label1,
+            `Vessel type` = vesseltype_name,
             `Sum weight fresh landings baitboats` = sum_landing_weight
-            )
+          )
           # Uses a function which indicates whether the sample weight (m10 and p10) is consistent for the global weight
-          check_weight_sample_inspector_data<-check_weight_sample_inspector(dataframe1=data_sample, output="report")
+          check_weight_sample_inspector_data <- check_weight_sample_inspector(dataframe1 = data_sample, output = "report")
           # Uses a function to format the table
           check_weight_sample <- table_display_trip(check_weight_sample_inspector_data, sample_select, type_inconsistency = "error")
           check_weight_sample <- dplyr::rename(
@@ -5886,8 +6334,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Big fish weight` = sample_bigsweight,
             `Total weight` = sample_totalweight
           )
-          # Uses a function which indicates whether the sample and the existence of the activity 
-          check_activity_sample_inspector_data<-check_activity_sample_inspector(dataframe1=data_sample_activity, output="report")
+          # Uses a function which indicates whether the sample and the existence of the activity
+          check_activity_sample_inspector_data <- check_activity_sample_inspector(dataframe1 = data_sample_activity, output = "report")
           # Uses a function to format the table
           check_activity_sample <- table_display_trip(check_activity_sample_inspector_data, sample_select, type_inconsistency = "error")
           check_activity_sample <- dplyr::rename(
@@ -5895,7 +6343,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Activity Count` = count_activity
           )
           # Uses a function which indicates whether the sample measurement types is consistent for the species or weight values
-          check_ldlf_inspector_data<-check_ldlf_inspector(dataframe1=data_samplespecies, dataframe2 = data_sample, output="report")
+          check_ldlf_inspector_data <- check_ldlf_inspector(dataframe1 = data_samplespecies, dataframe2 = data_sample, output = "report")
           # Uses a function to format the table
           check_ldlf <- table_display_trip(check_ldlf_inspector_data, samplespecies_select, type_inconsistency = "error")
           check_ldlf <- dplyr::rename(
@@ -5905,7 +6353,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the small and large sample weights is consistent for the sum of the small and big weights of the associated well
-          check_distribution_inspector_data<-check_distribution_inspector(dataframe1=data_sample,dataframe2 = data_well, dataframe3 = data_wellactivity, dataframe4 = data_wellactivityspecies, output="report")
+          check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = data_sample, dataframe2 = data_well, dataframe3 = data_wellactivity, dataframe4 = data_wellactivityspecies, output = "report")
           # Uses a function to format the table
           check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select, type_inconsistency = "error")
           check_distribution <- dplyr::rename(
@@ -5918,41 +6366,50 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function which indicates whether the activity position is consistent for VMS position
           # Checks data consistency
-          if(nrow(data_activity)!=length(activity_select$activity_id)){warning(text_object_more_or_less(id=activity_select$activity_id ,result_check=data_activity$activity_id))}
-          if(exists("data_vms")){
+          if (nrow(data_activity) != length(activity_select$activity_id)) {
+            warning(text_object_more_or_less(id = activity_select$activity_id, result_check = data_activity$activity_id))
+          }
+          if (exists("data_vms")) {
             # Recovers all trip positions
-            check_anapo_inspector_data<-check_anapo_inspector(dataframe1 = data_activity, dataframe2 = data_activity_harbour, dataframe3 = data_vms, activity_crs = unique(data_activity$activity_crs), vms_crs = ifelse(length(unique(data_vms$vms_crs))==0,4326,unique(data_vms$vms_crs)), output = "report" )
-            check_anapo_inspector_dataplot<-merge(check_anapo_inspector_data[[2]],data_activity[,c("activity_id", "trip_id", "activity_number")], by= "activity_id")
-            check_anapo_inspector_dataplot_trip<- check_anapo_inspector_dataplot %>% dplyr::select("trip_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs") %>% dplyr::group_by(trip_id) %>% dplyr::distinct()
+            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = data_activity, dataframe2 = data_activity_harbour, dataframe3 = data_vms, activity_crs = unique(data_activity$activity_crs), vms_crs = ifelse(length(unique(data_vms$vms_crs)) == 0, 4326, unique(data_vms$vms_crs)), output = "report")
+            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], data_activity[, c("activity_id", "trip_id", "activity_number")], by = "activity_id")
+            check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot %>%
+              dplyr::select("trip_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs") %>%
+              dplyr::group_by(trip_id) %>%
+              dplyr::distinct()
             # Retrieves activity positions for the previous, current and next day
-            check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group=activity_date)
-            check_anapo_inspector_dataplot_trip_prior <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group=activity_date-1)
-            check_anapo_inspector_dataplot_trip_post <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group=activity_date+1)
-            check_anapo_inspector_dataplot_range_date<-rbind(check_anapo_inspector_dataplot_trip, check_anapo_inspector_dataplot_trip_prior, check_anapo_inspector_dataplot_trip_post) %>% dplyr::group_by(date_group, trip_id)%>% dplyr::distinct()
-            check_anapo_inspector_dataplot_range_date <- merge(check_anapo_inspector_dataplot_range_date, data_activity[,c("activity_date","trip_id","activity_id")], by.x = c("date_group", "trip_id"), by.y = c("activity_date", "trip_id") )
-            check_anapo_inspector_dataplot_range_date %>% dplyr::group_by(date_group, trip_id, activity_id)%>% dplyr::distinct() 
-            code_txt<-data_to_text(name_data = "check_anapo_inspector_dataplot_range_date",name_col="trip_data",name_button="NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number"), colname_info = "NULL")
-            eval(parse(text=code_txt))
-            check_anapo_inspector_dataplot <-check_anapo_inspector_dataplot%>% dplyr::select(-c("activity_number","activity_date"))
-            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by= "activity_id")
+            check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group = activity_date)
+            check_anapo_inspector_dataplot_trip_prior <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group = activity_date - 1)
+            check_anapo_inspector_dataplot_trip_post <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group = activity_date + 1)
+            check_anapo_inspector_dataplot_range_date <- rbind(check_anapo_inspector_dataplot_trip, check_anapo_inspector_dataplot_trip_prior, check_anapo_inspector_dataplot_trip_post) %>%
+              dplyr::group_by(date_group, trip_id) %>%
+              dplyr::distinct()
+            check_anapo_inspector_dataplot_range_date <- merge(check_anapo_inspector_dataplot_range_date, data_activity[, c("activity_date", "trip_id", "activity_id")], by.x = c("date_group", "trip_id"), by.y = c("activity_date", "trip_id"))
+            check_anapo_inspector_dataplot_range_date %>%
+              dplyr::group_by(date_group, trip_id, activity_id) %>%
+              dplyr::distinct()
+            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_range_date", name_col = "trip_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number"), colname_info = "NULL")
+            eval(parse(text = code_txt))
+            check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("activity_number", "activity_date"))
+            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = "activity_id")
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
             # Add button and data for plot in table
-            check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data[[1]], data_id = activity_select, colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_time", "activity_number","activity_position", "activity_crs", "vms_crs", "activity_date", "trip_data"), name_button = "button_anapo")
+            check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data[[1]], data_id = activity_select, colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_time", "activity_number", "activity_position", "activity_crs", "vms_crs", "activity_date", "trip_data"), name_button = "button_anapo")
             # Uses a function to format the table
             check_anapo <- table_display_trip(check_anapo, activity_select, type_inconsistency = "error")
             check_anapo$min_distance <- trunc(check_anapo$min_distance * 1000) / 1000
             check_anapo$max_score <- trunc(check_anapo$max_score * 1000) / 1000
             check_anapo <- dplyr::rename(
               .data = check_anapo,
-              `Number of VMS` = nb_vms, 
+              `Number of VMS` = nb_vms,
               `Minimale distance` = min_distance,
               `Maximum score` = max_score,
               `Details problem` = button
             )
-          }else{
+          } else {
             check_anapo <- data.frame()
-            }
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt,check_position,check_weight,check_length_class,check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo))
+          }
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo))
         }
       }
     })
@@ -5993,7 +6450,7 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
 # Shiny function : table display
 table_server <- function(id, data, number, parent_in, text_error_trip_select, trip_select, calcul_check, autoWidth = FALSE, columnDefs = NULL) {
   moduleServer(id, function(input, output, session) {
-    output$table <- renderDT(
+    output$table <- DT::renderDT(
       {
         # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
         if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
@@ -6005,49 +6462,64 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
           }
         }
       },
-      escape = FALSE, rownames = FALSE,
-      extensions = "Buttons", 
-      options = list(lengthChange = FALSE, scrollX = TRUE, autoWidth= autoWidth, columnDefs = unlist(list(list(list(className = 'dt-left', targets = "_all")),columnDefs ),recursive = F),  dom = 'Bfrtip',
-                     buttons = 
-                       list(list(extend = "copy", text ="Copy data displayed"),
-                       list(extend = "collection", text = "Download all data", action = DT::JS(paste0("function ( e, dt, node, config ) {Shiny.setInputValue('button_download', ",number,", {priority: 'event'});}"))))))
+      escape = FALSE,
+      rownames = FALSE,
+      extensions = "Buttons",
+      options = list(
+        lengthChange = FALSE, scrollX = TRUE, autoWidth = autoWidth, columnDefs = unlist(list(list(list(className = "dt-left", targets = "_all")), columnDefs), recursive = F), dom = "Bfrtip",
+        buttons =
+          list(
+            list(extend = "copy", text = "Copy data displayed"),
+            list(extend = "collection", text = "Download all data", action = DT::JS(paste0("function ( e, dt, node, config ) {Shiny.setInputValue('button_download', ", number, ", {priority: 'event'});}")))
+          )
+      )
+    )
   })
 }
 
 window_button_download <- function(number) {
-      modalDialog(downloadButton(outputId="download_csv",label="CSV"),
-                  downloadButton(outputId="download_excel",label="Excel"),
-                  fade = TRUE,
-                  easyClose = TRUE,
-                  footer = NULL, 
-                  title = "Download Table")
+  modalDialog(downloadButton(outputId = "download_csv", label = "CSV"),
+    downloadButton(outputId = "download_excel", label = "Excel"),
+    fade = TRUE,
+    easyClose = TRUE,
+    footer = NULL,
+    title = "Download Table"
+  )
 }
 
-# Shiny function : table display
 table_ui <- function(id, title, text = NULL) {
   div(
     id = paste0("div_", id),
     class = "col-sm-12 col-md-6 col-lg-4",
-    box(
+    shinydashboard::box(
       width = "100%",
       title = title,
-      status = "primary", 
+      status = "primary",
       solidHeader = TRUE,
       HTML(text),
-      withSpinner(DTOutput(NS(namespace = id, id = "table")), type = 6, size = 0.5, proxy.height = "70px")
+      shinycssloaders::withSpinner(DT::DTOutput(NS(namespace = id, id = "table")), type = 6, size = 0.5, proxy.height = "70px")
     )
   )
 }
 
 # Function which formats the trip data for display inconsistency
 table_display_trip <- function(data, data_info, type_inconsistency) {
+  # Global variables assignement
+  vessel_code <- NULL
+  trip_enddate <- NULL
+  activity_date <- NULL
+  activity_number <- NULL
+  sample_number <- NULL
+  specie_name <- NULL
+  sizemeasuretype_code <- NULL
+  samplespeciesmeasure_sizeclass <- NULL
   # Retrieves the name of the column containing the ID
   colname_id <- grep("_id$", colnames(data), value = TRUE)
   # Deletes duplicate columns
-  all_colname<-c(colnames(data), colnames(data_info))
-  colname_double<-table(all_colname)[table(all_colname)>1]
-  colname_double<-names(colname_double)[!(names(colname_double) %in% colname_id)]
-  data<-data[,!(colnames(data) %in% colname_double)]
+  all_colname <- c(colnames(data), colnames(data_info))
+  colname_double <- table(all_colname)[table(all_colname) > 1]
+  colname_double <- names(colname_double)[!(names(colname_double) %in% colname_id)]
+  data <- data[, !(colnames(data) %in% colname_double)]
   # Combines the consistency test on the data and data identification information
   data <- merge(data_info, data, by = colname_id)
   # Sort rows by date
@@ -6090,7 +6562,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
     data <- dplyr::rename(
       .data = data,
       `FAO code` = specie_name,
-     `Size measure type` = sizemeasuretype_code
+      `Size measure type` = sizemeasuretype_code
     )
   }
   # Modify the table for display purposes specifically for samples species measure : rename column
@@ -6108,25 +6580,27 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
 }
 
 # Function to create a data.frame in character
-data_to_text <- function(name_data,name_col,name_button, colname_id, colname_plot, colname_info){
-   code_txt<-paste0(name_data,' <-', name_data ,'%>%dplyr::group_by(',colname_id,') %>%
-            dplyr::reframe(',name_col," = paste0(",name_button,",paste0(deparse(dplyr::across(.cols=c(",paste0(colname_plot,collapse= ","),'))), collapse = ""), "&",',paste0(colname_info,collapse= ', "&",'),'))%>%
-            dplyr::group_by(',colname_id,') %>% dplyr::filter(dplyr::row_number() == 1)')
+data_to_text <- function(name_data, name_col, name_button, colname_id, colname_plot, colname_info) {
+  code_txt <- paste0(name_data, " <-", name_data, "%>%dplyr::group_by(", colname_id, ") %>%
+            dplyr::reframe(", name_col, " = paste0(", name_button, ",paste0(deparse(dplyr::across(.cols=c(", paste0(colname_plot, collapse = ","), '))), collapse = ""), "&",', paste0(colname_info, collapse = ', "&",'), "))%>%
+            dplyr::group_by(", colname_id, ") %>% dplyr::filter(dplyr::row_number() == 1)")
   return(code_txt)
 }
 
 # Function to create the button in the table that will create the plot
-data_button_plot <- function(data_plot, data_display, data_id, colname_id, colname_plot, colname_info,name_button){
-  # Add line identification 
+data_button_plot <- function(data_plot, data_display, data_id, colname_id, colname_plot, colname_info, name_button) {
+  # Global variables assignement
+  buttontmp <- NULL
+  # Add line identification
   data_plot <- merge(data_id, data_plot, by.x = colname_id, by.y = colname_id, all.x = TRUE)
   # Add button and data for plot in table
-  code_txt<-data_to_text(name_data = "data_plot",name_col = "buttontmp",name_button = '"button&"', colname_id = colname_id, colname_plot = colname_plot, colname_info = colname_info)
-  eval(parse(text=code_txt))
+  code_txt <- data_to_text(name_data = "data_plot", name_col = "buttontmp", name_button = '"button&"', colname_id = colname_id, colname_plot = colname_plot, colname_info = colname_info)
+  eval(parse(text = code_txt))
   data_display <- merge(data_display, data_plot, by = colname_id)
   data_display$button <- NA
-   data_display$button[data_display$logical == FALSE] <- sapply(which(data_display$logical == FALSE), function(c) {
-     as.character(shiny::actionButton(inputId = data_display$buttontmp[c], label = "Detail", onclick = paste0('Shiny.setInputValue(\"',name_button,'\", this.id, {priority: \"event\"})')))
-   })
+  data_display$button[data_display$logical == FALSE] <- sapply(which(data_display$logical == FALSE), function(c) {
+    as.character(shiny::actionButton(inputId = data_display$buttontmp[c], label = "Detail", onclick = paste0('Shiny.setInputValue(\"', name_button, '\", this.id, {priority: \"event\"})')))
+  })
   data_display <- subset(data_display, select = -c(buttontmp))
   return(data_display)
 }
@@ -6158,66 +6632,77 @@ plot_temporal_limit <- function(data, startdate, enddate) {
         tickvals = c(data$count_freq, 1),
         ticktext = c(data$count_freq, 1)
       ),
-      legend = list(orientation = 'h', y=-0.3)
+      legend = list(orientation = "h", y = -0.3)
     )
 }
 
 # Function to create the plot of the consistency of the position for the activity
-plot_position<- function(data){
+plot_position <- function(data) {
+  # Local binding global variables
+  . <- NULL
   # Spatial formatting
   data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
   # Plot
   plotly::plot_ly(
-    data = data_geo,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers",  marker = list(size = 10), hovertemplate = "(%{lat}°,%{lon}°)<extra></extra>")%>%
-    plotly::layout(showlegend=FALSE,mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
+    data = data_geo, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>"
+  ) %>%
+    plotly::layout(showlegend = FALSE, mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
 }
 
 # Function to create the plot of the consistency of the position for the activity and VMS
-plot_anapo<- function(data_vms, crs_vms, position_activity, crs_activity, date, time_activity, number_activity, data_trip){
+plot_anapo <- function(data_vms, crs_vms, position_activity, crs_activity, date, time_activity, number_activity, data_trip) {
+  # Local binding global variables
+  . <- NULL
+  vms_time <- NULL
+  activity_date <- NULL
+  activity_time <- NULL
+  distance <- NULL
+  duration <- NULL
+  score <- NULL
+  activity_number <- NULL
   # Format date time and order
-  if(!all(is.na(data_vms$vms_position))){
-    data_vms<- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(date, vms_time))) 
-    data_vms<-data_vms[order(data_vms$date_time),]
+  if (!all(is.na(data_vms$vms_position))) {
+    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(date, vms_time)))
+    data_vms <- data_vms[order(data_vms$date_time), ]
   }
-  data_trip<- data_trip %>% dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time)))
-  data_trip<-data_trip[order(data_trip$date_time),]
+  data_trip <- data_trip %>% dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time)))
+  data_trip <- data_trip[order(data_trip$date_time), ]
   # Spatial formatting
-  if(!all(is.na(data_vms$vms_position))){
+  if (!all(is.na(data_vms$vms_position))) {
     data_geo_vms <- sf::st_as_sf(data_vms, wkt = "vms_position", crs = as.numeric(crs_vms)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
   }
-  data_geo_activity <- sf::st_as_sfc(x = position_activity, crs = as.numeric(crs_activity)) %>% sf::st_coordinates() %>% tibble::as_tibble()
+  data_geo_activity <- sf::st_as_sfc(x = position_activity, crs = as.numeric(crs_activity)) %>%
+    sf::st_coordinates() %>%
+    tibble::as_tibble()
   data_geo_trip <- sf::st_as_sf(data_trip, wkt = "activity_position", crs = as.numeric(crs_activity)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
   # text hovertemplate
-  if(!all(is.na(data_vms$vms_position))){
-    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text =paste("Date:",date,"<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000,"miles<br>Duration:",trunc(duration * 1000) / 1000,"minutes<br>Score:",trunc(score * 1000) / 1000))
+  if (!all(is.na(data_vms$vms_position))) {
+    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc(duration * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000))
   }
-  data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:",date,"<br>Time:", time_activity,"<br>Activity number:", number_activity, "<br>Position:%{lat}°,%{lon}°<extra></extra>"))
-  data_geo_trip <- data_geo_trip %>% dplyr::mutate(text =paste("Date:",activity_date,"<br>Time:", activity_time, "<br>Activity number:",activity_number))
+  data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", time_activity, "<br>Activity number:", number_activity, "<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>"))
+  data_geo_trip <- data_geo_trip %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number))
   # Plot
-  plot<-plotly::plot_ly() %>%
-    add_trace(name = 'Activity', data = data_geo_trip,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}°,%{lon}°<extra></extra>", marker = list(color = "rgb(0, 255, 66)", size = 10), line = list(color = "rgb(0, 255, 66)"))
-  if(!all(is.na(data_vms$vms_position))){
-    plot<- plot %>%
-      add_trace(name = 'VMS day', data = data_geo_vms,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}°,%{lon}°<extra></extra>", marker = list(color = "rgb(0, 50, 255)", size = 10), line = list(color = "rgb(0, 50, 255)"))
-    }
-  plot<- plot %>%
-    add_trace(name = 'Supecte activity', data = data_geo_activity,  lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", hovertemplate = ~text, marker = list(color = "rgb(255, 0, 0)", size = 10)) %>%
-     plotly::layout(mapbox = list(style = "carto-positron", center = list(lon = data_geo_activity$X, lat = data_geo_activity$Y), pitch=0, zoom=6))
+  plot <- plotly::plot_ly() %>%
+    plotly::add_trace(name = "Activity", data = data_geo_trip, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(0, 255, 66)", size = 10), line = list(color = "rgb(0, 255, 66)"))
+  if (!all(is.na(data_vms$vms_position))) {
+    plot <- plot %>%
+      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(0, 50, 255)", size = 10), line = list(color = "rgb(0, 50, 255)"))
+  }
+  plot <- plot %>%
+    plotly::add_trace(name = "Supecte activity", data = data_geo_activity, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", hovertemplate = ~text, marker = list(color = "rgb(255, 0, 0)", size = 10)) %>%
+    plotly::layout(mapbox = list(style = "carto-positron", center = list(lon = data_geo_activity$X, lat = data_geo_activity$Y), pitch = 0, zoom = 6))
 }
 
- # Function to list elements with a number of occurrences other than 2
-text_object_more_or_less<-function(id,result_check){
-  all<-c(id,result_check)
-  number_occurrences<-table(all)
-  text<-""
-  if(sum(number_occurrences==1)>0){
-    text<-paste0(text,"Missing item ","(",sum(number_occurrences==1),"):",paste0(names(number_occurrences[number_occurrences==1]), collapse = ", "),"\n")
+# Function to list elements with a number of occurrences other than 2
+text_object_more_or_less <- function(id, result_check) {
+  all <- c(id, result_check)
+  number_occurrences <- table(all)
+  text <- ""
+  if (sum(number_occurrences == 1) > 0) {
+    text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
   }
-  if(sum(number_occurrences>2)>0){
-    text<-paste0(text,"Too many item ","(",sum(number_occurrences>2),"):",paste0(names(number_occurrences[number_occurrences>2]), collapse = ", "))
+  if (sum(number_occurrences > 2) > 0) {
+    text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
   }
   return(text)
 }
-
-
-
