@@ -1,8 +1,8 @@
 --- Recovers information about trip
 SELECT
     t.topiaid::text AS trip_id,
-    vt.code::text AS vesseltype_code,
-    vt.label1::text AS vesseltype_label1
+    vt.code::text AS vessel_type_code, 
+    vt.label1::text AS vesseltype_name
 FROM 
     ps_common.trip t
     LEFT JOIN common.vessel v ON t.vessel = v.topiaid 
