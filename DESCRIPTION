@@ -29,9 +29,6 @@ Imports:
     tibble,
     tidyr,
     units,
-    tibble,
-    tidyr,
-    units,
     writexl
 Suggests: 
     knitr,
