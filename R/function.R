@@ -1,42 +1,59 @@
-# Function that tests the presence of activity associated with the trip, in the future integrated in the pakage codama
-check_trip_activity_inspector <- function(data_connection,
-                                          type_select,
-                                          select,
+#' @name check_trip_activity_inspector
+#' @title Gives the inconsistencies between the trip and the associated activities in terms of presence
+#' @description The purpose of the check_trip_activity_inspector function is to provide a table of data that contains an inconsistency between the trip and the presence or not of activity associated with this trip
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  trip_id}}
+#' Dataframe 2:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  activity_id}}
+#' }
+#' @export
+check_trip_activity_inspector <- function(dataframe1,
+                                          dataframe2,
                                           output) {
   # 0 - Global variables assignement ----
   first_vector <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("trip_id"),
+    column_type = c("character"),
     output = "logical"
-  ) != TRUE & !inherits(data_connection, "data.frame")) {
-    stop(
-      format(
-        x = Sys.time(),
-        format = "%Y-%m-%d %H:%M:%S"
-      ),
-      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
-      sep = ""
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("trip_id"),
+      column_type = c("character"),
+      output = "message"
     )
-  } else {
-    if (codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
-      output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = data_connection[[2]],
-        type = "PostgreSQLConnection",
-        output = "message"
-      ))
-    }
+  }else {
+    dataframe1 <- dataframe1[, c("trip_id")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("trip_id", "activity_id"),
+    column_type = c("character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("trip_id", "activity_id"),
+      column_type = c("character", "character"),
+      output = "message"
+    )
+  }else {
+    dataframe2 <- dataframe2[, c("trip_id", "activity_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -52,143 +69,46 @@ check_trip_activity_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("trip", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("trip", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "trip" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Trip selection in the SQL query
-    if (type_select == "trip") {
-      select_sql <- paste0("'", select, "'")
-      trip_id <- select
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Trip with a departure or arrival date in the selected year
-      trip_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "trip_id_selected_by_year.sql",
-          package = "codama"
-        )),
-        collapse = "\n"
-      )
-      trip_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = trip_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = trip_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", trip_id_selected_by_year_data$trip_id, "'")
-      trip_id <- trip_id_selected_by_year_data$trip_id
-    }
-    # Trip associated with route and activity
-    trip_with_activity_sql <- paste(
-      readLines(con = system.file("sql",
-        "trip_with_activity.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    trip_with_activity_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = trip_with_activity_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    trip_with_activity_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = trip_with_activity_sql
-    ))
-    nrow_first <- length(select_sql)
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE) {
-      trip_with_activity_data <- data_connection[[1]]
-      nrow_first <- nrow(trip_with_activity_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument.\n ",
-        sep = ""
-      )
-    }
-  }
-  # 3 - Data design ----
+  select <- dataframe1$trip_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Search trip ID in the associations trip, route, activity
   comparison <- codama::vector_comparison(
-    first_vector = trip_id,
-    second_vector = trip_with_activity_data$trip_id,
+    first_vector = dataframe1$trip_id,
+    second_vector = dataframe2$trip_id,
     comparison_type = "difference",
     output = "report"
   )
-  trip_id <- cbind(trip_id, comparison)
-  if ((sum(trip_id$logical) + sum(!trip_id$logical)) != nrow_first) {
+  dataframe1$logical <- comparison$logical
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$trip_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "trip") {
-        text_object_more_or_less(select, trip_id$trip_id)
-      },
+      text,
       sep = ""
     )
   }
   # 4 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!trip_id$logical), " trip with no activity")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " trip with no activity")))
   }
   if (output == "report") {
-    trip_id <- subset(trip_id, select = -c(first_vector))
-    return(trip_id)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!trip_id$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -5837,13 +5757,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether the selected trips contain activities or not
-          check_trip_activity_inspector_data <- check_trip_activity_inspector(
-            data_connection = data_connection,
-            type_select = "trip",
-            select = trip_select()$trip_id,
-            output = "report"
-          )
           # Uses a function which indicates whether the selected trips contain fishing time inconsistent
           check_fishing_time_inspector_data <- check_fishing_time_inspector(
             data_connection = data_connection,
@@ -6129,6 +6042,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             # Disconnection to the bases
             DBI::dbDisconnect(data_connection_vms[[2]])
           }
+          # Uses a function which indicates whether the selected trips contain activities or not
+          check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip, dataframe2 = data_activity, output = "report")
           # Uses a function to format the table
           check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
           # Uses a function to format the table
