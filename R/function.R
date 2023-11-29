@@ -100,7 +100,7 @@ check_trip_activity_inspector <- function(dataframe1,
       sep = ""
     )
   }
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!dataframe1$logical), " trip with no activity")))
   }
@@ -116,10 +116,27 @@ check_trip_activity_inspector <- function(dataframe1,
   }
 }
 
-# Function that tests the fishing time, in the future integrated in the pakage codama
-check_fishing_time_inspector <- function(data_connection,
-                                         type_select,
-                                         select,
+#' @name check_fishing_time_inspector
+#' @title Gives the inconsistencies between the sum of the fishing times indicated for the route and the one indicated for the trip
+#' @description The purpose of the check_fishing_time_inspector function is to provide a table of data that contains an inconsistency between the sum of the fishing times indicated for the route and the one indicated for the trip
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  trip_fishingtime}}
+#' Dataframe 2:
+#'  \item{\code{  route_id}}
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  route_fishingtime}}
+#' }
+#' @export
+check_fishing_time_inspector <- function(dataframe1,
+                                         dataframe2,
                                          output) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
@@ -131,33 +148,39 @@ check_fishing_time_inspector <- function(data_connection,
   first_vector <- NULL
   second_vector <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("trip_id", "trip_fishingtime"),
+    column_type = c("character", "numeric"),
     output = "logical"
   ) != TRUE) {
-    return(codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("trip_id", "trip_fishingtime"),
+      column_type = c("character", "numeric"),
       output = "message"
-    ))
-  } else {
-    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
-        sep = ""
-      )
-    }
+    )
+  }else {
+    dataframe1 <- dataframe1[, c("trip_id", "trip_fishingtime")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("route_id", "trip_id", "route_fishingtime"),
+    column_type = c("character","character", "numeric"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("route_id", "trip_id", "route_fishingtime"),
+      column_type = c("character","character", "numeric"),
+      output = "message"
+    )
+  }else {
+    dataframe2 <- dataframe2[, c("route_id", "trip_id", "route_fishingtime")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -173,170 +196,55 @@ check_fishing_time_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("trip", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("trip", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "trip" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Trip selection in the SQL query
-    if (type_select == "trip") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Trip with a departure or arrival date in the selected year
-      trip_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "trip_id_selected_by_year.sql",
-          package = "codama"
-        )),
-        collapse = "\n"
-      )
-      trip_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = trip_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = trip_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", trip_id_selected_by_year_data$trip_id, "'")
-    }
-    # Fishing time link to trip
-    trip_fishingtime_sql <- paste(
-      readLines(con = system.file("sql",
-        "trip_fishingtime.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    trip_fishingtime_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = trip_fishingtime_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    trip_fishingtime_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = trip_fishingtime_sql
-    ))
-    # Fishing time link to route
-    route_fishingtime_sql <- paste(
-      readLines(con = system.file("sql",
-        "route_fishingtime.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    route_fishingtime_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = route_fishingtime_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    route_fishingtime_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = route_fishingtime_sql
-    ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
-      trip_fishingtime_data <- data_connection[[1]]
-      route_fishingtime_data <- data_connection[[2]]
-      nrow_first <- nrow(trip_fishingtime_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
-  }
-  # 3 - Data design ----
+  select <- dataframe1$trip_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Calculate the sum of the fishing time per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
-  route_fishingtime_data <- route_fishingtime_data %>%
+  dataframe2 <- dataframe2 %>%
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_route_fishingtime = ifelse(all(is.na(route_fishingtime)), route_fishingtime[NA_integer_], sum(route_fishingtime, na.rm = TRUE)))
   # Group the pair to compare
-  trip_fishingtime_data <- merge(trip_fishingtime_data, route_fishingtime_data, by = "trip_id", all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2, by = "trip_id", all.x = TRUE)
   # Compare fishing time of the trip or the sum of the route
   comparison <- codama::vector_comparison(
-    first_vector = trip_fishingtime_data$trip_fishingtime,
-    second_vector = trip_fishingtime_data$sum_route_fishingtime,
+    first_vector = dataframe1$trip_fishingtime,
+    second_vector = dataframe1$sum_route_fishingtime,
     comparison_type = "equal",
     output = "report"
   )
   # Modify the table for display purposes: add, remove and order column
-  trip_fishingtime_data <- cbind(trip_fishingtime_data, comparison)
-  trip_fishingtime_data <- dplyr::relocate(.data = trip_fishingtime_data, trip_fishingtime, sum_route_fishingtime, .after = logical)
-  trip_fishingtime_data <- subset(trip_fishingtime_data, select = -c(first_vector, second_vector))
-  if ((sum(trip_fishingtime_data$logical) + sum(!trip_fishingtime_data$logical)) != nrow_first) {
+  dataframe1 <- cbind(dataframe1, comparison)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, trip_fishingtime, sum_route_fishingtime, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(first_vector, second_vector))
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$trip_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "trip") {
-        text_object_more_or_less(select, trip_fishingtime_data$trip_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!trip_fishingtime_data$logical), " trip with a fishing time different from the sum of the fishing times of each activity")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " trip with a fishing time different from the sum of the fishing times of each activity")))
   }
   if (output == "report") {
-    return(trip_fishingtime_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!trip_fishingtime_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -5757,13 +5665,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether the selected trips contain fishing time inconsistent
-          check_fishing_time_inspector_data <- check_fishing_time_inspector(
-            data_connection = data_connection,
-            type_select = "trip",
-            select = trip_select()$trip_id,
-            output = "report"
-          )
           # Uses a function which indicates whether the selected trips contain sea time inconsistent
           check_sea_time_inspector_data <- check_sea_time_inspector(
             data_connection = data_connection,
@@ -6006,6 +5907,16 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = activity_select$activity_id)
           )
+          # Uses a function to extract data from route
+          data_route <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "route.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = trip_select()$trip_id)
+          )
           # Uses a function to extract data from activity_harbour
           data_activity_harbour <- furdeb::data_extraction(
             type = "database",
@@ -6046,6 +5957,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip, dataframe2 = data_activity, output = "report")
           # Uses a function to format the table
           check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
+          # Uses a function which indicates whether the selected trips contain fishing time inconsistent
+          check_fishing_time_inspector_data <- check_fishing_time_inspector(dataframe1 = data_trip, dataframe2 = data_route, output = "report")
           # Uses a function to format the table
           check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select(), type_inconsistency = "error")
           # Modify the table for display purposes: rename column
