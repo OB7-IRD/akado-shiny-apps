@@ -4,7 +4,10 @@ SELECT
     vt.code::text AS vessel_type_code, 
     vt.label1::text AS vesseltype_name,
     t.fishingtime::numeric AS trip_fishingtime,
-    t.timeatsea::numeric AS trip_seatime  
+    t.timeatsea::numeric AS trip_seatime,
+    t.landingtotalweight::numeric AS trip_landingtotalweight, 
+    t.localmarkettotalweight::numeric AS trip_localmarkettotalweight,
+    v.capacity::numeric AS vessel_capacity
 FROM 
     ps_common.trip t
     LEFT JOIN common.vessel v ON t.vessel = v.topiaid 

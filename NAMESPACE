@@ -2,6 +2,7 @@
 
 export("%>%")
 export(check_fishing_time_inspector)
+export(check_landing_consistent_inspector)
 export(check_sea_time_inspector)
 export(check_trip_activity_inspector)
 export(run_app)
