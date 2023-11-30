@@ -1,8 +1,9 @@
---- Recovers information about the species caught, the ocean declared in the trip
+--- Recovers information about the route
 SELECT 
     r.topiaid::text AS route_id,
     r.trip::text AS trip_id,
-    r.fishingtime::numeric AS route_fishingtime 
+    r.fishingtime::numeric AS route_fishingtime,
+    r.timeatsea::numeric AS route_seatime 
 FROM 
     ps_logbook.route r 
 WHERE 
