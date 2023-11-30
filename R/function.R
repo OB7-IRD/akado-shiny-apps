@@ -503,10 +503,29 @@ check_landing_consistent_inspector <- function(dataframe1,
   }
 }
 
-# Function that tests if the total landed weight for canneries is consistent with the weights of each landing for the canneries, in the future integrated in the pakage codama
-check_landing_total_weight_inspector <- function(data_connection,
-                                                 type_select,
-                                                 select,
+#' @name check_landing_total_weight_inspector
+#' @title Gives the inconsistencies between the total weight landed during the trip for the canneries and the sum of the weights of each landing for the canneries linked to the trip
+#' @description The purpose of the check_landing_total_weight_inspector function is to provide a table of data that contains an inconsistency between the sum of the weights of each landing for the canneries and the one indicated for the trip
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param epsilon {\link[base]{numeric}} expected, default : 0.01. Gives the threshold at which the difference is considered too large.
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  trip_landingtotalweight}}
+#'  \item{\code{  trip_localmarkettotalweight}}
+#' Dataframe 2:
+#'  \item{\code{  landing_id}}
+#'  \item{\code{  landing_weight}}
+#'  \item{\code{  trip_id}}
+#' }
+#' @export
+check_landing_total_weight_inspector <- function(dataframe1,
+                                                 dataframe2,
                                                  output,
                                                  epsilon = 0.01) {
   # 0 - Global variables assignement ----
@@ -514,37 +533,42 @@ check_landing_total_weight_inspector <- function(data_connection,
   landing_weight <- NULL
   trip_landingtotalweight <- NULL
   sum_weightlanding <- NULL
-  vessel_capacity <- NULL
   trip_localmarkettotalweight <- NULL
   difference <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight"),
+    column_type = c("character", "numeric", "numeric"),
     output = "logical"
   ) != TRUE) {
-    return(codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight"),
+      column_type = c("character", "numeric", "numeric"),
       output = "message"
-    ))
-  } else {
-    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
-        sep = ""
-      )
-    }
+    )
+  }else {
+    dataframe1 <- dataframe1[, c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("landing_id", "landing_weight", "trip_id"),
+    column_type = c("character", "numeric", "character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("landing_id", "landing_weight", "trip_id"),
+      column_type = c("character", "numeric", "character"),
+      output = "message"
+    )
+  }else {
+    dataframe2 <- dataframe2[, c("landing_id", "landing_weight", "trip_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -560,175 +584,61 @@ check_landing_total_weight_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("trip", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("trip", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "trip" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Trip selection in the SQL query
-    if (type_select == "trip") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Trip with a departure or arrival date in the selected year
-      trip_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "trip_id_selected_by_year.sql",
-          package = "codama"
-        )),
-        collapse = "\n"
-      )
-      trip_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = trip_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = trip_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", trip_id_selected_by_year_data$trip_id, "'")
-    }
-    # landing total weight and vessel capacity link to trip
-    trip_weight_capacity_sql <- paste(
-      readLines(con = system.file("sql",
-        "trip_weight_vessel_capacity.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    trip_weight_capacity_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = trip_weight_capacity_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    trip_weight_capacity_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = trip_weight_capacity_sql
-    ))
-    trip_weight_landing_sql <- paste(
-      readLines(con = system.file("sql",
-        "trip_weight_landing.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    trip_weight_landing_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = trip_weight_landing_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    trip_weight_landing_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = trip_weight_landing_sql
-    ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
-      trip_weight_capacity_data <- data_connection[[1]]
-      trip_weight_landing_data <- data_connection[[2]]
-      nrow_first <- nrow(trip_weight_capacity_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
-  }
-  # 3 - Data design ----
+  select <- dataframe1$trip_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Calculate the landing total weight per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
-  trip_weight_landing_data <- trip_weight_landing_data %>%
+  dataframe2 <- dataframe2 %>%
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_weightlanding = ifelse(all(is.na(landing_weight)), landing_weight[NA_integer_], sum(landing_weight, na.rm = TRUE)))
   # Merge and calcul difference
-  trip_weight_capacity_data <- merge(trip_weight_capacity_data, trip_weight_landing_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
-  trip_weight_capacity_data$difference <- ifelse(is.na(trip_weight_capacity_data$trip_landingtotalweight), 0, trip_weight_capacity_data$trip_landingtotalweight) - ifelse(is.na(trip_weight_capacity_data$sum_weightlanding), 0, trip_weight_capacity_data$sum_weightlanding)
-  trip_weight_capacity_data$difference <- abs(trip_weight_capacity_data$difference)
-  trip_weight_capacity_data$epsilon <- epsilon
+  dataframe1 <- merge(dataframe1, dataframe2, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  dataframe1$difference <- ifelse(is.na(dataframe1$trip_landingtotalweight), 0, dataframe1$trip_landingtotalweight) - ifelse(is.na(dataframe1$sum_weightlanding), 0, dataframe1$sum_weightlanding)
+  dataframe1$difference <- abs(dataframe1$difference)
+  dataframe1$epsilon <- epsilon
   # Compare sum difference with epsilon
   comparison <- codama::vector_comparison(
-    first_vector = trip_weight_capacity_data$difference,
-    second_vector = trip_weight_capacity_data$epsilon,
+    first_vector = dataframe1$difference,
+    second_vector = dataframe1$epsilon,
     comparison_type = "less_equal",
     output = "report"
   )
-  trip_weight_capacity_data$logical <- comparison$logical
-  trip_weight_capacity_data <- dplyr::relocate(.data = trip_weight_capacity_data, trip_landingtotalweight, sum_weightlanding, .after = logical)
-  trip_weight_capacity_data <- subset(trip_weight_capacity_data, select = -c(vessel_capacity, trip_localmarkettotalweight, difference, epsilon))
+  dataframe1$logical <- comparison$logical
+  dataframe1 <- dplyr::relocate(.data = dataframe1, trip_landingtotalweight, sum_weightlanding, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(trip_localmarkettotalweight, difference, epsilon))
   # Management of missing landing weight in trip
-  trip_weight_capacity_data[is.na(trip_weight_capacity_data$trip_landingtotalweight), "logical"] <- FALSE
+  dataframe1[is.na(dataframe1$trip_landingtotalweight), "logical"] <- FALSE
   # Management of missing sum of the landing
-  trip_weight_capacity_data[is.na(trip_weight_capacity_data$sum_weightlanding) & !is.na(trip_weight_capacity_data$trip_landingtotalweight) & trip_weight_capacity_data$trip_landingtotalweight > 0, "logical"] <- FALSE
-  if ((sum(trip_weight_capacity_data$logical) + sum(!trip_weight_capacity_data$logical)) != nrow_first) {
+  dataframe1[is.na(dataframe1$sum_weightlanding) & !is.na(dataframe1$trip_landingtotalweight) & dataframe1$trip_landingtotalweight > 0, "logical"] <- FALSE
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$trip_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "trip") {
-        text_object_more_or_less(select, trip_weight_capacity_data$trip_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!trip_weight_capacity_data$logical), " trips with a landing weight for the canneries different from the sum of the weights of each landing for the canneries")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " trips with a landing weight for the canneries different from the sum of the weights of each landing for the canneries")))
   }
   if (output == "report") {
-    return(trip_weight_capacity_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!trip_weight_capacity_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -5476,14 +5386,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether the selected trips contain the total landed weight for canneries inconsistent with the weights of each landing for the canneries
-          check_landing_total_weight_inspector_data <- check_landing_total_weight_inspector(
-            data_connection = data_connection,
-            type_select = "trip",
-            select = trip_select()$trip_id,
-            output = "report",
-            epsilon = config_data()[["epsilon"]]
-          )
           # Uses a function which indicates whether the selected trips contain the trip start and end date inconsistent with the dates of activity
           check_temporal_limit_inspector_data <- check_temporal_limit_inspector(
             data_connection = data_connection,
@@ -5784,6 +5686,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Vessel capacity` = vessel_capacity,
             `Total weight` = trip_weighttotal
           )
+          # Uses a function which indicates whether the selected trips contain the total landed weight for canneries inconsistent with the weights of each landing for the canneries
+          check_landing_total_weight_inspector_data <- check_landing_total_weight_inspector(dataframe1 = data_trip, dataframe2 = data_landing, output = "report", epsilon = config_data()[["epsilon"]])
           # Uses a function to format the table
           check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_select(), type_inconsistency = "error")
           # Modify the table for display purposes: rename column
