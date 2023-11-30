@@ -814,12 +814,25 @@ check_temporal_limit_inspector <- function(dataframe1,
   }
 }
 
-# Function that tests if the harbour of landing of the previous trip and the harbour of departure of the current trip is the same, in the future integrated in the pakage codama
-check_harbour_inspector <- function(data_connection,
-                                    type_select,
-                                    select,
-                                    output,
-                                    logbook_program) {
+#' @name check_harbour_inspector
+#' @title Gives the inconsistencies between the harbour of landing of the previous trip and the harbour of departure of the current trip
+#' @description The purpose of the check_harbour_inspector function is to provide a table of data that contains an inconsistency with the harbour of landing of the previous trip and the harbour of departure of the current trip
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  harbour_id_departure_trip_previous}}
+#'  \item{\code{  harbour_name_departure_trip_previous}}
+#'  \item{\code{  harbour_id_landing}}
+#'  \item{\code{  harbour_name_landing}}
+#' }
+#' @export
+check_harbour_inspector <- function(dataframe1,
+                                    output) {
   # 0 - Global variables assignement ----
   harbour_id <- NULL
   harbour_name_landing <- NULL
@@ -828,33 +841,22 @@ check_harbour_inspector <- function(data_connection,
   harbour_id_landing <- NULL
   harbour_id_departure <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("trip_id", "harbour_id_departure_trip_previous", "harbour_name_departure_trip_previous", "harbour_id_landing", "harbour_name_landing"),
+    column_type = c("character", "character", "character", "character" , "character"),
     output = "logical"
   ) != TRUE) {
-    return(codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("trip_id", "harbour_id_departure_trip_previous", "harbour_name_departure_trip_previous", "harbour_id_landing", "harbour_name_landing"),
+      column_type = c("character", "character", "character", "character" , "character"),
       output = "message"
-    ))
-  } else {
-    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Class for \"data_connection\" must be a *list* with either the connection information or the three data frames.\n ",
-        sep = ""
-      )
-    }
+    )
+  }else {
+    dataframe1 <- dataframe1[, c("trip_id", "harbour_id_departure_trip_previous", "harbour_name_departure_trip_previous", "harbour_id_landing", "harbour_name_landing")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -870,212 +872,52 @@ check_harbour_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("trip", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("trip", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "trip" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # Checks the type of logbook_program
-    if (codama::r_type_checking(
-      r_object = logbook_program,
-      type = "character",
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = logbook_program,
-        type = "character",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Trip selection in the SQL query
-    if (type_select == "trip") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Trip with a departure or arrival date in the selected year
-      trip_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "trip_id_selected_by_year.sql",
-          package = "codama"
-        )),
-        collapse = "\n"
-      )
-      trip_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = trip_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = trip_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", trip_id_selected_by_year_data$trip_id, "'")
-    }
-    # Retrieves the identifier of the previous trip
-    trip_previous_trip_sql <- paste(
-      readLines(con = system.file("sql",
-        "trip_previous.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    trip_previous_trip_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = trip_previous_trip_sql,
-      select_item_1 = DBI::SQL(paste(paste0("'", logbook_program, "'"), collapse = ", ")),
-      select_item_2 = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    trip_previous_trip_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = trip_previous_trip_sql
-    ))
-    # Retrieves the port of landing of the previous trip
-    select_sql <- paste0("'", trip_previous_trip_data$trip_previous_id, "'")
-    landing_harbour_sql <- paste(
-      readLines(con = system.file("sql",
-        "trip_landing_harbour.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    landing_harbour_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = landing_harbour_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    landing_harbour_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = landing_harbour_sql
-    ))
-    landing_harbour_data <- dplyr::rename(
-      .data = landing_harbour_data,
-      harbour_id_landing = harbour_id,
-    )
-    # Retrieves the port of departure of the trip
-    select_sql <- paste0("'", trip_previous_trip_data$trip_id, "'")
-    departure_harbour_sql <- paste(
-      readLines(con = system.file("sql",
-        "trip_departure_harbour.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    departure_harbour_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = departure_harbour_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    departure_harbour_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = departure_harbour_sql
-    ))
-    departure_harbour_data <- dplyr::rename(
-      .data = departure_harbour_data,
-      harbour_id_departure = harbour_id,
-    )
-    nrow_first <- length(unique(select))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE && is.data.frame(data_connection[[3]]) == TRUE) {
-      trip_previous_trip_data <- data_connection[[1]]
-      landing_harbour_data <- data_connection[[2]]
-      departure_harbour_data <- data_connection[[3]]
-      nrow_first <- nrow(trip_previous_trip_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
-  }
-  # 3 - Data design ----
-  # Merge data
-  trip_previous_trip_data <- merge(trip_previous_trip_data, landing_harbour_data, by.x = "trip_previous_id", by.y = "trip_id", all.x = TRUE)
-  trip_previous_trip_data <- merge(trip_previous_trip_data, departure_harbour_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE, suffixes = c("_landing", "_departure"))
+  select <- dataframe1$trip_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Compare landing total weight of the trip with vessel capacity
   comparison <- codama::vector_comparison(
-    first_vector = trip_previous_trip_data$harbour_id_departure,
-    second_vector = trip_previous_trip_data$harbour_id_landing,
+    first_vector = dataframe1$harbour_id_departure_trip_previous,
+    second_vector = dataframe1$harbour_id_landing,
     comparison_type = "equal",
     output = "report"
   )
-  trip_previous_trip_data$logical <- comparison$logical
-  trip_previous_trip_data <- dplyr::relocate(.data = trip_previous_trip_data, harbour_name_landing, harbour_name_departure, .after = logical)
-  trip_previous_trip_data <- subset(trip_previous_trip_data, select = -c(trip_previous_id, harbour_id_landing, harbour_id_departure))
+  dataframe1$logical <- comparison$logical
   # Management of missing vessel capacity
-  trip_previous_trip_data[is.na(trip_previous_trip_data$harbour_id_departure), "logical"] <- FALSE
-  trip_previous_trip_data[is.na(trip_previous_trip_data$harbour_id_landing), "logical"] <- FALSE
-  if ((sum(trip_previous_trip_data$logical) + sum(!trip_previous_trip_data$logical)) != nrow_first) {
+  dataframe1[is.na(dataframe1$harbour_id_departure_trip_previous), "logical"] <- FALSE
+  dataframe1[is.na(dataframe1$harbour_id_landing), "logical"] <- FALSE
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_name_landing, harbour_name_departure_trip_previous, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(harbour_id_landing, harbour_id_departure_trip_previous))
+    if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$trip_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "trip") {
-        text_object_more_or_less(select, trip_previous_trip_data$trip_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!trip_previous_trip_data$logical), " trips with departure port different from the landing harbour of a previous trip")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " trips with departure port different from the landing harbour of a previous trip")))
   }
   if (output == "report") {
-    return(trip_previous_trip_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!trip_previous_trip_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -5313,14 +5155,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether the selected trips contain the trip harbour of departure of the current trip inconsistent with the harbour of landing of the previous trip
-          check_harbour_inspector_data <- check_harbour_inspector(
-            data_connection = data_connection,
-            type_select = "trip",
-            select = trip_select()$trip_id,
-            output = "report",
-            logbook_program = config_data()[["logbook_program"]]
-          )
           # Uses a function which indicates whether the selected trips contain RF1 inconsistent with limit values
           check_raising_factor_inspector_data <- check_raising_factor_inspector(
             data_connection = data_connection,
@@ -5474,7 +5308,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
+            anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id)
           )
           # Uses a function to extract data from activity in connection with sample
           data_sample_activity <- furdeb::data_extraction(
@@ -5637,13 +5471,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             .data = check_temporal_limit,
             `Details problem` = button
           )
+          # Uses a function which indicates whether the selected trips contain the trip harbour of departure of the current trip inconsistent with the harbour of landing of the previous trip
+          check_harbour_inspector_data <- check_harbour_inspector(dataframe1 = data_trip, output = "report")
           # Uses a function to format the table
           check_harbour <- table_display_trip(check_harbour_inspector_data, trip_select(), type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_harbour <- dplyr::rename(
             .data = check_harbour,
             `Harbour landing` = harbour_name_landing,
-            `Harbour departure` = harbour_name_departure
+            `Harbour departure` = harbour_name_departure_trip_previous
           )
           # Uses a function to format the table
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
