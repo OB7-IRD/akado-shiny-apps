@@ -925,13 +925,43 @@ check_harbour_inspector <- function(dataframe1,
   }
 }
 
-# Function that tests if RF1 is within the limit values, in the future integrated in the pakage codama
-check_raising_factor_inspector <- function(data_connection,
-                                           type_select,
-                                           select,
+#' @name check_raising_factor_inspector
+#' @title Gives the inconsistencies between RF1 and limits values
+#' @description The purpose of the check_raising_factor_inspector function is to provide a table of data that contains an inconsistency with the RF1 and the valid limits (Default : 0.9 ; 1.1)
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param logbook_program {\link[base]{character}} expected. Vector of the logbook program inventory, to which the trips that make up the tides may belong.
+#' @param species {\link[base]{character}} expected. Default values: c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"). Vector of the inventory of species used to calculate catch weight in RF1.
+#' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.
+#' @param vesselactivity {\link[base]{character}} expected. Default values: c("25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.
+#' @param limit {\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable limits for RF1.
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  trip_id}}
+#' Dataframe 2:
+#'  \item{\code{  catch_id}}
+#'  \item{\code{  catch_weight}}
+#'  \item{\code{  speciesfate_code}}
+#'  \item{\code{  specie_name}}
+#'  \item{\code{  vesselactivity_code}}
+#'  \item{\code{  trip_id}}
+#' Dataframe 3:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  trip_landingtotalweight}}
+#'  \item{\code{  trip_end_tide_id}}
+#'  \item{\code{  trip_previous_end_tide_id}}
+#' }
+#' @export
+check_raising_factor_inspector <- function(dataframe1,
+                                           dataframe2,
+                                           dataframe3,
                                            output,
-                                           logbook_program,
-                                           species,
+                                           species = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"),
+                                           speciesfate = "6",
+                                           vesselactivity = c("25", "27", "29"),
                                            limit = c(0.9, 1.1)) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
@@ -941,40 +971,61 @@ check_raising_factor_inspector <- function(data_connection,
   sum_catch_weight <- NULL
   RF1 <- NULL
   trip_previous_end_tide_id <- NULL
-  vessel_capacity <- NULL
   tide_landingtotalweight <- NULL
   tide_sum_catch_weight <- NULL
-  trip_localmarkettotalweight <- NULL
   lower_limit <- NULL
   upper_limit <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("trip_id"),
+    column_type = c("character"),
     output = "logical"
   ) != TRUE) {
-    return(codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("trip_id"),
+      column_type = c("character"),
       output = "message"
-    ))
-  } else {
-    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Class for \"data_connection\" must be a *list* with either the connection information or the three data frames.\n ",
-        sep = ""
-      )
-    }
+    )
+  }else {
+    dataframe1 <- dataframe1[, c("trip_id")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("catch_id", "catch_weight", "speciesfate_code", "specie_name", "vesselactivity_code", "trip_id"),
+    column_type = c("character", "numeric", "character", "character", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("catch_id", "catch_weight", "speciesfate_code", "specie_name", "vesselactivity_code", "trip_id"),
+      column_type = c("character", "numeric", "character", "character", "character", "character"),
+      output = "message"
+    )
+  }else {
+    dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "speciesfate_code", "specie_name", "vesselactivity_code", "trip_id")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe3,
+    type = "data.frame",
+    column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id", "trip_previous_end_tide_id"),
+    column_type = c("character", "numeric", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe3,
+      type = "data.frame",
+      column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id", "trip_previous_end_tide_id"),
+      column_type = c("character", "numeric", "character", "character"),
+      output = "message"
+    )
+  }else {
+    dataframe3 <- dataframe3[, c("trip_id", "trip_landingtotalweight", "trip_end_tide_id", "trip_previous_end_tide_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -987,6 +1038,42 @@ check_raising_factor_inspector <- function(data_connection,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  # Checks the type of species
+  if (codama::r_type_checking(
+    r_object = species,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = species,
+      type = "character",
+      output = "message"
+    ))
+  }
+  # Checks the type of speciesfate
+  if (codama::r_type_checking(
+    r_object = speciesfate,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = speciesfate,
+      type = "character",
+      output = "message"
+    ))
+  }
+  # Checks the type of vesselactivity
+  if (codama::r_type_checking(
+    r_object = vesselactivity,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = vesselactivity,
+      type = "character",
       output = "message"
     ))
   }
@@ -1004,237 +1091,80 @@ check_raising_factor_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("trip", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("trip", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "trip" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # Checks the type of logbook_program
-    if (codama::r_type_checking(
-      r_object = logbook_program,
-      type = "character",
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = logbook_program,
-        type = "character",
-        output = "message"
-      ))
-    }
-    # Checks the type of species
-    if (codama::r_type_checking(
-      r_object = species,
-      type = "character",
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = species,
-        type = "character",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Trip selection in the SQL query
-    if (type_select == "trip") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Trip with a departure or arrival date in the selected year
-      trip_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "trip_id_selected_by_year.sql",
-          package = "codama"
-        )),
-        collapse = "\n"
-      )
-      trip_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = trip_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      trip_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = trip_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", trip_id_selected_by_year_data$trip_id, "'")
-    }
-    # Retrieves all identifiers for the entire tide
-    tide_id_sql <- paste(
-      readLines(con = system.file("sql",
-        "tide_id.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    tide_id_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = tide_id_sql,
-      select_item_1 = DBI::SQL(paste(paste0("'", logbook_program, "'"), collapse = ", ")),
-      select_item_2 = DBI::SQL(paste(select_sql, collapse = ", "))
-    )
-    tide_id_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = tide_id_sql
-    ))
-    # Retrieves the weight of each catch in the tide
-    select_trip_tide_sql <- paste0("'", tide_id_data$trip_id, "'")
-    catch_weight_RF1_sql <- paste(
-      readLines(con = system.file("sql",
-        "trip_catch_weight_RF1.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    catch_weight_RF1_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = catch_weight_RF1_sql,
-      select_item_1 = DBI::SQL(paste(select_trip_tide_sql, collapse = ", ")),
-      select_item_2 = DBI::SQL(paste(paste0("'", species, "'"), collapse = ", "))
-    )
-    catch_weight_RF1_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = catch_weight_RF1_sql
-    ))
-    # Retrieves the landing total weight
-    trip_weight_capacity_sql <- paste(
-      readLines(con = system.file("sql",
-        "trip_weight_vessel_capacity.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    trip_weight_capacity_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = trip_weight_capacity_sql,
-      select_item = DBI::SQL(paste(select_trip_tide_sql,
-        collapse = ", "
-      ))
-    )
-    trip_weight_capacity_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = trip_weight_capacity_sql
-    ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE && is.data.frame(data_connection[[3]]) == TRUE) {
-      tide_id_data <- data_connection[[1]]
-      catch_weight_RF1_data <- data_connection[[2]]
-      trip_weight_capacity_data <- data_connection[[3]]
-      select <- tide_id_data$trip_id
-      nrow_first <- nrow(tide_id_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
-  }
-  # 3 - Data design ----
+  select <- dataframe1$trip_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Catch filtration for RF1
+  dataframe2 <- dataframe2 %>%
+    dplyr::filter(specie_name %in% species & speciesfate_code %in% speciesfate & !(vesselactivity_code %in% vesselactivity))
   # Calculation of the sum of weights caught per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
-  catch_weight_RF1_data <- catch_weight_RF1_data %>%
+  dataframe2 <- dataframe2 %>%
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
   # Merge data
-  tide_id_data <- merge(tide_id_data, catch_weight_RF1_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
-  tide_id_data <- merge(tide_id_data, trip_weight_capacity_data, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  dataframe3 <- merge(dataframe3, dataframe2, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # Creation of a tide identification number
-  tide_id_data$tide_id <- paste0(tide_id_data$trip_end_tide_id, "_", tide_id_data$trip_previous_end_tide_id)
+  dataframe3$tide_id <- paste0(dataframe3$trip_end_tide_id, "_", dataframe3$trip_previous_end_tide_id)
   # RF1 calculation
-  tide_id_data_RF1 <- tide_id_data %>%
+  tide_id_data_RF1 <- dataframe3 %>%
     dplyr::group_by(tide_id) %>%
     dplyr::summarise(RF1 = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), tide_landingtotalweight = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)), tide_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
-  tide_id_data$lower_limit <- limit[1]
-  tide_id_data$upper_limit <- limit[2]
+  dataframe3$lower_limit <- limit[1]
+  dataframe3$upper_limit <- limit[2]
   # Selection of user-supplied trips
-  tide_id_data <- merge(data.frame(trip_id = select), unique(tide_id_data), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  dataframe3 <- merge(data.frame(trip_id = select), unique(dataframe3), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # Merge data
-  tide_id_data <- merge(tide_id_data, tide_id_data_RF1, by.x = "tide_id", by.y = "tide_id", all.x = TRUE)
+  dataframe3 <- merge(dataframe3, tide_id_data_RF1, by.x = "tide_id", by.y = "tide_id", all.x = TRUE)
   # Compare RF1 to valid limits
   comparison_less <- codama::vector_comparison(
-    first_vector = tide_id_data$RF1,
-    second_vector = tide_id_data$upper_limit,
+    first_vector = dataframe3$RF1,
+    second_vector = dataframe3$upper_limit,
     comparison_type = "less",
     output = "report"
   )
   comparison_greater <- codama::vector_comparison(
-    first_vector = tide_id_data$RF1,
-    second_vector = tide_id_data$lower_limit,
+    first_vector = dataframe3$RF1,
+    second_vector = dataframe3$lower_limit,
     comparison_type = "greater",
     output = "report"
   )
-  tide_id_data$logical <- comparison_less$logical & comparison_greater$logical
+  dataframe3$logical <- comparison_less$logical & comparison_greater$logical
   # Corrects missing RF1s when nothing has been landed and there is no capture
-  tide_id_data[(is.na(tide_id_data$tide_landingtotalweight) | tide_id_data$tide_landingtotalweight == 0) & is.na(tide_id_data$tide_sum_catch_weight), "logical"] <- TRUE
+  dataframe3[(is.na(dataframe3$tide_landingtotalweight) | dataframe3$tide_landingtotalweight == 0) & is.na(dataframe3$tide_sum_catch_weight), "logical"] <- TRUE
   # Correction of complete tides not yet finished
-  tide_id_data[(is.na(tide_id_data$trip_end_tide_id)), "logical"] <- TRUE
-  tide_id_data <- dplyr::relocate(.data = tide_id_data, RF1, .after = logical)
-  trip_end_tide_id <- tide_id_data$trip_end_tide_id
-  tide_id_data <- subset(tide_id_data, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, vessel_capacity, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, trip_localmarkettotalweight, lower_limit, upper_limit))
-  if ((sum(tide_id_data$logical) + sum(!tide_id_data$logical)) != nrow_first) {
+  dataframe3[(is.na(dataframe3$trip_end_tide_id)), "logical"] <- TRUE
+  dataframe3 <- dplyr::relocate(.data = dataframe3, RF1, .after = logical)
+  trip_end_tide_id <- dataframe3$trip_end_tide_id
+  dataframe3 <- subset(dataframe3, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, lower_limit, upper_limit))
+  if ((sum(dataframe3$logical) + sum(!dataframe3$logical)) != nrow_first) {
+    all <- c(select, dataframe3$trip_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "trip") {
-        text_object_more_or_less(select, tide_id_data$trip_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!tide_id_data$logical), " trips with RF1 outside defined thresholds or missing")))
+    return(print(paste0("There are ", sum(!dataframe3$logical), " trips with RF1 outside defined thresholds or missing")))
   }
   if (output == "report") {
-    return(tide_id_data)
+    return(dataframe3)
   }
   if (output == "logical") {
-    if (sum(!tide_id_data$logical) == 0) {
+    if (sum(!dataframe3$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -5155,15 +5085,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether the selected trips contain RF1 inconsistent with limit values
-          check_raising_factor_inspector_data <- check_raising_factor_inspector(
-            data_connection = data_connection,
-            type_select = "trip",
-            select = trip_select()$trip_id,
-            output = "report",
-            logbook_program = config_data()[["logbook_program"]],
-            species = config_data()[["species_RF1"]]
-          )
           # Uses a function which indicates whether the school type is consistent with the association
           check_fishing_context_inspector_data <- check_fishing_context_inspector(
             data_connection = data_connection,
@@ -5370,6 +5291,26 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = trip_select()$trip_id)
           )
+          # Uses a function to extract data from tide
+          data_tide <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "tide_id.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id)
+          )
+          # Uses a function to extract data from catch of the tide
+          data_catch_tide <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "catch_tide.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = data_tide$trip_id)
+          )
           # Uses a function to extract data from activity_harbour
           data_activity_harbour <- furdeb::data_extraction(
             type = "database",
@@ -5481,6 +5422,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Harbour landing` = harbour_name_landing,
             `Harbour departure` = harbour_name_departure_trip_previous
           )
+          # Uses a function which indicates whether the selected trips contain RF1 inconsistent with limit values
+          check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip, dataframe2 = data_catch_tide, dataframe3 = data_tide, output = "report")
           # Uses a function to format the table
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
           check_raising_factor$RF1 <- trunc(check_raising_factor$RF1 * 100000) / 100000
