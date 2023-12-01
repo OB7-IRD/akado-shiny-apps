@@ -1326,10 +1326,24 @@ check_fishing_context_inspector <- function(dataframe1,
   }
 }
 
-# Function that tests if succes status is consistent with vessel activity, the type of school or the weight caught, in the future integrated in the pakage codama
-check_operationt_inspector <- function(data_connection,
-                                       type_select,
-                                       select,
+#' @name check_operationt_inspector
+#' @title Gives the inconsistencies between fishing success status, vessel activity, type of school or weight caught
+#' @description The purpose of the check_operationt_inspector function is to provide a table of data that contains an inconsistency with succes status and vessel activity, the type of school or the weight caught
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  schooltype_code}}
+#'  \item{\code{  successstatus_code}}
+#'  \item{\code{  activity_weight}}
+#'  \item{\code{  vesselactivity_code}}
+#' }
+#' @export
+check_operationt_inspector <- function(dataframe1,
                                        output) {
   # 0 - Global variables assignement ----
   vesselactivity_code <- NULL
@@ -1341,37 +1355,22 @@ check_operationt_inspector <- function(data_connection,
   logical_successstatus_schooltype <- NULL
   logical_successstatus_weight <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("activity_id", "schooltype_code", "successstatus_code", "activity_weight", "vesselactivity_code"),
+    column_type = c("character", "character", "character", "numeric" , "character"),
     output = "logical"
-  ) != TRUE & !inherits(data_connection, "data.frame")) {
-    stop(
-      format(
-        x = Sys.time(),
-        format = "%Y-%m-%d %H:%M:%S"
-      ),
-      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
-      sep = ""
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("activity_id", "schooltype_code", "successstatus_code", "activity_weight", "vesselactivity_code"),
+      column_type = c("character", "character", "character", "numeric" , "character"),
+      output = "message"
     )
-  } else {
-    if (codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
-      output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = data_connection[[2]],
-        type = "PostgreSQLConnection",
-        output = "message"
-      ))
-    }
+  }else {
+    dataframe1 <- dataframe1[, c("activity_id", "schooltype_code", "successstatus_code", "activity_weight", "vesselactivity_code")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1387,178 +1386,83 @@ check_operationt_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("activity", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("activity", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "activity" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Activity selection in the SQL query
-    if (type_select == "activity") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Activity with date in the selected year
-      activity_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "activity_id_selected_by_year.sql",
-          package = "AkadoR"
-        )),
-        collapse = "\n"
-      )
-      activity_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = activity_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = activity_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", activity_id_selected_by_year_data$activity_id, "'")
-    }
-    # Retrieves the schooltype of activity
-    activity_sql <- paste(
-      readLines(con = system.file("sql",
-        "activity_schooltype_successstatus_weight_vesselactivity.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    activity_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = activity_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    activity_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = activity_sql
-    ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE) {
-      activity_data <- data_connection[[1]]
-      nrow_first <- nrow(activity_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
-  }
-  # 3 - Data design ----
+  select <- dataframe1$activity_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Indicates whether the vessel activity requires a success status
-  activity_data$seuil <- "6"
+  dataframe1$seuil <- "6"
   comparison_successstatus_vesselactivity <- codama::vector_comparison(
-    first_vector = activity_data$vesselactivity_code,
-    second_vector = activity_data$seuil,
+    first_vector = dataframe1$vesselactivity_code,
+    second_vector = dataframe1$seuil,
     comparison_type = "equal",
     output = "report"
   )
-  activity_data$logical_successstatus_vesselactivity <- comparison_successstatus_vesselactivity$logical
+  dataframe1$logical_successstatus_vesselactivity <- comparison_successstatus_vesselactivity$logical
   # Case of success status NA: must not have activity 6 (inverse of the result obtained)
-  activity_data$logical_successstatus_vesselactivity[is.na(activity_data$successstatus_code)] <- !activity_data$logical_successstatus_vesselactivity[is.na(activity_data$successstatus_code)]
+  dataframe1$logical_successstatus_vesselactivity[is.na(dataframe1$successstatus_code)] <- !dataframe1$logical_successstatus_vesselactivity[is.na(dataframe1$successstatus_code)]
   # Indicates indeterminate school must not have positive or negative success status
-  activity_data$seuil <- "0"
+  dataframe1$seuil <- "0"
   logical_successstatus_schooltype_indeterminate <- codama::vector_comparison(
-    first_vector = activity_data$schooltype_code,
-    second_vector = activity_data$seuil,
+    first_vector = dataframe1$schooltype_code,
+    second_vector = dataframe1$seuil,
     comparison_type = "difference",
     output = "report"
   )
-  activity_data$logical_successstatus_schooltype_indeterminate <- !logical_successstatus_schooltype_indeterminate$logical
+  dataframe1$logical_successstatus_schooltype_indeterminate <- !logical_successstatus_schooltype_indeterminate$logical
   # Case of success status indeterminate or NA: no constraints
-  activity_data$logical_successstatus_schooltype_indeterminate[is.na(activity_data$successstatus_code) | activity_data$successstatus_code == "2"] <- TRUE
+  dataframe1$logical_successstatus_schooltype_indeterminate[is.na(dataframe1$successstatus_code) | dataframe1$successstatus_code == "2"] <- TRUE
   # Indicates whether the success status requires a school type
-  activity_data$logical_successstatus_schooltype <- !is.na(activity_data$schooltype_code)
+  dataframe1$logical_successstatus_schooltype <- !is.na(dataframe1$schooltype_code)
   # Case of success status NA: no constraints
-  activity_data$logical_successstatus_schooltype[is.na(activity_data$successstatus_code)] <- TRUE
+  dataframe1$logical_successstatus_schooltype[is.na(dataframe1$successstatus_code)] <- TRUE
   # Indicates whether captured weight is greater than 0
-  activity_data$seuil <- 0
+  dataframe1$seuil <- 0
   comparison_successstatus_weight <- codama::vector_comparison(
-    first_vector = activity_data$activity_weight,
-    second_vector = activity_data$seuil,
+    first_vector = dataframe1$activity_weight,
+    second_vector = dataframe1$seuil,
     comparison_type = "greater",
     output = "report"
   )
-  activity_data$logical_successstatus_weight <- comparison_successstatus_weight$logical
+  dataframe1$logical_successstatus_weight <- comparison_successstatus_weight$logical
   # Case of success status null : must not have weight (inverse of the result obtained)
-  activity_data$logical_successstatus_weight[!is.na(activity_data$successstatus_code) & activity_data$successstatus_code == "0"] <- !activity_data$logical_successstatus_weight[!is.na(activity_data$successstatus_code) & activity_data$successstatus_code == "0"]
+  dataframe1$logical_successstatus_weight[!is.na(dataframe1$successstatus_code) & dataframe1$successstatus_code == "0"] <- !dataframe1$logical_successstatus_weight[!is.na(dataframe1$successstatus_code) & dataframe1$successstatus_code == "0"]
   # NA success status: no constraints
-  activity_data$logical_successstatus_weight[is.na(activity_data$successstatus_code)] <- TRUE
+  dataframe1$logical_successstatus_weight[is.na(dataframe1$successstatus_code)] <- TRUE
   # NA weight: no constraints
-  activity_data$logical_successstatus_weight[is.na(activity_data$activity_weight)] <- TRUE
+  dataframe1$logical_successstatus_weight[is.na(dataframe1$activity_weight)] <- TRUE
   # Combines test results
-  activity_data$logical <- activity_data$logical_successstatus_vesselactivity & activity_data$logical_successstatus_schooltype_indeterminate & activity_data$logical_successstatus_schooltype & activity_data$logical_successstatus_weight
-  activity_data <- dplyr::relocate(.data = activity_data, vesselactivity_code, successstatus_code, schooltype_code, activity_weight, .after = logical)
-  activity_data <- subset(activity_data, select = -c(seuil, logical_successstatus_vesselactivity, logical_successstatus_schooltype_indeterminate, logical_successstatus_schooltype, logical_successstatus_weight))
-  if ((sum(activity_data$logical) + sum(!activity_data$logical)) != nrow_first) {
+  dataframe1$logical <- dataframe1$logical_successstatus_vesselactivity & dataframe1$logical_successstatus_schooltype_indeterminate & dataframe1$logical_successstatus_schooltype & dataframe1$logical_successstatus_weight
+  dataframe1 <- dplyr::relocate(.data = dataframe1, vesselactivity_code, successstatus_code, schooltype_code, activity_weight, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(seuil, logical_successstatus_vesselactivity, logical_successstatus_schooltype_indeterminate, logical_successstatus_schooltype, logical_successstatus_weight))
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$activity_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "activity") {
-        text_object_more_or_less(select, activity_data$activity_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!activity_data$logical), " activity with a succes status that doesn't match either the vessel activity, the type of school or the weight caught.")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " activity with a succes status that doesn't match either the vessel activity, the type of school or the weight caught.")))
   }
   if (output == "report") {
-    return(activity_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!activity_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -5010,13 +4914,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether the succes status is consistent with the vessel activity, the type of school or the weight caught
-          check_operationt_inspector_data <- check_operationt_inspector(
-            data_connection = data_connection,
-            type_select = "activity",
-            select = activity_select$activity_id,
-            output = "report"
-          )
           # Uses a function which indicates whether the ocean declaration is consistent with activity position
           check_position_inspector_data <- check_position_inspector(
             data_connection = data_connection,
@@ -5367,6 +5264,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `School type` = schooltype_code,
             `Number of associations object` = association_object_count
           )
+          # Uses a function which indicates whether the succes status is consistent with the vessel activity, the type of school or the weight caught
+          check_operationt_inspector_data <- check_operationt_inspector(dataframe1 = data_activity, output = "report")
           # Uses a function to format the table
           check_operationt <- table_display_trip(check_operationt_inspector_data, activity_select, type_inconsistency = "error")
           # Modify the table for display purposes: rename column

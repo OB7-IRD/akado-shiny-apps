@@ -8,12 +8,17 @@ SELECT
     t.topiaid::text AS trip_id,
     st_asText(a.the_geom)::text AS activity_position,
     ST_SRID(a.the_geom)::numeric AS activity_crs,
-    s.code::text AS schooltype_code
+    s.code::text AS schooltype_code,
+    sss.code::text AS successstatus_code,
+    a.totalweight::numeric AS activity_weight,
+    va.code::text AS vesselactivity_code
 FROM 
     ps_logbook.activity a 
     INNER JOIN ps_logbook.route r ON a.route = r.topiaid 
     INNER JOIN ps_common.trip t ON r.trip = t.topiaid
     INNER JOIN common.vessel v ON t.vessel = v.topiaid
+    LEFT JOIN ps_logbook.setsuccessstatus sss ON a.setsuccessstatus = sss.topiaid 
     LEFT JOIN ps_common.schooltype s ON a.schooltype = s.topiaid
+    LEFT JOIN ps_common.vesselactivity va ON a.vesselactivity = va.topiaid 
 WHERE 
     a.topiaid IN (?select_item) 
