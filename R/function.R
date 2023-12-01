@@ -5347,12 +5347,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             # Disconnection to the bases
             DBI::dbDisconnect(data_connection_vms[[2]])
           }
+          # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
+          data_trip_unprecedented<-unique(subset(data_trip, select = -c(harbour_id_departure_trip_previous, harbour_name_departure_trip_previous)))
           # Uses a function which indicates whether the selected trips contain activities or not
-          check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip, dataframe2 = data_activity, output = "report")
+          check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_activity, output = "report")
           # Uses a function to format the table
           check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
           # Uses a function which indicates whether the selected trips contain fishing time inconsistent
-          check_fishing_time_inspector_data <- check_fishing_time_inspector(dataframe1 = data_trip, dataframe2 = data_route, output = "report")
+          check_fishing_time_inspector_data <- check_fishing_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
           # Uses a function to format the table
           check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select(), type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5362,7 +5364,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum route fishing time` = sum_route_fishingtime
           )
           # Uses a function which indicates whether the selected trips contain sea time inconsistent
-          check_sea_time_inspector_data <- check_sea_time_inspector(dataframe1 = data_trip, dataframe2 = data_route, output = "report")
+          check_sea_time_inspector_data <- check_sea_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
           # Uses a function to format the table
           check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_select(), type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5372,7 +5374,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum route sea time` = sum_route_seatime
           )
           # Uses a function which indicates whether the selected trips contain landing total weight inconsistent with vessel capacity
-          check_landing_consistent_inspector_data <- check_landing_consistent_inspector(dataframe1 = data_trip, output = "report")
+          check_landing_consistent_inspector_data <- check_landing_consistent_inspector(dataframe1 = data_trip_unprecedented, output = "report")
           # Uses a function to format the table
           check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_select(), type_inconsistency = "warning")
           # Modify the table for display purposes: rename column
@@ -5382,7 +5384,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = trip_weighttotal
           )
           # Uses a function which indicates whether the selected trips contain the total landed weight for canneries inconsistent with the weights of each landing for the canneries
-          check_landing_total_weight_inspector_data <- check_landing_total_weight_inspector(dataframe1 = data_trip, dataframe2 = data_landing, output = "report", epsilon = config_data()[["epsilon"]])
+          check_landing_total_weight_inspector_data <- check_landing_total_weight_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_landing, output = "report", epsilon = config_data()[["epsilon"]])
           # Uses a function to format the table
           check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_select(), type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5392,7 +5394,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum landing weight` = sum_weightlanding
           )
           # Uses a function which indicates whether the selected trips contain the trip start and end date inconsistent with the dates of activity
-          check_temporal_limit_inspector_data <- check_temporal_limit_inspector(dataframe1 = data_trip, dataframe2 = data_route, output = "report")
+          check_temporal_limit_inspector_data <- check_temporal_limit_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
           # Data preparation
           check_temporal_limit <- check_temporal_limit_inspector_data[[1]]
           check_temporal_limit_data_plot <- check_temporal_limit_inspector_data[[2]]
@@ -5423,7 +5425,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Harbour departure` = harbour_name_departure_trip_previous
           )
           # Uses a function which indicates whether the selected trips contain RF1 inconsistent with limit values
-          check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip, dataframe2 = data_catch_tide, dataframe3 = data_tide, output = "report")
+          check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_tide, dataframe3 = data_tide, output = "report")
           # Uses a function to format the table
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
           check_raising_factor$RF1 <- trunc(check_raising_factor$RF1 * 100000) / 100000
