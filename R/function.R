@@ -929,6 +929,8 @@ check_harbour_inspector <- function(dataframe1,
 #' @title Gives the inconsistencies between RF1 and limits values
 #' @description The purpose of the check_raising_factor_inspector function is to provide a table of data that contains an inconsistency with the RF1 and the valid limits (Default : 0.9 ; 1.1)
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param logbook_program {\link[base]{character}} expected. Vector of the logbook program inventory, to which the trips that make up the tides may belong.
 #' @param species {\link[base]{character}} expected. Default values: c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"). Vector of the inventory of species used to calculate catch weight in RF1.
@@ -1172,44 +1174,69 @@ check_raising_factor_inspector <- function(dataframe1,
   }
 }
 
-# Function that tests if the school type is consistent with the association, in the future integrated in the pakage codama
-check_fishing_context_inspector <- function(data_connection,
-                                            type_select,
-                                            select,
-                                            output) {
+#' @name check_fishing_context_inspector
+#' @title Gives the inconsistencies between the school type and the association
+#' @description The purpose of the check_fishing_context_inspector function is to provide a table of data that contains an inconsistency with school type and the association
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param schooltype_object {\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  schooltype_code}}
+#' Dataframe 2:
+#'  \item{\code{  observedsystem_id}}
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  schooltype_code}}
+#' }
+#' @export
+check_fishing_context_inspector <- function(dataframe1,
+                                            dataframe2,
+                                            output,
+                                            schooltype_object = c("1")) {
   # 0 - Global variables assignement ----
   activity_id <- NULL
   schooltype_code <- NULL
   association_object_count <- NULL
   seuil <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("activity_id", "schooltype_code"),
+    column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
-    return(codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("activity_id", "schooltype_code"),
+      column_type = c("character", "character"),
       output = "message"
-    ))
-  } else {
-    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
-        sep = ""
-      )
-    }
+    )
+  }else {
+    dataframe1 <- dataframe1[, c("activity_id", "schooltype_code")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("observedsystem_id", "activity_id", "schooltype_code"),
+    column_type = c("character", "character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("observedsystem_id", "activity_id", "schooltype_code"),
+      column_type = c("character", "character", "character"),
+      output = "message"
+    )
+  }else {
+    dataframe2 <- dataframe2[, c("observedsystem_id", "activity_id", "schooltype_code")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1225,175 +1252,73 @@ check_fishing_context_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
+  if (codama::r_type_checking(
+    r_object = schooltype_object,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = schooltype_object,
       type = "character",
-      allowed_value = c("activity", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("activity", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "activity" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Activity selection in the SQL query
-    if (type_select == "activity") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Activity with date in the selected year
-      activity_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "activity_id_selected_by_year.sql",
-          package = "AkadoR"
-        )),
-        collapse = "\n"
-      )
-      activity_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = activity_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = activity_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", activity_id_selected_by_year_data$activity_id, "'")
-    }
-    # Retrieves the schooltype of activity
-    activity_schooltype_sql <- paste(
-      readLines(con = system.file("sql",
-        "activity_schooltype.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    activity_schooltype_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = activity_schooltype_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    activity_schooltype_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = activity_schooltype_sql
+      output = "message"
     ))
-    # Retrieves activities with object-type associations
-    activity_association_object_sql <- paste(
-      readLines(con = system.file("sql",
-        "activity_association_object.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    activity_association_object_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = activity_association_object_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    activity_association_object_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = activity_association_object_sql
-    ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
-      activity_schooltype_data <- data_connection[[1]]
-      activity_association_object_data <- data_connection[[2]]
-      nrow_first <- nrow(activity_schooltype_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
   }
-  # 3 - Data design ----
+  select <- dataframe1$activity_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Filters out object-school associations
+  dataframe2 <- dataframe2 %>% dplyr::filter(schooltype_code %in% schooltype_object)
   # Calculates the number of object-type associations
-  activity_association_object_data <- activity_association_object_data %>%
+  dataframe2 <- dataframe2 %>%
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(association_object_count = dplyr::n())
   # Merge
-  activity_schooltype_data <- merge(activity_schooltype_data, activity_association_object_data, all.x = TRUE)
-  activity_schooltype_data$seuil <- 0
-  activity_schooltype_data$association_object_count[is.na(activity_schooltype_data$association_object_count)] <- 0
+  dataframe1 <- merge(dataframe1, dataframe2, all.x = TRUE)
+  dataframe1$seuil <- 0
+  dataframe1$association_object_count[is.na(dataframe1$association_object_count)] <- 0
   # Indicates whether or not an object-type association exists
   comparison <- codama::vector_comparison(
-    first_vector = activity_schooltype_data$association_object_count,
-    second_vector = activity_schooltype_data$seuil,
+    first_vector = dataframe1$association_object_count,
+    second_vector = dataframe1$seuil,
     comparison_type = "greater",
     output = "report"
   )
-  activity_schooltype_data$logical <- comparison$logical
+  dataframe1$logical <- comparison$logical
   # Case of free school : must not have any object-type association (inverse of the result obtained)
-  activity_schooltype_data$logical[!is.na(activity_schooltype_data$schooltype_code) & activity_schooltype_data$schooltype_code == "2"] <- !activity_schooltype_data$logical[!is.na(activity_schooltype_data$schooltype_code) & activity_schooltype_data$schooltype_code == "2"]
+  dataframe1$logical[!is.na(dataframe1$schooltype_code) & dataframe1$schooltype_code == "2"] <- !dataframe1$logical[!is.na(dataframe1$schooltype_code) & dataframe1$schooltype_code == "2"]
   # Unknown benches and NA: no constraint
-  activity_schooltype_data$logical[is.na(activity_schooltype_data$schooltype_code) | activity_schooltype_data$schooltype_code == "0"] <- TRUE
-  activity_schooltype_data <- dplyr::relocate(.data = activity_schooltype_data, schooltype_code, association_object_count, .after = logical)
-  activity_schooltype_data <- subset(activity_schooltype_data, select = -c(seuil))
-  if ((sum(activity_schooltype_data$logical) + sum(!activity_schooltype_data$logical)) != nrow_first) {
+  dataframe1$logical[is.na(dataframe1$schooltype_code) | dataframe1$schooltype_code == "0"] <- TRUE
+  dataframe1 <- dplyr::relocate(.data = dataframe1, schooltype_code, association_object_count, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(seuil))
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$activity_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "activity") {
-        text_object_more_or_less(select, activity_schooltype_data$activity_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!activity_schooltype_data$logical), " activity with school types that do not correspond to the observed associations")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " activity with school types that do not correspond to the observed associations")))
   }
   if (output == "report") {
-    return(activity_schooltype_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!activity_schooltype_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -5085,13 +5010,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether the school type is consistent with the association
-          check_fishing_context_inspector_data <- check_fishing_context_inspector(
-            data_connection = data_connection,
-            type_select = "activity",
-            select = activity_select$activity_id,
-            output = "report"
-          )
           # Uses a function which indicates whether the succes status is consistent with the vessel activity, the type of school or the weight caught
           check_operationt_inspector_data <- check_operationt_inspector(
             data_connection = data_connection,
@@ -5311,6 +5229,16 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = data_tide$trip_id)
           )
+          # Uses a function to extract data from activity_observedsystem
+          data_activity_observedsystem <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "activity_observedsystem.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = activity_select$activity_id)
+          )
           # Uses a function to extract data from activity_harbour
           data_activity_harbour <- furdeb::data_extraction(
             type = "database",
@@ -5429,6 +5357,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function to format the table
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
           check_raising_factor$RF1 <- trunc(check_raising_factor$RF1 * 100000) / 100000
+          # Uses a function which indicates whether the school type is consistent with the association
+          check_fishing_context_inspector_data <- check_fishing_context_inspector(dataframe1 = data_activity, dataframe2 = data_activity_observedsystem, output = "report")
           # Uses a function to format the table
           check_fishing_context <- table_display_trip(check_fishing_context_inspector_data, activity_select, type_inconsistency = "error")
           # Modify the table for display purposes: rename column

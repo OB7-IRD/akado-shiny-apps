@@ -7,11 +7,13 @@ SELECT
     v.code::text AS vessel_code,
     t.topiaid::text AS trip_id,
     st_asText(a.the_geom)::text AS activity_position,
-    ST_SRID(a.the_geom)::numeric AS activity_crs
+    ST_SRID(a.the_geom)::numeric AS activity_crs,
+    s.code::text AS schooltype_code
 FROM 
     ps_logbook.activity a 
     INNER JOIN ps_logbook.route r ON a.route = r.topiaid 
     INNER JOIN ps_common.trip t ON r.trip = t.topiaid
     INNER JOIN common.vessel v ON t.vessel = v.topiaid
+    LEFT JOIN ps_common.schooltype s ON a.schooltype = s.topiaid
 WHERE 
     a.topiaid IN (?select_item) 
