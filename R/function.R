@@ -2175,46 +2175,43 @@ check_temperature_inspector <- function(dataframe1,
   }
 }
 
-# Function the species sampled is consistent with species authorized, in the future integrated in the pakage codama
-check_species_inspector <- function(data_connection,
-                                    type_select,
-                                    select,
+#' @name check_species_inspector
+#' @title Gives the inconsistencies between species sampled and species authorized
+#' @description The purpose of the check_species_inspector function is to provide a table of data that contains an inconsistency between the species sampled and species authorized
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param species {\link[base]{character}} expected. Default values: c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"). Vector of the species authorized.
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  samplespecies_id}}
+#'  \item{\code{  specie_name}}
+#' }
+#' @export
+check_species_inspector <- function(dataframe1,
                                     output,
                                     species = c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT")) {
   # 0 - Global variables assignement ----
   specie_name <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("samplespecies_id", "specie_name"),
+    column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE & !inherits(data_connection, "data.frame")) {
-    stop(
-      format(
-        x = Sys.time(),
-        format = "%Y-%m-%d %H:%M:%S"
-      ),
-      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
-      sep = ""
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("samplespecies_id", "specie_name"),
+      column_type = c("character", "character"),
+      output = "message"
     )
-  } else {
-    if (codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
-      output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = data_connection[[2]],
-        type = "PostgreSQLConnection",
-        output = "message"
-      ))
-    }
+  }else {
+    dataframe1 <- dataframe1[, c("samplespecies_id", "specie_name")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -2230,143 +2227,59 @@ check_species_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
+  if (codama::r_type_checking(
+    r_object = species,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = species,
       type = "character",
-      allowed_value = c("sample", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("sample", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "sample" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Sample selection in the SQL query
-    if (type_select == "sample") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Sample with date in the selected year
-      sample_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "sample_id_selected_by_year.sql",
-          package = "AkadoR"
-        )),
-        collapse = "\n"
-      )
-      sample_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = sample_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      sample_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = sample_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", sample_id_selected_by_year_data$sample_id, "'")
-    }
-    # Retrieves the species of the samples
-    samplespecies_specie_sql <- paste(
-      readLines(con = system.file("sql",
-        "samplespecies_specie.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    samplespecies_specie_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = samplespecies_specie_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    samplespecies_specie_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = samplespecies_specie_sql
+      output = "message"
     ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection) == TRUE) {
-      samplespecies_specie_data <- data_connection
-      nrow_first <- nrow(samplespecies_specie_data)
-    } else {
-      warning(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
   }
-  # 3 - Data design ----
+  select <- dataframe1$samplespecies_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Compare specie of the samples
   comparison_species <- codama::vector_comparison(
-    first_vector = samplespecies_specie_data$specie_name,
+    first_vector = dataframe1$specie_name,
     second_vector = species,
     comparison_type = "difference",
     output = "report"
   )
-  samplespecies_specie_data$logical <- comparison_species$logical
+  dataframe1$logical <- comparison_species$logical
   # Modify the table for display purposes: add, remove and order column
-  samplespecies_specie_data <- dplyr::relocate(.data = samplespecies_specie_data, specie_name, .after = logical)
-  if ((sum(samplespecies_specie_data$logical) + sum(!samplespecies_specie_data$logical)) != nrow_first) {
+  dataframe1 <- dplyr::relocate(.data = dataframe1, specie_name, .after = logical)
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$samplespecies_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "sample") {
-        text_object_more_or_less(select, samplespecies_specie_data$samplespecies_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!samplespecies_specie_data$logical), " samples with species not included in the authorized list (", paste0(species, collapse = ", "), ")", collapse = ", ")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " samples with species not included in the authorized list (", paste0(species, collapse = ", "), ")", collapse = ", ")))
   }
   if (output == "report") {
-    return(samplespecies_specie_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!samplespecies_specie_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -4459,13 +4372,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether that species sampled is consistent with species authorized
-          check_species_inspector_data <- check_species_inspector(
-            data_connection = data_connection,
-            type_select = "sample",
-            select = samplespecies_select$samplespecies_id,
-            output = "report"
-          )
           # Uses a function to extract data from samplespeciesmeasure in connection with samplespecies
           data_samplespecies_samplespeciesmeasure <- furdeb::data_extraction(
             type = "database",
@@ -4844,6 +4750,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             .data = check_temperature,
             `Sea surface temperature` = activity_seasurfacetemperature
           )
+          # Uses a function which indicates whether that species sampled is consistent with species authorized
+          check_species_inspector_data <- check_species_inspector(dataframe1 = data_samplespecies, output = "report")
           # Uses a function to format the table
           check_species <- table_display_trip(check_species_inspector_data, samplespecies_select, type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of measurement
