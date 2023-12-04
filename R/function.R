@@ -2045,7 +2045,7 @@ check_measure_inspector <- function(dataframe1,
       sep = ""
     )
   }
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!dataframe1$logical), " samples with number of individuals measured per species different from number measured per species and size class")))
   }
@@ -2061,11 +2061,22 @@ check_measure_inspector <- function(dataframe1,
   }
 }
 
-
-# Function the sea surface temperature is consistent with valid limits, in the future integrated in the pakage codama
-check_temperature_inspector <- function(data_connection,
-                                        type_select,
-                                        select,
+#' @name check_temperature_inspector
+#' @title Gives the inconsistencies between activity sea surface temperature and valid limits
+#' @description The purpose of the check_temperature_inspector function is to provide a table of data that contains an inconsistency between the sea surface temperature for the activity and valid limits
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param limit {\link[base]{numeric}} expected. Default values: 15 and 32. Vector containing the lower and upper acceptable limits for sea surface temperature.
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  activity_seasurfacetemperature}}
+#' }
+#' @export
+check_temperature_inspector <- function(dataframe1,
                                         output,
                                         limit = c(15, 32)) {
   # 0 - Global variables assignement ----
@@ -2073,37 +2084,22 @@ check_temperature_inspector <- function(data_connection,
   lower_limit <- NULL
   upper_limit <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("activity_id", "activity_seasurfacetemperature"),
+    column_type = c("character", "numeric"),
     output = "logical"
-  ) != TRUE & !inherits(data_connection, "data.frame")) {
-    stop(
-      format(
-        x = Sys.time(),
-        format = "%Y-%m-%d %H:%M:%S"
-      ),
-      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
-      sep = ""
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("activity_id", "activity_seasurfacetemperature"),
+      column_type = c("character", "numeric"),
+      output = "message"
     )
-  } else {
-    if (codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
-      output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = data_connection[[2]],
-        type = "PostgreSQLConnection",
-        output = "message"
-      ))
-    }
+  }else {
+    dataframe1 <- dataframe1[, c("activity_id", "activity_seasurfacetemperature")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -2119,154 +2115,59 @@ check_temperature_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("activity", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("activity", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "activity" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Activity selection in the SQL query
-    if (type_select == "activity") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Activity with date in the selected year
-      activity_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "activity_id_selected_by_year.sql",
-          package = "AkadoR"
-        )),
-        collapse = "\n"
-      )
-      activity_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = activity_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = activity_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", activity_id_selected_by_year_data$activity_id, "'")
-    }
-    # Retrieves the sea surface temperature of the activity
-    activity_seasurfacetemperature_sql <- paste(
-      readLines(con = system.file("sql",
-        "activity_seasurfacetemperature.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    activity_seasurfacetemperature_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = activity_seasurfacetemperature_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    activity_seasurfacetemperature_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = activity_seasurfacetemperature_sql
-    ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE) {
-      activity_seasurfacetemperature_data <- data_connection
-      nrow_first <- nrow(activity_seasurfacetemperature_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide the datasets instead.\n ",
-        sep = ""
-      )
-    }
-  }
-  # 3 - Data design ----
+  select <- dataframe1$activity_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Compare RF1 to valid limits
-  activity_seasurfacetemperature_data$lower_limit <- limit[1]
-  activity_seasurfacetemperature_data$upper_limit <- limit[2]
+  dataframe1$lower_limit <- limit[1]
+  dataframe1$upper_limit <- limit[2]
   comparison_less <- codama::vector_comparison(
-    first_vector = activity_seasurfacetemperature_data$activity_seasurfacetemperature,
-    second_vector = activity_seasurfacetemperature_data$upper_limit,
+    first_vector = dataframe1$activity_seasurfacetemperature,
+    second_vector = dataframe1$upper_limit,
     comparison_type = "less_equal",
     output = "report"
   )
   comparison_greater <- codama::vector_comparison(
-    first_vector = activity_seasurfacetemperature_data$activity_seasurfacetemperature,
-    second_vector = activity_seasurfacetemperature_data$lower_limit,
+    first_vector = dataframe1$activity_seasurfacetemperature,
+    second_vector = dataframe1$lower_limit,
     comparison_type = "greater_equal",
     output = "report"
   )
-  activity_seasurfacetemperature_data$logical <- comparison_less$logical & comparison_greater$logical
+  dataframe1$logical <- comparison_less$logical & comparison_greater$logical
   # Management of the NA value for the sea surface temperature
-  activity_seasurfacetemperature_data[is.na(activity_seasurfacetemperature_data$activity_seasurfacetemperature), "logical"] <- TRUE
+  dataframe1[is.na(dataframe1$activity_seasurfacetemperature), "logical"] <- TRUE
   # Modify the table for display purposes: add, remove and order column
-  activity_seasurfacetemperature_data <- dplyr::relocate(.data = activity_seasurfacetemperature_data, activity_seasurfacetemperature, .after = logical)
-  activity_seasurfacetemperature_data <- subset(activity_seasurfacetemperature_data, select = -c(lower_limit, upper_limit))
-  if ((sum(activity_seasurfacetemperature_data$logical) + sum(!activity_seasurfacetemperature_data$logical)) != nrow_first) {
+  dataframe1 <- dplyr::relocate(.data = dataframe1, activity_seasurfacetemperature, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(lower_limit, upper_limit))
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$activity_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "activity") {
-        text_object_more_or_less(select, activity_seasurfacetemperature_data$activity_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!activity_seasurfacetemperature_data$logical), " activity with sea surface temperature outside defined thresholds")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " activity with sea surface temperature outside defined thresholds")))
   }
   if (output == "report") {
-    return(activity_seasurfacetemperature_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!activity_seasurfacetemperature_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -4558,13 +4459,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether that sea surface temperature is consistent with the valid limits
-          check_temperature_inspector_data <- check_temperature_inspector(
-            data_connection = data_connection,
-            type_select = "activity",
-            select = activity_select$activity_id,
-            output = "report"
-          )
           # Uses a function which indicates whether that species sampled is consistent with species authorized
           check_species_inspector_data <- check_species_inspector(
             data_connection = data_connection,
@@ -4942,6 +4836,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Number individuals measured sample` = sum_measuredcount,
             `Sum numbers individuals size class` = sum_count
           )
+          # Uses a function which indicates whether that sea surface temperature is consistent with the valid limits
+          check_temperature_inspector_data <- check_temperature_inspector(dataframe1 = data_activity_unzfaoocean, output = "report")
           # Uses a function to format the table
           check_temperature <- table_display_trip(check_temperature_inspector_data, activity_select, type_inconsistency = "error")
           check_temperature <- dplyr::rename(

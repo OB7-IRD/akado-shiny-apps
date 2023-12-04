@@ -14,7 +14,8 @@ SELECT
     va.code::text AS vesselactivity_code,
     o.label1::text AS ocean_name, 
     tmp_geo.ocean::text AS zfao_ocean,
-    tmp_harbour.topiaid::text AS harbour_id
+    tmp_harbour.topiaid::text AS harbour_id,
+    a.seasurfacetemperature::numeric AS activity_seasurfacetemperature
 FROM 
     ps_logbook.activity a 
     INNER JOIN ps_logbook.route r ON a.route = r.topiaid 
