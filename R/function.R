@@ -1754,10 +1754,26 @@ check_weight_inspector <- function(dataframe1,
   }
 }
 
-# Function that size class of the samples depending on the species and measurement type is consistent with valid limits, in the future integrated in the pakage codama
-check_length_class_inspector <- function(data_connection,
-                                         type_select,
-                                         select,
+#' @name check_length_class_inspector
+#' @title Gives the inconsistencies between size class of the samples depending on the species and measurement type and the valid limits
+#' @description The purpose of the check_length_class_inspector function is to provide a table of data that contains an inconsistency between the size class of the samples depending on the species and measurement type and the valid limits (Default : 80)
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param species {\link[base]{character}} expected. Default values: c("YFT", "BET", "ALB"). Vector of the species inventory controlled.
+#' @param size_measure_type {\link[base]{character}} expected. Default values: "FL". Vector of the size measure type controlled.
+#' @param limit {\link[base]{numeric}} expected. Default values: 80. Limit of the size measure
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  samplespeciesmeasure_id}}
+#'  \item{\code{  specie_code}}
+#'  \item{\code{  sizemeasuretype_code}}
+#'  \item{\code{  samplespeciesmeasure_sizeclass}}
+#' }
+#' @export
+check_length_class_inspector <- function(dataframe1,
                                          output,
                                          species = c("YFT", "BET", "ALB"),
                                          size_measure_type = "FL",
@@ -1771,37 +1787,22 @@ check_length_class_inspector <- function(data_connection,
   logical_species <- NULL
   seuil <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("samplespeciesmeasure_id", "specie_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
+    column_type = c("character", "character", "character", "numeric"),
     output = "logical"
-  ) != TRUE & !inherits(data_connection, "data.frame")) {
-    stop(
-      format(
-        x = Sys.time(),
-        format = "%Y-%m-%d %H:%M:%S"
-      ),
-      " - Class for \"data_connection\" must be a *list* in the case of a connection to a base and a *data.frame* otherwise.\n ",
-      sep = ""
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("samplespeciesmeasure_id", "specie_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
+      column_type = c("character", "character", "character", "numeric"),
+      output = "message"
     )
-  } else {
-    if (codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
-      output = "logical"
-    ) == TRUE && !is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = data_connection[[2]],
-        type = "PostgreSQLConnection",
-        output = "message"
-      ))
-    }
+  }else {
+    dataframe1 <- dataframe1[, c("samplespeciesmeasure_id", "specie_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1817,162 +1818,102 @@ check_length_class_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
+  if (codama::r_type_checking(
+    r_object = species,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = species,
       type = "character",
-      allowed_value = c("sample", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("sample", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "sample" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Sample selection in the SQL query
-    if (type_select == "sample") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Sample with date in the selected year
-      sample_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "sample_id_selected_by_year.sql",
-          package = "AkadoR"
-        )),
-        collapse = "\n"
-      )
-      sample_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = sample_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      sample_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = sample_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", sample_id_selected_by_year_data$sample_id, "'")
-    }
-    # Retrieves the species, measurement type and size class of the samples
-    samplespeciesmeasure_sizeclass_sql <- paste(
-      readLines(con = system.file("sql",
-        "samplespeciesmeasure_sizeclass.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    samplespeciesmeasure_sizeclass_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = samplespeciesmeasure_sizeclass_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    samplespeciesmeasure_sizeclass_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = samplespeciesmeasure_sizeclass_sql
+      output = "message"
     ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection) == TRUE) {
-      samplespeciesmeasure_sizeclass_data <- data_connection
-      nrow_first <- nrow(samplespeciesmeasure_sizeclass_data)
-    } else {
-      warning(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
   }
-  # 3 - Data design ----
-  samplespeciesmeasure_sizeclass_data$seuil <- limit
+  if (codama::r_type_checking(
+    r_object = size_measure_type,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = size_measure_type,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (codama::r_type_checking(
+    r_object = limit,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = limit,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  select <- dataframe1$samplespeciesmeasure_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  dataframe1$seuil <- limit
   # Compare size class of the samples
   comparison_sizeclass <- codama::vector_comparison(
-    first_vector = samplespeciesmeasure_sizeclass_data$samplespeciesmeasure_sizeclass,
-    second_vector = samplespeciesmeasure_sizeclass_data$seuil,
+    first_vector = dataframe1$samplespeciesmeasure_sizeclass,
+    second_vector = dataframe1$seuil,
     comparison_type = "less_equal",
     output = "report"
   )
-  samplespeciesmeasure_sizeclass_data$logical_sizeclass <- comparison_sizeclass$logical
+  dataframe1$logical_sizeclass <- comparison_sizeclass$logical
   # Compare specie of the samples
   comparison_species <- codama::vector_comparison(
-    first_vector = samplespeciesmeasure_sizeclass_data$specie_code,
+    first_vector = dataframe1$specie_code,
     second_vector = species,
     comparison_type = "difference",
     output = "report"
   )
-  samplespeciesmeasure_sizeclass_data$logical_species <- comparison_species$logical
+  dataframe1$logical_species <- comparison_species$logical
   # Compare size measure type of the samples
   comparison_sizemeasuretype <- codama::vector_comparison(
-    first_vector = samplespeciesmeasure_sizeclass_data$sizemeasuretype_code,
+    first_vector = dataframe1$sizemeasuretype_code,
     second_vector = size_measure_type,
     comparison_type = "difference",
     output = "report"
   )
-  samplespeciesmeasure_sizeclass_data$logical_sizemeasuretype <- comparison_sizemeasuretype$logical
-  samplespeciesmeasure_sizeclass_data$logical <- samplespeciesmeasure_sizeclass_data$logical_sizeclass | !samplespeciesmeasure_sizeclass_data$logical_sizemeasuretype | !samplespeciesmeasure_sizeclass_data$logical_species
+  dataframe1$logical_sizemeasuretype <- comparison_sizemeasuretype$logical
+  dataframe1$logical <- dataframe1$logical_sizeclass | !dataframe1$logical_sizemeasuretype | !dataframe1$logical_species
   # Modify the table for display purposes: add, remove and order column
-  samplespeciesmeasure_sizeclass_data <- dplyr::relocate(.data = samplespeciesmeasure_sizeclass_data, specie_code, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
-  samplespeciesmeasure_sizeclass_data <- subset(samplespeciesmeasure_sizeclass_data, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, seuil, specie_code, sizemeasuretype_code))
-  if ((sum(samplespeciesmeasure_sizeclass_data$logical) + sum(!samplespeciesmeasure_sizeclass_data$logical)) != nrow_first) {
+  dataframe1 <- dplyr::relocate(.data = dataframe1, specie_code, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, seuil, specie_code, sizemeasuretype_code))
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$samplespeciesmeasure_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "sample") {
-        text_object_more_or_less(select, samplespeciesmeasure_sizeclass_data$samplespeciesmeasure_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!samplespeciesmeasure_sizeclass_data$logical), " samples with measurements ", paste0(size_measure_type, collapse = ", "), ", for species ", paste0(species, collapse = ", "), ", greater than ", limit)))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " samples with measurements ", paste0(size_measure_type, collapse = ", "), ", for species ", paste0(species, collapse = ", "), ", greater than ", limit)))
   }
   if (output == "report") {
-    return(samplespeciesmeasure_sizeclass_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!samplespeciesmeasure_sizeclass_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -4708,13 +4649,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid limits
-          check_length_class_inspector_data <- check_length_class_inspector(
-            data_connection = data_connection,
-            type_select = "sample",
-            select = samplespeciesmeasure_select$samplespeciesmeasure_id,
-            output = "report"
-          )
           # Uses a function which indicates whether that total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
           check_measure_inspector_data <- check_measure_inspector(
             data_connection = data_connection,
@@ -5092,6 +5026,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Activity weight` = activity_weight,
             `Sum catch weight` = sum_catch_weight
           )
+          # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid limits
+          check_length_class_inspector_data <- check_length_class_inspector(dataframe1 = data_samplespeciesmeasure, output = "report")
           # Uses a function to format the table
           check_length_class <- table_display_trip(check_length_class_inspector_data, samplespeciesmeasure_select, type_inconsistency = "error")
           # Uses a function to format the table
