@@ -1470,10 +1470,26 @@ check_operationt_inspector <- function(dataframe1,
   }
 }
 
-# Function that tests if ocean declaration is consistent with activity position, in the future integrated in the pakage codama
-check_position_inspector <- function(data_connection,
-                                     type_select,
-                                     select,
+#' @name check_position_inspector
+#' @title Gives the inconsistencies between the ocean declared for the trip and the position of the activity
+#' @description The purpose of the check_position_inspector function is to provide a table of data that contains an inconsistency with ocean declaration and activity position
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param ocean_name_nonpriority {\link[base]{character}} expected. Default values: Atlantic. Name of the priority ocean when the point is on the border between two oceans.
+#' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  ocean_name}}
+#'  \item{\code{  zfao_ocean}}
+#'  \item{\code{  activity_position}}
+#'  \item{\code{  activity_crs}}
+#'  \item{\code{  harbour_id}}
+#' }
+#' @export
+check_position_inspector <- function(dataframe1,
                                      output,
                                      ocean_name_nonpriority = "Atlantic") {
   # 0 - Global variables assignement ----
@@ -1488,33 +1504,22 @@ check_position_inspector <- function(data_connection,
   logical_ocean <- NULL
   logical_harbour <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("activity_id", "ocean_name", "zfao_ocean", "activity_position", "activity_crs", "harbour_id"),
+    column_type = c("character", "character", "character", "character", "numeric", "character"),
     output = "logical"
   ) != TRUE) {
-    return(codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("activity_id", "ocean_name", "zfao_ocean", "activity_position", "activity_crs", "harbour_id"),
+      column_type = c("character", "character", "character", "character", "numeric", "character"),
       output = "message"
-    ))
-  } else {
-    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
-        sep = ""
-      )
-    }
+    )
+  }else {
+    dataframe1 <- dataframe1[, c("activity_id", "ocean_name", "zfao_ocean", "activity_position", "activity_crs", "harbour_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1530,198 +1535,79 @@ check_position_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("activity", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("activity", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "activity" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    if (codama::r_type_checking(
+  if (codama::r_type_checking(
+    r_object = ocean_name_nonpriority,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
       r_object = ocean_name_nonpriority,
       type = "character",
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = ocean_name_nonpriority,
-        type = "character",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Activity selection in the SQL query
-    if (type_select == "activity") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Activity with date in the selected year
-      activity_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "activity_id_selected_by_year.sql",
-          package = "AkadoR"
-        )),
-        collapse = "\n"
-      )
-      activity_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = activity_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = activity_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", activity_id_selected_by_year_data$activity_id, "'")
-    }
-    # Retrieves the position of activity
-    activity_sea_land_sql <- paste(
-      readLines(con = system.file("sql",
-        "activity_sea_land.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    activity_sea_land_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = activity_sea_land_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    activity_sea_land_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = activity_sea_land_sql
+      output = "message"
     ))
-    # Retrieves the position of activity in harbour
-    activity_harbour_sql <- paste(
-      readLines(con = system.file("sql",
-        "activity_harbour.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    activity_harbour_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = activity_harbour_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    activity_harbour_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = activity_harbour_sql
-    ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE) {
-      activity_sea_land_data <- data_connection[[1]]
-      activity_harbour_data <- data_connection[[2]]
-      nrow_first <- nrow(activity_schooltype_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
   }
-  # 3 - Data design ----
+  select <- dataframe1$activity_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Indicates whether the ocean is the same
   comparison_ocean <- codama::vector_comparison(
-    first_vector = activity_sea_land_data$ocean_name,
-    second_vector = activity_sea_land_data$zfao_ocean,
+    first_vector = dataframe1$ocean_name,
+    second_vector = dataframe1$zfao_ocean,
     comparison_type = "equal",
     output = "report"
   )
-  activity_sea_land_data$logical_ocean <- comparison_ocean$logical
+  dataframe1$logical_ocean <- comparison_ocean$logical
   # Indicates whether in land harbour
-  comparison_harbour <- codama::vector_comparison(
-    first_vector = activity_sea_land_data$activity_id,
-    second_vector = activity_harbour_data$activity_id,
-    comparison_type = "difference",
-    output = "report"
-  )
-  activity_sea_land_data$logical_harbour <- comparison_harbour$logical
+  dataframe1$logical_harbour<- FALSE
+  dataframe1$logical_harbour[!is.na(dataframe1$harbour_id)] <- TRUE
   # Case of harbour in sea : not in harbour
-  activity_sea_land_data$logical_harbour[!is.na(activity_sea_land_data$zfao_ocean)] <- FALSE
-  activity_sea_land_data$logical <- activity_sea_land_data$logical_ocean | activity_sea_land_data$logical_harbour
+  dataframe1$logical_harbour[!is.na(dataframe1$zfao_ocean)] <- FALSE
+  dataframe1$logical <- dataframe1$logical_ocean | dataframe1$logical_harbour
   # Case case where the position is exactly on the boundary of the two oceans: focus on the Indian Ocean
-  count_ocean_activity <- activity_sea_land_data %>%
+  count_ocean_activity <- dataframe1 %>%
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(count_ocean = length(unique(zfao_ocean))) %>%
     dplyr::filter(count_ocean == 2)
-  activity_sea_land_data <- activity_sea_land_data[!(activity_sea_land_data$activity_id %in% count_ocean_activity$activity_id & activity_sea_land_data$zfao_ocean == ocean_name_nonpriority), ]
+  dataframe1 <- dataframe1[!(dataframe1$activity_id %in% count_ocean_activity$activity_id & dataframe1$zfao_ocean == ocean_name_nonpriority), ]
   # Gives the type of location
-  activity_sea_land_data$type <- "Sea"
-  activity_sea_land_data$type[is.na(activity_sea_land_data$zfao_ocean)] <- "Land"
-  activity_sea_land_data$type[activity_sea_land_data$logical_harbour] <- "Harbour"
+  dataframe1$type <- "Sea"
+  dataframe1$type[is.na(dataframe1$zfao_ocean)] <- "Land"
+  dataframe1$type[dataframe1$logical_harbour] <- "Harbour"
   # Case of ocean trip is null :
-  activity_sea_land_data$logical[is.na(activity_sea_land_data$ocean_name)] <- FALSE
-  activity_sea_land_data <- dplyr::relocate(.data = activity_sea_land_data, type, ocean_name, zfao_ocean, .after = logical)
-  activity_sea_land_data_detail <- activity_sea_land_data
-  activity_sea_land_data <- subset(activity_sea_land_data, select = -c(activity_position, activity_crs, logical_ocean, logical_harbour))
-  if ((sum(activity_sea_land_data$logical) + sum(!activity_sea_land_data$logical)) != nrow_first) {
+  dataframe1$logical[is.na(dataframe1$ocean_name)] <- FALSE
+  dataframe1 <- dplyr::relocate(.data = dataframe1, type, ocean_name, zfao_ocean, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(harbour_id))
+  activity_sea_land_data_detail <- dataframe1
+  dataframe1 <- subset(dataframe1, select = -c(activity_position, activity_crs, logical_ocean, logical_harbour))
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$activity_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "activity") {
-        text_object_more_or_less(select, activity_sea_land_data$activity_id)
-      },
+      text,
       sep = ""
     )
   }
-
   # 4 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!activity_sea_land_data$logical), " activity with school types that do not correspond to the observed associations")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " activity with school types that do not correspond to the observed associations")))
   }
   if (output == "report") {
-    return(list(activity_sea_land_data, activity_sea_land_data_detail))
+    return(list(dataframe1, activity_sea_land_data_detail))
   }
   if (output == "logical") {
-    if (sum(!activity_sea_land_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -4914,13 +4800,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether the ocean declaration is consistent with activity position
-          check_position_inspector_data <- check_position_inspector(
-            data_connection = data_connection,
-            type_select = "activity",
-            select = activity_select$activity_id,
-            output = "report"
-          )
           # Uses a function which indicates whether that sum of the weight indicated for the catch is consistent with activity weight
           check_weight_inspector_data <- check_weight_inspector(
             data_connection = data_connection,
@@ -5174,8 +5053,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           }
           # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
           data_trip_unprecedented<-unique(subset(data_trip, select = -c(harbour_id_departure_trip_previous, harbour_name_departure_trip_previous)))
+          # Create an intermediate dataset without information from fao ocean to limit duplication problems with the position is exactly on the boundary of the two oceans, same for harbour
+          data_activity_unzfaoocean<-unique(subset(data_activity, select = -c(zfao_ocean, harbour_id)))
           # Uses a function which indicates whether the selected trips contain activities or not
-          check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_activity, output = "report")
+          check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_activity_unzfaoocean, output = "report")
           # Uses a function to format the table
           check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
           # Uses a function which indicates whether the selected trips contain fishing time inconsistent
@@ -5255,7 +5136,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
           check_raising_factor$RF1 <- trunc(check_raising_factor$RF1 * 100000) / 100000
           # Uses a function which indicates whether the school type is consistent with the association
-          check_fishing_context_inspector_data <- check_fishing_context_inspector(dataframe1 = data_activity, dataframe2 = data_activity_observedsystem, output = "report")
+          check_fishing_context_inspector_data <- check_fishing_context_inspector(dataframe1 = data_activity_unzfaoocean, dataframe2 = data_activity_observedsystem, output = "report")
           # Uses a function to format the table
           check_fishing_context <- table_display_trip(check_fishing_context_inspector_data, activity_select, type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5265,7 +5146,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Number of associations object` = association_object_count
           )
           # Uses a function which indicates whether the succes status is consistent with the vessel activity, the type of school or the weight caught
-          check_operationt_inspector_data <- check_operationt_inspector(dataframe1 = data_activity, output = "report")
+          check_operationt_inspector_data <- check_operationt_inspector(dataframe1 = data_activity_unzfaoocean, output = "report")
           # Uses a function to format the table
           check_operationt <- table_display_trip(check_operationt_inspector_data, activity_select, type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5276,6 +5157,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Success status` = successstatus_code,
             `Weigth` = activity_weight
           )
+          # Uses a function which indicates whether the ocean declaration is consistent with activity position
+          check_position_inspector_data <- check_position_inspector(dataframe1 = data_activity, output = "report")
           # Add button and data for plot in table
           check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select, colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_name", "zfao_ocean"), name_button = "button_position")
           # Uses a function to format the table
