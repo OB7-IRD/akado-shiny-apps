@@ -4,7 +4,8 @@ SELECT
     se.subsamplenumber::numeric AS samplespecies_subsamplenumber,
     se.sample::text AS sample_id,
     s.faocode::text AS specie_name,
-    smt.code::text AS sizemeasuretype_code
+    smt.code::text AS sizemeasuretype_code,
+    se.measuredcount::numeric AS samplespecies_measuredcount
 FROM 
     ps_logbook.samplespecies se
     LEFT JOIN common.species s ON se.species = s.topiaid

@@ -1921,10 +1921,28 @@ check_length_class_inspector <- function(dataframe1,
   }
 }
 
-# Function the total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class, in the future integrated in the pakage codama
-check_measure_inspector <- function(data_connection,
-                                    type_select,
-                                    select,
+#' @name check_measure_inspector
+#' @title Gives the inconsistencies between the total number of individuals measured per sample and the sum of individuals per sample, species and size class
+#' @description The purpose of the check_measure_inspector function is to provide a table of data that contains an inconsistency between the total number of individuals measured per sample and the sum of individuals per sample, species and size class
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  samplespecies_id}}
+#'  \item{\code{  samplespecies_measuredcount}}
+#'  \item{\code{  sample_id}}
+#' Dataframe 2:
+#'  \item{\code{  samplespeciesmeasure_id}}
+#'  \item{\code{  samplespeciesmeasure_count}}
+#'  \item{\code{  sample_id}}
+#' }
+#' @export
+check_measure_inspector <- function(dataframe1,
+                                    dataframe2,
                                     output) {
   # 0 - Global variables assignement ----
   trip_weight_capacity_data <- NULL
@@ -1934,33 +1952,39 @@ check_measure_inspector <- function(data_connection,
   sum_measuredcount <- NULL
   sum_count <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("samplespecies_id", "samplespecies_measuredcount", "sample_id"),
+    column_type = c("character", "numeric", "character"),
     output = "logical"
   ) != TRUE) {
-    return(codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("samplespecies_id", "samplespecies_measuredcount", "sample_id"),
+      column_type = c("character", "numeric", "character"),
       output = "message"
-    ))
-  } else {
-    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
-        sep = ""
-      )
-    }
+    )
+  }else {
+    dataframe1 <- dataframe1[, c("samplespecies_id", "samplespecies_measuredcount", "sample_id")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_count", "sample_id"),
+    column_type = c("character", "numeric", "character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_count", "sample_id"),
+      column_type = c("character", "numeric", "character"),
+      output = "message"
+    )
+  }else {
+    dataframe2 <- dataframe2[, c("samplespeciesmeasure_id", "samplespeciesmeasure_count", "sample_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1976,175 +2000,60 @@ check_measure_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("sample", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("sample", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "sample" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Trip selection in the SQL query
-    if (type_select == "sample") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Trip with a departure or arrival date in the selected year
-      sample_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "sample_id_selected_by_year.sql",
-          package = "codama"
-        )),
-        collapse = "\n"
-      )
-      sample_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = sample_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      sample_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = sample_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", sample_id_selected_by_year_data$trip_id, "'")
-    }
-    # number of individual measurements by sample and by species
-    samplespecies_measuredcount_sql <- paste(
-      readLines(con = system.file("sql",
-        "samplespecies_measuredcount.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    samplespecies_measuredcount_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = samplespecies_measuredcount_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    samplespecies_measuredcount_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = samplespecies_measuredcount_sql
-    ))
-    # number of individual measurements by sample and by species and by size class
-    samplespeciesmeasure_count_sql <- paste(
-      readLines(con = system.file("sql",
-        "samplespeciesmeasure_count.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    samplespeciesmeasure_count_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = samplespeciesmeasure_count_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    samplespeciesmeasure_count_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = samplespeciesmeasure_count_sql
-    ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE && is.data.frame(data_connection[[2]]) == TRUE) {
-      samplespecies_measuredcount_data <- data_connection[[1]]
-      samplespeciesmeasure_count_data <- data_connection[[2]]
-      nrow_first <- nrow(trip_weight_capacity_data)
-    } else {
-      warning(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
-  }
-  # 3 - Data design ----
+  select <- dataframe1$sample_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Calculates the total sum of individuals by sample (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
-  samplespecies_measuredcount_data <- samplespecies_measuredcount_data %>%
+  dataframe1 <- dataframe1 %>%
     dplyr::group_by(sample_id) %>%
     dplyr::summarise(sum_measuredcount = ifelse(all(is.na(samplespecies_measuredcount)), samplespecies_measuredcount[NA_integer_], sum(samplespecies_measuredcount, na.rm = TRUE)))
-  samplespeciesmeasure_count_data <- samplespeciesmeasure_count_data %>%
+  dataframe2 <- dataframe2 %>%
     dplyr::group_by(sample_id) %>%
     dplyr::summarise(sum_count = ifelse(all(is.na(samplespeciesmeasure_count)), samplespeciesmeasure_count[NA_integer_], sum(samplespeciesmeasure_count, na.rm = TRUE)))
   # Merge
-  samplespecies_measuredcount_data <- merge(samplespecies_measuredcount_data, samplespeciesmeasure_count_data, by.x = "sample_id", by.y = "sample_id", all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2, by.x = "sample_id", by.y = "sample_id", all.x = TRUE)
   # Compare the two sums
   comparison <- codama::vector_comparison(
-    first_vector = samplespecies_measuredcount_data$sum_measuredcount,
-    second_vector = samplespecies_measuredcount_data$sum_count,
+    first_vector = dataframe1$sum_measuredcount,
+    second_vector = dataframe1$sum_count,
     comparison_type = "equal",
     output = "report"
   )
-  samplespecies_measuredcount_data$logical <- comparison$logical
-  samplespecies_measuredcount_data <- dplyr::relocate(.data = samplespecies_measuredcount_data, sum_measuredcount, sum_count, .after = logical)
+  dataframe1$logical <- comparison$logical
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sum_measuredcount, sum_count, .after = logical)
   # Management of missing count measurements by sample and by species
-  samplespecies_measuredcount_data[is.na(samplespecies_measuredcount_data$sum_measuredcount), "logical"] <- FALSE
+  dataframe1[is.na(dataframe1$sum_measuredcount), "logical"] <- FALSE
   # Management of missing count measurements by sample and by species and by size class
-  samplespecies_measuredcount_data[is.na(samplespecies_measuredcount_data$sum_count), "logical"] <- FALSE
-  if ((sum(samplespecies_measuredcount_data$logical) + sum(!samplespecies_measuredcount_data$logical)) != nrow_first) {
+  dataframe1[is.na(dataframe1$sum_count), "logical"] <- FALSE
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "sample") {
-        text_object_more_or_less(select, samplespecies_measuredcount_data$sample_id)
-      },
+      text,
       sep = ""
     )
   }
-
   # 4 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!samplespecies_measuredcount_data$logical), " samples with number of individuals measured per species different from number measured per species and size class")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " samples with number of individuals measured per species different from number measured per species and size class")))
   }
   if (output == "report") {
-    return(samplespecies_measuredcount_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!samplespecies_measuredcount_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -4649,13 +4558,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether that total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
-          check_measure_inspector_data <- check_measure_inspector(
-            data_connection = data_connection,
-            type_select = "sample",
-            select = sample_select$sample_id,
-            output = "report"
-          )
           # Uses a function which indicates whether that sea surface temperature is consistent with the valid limits
           check_temperature_inspector_data <- check_temperature_inspector(
             data_connection = data_connection,
@@ -5030,6 +4932,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_length_class_inspector_data <- check_length_class_inspector(dataframe1 = data_samplespeciesmeasure, output = "report")
           # Uses a function to format the table
           check_length_class <- table_display_trip(check_length_class_inspector_data, samplespeciesmeasure_select, type_inconsistency = "error")
+          # Uses a function which indicates whether that total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
+          check_measure_inspector_data <- check_measure_inspector(dataframe1 = data_samplespecies, dataframe2 = data_samplespeciesmeasure, output = "report")
           # Uses a function to format the table
           check_measure <- table_display_trip(check_measure_inspector_data, sample_select, type_inconsistency = "error")
           # Modify the table for display purposes: rename column
