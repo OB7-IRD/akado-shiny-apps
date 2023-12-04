@@ -1599,7 +1599,7 @@ check_position_inspector <- function(dataframe1,
       sep = ""
     )
   }
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
     return(print(paste0("There are ", sum(!dataframe1$logical), " activity with school types that do not correspond to the observed associations")))
   }
@@ -1615,10 +1615,27 @@ check_position_inspector <- function(dataframe1,
   }
 }
 
-# Function that sum of the weight indicated for the catch is consistent with activity weight, in the future integrated in the pakage codama
-check_weight_inspector <- function(data_connection,
-                                   type_select,
-                                   select,
+#' @name check_weight_inspector
+#' @title Gives the inconsistencies between the sum of the weight indicated for catches and the one indicated for the activity
+#' @description The purpose of the check_weight_inspector function is to provide a table of data that contains an inconsistency between the sum of the weight indicated for the catch and the one indicated for the activity
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  activity_weight}}
+#' Dataframe 2:
+#'  \item{\code{  catch_id}}
+#'  \item{\code{  catch_weight}}
+#'  \item{\code{  activity_id}}
+#' }
+#' @export
+check_weight_inspector <- function(dataframe1,
+                                   dataframe2,
                                    output) {
   # 0 - Global variables assignement ----
   activity_schooltype_data <- NULL
@@ -1629,33 +1646,39 @@ check_weight_inspector <- function(data_connection,
   first_vector <- NULL
   second_vector <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_type_checking(
-    r_object = data_connection,
-    type = "list",
-    length = 2L,
+  if (codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("activity_id", "activity_weight"),
+    column_type = c("character","numeric"),
     output = "logical"
   ) != TRUE) {
-    return(codama::r_type_checking(
-      r_object = data_connection,
-      type = "list",
-      length = 2L,
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("activity_id", "activity_weight"),
+      column_type = c("character","numeric"),
       output = "message"
-    ))
-  } else {
-    if (!is.data.frame(data_connection[[1]]) && codama::r_type_checking(
-      r_object = data_connection[[2]],
-      type = "PostgreSQLConnection",
-      output = "logical"
-    ) != TRUE) {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Class for \"data_connection\" must be a *list* with either the connection information or the two data frames.\n ",
-        sep = ""
-      )
-    }
+    )
+  }else {
+    dataframe1 <- dataframe1[, c("activity_id", "activity_weight")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("catch_id", "catch_weight", "activity_id"),
+    column_type = c("character","numeric", "character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("catch_id", "catch_weight", "activity_id"),
+      column_type = c("character","numeric", "character"),
+      output = "message"
+    )
+  }else {
+    dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "activity_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1671,174 +1694,59 @@ check_weight_inspector <- function(data_connection,
       output = "message"
     ))
   }
-  if (any(grep("observe_", data_connection[1]))) {
-    # Checks the type and values of type_select
-    if (codama::r_type_checking(
-      r_object = type_select,
-      type = "character",
-      allowed_value = c("activity", "year"),
-      output = "logical"
-    ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = type_select,
-        type = "character",
-        allowed_value = c("activity", "year"),
-        output = "message"
-      ))
-    }
-    # Checks the type of select according to type_select
-    if (type_select == "activity" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "character",
-        output = "message"
-      ))
-    }
-    if (type_select == "year" &&
-      codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "logical"
-      ) != TRUE) {
-      return(codama::r_type_checking(
-        r_object = select,
-        type = "numeric",
-        output = "message"
-      ))
-    }
-    # 2 - Data extraction ----
-    # Activity selection in the SQL query
-    if (type_select == "activity") {
-      select_sql <- paste0("'", select, "'")
-    }
-    # Year selection in the SQL query
-    if (type_select == "year") {
-      # Activity with date in the selected year
-      activity_id_selected_by_year_sql <- paste(
-        readLines(con = system.file("sql",
-          "activity_id_selected_by_year.sql",
-          package = "AkadoR"
-        )),
-        collapse = "\n"
-      )
-      activity_id_selected_by_year_sql <- DBI::sqlInterpolate(
-        conn = data_connection[[2]],
-        sql = activity_id_selected_by_year_sql,
-        select_item = DBI::SQL(paste(select,
-          collapse = ", "
-        ))
-      )
-      activity_id_selected_by_year_data <- dplyr::tibble(DBI::dbGetQuery(
-        conn = data_connection[[2]],
-        statement = activity_id_selected_by_year_sql
-      ))
-      select_sql <- paste0("'", activity_id_selected_by_year_data$activity_id, "'")
-    }
-    # Retrieves the weigth catch of the activity
-    activity_weight_sql <- paste(
-      readLines(con = system.file("sql",
-        "activity_weight.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    activity_weight_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = activity_weight_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    activity_weight_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = activity_weight_sql
-    ))
-    # Retrieves the weight of each capture of the activity
-    catch_weight_sql <- paste(
-      readLines(con = system.file("sql",
-        "catch_weight.sql",
-        package = "AkadoR"
-      )),
-      collapse = "\n"
-    )
-    catch_weight_sql <- DBI::sqlInterpolate(
-      conn = data_connection[[2]],
-      sql = catch_weight_sql,
-      select_item = DBI::SQL(paste(select_sql,
-        collapse = ", "
-      ))
-    )
-    catch_weight_data <- dplyr::tibble(DBI::dbGetQuery(
-      conn = data_connection[[2]],
-      statement = catch_weight_sql
-    ))
-    nrow_first <- length(unique(select_sql))
-  } else {
-    if (is.data.frame(data_connection[[1]]) == TRUE) {
-      activity_weight_data <- data_connection[[1]]
-      catch_weight_data <- data_connection[[2]]
-      nrow_first <- nrow(activity_schooltype_data)
-    } else {
-      stop(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " - Consistency check not developed yet for this \"data_connection\" argument, you can provide both sets of data instead.\n ",
-        sep = ""
-      )
-    }
-  }
-  # 3 - Data design ----
+  select <- dataframe1$activity_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
   # Calculate the sum of the weight per activity (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
-  catch_weight_data <- catch_weight_data %>%
+  dataframe2 <- dataframe2 %>%
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
   # Group the pair to compare
-  activity_weight_data <- merge(activity_weight_data, catch_weight_data, by = "activity_id", all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2, by = "activity_id", all.x = TRUE)
   # Compare weight of the activity or the sum of the catch
   comparison <- codama::vector_comparison(
-    first_vector = activity_weight_data$activity_weight,
-    second_vector = activity_weight_data$sum_catch_weight,
+    first_vector = dataframe1$activity_weight,
+    second_vector = dataframe1$sum_catch_weight,
     comparison_type = "equal",
     output = "report"
   )
   # Modify the table for display purposes: add, remove and order column
-  activity_weight_data <- cbind(activity_weight_data, comparison)
-  activity_weight_data <- dplyr::relocate(.data = activity_weight_data, activity_weight, sum_catch_weight, .after = logical)
-  activity_weight_data <- subset(activity_weight_data, select = -c(first_vector, second_vector))
+  dataframe1 <- cbind(dataframe1, comparison)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, activity_weight, sum_catch_weight, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(first_vector, second_vector))
   # Management of the NA value for the weight activity and catch
-  activity_weight_data[is.na(activity_weight_data$activity_weight) & is.na(activity_weight_data$sum_catch_weight), "logical"] <- TRUE
+  dataframe1[is.na(dataframe1$activity_weight) & is.na(dataframe1$sum_catch_weight), "logical"] <- TRUE
   # Management of the 0 value for the weight activity
-  activity_weight_data[!is.na(activity_weight_data$activity_weight) & activity_weight_data$activity_weight == 0 & is.na(activity_weight_data$sum_catch_weight), "logical"] <- TRUE
-  if ((sum(activity_weight_data$logical) + sum(!activity_weight_data$logical)) != nrow_first) {
+  dataframe1[!is.na(dataframe1$activity_weight) & dataframe1$activity_weight == 0 & is.na(dataframe1$sum_catch_weight), "logical"] <- TRUE
+  if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
+    all <- c(select, dataframe1$activity_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
     warning(
       format(
         x = Sys.time(),
         format = "%Y-%m-%d %H:%M:%S"
       ),
       " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
-      if (type_select == "activity") {
-        text_object_more_or_less(select, activity_weight_data$activity_id)
-      },
+      text,
       sep = ""
     )
   }
-
-  # 4 - Export ----
+  # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!activity_weight_data$logical), " activity with a weight different from the sum of the weight of each catch")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " activity with a weight different from the sum of the weight of each catch")))
   }
   if (output == "report") {
-    return(activity_weight_data)
+    return(dataframe1)
   }
   if (output == "logical") {
-    if (sum(!activity_weight_data$logical) == 0) {
+    if (sum(!dataframe1$logical) == 0) {
       return(TRUE)
     } else {
       return(FALSE)
@@ -4800,13 +4708,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             conn = data_connection[[2]],
             statement = samplespeciesmeasure_id_sql
           ))
-          # Uses a function which indicates whether that sum of the weight indicated for the catch is consistent with activity weight
-          check_weight_inspector_data <- check_weight_inspector(
-            data_connection = data_connection,
-            type_select = "activity",
-            select = activity_select$activity_id,
-            output = "report"
-          )
           # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid limits
           check_length_class_inspector_data <- check_length_class_inspector(
             data_connection = data_connection,
@@ -5015,6 +4916,16 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = activity_select$activity_id)
           )
+          # Uses a function to extract data from activity_observedsystem
+          data_catch <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "catch.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = activity_select$activity_id)
+          )
           # Uses a function to extract data from activity_harbour
           data_activity_harbour <- furdeb::data_extraction(
             type = "database",
@@ -5171,6 +5082,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Ocean activity` = zfao_ocean,
             `Details problem` = button
           )
+          # Uses a function which indicates whether that sum of the weight indicated for the catch is consistent with activity weight
+          check_weight_inspector_data <- check_weight_inspector(dataframe1 = data_activity_unzfaoocean, dataframe2 = data_catch, output = "report")
           # Uses a function to format the table
           check_weight <- table_display_trip(check_weight_inspector_data, activity_select, type_inconsistency = "error")
           # Modify the table for display purposes: rename column
