@@ -2287,7 +2287,20 @@ check_species_inspector <- function(dataframe1,
   }
 }
 
-# Function the sample is consistent with the presence of measurement, in the future integrated in the pakage codama
+#' @name check_sample_without_measure_inspector
+#' @title Gives inconsistencies between the sample and the measurement in terms of presence
+#' @description The purpose of the check_sample_without_measure_inspector function is to provide a table of data that contains an inconsistency between the sample and the presence of measurement
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_without_measure_inspector() function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  samplespecies_id}}
+#'  \item{\code{  samplespeciesmeasure_id}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_sample_without_measure_inspector <- function(dataframe1,
                                                    output) {
   # 0 - Global variables assignement ----
@@ -2371,7 +2384,20 @@ check_sample_without_measure_inspector <- function(dataframe1,
   }
 }
 
-# Function the sample is consistent with the presence of species, in the future integrated in the pakage codama
+#' @name check_sample_without_species_inspector
+#' @title Gives inconsistencies between the sample and the species sampled in terms of presence
+#' @description The purpose of the check_sample_without_species_inspector function is to provide a table of data that contains an inconsistency between the sample and the presence of species
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_without_species_inspector() function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  samplespecies_id}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_sample_without_species_inspector <- function(dataframe1,
                                                    output) {
   # 0 - Global variables assignement ----
@@ -2455,7 +2481,25 @@ check_sample_without_species_inspector <- function(dataframe1,
   }
 }
 
-# Function the sample is consistent with the subsample number, in the future integrated in the pakage codama
+#' @name check_super_sample_number_consistent_inspector
+#' @title Gives the inconsistencies between the sample and the subsample number
+#' @description The purpose of the check_super_sample_number_consistent_inspector function is to provide a table of data that contains an inconsistency between the sample and the subsample number
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_super_sample_number_consistent_inspector() function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_super_sample_number_consistent_inspector() function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  sample_supersample}}
+#' Dataframe 2:
+#'  \item{\code{  samplespecies_id}}
+#'  \item{\code{  samplespecies_subsamplenumber}}
+#'  \item{\code{  sample_id}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_super_sample_number_consistent_inspector <- function(dataframe1,
                                                            dataframe2,
                                                            output) {
@@ -2585,7 +2629,25 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   }
 }
 
-# Function the sample well number is consistent with the associated trip well numbers, in the future integrated in the pakage codama
+#' @name check_well_number_consistent_inspector
+#' @title Gives the inconsistencies between sample well number and associated trip well numbers
+#' @description The purpose of the check_well_number_consistent_inspector  function is to provide a table of data that contains an inconsistency between sample well number and associated trip well numbers
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  sample_well}}
+#'  \item{\code{  trip_id}}
+#' Dataframe 2:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  well_well}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_well_number_consistent_inspector <- function(dataframe1,
                                                    dataframe2,
                                                    output) {
@@ -2690,7 +2752,39 @@ check_well_number_consistent_inspector <- function(dataframe1,
   }
 }
 
-# Function the sample is consistent for the percentage of little and big fish sampled, in the future integrated in the pakage codama
+#' @name check_little_big_inspector
+#' @title Gives the inconsistencies between the percentage of little and big fish sampled
+#' @description The purpose of the check_little_big_inspector function is to provide a table of data that contains an inconsistency between the percentage of little and big fish sampled
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_little_big_inspector() function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_little_big_inspector() function.
+#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_little_big_inspector() function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param species {\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying small or big fish
+#' @param measuretype {\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying small or big fish
+#' @param sizelimit {\link[base]{numeric}} expected. Default values: c(24, 80, 24, 77, 23.5, 78). Vector of the limit size measure. Third criterion for identifying small or big fish
+#' @param measuretype_size {\link[base]{character}} expected. Default values: c("FL", "PD1"). Vector with the preferred type of size measurement for small fish and then for big fish
+#' @param threshold {\link[base]{numeric}} expected. Default values: 0.9. Threshold for percentage of small or big fish
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  sample_smallsweight}}
+#'  \item{\code{  sample_bigsweight}}
+#'  \item{\code{  sample_totalweight}}
+#' Dataframe 2:
+#'  \item{\code{  samplespecies_id}}
+#'  \item{\code{  specie_name}}
+#'  \item{\code{  sizemeasuretype_code}}
+#'  \item{\code{  sample_id}}
+#' Dataframe 3:
+#'  \item{\code{  samplespeciesmeasure_id}}
+#'  \item{\code{  samplespeciesmeasure_sizeclass}}
+#'  \item{\code{  samplespeciesmeasure_count}}
+#'  \item{\code{  samplespecies_id}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_little_big_inspector <- function(dataframe1,
                                        dataframe2,
                                        dataframe3,
@@ -2951,7 +3045,43 @@ check_little_big_inspector <- function(dataframe1,
   }
 }
 
-# Function the sample is consistent for the weighting, in the future integrated in the pakage codama
+#' @name check_weighting_inspector
+#' @title Gives the inconsistencies between the sample weighting and sample weight or landed weight
+#' @description The purpose of the check_weighting_inspector  function is to provide a table of data that contains an inconsistency between the sample weighting
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe4 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param vessel_type {\link[base]{character}} expected. Default values: c("6", "2"). List of two elements, the first is the seine vessel type code, and the second is the baitboat type code.
+#' @param weight_limit {\link[base]{numeric}} expected. Default values: 100. Seiner weight threshold limit
+#' @param threshold {\link[base]{numeric}} expected. Default values: 0.95. Percentage threshold between weight and weighted weight for seiners
+#' @param sampletype_code_landing_baitboat {\link[base]{character}} expected. Default values: c("11"). List of sample type codes for baitboat fresh landings
+#' @param landingtype_baitboat {\link[base]{character}} expected. Default values: c("L-YFT-10", "L-BET-10", "L-TUN-10"). List of codes for fresh baitboat landings
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  sample_smallsweight}}
+#'  \item{\code{  sample_bigsweight}}
+#'  \item{\code{  sample_totalweight}}
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  sampletype_code}}
+#' Dataframe 2:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  sampleactivity_weightedweight}}
+#' Dataframe 3:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  vesseltype_code}}
+#'  \item{\code{  vesseltype_label1}}
+#' Dataframe 4:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  landing_weight}}
+#'  \item{\code{  weightcategory_code}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_weighting_inspector <- function(dataframe1,
                                       dataframe2,
                                       dataframe3,
@@ -3202,7 +3332,22 @@ check_weighting_inspector <- function(dataframe1,
 }
 
 
-# Function the sample weight (m10 and p10) is consistent for the global weight, in the future integrated in the pakage codama
+#' @name check_weight_sample_inspector
+#' @title Gives the inconsistencies between the sample weight (m10 and p10) and the global sample weight
+#' @description The purpose of the check_weight_sample_inspector  function is to provide a table of data that contains an inconsistency between the sample weight (m10 and p10) and the global weight
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weight_sample_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  sample_smallsweight}}
+#'  \item{\code{  sample_bigsweight}}
+#'  \item{\code{  sample_totalweight}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_weight_sample_inspector <- function(dataframe1,
                                           output) {
   # 0 - Global variables assignement ----
@@ -3303,7 +3448,20 @@ check_weight_sample_inspector <- function(dataframe1,
   }
 }
 
-# Function the sample is consistent for the existence of the activity, in the future integrated in the pakage codama
+#' @name check_activity_sample_inspector
+#' @title Gives inconsistencies between the sample and the activity in terms of presence
+#' @description The purpose of the check_activity_sample_inspector  function is to provide a table of data that contains an inconsistency between the sample and the existence of the activity
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_activity_sample_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  activity_id}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_activity_sample_inspector <- function(dataframe1,
                                             output) {
   # 0 - Global variables assignement ----
@@ -3395,7 +3553,32 @@ check_activity_sample_inspector <- function(dataframe1,
   }
 }
 
-# Function the sample measurement types is consistent for the species or weight values, in the future integrated in the pakage codama
+#' @name check_ldlf_inspector
+#' @title Gives the inconsistencies between the sample measurement types and species or weight values
+#' @description The purpose of the check_ldlf_inspector  function is to provide a table of data that contains an inconsistency between the sample measurement types and species or weight values
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_ldlf_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_ldlf_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param species {\link[base]{character}} expected. Default values:  c("SKJ", "LTA", "FRI"). Vector of the species not to be associated with a type of measure.
+#' @param measuretype_species {\link[base]{character}} expected. Default values:  c("PD1"). Vector of type of measure not to be associated with species
+#' @param measuretype_bigsweight {\link[base]{character}} expected. Default values:  c("PD1"). Type of measure that must have a total weight or a big fish weight
+#' @param measuretype_smallsweight {\link[base]{character}} expected. Default values: c("FL"). Type of measure that must have a total weight or a small fish weight
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  samplespecies_id}}
+#'  \item{\code{  specie_name}}
+#'  \item{\code{  sizemeasuretype_code}}
+#'  \item{\code{  sample_id}}
+#' Dataframe 2:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  sample_smallsweight}}
+#'  \item{\code{  sample_bigsweight}}
+#'  \item{\code{  sample_totalweight}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_ldlf_inspector <- function(dataframe1,
                                  dataframe2,
                                  output,
@@ -3582,7 +3765,41 @@ check_ldlf_inspector <- function(dataframe1,
   }
 }
 
-# Function the small and large sample weights is consistent for the sum of the small and big weights of the associated well, in the future integrated in the pakage codama
+#' @name check_distribution_inspector
+#' @title Gives the inconsistencies between the weights of small and big sample fish and the sum of the small and big weights in the associated well
+#' @description The purpose of the check_distribution_inspector  function is to provide a table of data that contains an inconsistency between the small and large sample weights and the sum of the small and big weights of the associated well
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param species {\link[base]{character}} expected. Default values: c("SKJ"). Vector of species categorized as small if weight category information is missing
+#' @param weightcategory_small {\link[base]{character}} expected. Default values: c("W-1"). Vector of small weight category codes
+#' @param weightcategory_big {\link[base]{character}} expected. Default values: c("W-2"). Vector of big weight category codes
+#' @param weightcategory_unknown {\link[base]{character}} expected. Default values: c("W-9"). Vector of unknown weight category codes
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  sample_well}}
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  sample_smallsweight}}
+#'  \item{\code{  sample_bigsweight}}
+#' Dataframe 2:
+#'  \item{\code{  well_id}}
+#'  \item{\code{  well_well}}
+#'  \item{\code{  trip_id}}
+#' Dataframe 3:
+#'  \item{\code{  wellactivity_id}}
+#'  \item{\code{  well_id}}
+#' Dataframe 4:
+#'  \item{\code{  wellactivityspecies_id}}
+#'  \item{\code{  wellactivity_id}}
+#'  \item{\code{  weightcategory_code}}
+#'  \item{\code{  specie_name}}
+#'  \item{\code{  wellactivityspecies_weight}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
 check_distribution_inspector <- function(dataframe1,
                                          dataframe2,
                                          dataframe3,
@@ -3832,7 +4049,39 @@ check_distribution_inspector <- function(dataframe1,
   }
 }
 
-# Function the activity position is consistent for VMS position, in the future integrated in the pakage codama
+#' @name check_anapo_inspector
+#' @title Gives the inconsistencies activity position and VMS position
+#' @description The purpose of the check_anapo_inspector function is to provide a table of data that contains an inconsistency between activity position and VMS position
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_inspector () function.
+#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_inspector () function.
+#' @param activity_crs {\link[base]{numeric}} expected. Coordinate Reference Systems for the position activity
+#' @param vms_crs {\link[base]{numeric}} expected. Coordinate Reference Systems for the position VMS
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param nb_positions_vms_min {\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.
+#' @param threshold {\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  activity_date}}
+#'  \item{\code{  activity_time}}
+#'  \item{\code{  activity_position}}
+#'  \item{\code{  activity_crs}}
+#'  \item{\code{  vessel_code}}
+#' Dataframe 2:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  harbour_id}}
+#' Dataframe 3:
+#'  \item{\code{  vms_date}}
+#'  \item{\code{  vms_time}}
+#'  \item{\code{  vms_position}}
+#'  \item{\code{  vms_crs}}
+#'  \item{\code{  vessel_code}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
+#' @export
 check_anapo_inspector <- function(dataframe1,
                                   dataframe2,
                                   dataframe3,
