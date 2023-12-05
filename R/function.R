@@ -4412,50 +4412,30 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
         )
         # If the database is "observe_", read, transform and execute the SQL query that selects the trips according to the user parameters
         if (any(grep("observe_", data_connection[1]))) {
-          # Read the SQL query
-          trip_id_sql <- paste(
-            readLines(con = system.file("sql",
-              "trip_id.sql",
-              package = "AkadoR"
-            )),
-            collapse = "\n"
-          )
-          # Transform the SQL query
-          # Deletes the part linked to the selection with a date range
+          # Selected trip with the vessel code and the end date of the trip
           if (isTruthy(parent_in$vessel_number) && isTruthy(parent_in$trip_end_date)) {
-            trip_id_sql <- sub(
-              pattern = "(t.startdate >= ?select_item_2 AND t.enddate <= ?select_item_3)",
-              replacement = "",
-              x = trip_id_sql,
-              fixed = TRUE
+            trip_id_data <- furdeb::data_extraction(
+              type = "database",
+              file_path = system.file("sql",
+                                      "trip_selected_vesselcode_enddate.sql",
+                                      package = "AkadoR"
+              ),
+              database_connection = data_connection,
+              anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = as.character(parent_in$vessel_number), select_item_3 = parent_in$trip_end_date)
             )
-            select_item_2 <- parent_in$vessel_number
-            select_item_3 <- parent_in$trip_end_date
           }
-          # Deletes the part linked to a selection with the vessel code and the end date of the trip
+          # Selected trip with a date range
           if (isTruthy(parent_in$trip_start_date_range) && isTruthy(parent_in$trip_end_date_range)) {
-            trip_id_sql <- sub(
-              pattern = "(v.code IN (?select_item_2) AND t.enddate IN (?select_item_3))",
-              replacement = "",
-              x = trip_id_sql,
-              fixed = TRUE
+            trip_id_data <- furdeb::data_extraction(
+              type = "database",
+              file_path = system.file("sql",
+                                      "trip_selected_startdate_enddate.sql",
+                                      package = "AkadoR"
+              ),
+              database_connection = data_connection,
+              anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = parent_in$trip_start_date_range, select_item_3 = parent_in$trip_end_date_range)
             )
-            select_item_2 <- parent_in$trip_start_date_range
-            select_item_3 <- parent_in$trip_end_date_range
           }
-          # Replaces the anchors with the selected values
-          trip_id_sql <- DBI::sqlInterpolate(
-            conn = data_connection[[2]],
-            sql = trip_id_sql,
-            select_item_1 = DBI::SQL(paste(paste0("'", config_data()[["logbook_program"]], "'"), collapse = ", ")),
-            select_item_2 = DBI::SQL(paste0("'", select_item_2, "'")),
-            select_item_3 = DBI::SQL(paste0("'", select_item_3, "'"))
-          )
-          # Execute the SQL query
-          trip_id_data <- dplyr::tibble(DBI::dbGetQuery(
-            conn = data_connection[[2]],
-            statement = trip_id_sql
-          ))
           # Disconnection to the base
           DBI::dbDisconnect(data_connection[[2]])
           # If trips have been found return them otherwise return FALSE
@@ -4541,86 +4521,46 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # If the database is "observe_", read, transform and execute the SQL query that selects the trips according to the user parameters
         if (any(grep("observe_", data_connection[1]))) {
-          # Retrieve trip activity
-          # Read the SQL query to retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
-          activity_id_sql <- paste(
-            readLines(con = system.file("sql",
-              "activity_id.sql",
-              package = "AkadoR"
-            )),
-            collapse = "\n"
+          # Retrieve trip activity : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
+          activity_select <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "activity_id.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = trip_select()$trip_id)
           )
-          # Replaces the anchors with the selected values
-          activity_id_sql <- DBI::sqlInterpolate(
-            conn = data_connection[[2]],
-            sql = activity_id_sql,
-            select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"), collapse = ", "))
+          # Retrieve trip sample : retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
+          sample_select <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "sample_id.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = trip_select()$trip_id)
           )
-          # Execute the SQL query
-          activity_select <- dplyr::tibble(DBI::dbGetQuery(
-            conn = data_connection[[2]],
-            statement = activity_id_sql
-          ))
-          # Retrieve trip sample
-          # Read the SQL query to retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
-          sample_id_sql <- paste(
-            readLines(con = system.file("sql",
-              "sample_id.sql",
-              package = "AkadoR"
-            )),
-            collapse = "\n"
+          # Retrieve trip sample species : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
+          samplespecies_select <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "samplespecies_id.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = trip_select()$trip_id)
           )
-          # Replaces the anchors with the selected values
-          sample_id_sql <- DBI::sqlInterpolate(
-            conn = data_connection[[2]],
-            sql = sample_id_sql,
-            select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"), collapse = ", "))
+          # Retrieve trip sample species measure : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
+          samplespeciesmeasure_select <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "samplespeciesmeasure_id.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = trip_select()$trip_id)
           )
-          # Execute the SQL query
-          sample_select <- dplyr::tibble(DBI::dbGetQuery(
-            conn = data_connection[[2]],
-            statement = sample_id_sql
-          ))
-          # Retrieve trip sample species
-          # Read the SQL query to retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
-          samplespecies_id_sql <- paste(
-            readLines(con = system.file("sql",
-              "samplespecies_id.sql",
-              package = "AkadoR"
-            )),
-            collapse = "\n"
-          )
-          # Replaces the anchors with the selected values
-          samplespecies_id_sql <- DBI::sqlInterpolate(
-            conn = data_connection[[2]],
-            sql = samplespecies_id_sql,
-            select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"), collapse = ", "))
-          )
-          # Execute the SQL query
-          samplespecies_select <- dplyr::tibble(DBI::dbGetQuery(
-            conn = data_connection[[2]],
-            statement = samplespecies_id_sql
-          ))
-          # Retrieve trip sample species measure
-          # Read the SQL query to retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
-          samplespeciesmeasure_id_sql <- paste(
-            readLines(con = system.file("sql",
-              "samplespeciesmeasure_id.sql",
-              package = "AkadoR"
-            )),
-            collapse = "\n"
-          )
-          # Replaces the anchors with the selected values
-          samplespeciesmeasure_id_sql <- DBI::sqlInterpolate(
-            conn = data_connection[[2]],
-            sql = samplespeciesmeasure_id_sql,
-            select_item = DBI::SQL(paste(paste0("'", trip_select()$trip_id, "'"), collapse = ", "))
-          )
-          # Execute the SQL query
-          samplespeciesmeasure_select <- dplyr::tibble(DBI::dbGetQuery(
-            conn = data_connection[[2]],
-            statement = samplespeciesmeasure_id_sql
-          ))
           # Uses a function to extract data from samplespeciesmeasure in connection with samplespecies
           data_samplespecies_samplespeciesmeasure <- furdeb::data_extraction(
             type = "database",
@@ -5065,7 +5005,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             warning(text_object_more_or_less(id = trip_select()$trip_id, result_check = data_trip$trip_id))
           }
           # Uses a function which indicates whether the sample is consistent for the weighting
-          check_weighting_inspector_data <- check_weighting_inspector(dataframe1 = data_sample, dataframe2 = data_sampleactivity, dataframe3 = data_trip, dataframe4 = data_landing, output = "report")
+          check_weighting_inspector_data <- check_weighting_inspector(dataframe1 = data_sample, dataframe2 = data_sampleactivity, dataframe3 = data_trip_unprecedented, dataframe4 = data_landing, output = "report")
           # Uses a function to format the table
           check_weighting <- table_display_trip(check_weighting_inspector_data, sample_select, type_inconsistency = "error")
           check_weighting <- dplyr::rename(
@@ -5125,8 +5065,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           }
           if (exists("data_vms")) {
             # Recovers all trip positions
-            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = data_activity, dataframe2 = data_activity_harbour, dataframe3 = data_vms, activity_crs = unique(data_activity$activity_crs), vms_crs = ifelse(length(unique(data_vms$vms_crs)) == 0, 4326, unique(data_vms$vms_crs)), output = "report")
-            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], data_activity[, c("activity_id", "trip_id", "activity_number")], by = "activity_id")
+            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = data_activity_unzfaoocean, dataframe2 = data_activity_harbour, dataframe3 = data_vms, activity_crs = unique(data_activity_unzfaoocean$activity_crs), vms_crs = ifelse(length(unique(data_vms$vms_crs)) == 0, 4326, unique(data_vms$vms_crs)), output = "report")
+            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], data_activity_unzfaoocean[, c("activity_id", "trip_id", "activity_number")], by = "activity_id")
             check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot %>%
               dplyr::select("trip_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs") %>%
               dplyr::group_by(trip_id) %>%
@@ -5138,7 +5078,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo_inspector_dataplot_range_date <- rbind(check_anapo_inspector_dataplot_trip, check_anapo_inspector_dataplot_trip_prior, check_anapo_inspector_dataplot_trip_post) %>%
               dplyr::group_by(date_group, trip_id) %>%
               dplyr::distinct()
-            check_anapo_inspector_dataplot_range_date <- merge(check_anapo_inspector_dataplot_range_date, data_activity[, c("activity_date", "trip_id", "activity_id")], by.x = c("date_group", "trip_id"), by.y = c("activity_date", "trip_id"))
+            check_anapo_inspector_dataplot_range_date <- merge(check_anapo_inspector_dataplot_range_date, data_activity_unzfaoocean[, c("activity_date", "trip_id", "activity_id")], by.x = c("date_group", "trip_id"), by.y = c("activity_date", "trip_id"))
             check_anapo_inspector_dataplot_range_date %>%
               dplyr::group_by(date_group, trip_id, activity_id) %>%
               dplyr::distinct()
