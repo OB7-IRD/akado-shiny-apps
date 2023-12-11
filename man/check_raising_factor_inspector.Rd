@@ -54,6 +54,5 @@ Dataframe 3:
  \item{\code{  trip_id}}
  \item{\code{  trip_landingtotalweight}}
  \item{\code{  trip_end_tide_id}}
- \item{\code{  trip_previous_end_tide_id}}
 }
 }

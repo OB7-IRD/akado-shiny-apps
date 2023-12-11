@@ -953,7 +953,6 @@ check_harbour_inspector <- function(dataframe1,
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  trip_landingtotalweight}}
 #'  \item{\code{  trip_end_tide_id}}
-#'  \item{\code{  trip_previous_end_tide_id}}
 #' }
 #' @export
 check_raising_factor_inspector <- function(dataframe1,
@@ -971,7 +970,6 @@ check_raising_factor_inspector <- function(dataframe1,
   trip_landingtotalweight <- NULL
   sum_catch_weight <- NULL
   RF1 <- NULL
-  trip_previous_end_tide_id <- NULL
   tide_landingtotalweight <- NULL
   tide_sum_catch_weight <- NULL
   lower_limit <- NULL
@@ -1017,19 +1015,19 @@ check_raising_factor_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
-    column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id", "trip_previous_end_tide_id"),
-    column_type = c("character", "numeric", "character", "character"),
+    column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id"),
+    column_type = c("character", "numeric", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
-      column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id", "trip_previous_end_tide_id"),
-      column_type = c("character", "numeric", "character", "character"),
+      column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id"),
+      column_type = c("character", "numeric", "character"),
       output = "message"
     )
   }else {
-    dataframe3 <- dataframe3[, c("trip_id", "trip_landingtotalweight", "trip_end_tide_id", "trip_previous_end_tide_id")]
+    dataframe3 <- dataframe3[, c("trip_id", "trip_landingtotalweight", "trip_end_tide_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1107,18 +1105,16 @@ check_raising_factor_inspector <- function(dataframe1,
     dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
   # Merge data
   dataframe3 <- merge(dataframe3, dataframe2, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
-  # Creation of a tide identification number
-  dataframe3$tide_id <- paste0(dataframe3$trip_end_tide_id, "_", dataframe3$trip_previous_end_tide_id)
   # RF1 calculation
   tide_id_data_RF1 <- dataframe3 %>%
-    dplyr::group_by(tide_id) %>%
+    dplyr::group_by(trip_end_tide_id) %>%
     dplyr::summarise(RF1 = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), tide_landingtotalweight = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)), tide_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
   dataframe3$lower_limit <- limit[1]
   dataframe3$upper_limit <- limit[2]
   # Selection of user-supplied trips
   dataframe3 <- merge(data.frame(trip_id = select), unique(dataframe3), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # Merge data
-  dataframe3 <- merge(dataframe3, tide_id_data_RF1, by.x = "tide_id", by.y = "tide_id", all.x = TRUE)
+  dataframe3 <- merge(dataframe3, tide_id_data_RF1, by.x = "trip_end_tide_id", by.y = "trip_end_tide_id", all.x = TRUE)
   # Compare RF1 to valid limits
   comparison_less <- codama::vector_comparison(
     first_vector = dataframe3$RF1,
@@ -1139,7 +1135,7 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe3[(is.na(dataframe3$trip_end_tide_id)), "logical"] <- TRUE
   dataframe3 <- dplyr::relocate(.data = dataframe3, RF1, .after = logical)
   trip_end_tide_id <- dataframe3$trip_end_tide_id
-  dataframe3 <- subset(dataframe3, select = -c(tide_id, trip_end_tide_id, trip_previous_end_tide_id, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, lower_limit, upper_limit))
+  dataframe3 <- subset(dataframe3, select = -c(trip_end_tide_id, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, lower_limit, upper_limit))
   if ((sum(dataframe3$logical) + sum(!dataframe3$logical)) != nrow_first) {
     all <- c(select, dataframe3$trip_id)
     number_occurrences <- table(all)
