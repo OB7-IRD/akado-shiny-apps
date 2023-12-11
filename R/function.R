@@ -2446,7 +2446,7 @@ check_sample_without_species_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(count))
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
-    all <- c(select, dataframe1$samplespecies_id)
+    all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
     if (sum(number_occurrences == 1) > 0) {
@@ -2915,8 +2915,6 @@ check_little_big_inspector <- function(dataframe1,
       " - Error, the following arguments must be of the same size : \"species\", \"measuretype\" and \"sizelimit\"\n"
     )
   }
-  select <- dataframe1$sample_id
-  nrow_first <- length(unique(select))
   if (codama::r_type_checking(
     r_object = measuretype_size,
     type = "character",
@@ -2943,6 +2941,8 @@ check_little_big_inspector <- function(dataframe1,
       output = "message"
     ))
   }
+  select <- dataframe1$sample_id
+  nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Merge
   dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
@@ -3730,7 +3730,7 @@ check_ldlf_inspector <- function(dataframe1,
   dataframe1 <- subset(dataframe1, select = -c(logical_species, logical_bigsweight, logical_smallsweight, sample_id))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sizemeasuretype_code, specie_name, sample_bigsweight, sample_smallsweight, sample_totalweight, .after = logical)
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
-    all <- c(select, dataframe1$sample_id)
+    all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
     text <- ""
     if (sum(number_occurrences == 1) > 0) {
