@@ -836,10 +836,10 @@ check_harbour_inspector <- function(dataframe1,
   # 0 - Global variables assignement ----
   harbour_id <- NULL
   harbour_name_landing <- NULL
-  harbour_name_departure <- NULL
+  harbour_name_departure_trip_previous <- NULL
   trip_previous_id <- NULL
   harbour_id_landing <- NULL
-  harbour_id_departure <- NULL
+  harbour_id_departure_trip_previous <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -932,7 +932,6 @@ check_harbour_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param logbook_program {\link[base]{character}} expected. Vector of the logbook program inventory, to which the trips that make up the tides may belong.
 #' @param species {\link[base]{character}} expected. Default values: c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"). Vector of the inventory of species used to calculate catch weight in RF1.
 #' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.
 #' @param vesselactivity {\link[base]{character}} expected. Default values: c("25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.
@@ -977,6 +976,9 @@ check_raising_factor_inspector <- function(dataframe1,
   tide_sum_catch_weight <- NULL
   lower_limit <- NULL
   upper_limit <- NULL
+  specie_name <- NULL
+  speciesfate_code <- NULL
+  vesselactivity_code <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -1503,6 +1505,7 @@ check_position_inspector <- function(dataframe1,
   activity_crs <- NULL
   logical_ocean <- NULL
   logical_harbour <- NULL
+  harbour_id <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -3770,6 +3773,8 @@ check_ldlf_inspector <- function(dataframe1,
 #' @description The purpose of the check_distribution_inspector  function is to provide a table of data that contains an inconsistency between the small and large sample weights and the sum of the small and big weights of the associated well
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
+#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
+#' @param dataframe4 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values: c("SKJ"). Vector of species categorized as small if weight category information is missing
 #' @param weightcategory_small {\link[base]{character}} expected. Default values: c("W-1"). Vector of small weight category codes
@@ -4469,7 +4474,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     trip_enddate <- NULL
     button <- NULL
     harbour_name_landing <- NULL
-    harbour_name_departure <- NULL
+    harbour_name_departure_trip_previous <- NULL
+    harbour_id_departure_trip_previous <- NULL
+    harbour_id <- NULL
     schooltype_code <- NULL
     association_object_count <- NULL
     vesselactivity_code <- NULL

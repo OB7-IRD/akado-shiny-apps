@@ -21,6 +21,10 @@ check_distribution_inspector(
 
 \item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.}
 
+\item{dataframe3}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.}
+
+\item{dataframe4}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.}
+
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
 \item{species}{{\link[base]{character}} expected. Default values: c("SKJ"). Vector of species categorized as small if weight category information is missing}

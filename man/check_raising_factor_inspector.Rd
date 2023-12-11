@@ -31,8 +31,6 @@ check_raising_factor_inspector(
 \item{vesselactivity}{{\link[base]{character}} expected. Default values: c("25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.}
 
 \item{limit}{{\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable limits for RF1.}
-
-\item{logbook_program}{{\link[base]{character}} expected. Vector of the logbook program inventory, to which the trips that make up the tides may belong.}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
