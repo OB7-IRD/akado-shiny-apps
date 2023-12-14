@@ -9,9 +9,9 @@ check_ldlf_inspector(
   dataframe2,
   output,
   species = c("SKJ", "LTA", "FRI"),
-  measuretype_species = c("PD1"),
-  measuretype_bigsweight = c("PD1"),
-  measuretype_smallsweight = c("FL")
+  size_measure_type_species = c("PD1"),
+  size_measure_type_big = c("PD1"),
+  size_measure_type_small = c("FL")
 )
 }
 \arguments{
@@ -23,11 +23,11 @@ check_ldlf_inspector(
 
 \item{species}{{\link[base]{character}} expected. Default values:  c("SKJ", "LTA", "FRI"). Vector of the species not to be associated with a type of measure.}
 
-\item{measuretype_species}{{\link[base]{character}} expected. Default values:  c("PD1"). Vector of type of measure not to be associated with species}
+\item{size_measure_type_species}{{\link[base]{character}} expected. Default values:  c("PD1"). Vector of type of measure not to be associated with species}
 
-\item{measuretype_bigsweight}{{\link[base]{character}} expected. Default values:  c("PD1"). Type of measure that must have a total weight or a big fish weight}
+\item{size_measure_type_big}{{\link[base]{character}} expected. Default values:  c("PD1"). Type of measure that must have a total weight or a big fish weight}
 
-\item{measuretype_smallsweight}{{\link[base]{character}} expected. Default values: c("FL"). Type of measure that must have a total weight or a small fish weight}
+\item{size_measure_type_small}{{\link[base]{character}} expected. Default values: c("FL"). Type of measure that must have a total weight or a small fish weight}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"

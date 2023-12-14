@@ -2761,7 +2761,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
 #' @param species {\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying small or big fish
 #' @param measuretype {\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying small or big fish
 #' @param sizelimit {\link[base]{numeric}} expected. Default values: c(24, 80, 24, 77, 23.5, 78). Vector of the limit size measure. Third criterion for identifying small or big fish
-#' @param measuretype_size {\link[base]{character}} expected. Default values: c("FL", "PD1"). Vector with the preferred type of size measurement for small fish and then for big fish
+#' @param size_measure_type {\link[base]{character}} expected. Default values: c("FL", "PD1"). Vector with the preferred type of size measurement for small fish and then for big fish
 #' @param threshold {\link[base]{numeric}} expected. Default values: 0.9. Threshold for percentage of small or big fish
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -2791,7 +2791,7 @@ check_little_big_inspector <- function(dataframe1,
                                        species = c("YFT", "YFT", "BET", "BET", "ALB", "ALB"),
                                        measuretype = c("PD1", "FL", "PD1", "FL", "PD1", "FL"),
                                        sizelimit = c(24, 80, 24, 77, 23.5, 78),
-                                       measuretype_size = c("FL", "PD1"),
+                                       size_measure_type = c("FL", "PD1"),
                                        threshold = 0.9) {
   # 0 - Global variables assignement ----
   sample_id <- NULL
@@ -2915,13 +2915,13 @@ check_little_big_inspector <- function(dataframe1,
     )
   }
   if (codama::r_type_checking(
-    r_object = measuretype_size,
+    r_object = size_measure_type,
     type = "character",
     length = 2L,
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = measuretype_size,
+      r_object = size_measure_type,
       type = "character",
       length = 2L,
       output = "message"
@@ -2971,12 +2971,12 @@ check_little_big_inspector <- function(dataframe1,
   # Calculation of the number of measurements of type measurements 1 (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   measure1 <- dataframe1 %>%
     dplyr::group_by(sample_id) %>%
-    dplyr::filter(sizemeasuretype_code == measuretype_size[1]) %>%
+    dplyr::filter(sizemeasuretype_code == size_measure_type[1]) %>%
     dplyr::summarise(measure1 = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)))
   # Calculation of the number of measurements of type measurements 2 (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   measure2 <- dataframe1 %>%
     dplyr::group_by(sample_id) %>%
-    dplyr::filter(sizemeasuretype_code == measuretype_size[2]) %>%
+    dplyr::filter(sizemeasuretype_code == size_measure_type[2]) %>%
     dplyr::summarise(measure2 = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)))
   # Merge
   total_count <- merge(total_count, little, by = "sample_id", all.x = TRUE)
@@ -3559,9 +3559,9 @@ check_activity_sample_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_ldlf_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values:  c("SKJ", "LTA", "FRI"). Vector of the species not to be associated with a type of measure.
-#' @param measuretype_species {\link[base]{character}} expected. Default values:  c("PD1"). Vector of type of measure not to be associated with species
-#' @param measuretype_bigsweight {\link[base]{character}} expected. Default values:  c("PD1"). Type of measure that must have a total weight or a big fish weight
-#' @param measuretype_smallsweight {\link[base]{character}} expected. Default values: c("FL"). Type of measure that must have a total weight or a small fish weight
+#' @param size_measure_type_species {\link[base]{character}} expected. Default values:  c("PD1"). Vector of type of measure not to be associated with species
+#' @param size_measure_type_big {\link[base]{character}} expected. Default values:  c("PD1"). Type of measure that must have a total weight or a big fish weight
+#' @param size_measure_type_small {\link[base]{character}} expected. Default values: c("FL"). Type of measure that must have a total weight or a small fish weight
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
@@ -3582,9 +3582,9 @@ check_ldlf_inspector <- function(dataframe1,
                                  dataframe2,
                                  output,
                                  species = c("SKJ", "LTA", "FRI"),
-                                 measuretype_species = c("PD1"),
-                                 measuretype_bigsweight = c("PD1"),
-                                 measuretype_smallsweight = c("FL")) {
+                                 size_measure_type_species = c("PD1"),
+                                 size_measure_type_big = c("PD1"),
+                                 size_measure_type_small = c("FL")) {
   # 0 - Global variables assignement ----
   logical_species <- NULL
   logical_bigsweight <- NULL
@@ -3656,34 +3656,34 @@ check_ldlf_inspector <- function(dataframe1,
     ))
   }
   if (codama::r_type_checking(
-    r_object = measuretype_species,
+    r_object = size_measure_type_species,
     type = "character",
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = measuretype_species,
+      r_object = size_measure_type_species,
       type = "character",
       output = "message"
     ))
   }
   if (codama::r_type_checking(
-    r_object = measuretype_bigsweight,
+    r_object = size_measure_type_big,
     type = "character",
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = measuretype_bigsweight,
+      r_object = size_measure_type_big,
       type = "character",
       output = "message"
     ))
   }
   if (codama::r_type_checking(
-    r_object = measuretype_smallsweight,
+    r_object = size_measure_type_small,
     type = "character",
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = measuretype_smallsweight,
+      r_object = size_measure_type_small,
       type = "character",
       output = "message"
     ))
@@ -3698,31 +3698,31 @@ check_ldlf_inspector <- function(dataframe1,
     comparison_type = "difference",
     output = "report"
   )
-  comparison_measuretype_species <- codama::vector_comparison(
+  comparison_size_measure_type_species <- codama::vector_comparison(
     first_vector = dataframe1$sizemeasuretype_code,
-    second_vector = measuretype_species,
+    second_vector = size_measure_type_species,
     comparison_type = "difference",
     output = "report"
   )
-  dataframe1$logical_species <- !(comparison_species$logical & comparison_measuretype_species$logical)
+  dataframe1$logical_species <- !(comparison_species$logical & comparison_size_measure_type_species$logical)
   # Merge
   dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
   # Check bigs weight and measuretype
-  comparison_measuretype_bigsweight <- codama::vector_comparison(
+  comparison_size_measure_type_big <- codama::vector_comparison(
     first_vector = dataframe1$sizemeasuretype_code,
-    second_vector = measuretype_bigsweight,
+    second_vector = size_measure_type_big,
     comparison_type = "difference",
     output = "report"
   )
-  dataframe1$logical_bigsweight <- !(comparison_measuretype_bigsweight$logical & ((dataframe1$sample_bigsweight == 0 & dataframe1$sample_totalweight == 0) | (is.na(dataframe1$sample_bigsweight) & is.na(dataframe1$sample_totalweight))))
+  dataframe1$logical_bigsweight <- !(comparison_size_measure_type_big$logical & ((dataframe1$sample_bigsweight == 0 & dataframe1$sample_totalweight == 0) | (is.na(dataframe1$sample_bigsweight) & is.na(dataframe1$sample_totalweight))))
   # Check smalls weight and measuretype
-  comparison_measuretype_smallsweight <- codama::vector_comparison(
+  comparison_size_measure_type_small <- codama::vector_comparison(
     first_vector = dataframe1$sizemeasuretype_code,
-    second_vector = measuretype_smallsweight,
+    second_vector = size_measure_type_small,
     comparison_type = "difference",
     output = "report"
   )
-  dataframe1$logical_smallsweight <- !(comparison_measuretype_smallsweight$logical & ((dataframe1$sample_smallsweight == 0 & dataframe1$sample_totalweight == 0) | (is.na(dataframe1$sample_smallsweight) & is.na(dataframe1$sample_totalweight))))
+  dataframe1$logical_smallsweight <- !(comparison_size_measure_type_small$logical & ((dataframe1$sample_smallsweight == 0 & dataframe1$sample_totalweight == 0) | (is.na(dataframe1$sample_smallsweight) & is.na(dataframe1$sample_totalweight))))
   # Check
   dataframe1$logical <- dataframe1$logical_species & dataframe1$logical_bigsweight & dataframe1$logical_smallsweight
   # Modify the table for display purposes: add, remove and order column
