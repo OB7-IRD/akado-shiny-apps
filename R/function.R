@@ -1767,7 +1767,7 @@ check_weight_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  samplespeciesmeasure_id}}
-#'  \item{\code{  specie_code}}
+#'  \item{\code{  specie_name}}
 #'  \item{\code{  sizemeasuretype_code}}
 #'  \item{\code{  samplespeciesmeasure_sizeclass}}
 #' }
@@ -1778,7 +1778,7 @@ check_length_class_inspector <- function(dataframe1,
                                          size_measure_type = "FL",
                                          limit = 80) {
   # 0 - Global variables assignement ----
-  specie_code <- NULL
+  specie_name <- NULL
   sizemeasuretype_code <- NULL
   samplespeciesmeasure_sizeclass <- NULL
   logical_sizeclass <- NULL
@@ -1789,19 +1789,19 @@ check_length_class_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("samplespeciesmeasure_id", "specie_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
+    column_name = c("samplespeciesmeasure_id", "specie_name", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
     column_type = c("character", "character", "character", "numeric"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("samplespeciesmeasure_id", "specie_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
+      column_name = c("samplespeciesmeasure_id", "specie_name", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
       column_type = c("character", "character", "character", "numeric"),
       output = "message"
     )
   }else {
-    dataframe1 <- dataframe1[, c("samplespeciesmeasure_id", "specie_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")]
+    dataframe1 <- dataframe1[, c("samplespeciesmeasure_id", "specie_name", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1866,7 +1866,7 @@ check_length_class_inspector <- function(dataframe1,
   dataframe1$logical_sizeclass <- comparison_sizeclass$logical
   # Compare specie of the samples
   comparison_species <- codama::vector_comparison(
-    first_vector = dataframe1$specie_code,
+    first_vector = dataframe1$specie_name,
     second_vector = species,
     comparison_type = "difference",
     output = "report"
@@ -1882,8 +1882,8 @@ check_length_class_inspector <- function(dataframe1,
   dataframe1$logical_sizemeasuretype <- comparison_sizemeasuretype$logical
   dataframe1$logical <- dataframe1$logical_sizeclass | !dataframe1$logical_sizemeasuretype | !dataframe1$logical_species
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- dplyr::relocate(.data = dataframe1, specie_code, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, seuil, specie_code, sizemeasuretype_code))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, specie_name, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, seuil, specie_name, sizemeasuretype_code))
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$samplespeciesmeasure_id)
     number_occurrences <- table(all)
@@ -4554,11 +4554,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = trip_select()$trip_id)
           )
-          # Retrieve trip sample species measure : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
+          # Uses a function to extract data from sample species measure
           samplespeciesmeasure_select <- furdeb::data_extraction(
             type = "database",
             file_path = system.file("sql",
-                                    "samplespeciesmeasure_id.sql",
+                                    "samplespeciesmeasure.sql",
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
@@ -4584,7 +4584,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = sample_select$sample_id)
           )
-          # Uses a function to extract data from sample species
           # Uses a function to extract data from well
           data_well <- furdeb::data_extraction(
             type = "database",
@@ -4594,16 +4593,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             ),
             database_connection = data_connection,
             anchor = list(select_item = trip_select()$trip_id)
-          )
-          # Uses a function to extract data from sample species measure
-          data_samplespeciesmeasure <- furdeb::data_extraction(
-            type = "database",
-            file_path = system.file("sql",
-              "samplespeciesmeasure.sql",
-              package = "AkadoR"
-            ),
-            database_connection = data_connection,
-            anchor = list(select_item = samplespeciesmeasure_select$samplespeciesmeasure_id)
           )
           # Uses a function to extract data from landing
           data_landing <- furdeb::data_extraction(
@@ -4779,6 +4768,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           colnames_sample_id <- c("sample_id", "vessel_code", "trip_enddate", "sample_number")
           # Retrieve trip sample species : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
           colnames_samplespecies_id <- c("samplespecies_id", "vessel_code", "trip_enddate", "sample_number", "specie_name", "sizemeasuretype_code")
+          # Retrieve trip sample species measure : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
+          colnames_samplespeciesmeasure_id <- c("samplespeciesmeasure_id", "vessel_code", "trip_enddate", "sample_number", "specie_name", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")
           # Uses a function which indicates whether the selected trips contain activities or not
           check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_activity_unzfaoocean, output = "report")
           # Uses a function to format the table
@@ -4906,11 +4897,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum catch weight` = sum_catch_weight
           )
           # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid limits
-          check_length_class_inspector_data <- check_length_class_inspector(dataframe1 = data_samplespeciesmeasure, output = "report")
+          check_length_class_inspector_data <- check_length_class_inspector(dataframe1 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
-          check_length_class <- table_display_trip(check_length_class_inspector_data, samplespeciesmeasure_select, type_inconsistency = "error")
+          check_length_class <- table_display_trip(check_length_class_inspector_data, samplespeciesmeasure_select[,colnames_samplespeciesmeasure_id], type_inconsistency = "error")
           # Uses a function which indicates whether that total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
-          check_measure_inspector_data <- check_measure_inspector(dataframe1 = samplespecies_select, dataframe2 = data_samplespeciesmeasure, output = "report")
+          check_measure_inspector_data <- check_measure_inspector(dataframe1 = samplespecies_select, dataframe2 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
           check_measure <- table_display_trip(check_measure_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -4959,12 +4950,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             .data = check_well_number_consistent,
             `Well` = sample_well
           )
-          # Checks data consistency
-          if (nrow(data_samplespeciesmeasure) != length(samplespeciesmeasure_select$samplespeciesmeasure_id)) {
-            warning(text_object_more_or_less(id = samplespeciesmeasure_select$samplespeciesmeasure_id, result_check = data_samplespeciesmeasure$samplespeciesmeasure_id))
-          }
           # Uses a function which indicates whether the sample is consistent for the percentage of little and big fish sampled
-          check_little_big_inspector_data <- check_little_big_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, dataframe3 = data_samplespeciesmeasure, output = "report")
+          check_little_big_inspector_data <- check_little_big_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, dataframe3 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
           check_little_big <- table_display_trip(check_little_big_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_little_big$little_percentage <- trunc(check_little_big$little_percentage * 1000) / 1000
