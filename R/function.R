@@ -4534,11 +4534,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = trip_select()$trip_id)
           )
-          # Retrieve trip sample : retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
+          # Uses a function to extract data from sample
           sample_select <- furdeb::data_extraction(
             type = "database",
             file_path = system.file("sql",
-                                    "sample_id.sql",
+                                    "sample.sql",
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
@@ -4579,16 +4579,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             type = "database",
             file_path = system.file("sql",
               "sample_samplespecies.sql",
-              package = "AkadoR"
-            ),
-            database_connection = data_connection,
-            anchor = list(select_item = sample_select$sample_id)
-          )
-          # Uses a function to extract data from sample
-          data_sample <- furdeb::data_extraction(
-            type = "database",
-            file_path = system.file("sql",
-              "sample.sql",
               package = "AkadoR"
             ),
             database_connection = data_connection,
@@ -4794,6 +4784,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           data_trip_unprecedented<-unique(subset(data_trip, select = -c(harbour_id_departure_trip_previous, harbour_name_departure_trip_previous)))
           # Create an intermediate dataset without information from fao ocean to limit duplication problems with the position is exactly on the boundary of the two oceans, same for harbour
           data_activity_unzfaoocean<-unique(subset(data_activity, select = -c(zfao_ocean, harbour_id)))
+          # Retrieve trip sample : retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
+          colnames_sample_id <- c("sample_id", "vessel_code", "trip_enddate", "sample_number")
           # Uses a function which indicates whether the selected trips contain activities or not
           check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_activity_unzfaoocean, output = "report")
           # Uses a function to format the table
@@ -4927,7 +4919,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function which indicates whether that total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
           check_measure_inspector_data <- check_measure_inspector(dataframe1 = data_samplespecies, dataframe2 = data_samplespeciesmeasure, output = "report")
           # Uses a function to format the table
-          check_measure <- table_display_trip(check_measure_inspector_data, sample_select, type_inconsistency = "error")
+          check_measure <- table_display_trip(check_measure_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_measure <- dplyr::rename(
             .data = check_measure,
@@ -4953,18 +4945,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function which indicates whether the sample is consistent with the presence of species
           check_sample_without_species_inspector_data <- check_sample_without_species_inspector(dataframe1 = data_sample_samplespecies, output = "report")
           # Uses a function to format the table
-          check_sample_without_species <- table_display_trip(check_sample_without_species_inspector_data, sample_select, type_inconsistency = "error")
+          check_sample_without_species <- table_display_trip(check_sample_without_species_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           # Checks data consistency
-          if (nrow(data_sample) != length(sample_select$sample_id)) {
-            warning(text_object_more_or_less(id = sample_select$sample_id, result_check = data_sample$sample_id))
-          }
           if (nrow(data_samplespecies) != length(samplespecies_select$samplespecies_id)) {
             warning(text_object_more_or_less(id = samplespecies_select$samplespecies_id, result_check = data_sample$samplespecies_id))
           }
           # Uses a function which indicates whether the sample is consistent with the subsample number
-          check_super_sample_number_consistent_inspector_data <- check_super_sample_number_consistent_inspector(dataframe1 = data_sample, dataframe2 = data_samplespecies, output = "report")
+          check_super_sample_number_consistent_inspector_data <- check_super_sample_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_samplespecies, output = "report")
           # Uses a function to format the table
-          check_super_sample_number_consistent <- table_display_trip(check_super_sample_number_consistent_inspector_data, sample_select, type_inconsistency = "error")
+          check_super_sample_number_consistent <- table_display_trip(check_super_sample_number_consistent_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_super_sample_number_consistent <- dplyr::rename(
             .data = check_super_sample_number_consistent,
             `Super sample` = sample_supersample,
@@ -4974,9 +4963,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Counts number sample species` = count_samplespecies
           )
           # Uses a function which indicates whether the sample well number is consistent with the associated trip well numbers
-          check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = data_sample, dataframe2 = data_well, output = "report")
+          check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_well, output = "report")
           # Uses a function to format the table
-          check_well_number_consistent <- table_display_trip(check_well_number_consistent_inspector_data, sample_select, type_inconsistency = "error")
+          check_well_number_consistent <- table_display_trip(check_well_number_consistent_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_well_number_consistent <- dplyr::rename(
             .data = check_well_number_consistent,
             `Well` = sample_well
@@ -4986,9 +4975,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             warning(text_object_more_or_less(id = samplespeciesmeasure_select$samplespeciesmeasure_id, result_check = data_samplespeciesmeasure$samplespeciesmeasure_id))
           }
           # Uses a function which indicates whether the sample is consistent for the percentage of little and big fish sampled
-          check_little_big_inspector_data <- check_little_big_inspector(dataframe1 = data_sample, dataframe2 = data_samplespecies, dataframe3 = data_samplespeciesmeasure, output = "report")
+          check_little_big_inspector_data <- check_little_big_inspector(dataframe1 = sample_select, dataframe2 = data_samplespecies, dataframe3 = data_samplespeciesmeasure, output = "report")
           # Uses a function to format the table
-          check_little_big <- table_display_trip(check_little_big_inspector_data, sample_select, type_inconsistency = "error")
+          check_little_big <- table_display_trip(check_little_big_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_little_big$little_percentage <- trunc(check_little_big$little_percentage * 1000) / 1000
           check_little_big$big_percentage <- trunc(check_little_big$big_percentage * 1000) / 1000
           check_little_big$measure1_percentage <- trunc(check_little_big$measure1_percentage * 1000) / 1000
@@ -5008,9 +4997,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             warning(text_object_more_or_less(id = trip_select()$trip_id, result_check = data_trip$trip_id))
           }
           # Uses a function which indicates whether the sample is consistent for the weighting
-          check_weighting_inspector_data <- check_weighting_inspector(dataframe1 = data_sample, dataframe2 = data_sampleactivity, dataframe3 = data_trip_unprecedented, dataframe4 = data_landing, output = "report")
+          check_weighting_inspector_data <- check_weighting_inspector(dataframe1 = sample_select, dataframe2 = data_sampleactivity, dataframe3 = data_trip_unprecedented, dataframe4 = data_landing, output = "report")
           # Uses a function to format the table
-          check_weighting <- table_display_trip(check_weighting_inspector_data, sample_select, type_inconsistency = "error")
+          check_weighting <- table_display_trip(check_weighting_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_weighting <- dplyr::rename(
             .data = check_weighting,
             `Small fish weight` = sample_smallsweight,
@@ -5022,9 +5011,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum weight fresh landings baitboats` = sum_landing_weight
           )
           # Uses a function which indicates whether the sample weight (m10 and p10) is consistent for the global weight
-          check_weight_sample_inspector_data <- check_weight_sample_inspector(dataframe1 = data_sample, output = "report")
+          check_weight_sample_inspector_data <- check_weight_sample_inspector(dataframe1 = sample_select, output = "report")
           # Uses a function to format the table
-          check_weight_sample <- table_display_trip(check_weight_sample_inspector_data, sample_select, type_inconsistency = "error")
+          check_weight_sample <- table_display_trip(check_weight_sample_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_weight_sample <- dplyr::rename(
             .data = check_weight_sample,
             `Small fish weight` = sample_smallsweight,
@@ -5034,13 +5023,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function which indicates whether the sample and the existence of the activity
           check_activity_sample_inspector_data <- check_activity_sample_inspector(dataframe1 = data_sample_activity, output = "report")
           # Uses a function to format the table
-          check_activity_sample <- table_display_trip(check_activity_sample_inspector_data, sample_select, type_inconsistency = "error")
+          check_activity_sample <- table_display_trip(check_activity_sample_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_activity_sample <- dplyr::rename(
             .data = check_activity_sample,
             `Activity Count` = count_activity
           )
           # Uses a function which indicates whether the sample measurement types is consistent for the species or weight values
-          check_ldlf_inspector_data <- check_ldlf_inspector(dataframe1 = data_samplespecies, dataframe2 = data_sample, output = "report")
+          check_ldlf_inspector_data <- check_ldlf_inspector(dataframe1 = data_samplespecies, dataframe2 = sample_select, output = "report")
           # Uses a function to format the table
           check_ldlf <- table_display_trip(check_ldlf_inspector_data, samplespecies_select, type_inconsistency = "error")
           check_ldlf <- dplyr::rename(
@@ -5050,9 +5039,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the small and large sample weights is consistent for the sum of the small and big weights of the associated well
-          check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = data_sample, dataframe2 = data_well, dataframe3 = data_wellactivity, dataframe4 = data_wellactivityspecies, output = "report")
+          check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = data_wellactivity, dataframe4 = data_wellactivityspecies, output = "report")
           # Uses a function to format the table
-          check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select, type_inconsistency = "error")
+          check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_distribution <- dplyr::rename(
             .data = check_distribution,
             `Small fish weight` = sample_smallsweight,
