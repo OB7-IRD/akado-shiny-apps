@@ -8,5 +8,5 @@ SELECT
 FROM 
     public.nafpositionmessage n 
     INNER JOIN public.turbobat tb ON n.internalreferencenumber = tb."CFR_CODE" 
-WHERE 
-    CONCAT(tb."NUMBAT", '_',  n."date"::date ) in (?select_item)
+    INNER JOIN (SELECT unnest(array[ ?select_item_1 ])::integer AS vessel_code, 
+                       unnest(array[ ?select_item_2 ])::date AS activity_date) tmp ON tmp.vessel_code = tb."NUMBAT" AND tmp.activity_date = n."date"::date

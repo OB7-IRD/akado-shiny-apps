@@ -4745,6 +4745,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               db_host = config_data()[["databases_configuration"]][["vms"]][["host"]],
               db_port = config_data()[["databases_configuration"]][["vms"]][["port"]]
             )
+            # Selection of unique activity dates and vessel numbers
+            activity_select_vms<-unique(data.frame(vessel_code = activity_select$vessel_code, activity_date = activity_select$activity_date))
             # Uses a function to extract data from VMS
             data_vms <- furdeb::data_extraction(
               type = "database",
@@ -4753,7 +4755,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                 package = "AkadoR"
               ),
               database_connection = data_connection_vms,
-              anchor = list(select_item = unique(paste(data_activity$vessel_code, data_activity$activity_date, sep = "_")))
+              anchor = list(select_item_1 = activity_select_vms$vessel_code, select_item_2 = activity_select_vms$activity_date)
             )
             # Force date type, otherwise empty dataframe sets to charactere format
             data_vms$vms_date <- as.Date(data_vms$vms_date)
