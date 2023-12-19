@@ -4565,16 +4565,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = trip_select()$trip_id)
           )
-          # Uses a function to extract data from samplespeciesmeasure in connection with samplespecies
-          data_samplespecies_samplespeciesmeasure <- furdeb::data_extraction(
-            type = "database",
-            file_path = system.file("sql",
-              "samplespecies_samplespeciesmeasure.sql",
-              package = "AkadoR"
-            ),
-            database_connection = data_connection,
-            anchor = list(select_item = samplespecies_select$samplespecies_id)
-          )
           # Uses a function to extract data from samplespecies in connection with sample
           data_sample_samplespecies <- furdeb::data_extraction(
             type = "database",
@@ -4906,7 +4896,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function to format the table
           check_species <- table_display_trip(check_species_inspector_data, samplespecies_select[,colnames_samplespecies_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of measurement
-          check_sample_without_measure_inspector_data <- check_sample_without_measure_inspector(dataframe1 = data_samplespecies_samplespeciesmeasure, output = "report")
+          check_sample_without_measure_inspector_data <- check_sample_without_measure_inspector(dataframe1 = merge(samplespecies_select, samplespeciesmeasure_select, by = "samplespecies_id", all.x = TRUE), output = "report")
           # Uses a function to format the table
           check_sample_without_measure <- table_display_trip(check_sample_without_measure_inspector_data, samplespecies_select[,colnames_samplespecies_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of species
