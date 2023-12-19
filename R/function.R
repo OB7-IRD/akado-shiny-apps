@@ -4565,16 +4565,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = trip_select()$trip_id)
           )
-          # Uses a function to extract data from samplespecies in connection with sample
-          data_sample_samplespecies <- furdeb::data_extraction(
-            type = "database",
-            file_path = system.file("sql",
-              "sample_samplespecies.sql",
-              package = "AkadoR"
-            ),
-            database_connection = data_connection,
-            anchor = list(select_item = sample_select$sample_id)
-          )
           # Uses a function to extract data from well
           data_well <- furdeb::data_extraction(
             type = "database",
@@ -4900,7 +4890,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function to format the table
           check_sample_without_measure <- table_display_trip(check_sample_without_measure_inspector_data, samplespecies_select[,colnames_samplespecies_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of species
-          check_sample_without_species_inspector_data <- check_sample_without_species_inspector(dataframe1 = data_sample_samplespecies, output = "report")
+          check_sample_without_species_inspector_data <- check_sample_without_species_inspector(dataframe1 = merge(sample_select, samplespecies_select, by = "sample_id", all.x = TRUE), output = "report")
           # Uses a function to format the table
           check_sample_without_species <- table_display_trip(check_sample_without_species_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the subsample number
