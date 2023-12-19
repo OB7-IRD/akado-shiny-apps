@@ -4605,16 +4605,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id)
           )
-          # Uses a function to extract data from activity in connection with sample
-          data_sample_activity <- furdeb::data_extraction(
-            type = "database",
-            file_path = system.file("sql",
-              "sample_activity.sql",
-              package = "AkadoR"
-            ),
-            database_connection = data_connection,
-            anchor = list(select_item = sample_select$sample_id)
-          )
           # Uses a function to extract data from wellactivity
           wellactivity_select <- furdeb::data_extraction(
             type = "database",
@@ -4960,7 +4950,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the sample and the existence of the activity
-          check_activity_sample_inspector_data <- check_activity_sample_inspector(dataframe1 = data_sample_activity, output = "report")
+          check_activity_sample_inspector_data <- check_activity_sample_inspector(dataframe1 = data_sampleactivity, output = "report")
           # Uses a function to format the table
           check_activity_sample <- table_display_trip(check_activity_sample_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_activity_sample <- dplyr::rename(
