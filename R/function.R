@@ -4635,25 +4635,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = sample_select$sample_id)
           )
-          # Uses a function to extract data from wellactivity in connection with trip
-          wellactivity_select <- furdeb::data_extraction(
-            type = "database",
-            file_path = system.file("sql",
-              "trip_wellactivity.sql",
-              package = "AkadoR"
-            ),
-            database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
-          )
           # Uses a function to extract data from wellactivity
-          data_wellactivity <- furdeb::data_extraction(
+          wellactivity_select <- furdeb::data_extraction(
             type = "database",
             file_path = system.file("sql",
               "wellactivity.sql",
               package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = wellactivity_select$wellactivity_id)
+            anchor = list(select_item = trip_select()$trip_id)
           )
           # Uses a function to extract data from wellactivityspecies
           data_wellactivityspecies <- furdeb::data_extraction(
@@ -5008,7 +4998,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the small and large sample weights is consistent for the sum of the small and big weights of the associated well
-          check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = data_wellactivity, dataframe4 = data_wellactivityspecies, output = "report")
+          check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = wellactivity_select, dataframe4 = data_wellactivityspecies, output = "report")
           # Uses a function to format the table
           check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           check_distribution <- dplyr::rename(

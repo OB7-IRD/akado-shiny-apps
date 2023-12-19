@@ -3,6 +3,8 @@ SELECT
     wa.topiaid::text AS wellactivity_id, 
 	wa.well::text AS well_id
 FROM 
-    ps_logbook.wellactivity wa 
+    ps_common.trip t
+    LEFT JOIN ps_logbook.well w ON w.trip = t.topiaid 
+    LEFT JOIN ps_logbook.wellactivity wa ON wa.well = w.topiaid 
 WHERE 
-    wa.topiaid IN (?select_item)
+    t.topiaid IN (?select_item)
