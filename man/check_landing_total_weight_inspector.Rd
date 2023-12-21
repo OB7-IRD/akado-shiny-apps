@@ -32,7 +32,6 @@ The input dataframe must contain all these columns for the function to work :
 Dataframe 1:
  \item{\code{  trip_id}}
  \item{\code{  trip_landingtotalweight}}
- \item{\code{  trip_localmarkettotalweight}}
 Dataframe 2:
  \item{\code{  landing_id}}
  \item{\code{  landing_weight}}

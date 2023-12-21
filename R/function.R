@@ -19,7 +19,6 @@ check_trip_activity_inspector <- function(dataframe1,
                                           dataframe2,
                                           output) {
   # 0 - Global variables assignement ----
-  first_vector <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -73,6 +72,8 @@ check_trip_activity_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Search trip ID in the associations trip, route, activity
+  dataframe2 <- dataframe2[!is.na(dataframe2$activity_id),]
+  # Check
   comparison <- codama::vector_comparison(
     first_vector = dataframe1$trip_id,
     second_vector = dataframe2$trip_id,
@@ -141,12 +142,8 @@ check_fishing_time_inspector <- function(dataframe1,
   # 0 - Global variables assignement ----
   trip_id <- NULL
   route_fishingtime <- NULL
-  trip_fishingtime_data <- NULL
   trip_fishingtime <- NULL
-  trip_idfishingtime <- NULL
   sum_route_fishingtime <- NULL
-  first_vector <- NULL
-  second_vector <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -212,10 +209,9 @@ check_fishing_time_inspector <- function(dataframe1,
     comparison_type = "equal",
     output = "report"
   )
+  dataframe1$logical <- comparison$logical
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- cbind(dataframe1, comparison)
   dataframe1 <- dplyr::relocate(.data = dataframe1, trip_fishingtime, sum_route_fishingtime, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(first_vector, second_vector))
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
@@ -277,12 +273,8 @@ check_sea_time_inspector <- function(dataframe1,
   # 0 - Global variables assignement ----
   trip_id <- NULL
   route_seatime <- NULL
-  trip_seatime_data <- NULL
   trip_seatime <- NULL
-  trip_idseatime <- NULL
   sum_route_seatime <- NULL
-  first_vector <- NULL
-  second_vector <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -348,10 +340,9 @@ check_sea_time_inspector <- function(dataframe1,
     comparison_type = "equal",
     output = "report"
   )
+  dataframe1$logical <- comparison$logical
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- cbind(dataframe1, comparison)
   dataframe1 <- dplyr::relocate(.data = dataframe1, trip_seatime, sum_route_seatime, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(first_vector, second_vector))
   # Management of the 0 value for the time at sea
   dataframe1[!is.na(dataframe1$trip_seatime) & dataframe1$trip_seatime == 0, "logical"] <- FALSE
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
@@ -517,7 +508,6 @@ check_landing_consistent_inspector <- function(dataframe1,
 #' Dataframe 1:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  trip_landingtotalweight}}
-#'  \item{\code{  trip_localmarkettotalweight}}
 #' Dataframe 2:
 #'  \item{\code{  landing_id}}
 #'  \item{\code{  landing_weight}}
@@ -533,25 +523,24 @@ check_landing_total_weight_inspector <- function(dataframe1,
   landing_weight <- NULL
   trip_landingtotalweight <- NULL
   sum_weightlanding <- NULL
-  trip_localmarkettotalweight <- NULL
   difference <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight"),
-    column_type = c("character", "numeric", "numeric"),
+    column_name = c("trip_id", "trip_landingtotalweight"),
+    column_type = c("character", "numeric"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight"),
-      column_type = c("character", "numeric", "numeric"),
+      column_name = c("trip_id", "trip_landingtotalweight"),
+      column_type = c("character", "numeric"),
       output = "message"
     )
   }else {
-    dataframe1 <- dataframe1[, c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight")]
+    dataframe1 <- dataframe1[, c("trip_id", "trip_landingtotalweight")]
   }
   if (codama::r_table_checking(
     r_table = dataframe2,
@@ -605,7 +594,7 @@ check_landing_total_weight_inspector <- function(dataframe1,
   )
   dataframe1$logical <- comparison$logical
   dataframe1 <- dplyr::relocate(.data = dataframe1, trip_landingtotalweight, sum_weightlanding, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(trip_localmarkettotalweight, difference, epsilon))
+  dataframe1 <- subset(dataframe1, select = -c(difference, epsilon))
   # Management of missing landing weight in trip
   dataframe1[is.na(dataframe1$trip_landingtotalweight), "logical"] <- FALSE
   # Management of missing sum of the landing
@@ -1112,7 +1101,7 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe3$lower_limit <- limit[1]
   dataframe3$upper_limit <- limit[2]
   # Selection of user-supplied trips
-  dataframe3 <- merge(data.frame(trip_id = select), unique(dataframe3), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  dataframe3 <- merge(data.frame(trip_id = dataframe1$trip_id), unique(dataframe3), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # Merge data
   dataframe3 <- merge(dataframe3, tide_id_data_RF1, by.x = "trip_end_tide_id", by.y = "trip_end_tide_id", all.x = TRUE)
   # Compare RF1 to valid limits
@@ -1642,8 +1631,6 @@ check_weight_inspector <- function(dataframe1,
   catch_weight <- NULL
   activity_weight <- NULL
   sum_catch_weight <- NULL
-  first_vector <- NULL
-  second_vector <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -1709,10 +1696,9 @@ check_weight_inspector <- function(dataframe1,
     comparison_type = "equal",
     output = "report"
   )
+  dataframe1$logical<-comparison$logical
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- cbind(dataframe1, comparison)
   dataframe1 <- dplyr::relocate(.data = dataframe1, activity_weight, sum_catch_weight, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(first_vector, second_vector))
   # Management of the NA value for the weight activity and catch
   dataframe1[is.na(dataframe1$activity_weight) & is.na(dataframe1$sum_catch_weight), "logical"] <- TRUE
   # Management of the 0 value for the weight activity
@@ -2290,37 +2276,57 @@ check_species_inspector <- function(dataframe1,
 #' @title Gives inconsistencies between the sample and the measurement in terms of presence
 #' @description The purpose of the check_sample_without_measure_inspector function is to provide a table of data that contains an inconsistency between the sample and the presence of measurement
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_without_measure_inspector() function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_without_measure_inspector() function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  samplespecies_id}}
+#' Dataframe 2:
+#'  \item{\code{  samplespecies_id}}
 #'  \item{\code{  samplespeciesmeasure_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @export
 check_sample_without_measure_inspector <- function(dataframe1,
+                                                   dataframe2,
                                                    output) {
   # 0 - Global variables assignement ----
-  samplespecies_id <- NULL
-  samplespeciesmeasure_id <- NULL
-  count <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("samplespecies_id"),
+    column_type = c("character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("samplespecies_id"),
+      column_type = c("character"),
+      output = "message"
+    )
+  }else {
+    dataframe1 <- dataframe1[, c("samplespecies_id")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
     type = "data.frame",
     column_name = c("samplespecies_id", "samplespeciesmeasure_id"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
-      r_table = dataframe1,
+      r_table = dataframe2,
       type = "data.frame",
       column_name = c("samplespecies_id", "samplespeciesmeasure_id"),
       column_type = c("character", "character"),
       output = "message"
     )
+  }else {
+    dataframe2 <- dataframe2[, c("samplespecies_id", "samplespeciesmeasure_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -2340,13 +2346,15 @@ check_sample_without_measure_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Search samplespeciesmeasure ID in the associations samplespecies ID
-  dataframe1 <- dataframe1 %>%
-    dplyr::group_by(samplespecies_id) %>%
-    dplyr::summarise(count = sum(!is.na(samplespeciesmeasure_id)))
-  dataframe1$logical <- TRUE
-  dataframe1[dataframe1$count == 0, "logical"] <- FALSE
-  # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(count))
+  dataframe2 <- dataframe2[!is.na(dataframe2$samplespeciesmeasure_id),]
+  # Check
+  comparison <- codama::vector_comparison(
+    first_vector = dataframe1$samplespecies_id,
+    second_vector = dataframe2$samplespecies_id,
+    comparison_type = "difference",
+    output = "report"
+  )
+  dataframe1$logical <- comparison$logical
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
@@ -2387,10 +2395,13 @@ check_sample_without_measure_inspector <- function(dataframe1,
 #' @title Gives inconsistencies between the sample and the species sampled in terms of presence
 #' @description The purpose of the check_sample_without_species_inspector function is to provide a table of data that contains an inconsistency between the sample and the presence of species
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_without_species_inspector() function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_without_species_inspector() function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
 #' Dataframe 1:
 #'  \item{\code{  sample_id}}
 #'  \item{\code{  samplespecies_id}}
@@ -2398,26 +2409,43 @@ check_sample_without_measure_inspector <- function(dataframe1,
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @export
 check_sample_without_species_inspector <- function(dataframe1,
+                                                   dataframe2,
                                                    output) {
   # 0 - Global variables assignement ----
-  sample_id <- NULL
-  samplespecies_id <- NULL
-  count <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("sample_id"),
+    column_type = c("character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("sample_id"),
+      column_type = c("character"),
+      output = "message"
+    )
+  }else{
+    dataframe1<-dataframe1[,c("sample_id")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
     type = "data.frame",
     column_name = c("sample_id", "samplespecies_id"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
-      r_table = dataframe1,
+      r_table = dataframe2,
       type = "data.frame",
       column_name = c("sample_id", "samplespecies_id"),
       column_type = c("character", "character"),
       output = "message"
     )
+  }else{
+    dataframe2<-dataframe2[,c("sample_id", "samplespecies_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -2437,13 +2465,15 @@ check_sample_without_species_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Search samplespecies ID in the associations samples ID
-  dataframe1 <- dataframe1 %>%
-    dplyr::group_by(sample_id) %>%
-    dplyr::summarise(count = sum(!is.na(samplespecies_id)))
-  dataframe1$logical <- TRUE
-  dataframe1[dataframe1$count == 0, "logical"] <- FALSE
-  # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(count))
+  dataframe2 <- dataframe2[!is.na(dataframe2$samplespecies_id),]
+  # Check
+  comparison <- codama::vector_comparison(
+    first_vector = dataframe1$sample_id,
+    second_vector = dataframe2$sample_id,
+    comparison_type = "difference",
+    output = "report"
+  )
+  dataframe1$logical <- comparison$logical
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -3449,41 +3479,59 @@ check_weight_sample_inspector <- function(dataframe1,
 
 #' @name check_activity_sample_inspector
 #' @title Gives inconsistencies between the sample and the activity in terms of presence
-#' @description The purpose of the check_activity_sample_inspector  function is to provide a table of data that contains an inconsistency between the sample and the existence of the activity
+#' @description The purpose of the check_activity_sample_inspector function is to provide a table of data that contains an inconsistency between the sample and the existence of the activity
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_activity_sample_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_activity_sample_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  sample_id}}
+#' Dataframe 2:
+#'  \item{\code{  sample_id}}
 #'  \item{\code{  activity_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @export
 check_activity_sample_inspector <- function(dataframe1,
+                                            dataframe2,
                                             output) {
   # 0 - Global variables assignement ----
-  sample_id <- NULL
-  activity_id <- NULL
-  count_activity <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("sample_id"),
+    column_type = c("character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("sample_id"),
+      column_type = c("character"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("sample_id")]
+  }
+  if (codama::r_table_checking(
+    r_table = dataframe2,
     type = "data.frame",
     column_name = c("sample_id", "activity_id"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
-      r_table = dataframe1,
+      r_table = dataframe2,
       type = "data.frame",
       column_name = c("sample_id", "activity_id"),
       column_type = c("character", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("sample_id", "activity_id")]
+    dataframe2 <- dataframe2[, c("sample_id", "activity_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -3502,20 +3550,15 @@ check_activity_sample_inspector <- function(dataframe1,
   select <- dataframe1$sample_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
-  # Calculation activity_id (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
-  dataframe1 <- dataframe1 %>%
-    dplyr::group_by(sample_id) %>%
-    dplyr::summarise(count_activity = ifelse(all(is.na(activity_id)), 0L, sum(!is.na(activity_id))))
+  dataframe2 <- dataframe2[!is.na(dataframe2$activity_id),]
   # Check
   comparison <- codama::vector_comparison(
-    first_vector = dataframe1$count_activity,
-    second_vector = c(0L),
+    first_vector = dataframe1$sample_id,
+    second_vector = dataframe2$sample_id,
     comparison_type = "difference",
     output = "report"
   )
-  dataframe1$logical <- !comparison$logical
-  # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- dplyr::relocate(.data = dataframe1, count_activity, .after = logical)
+  dataframe1$logical <- comparison$logical
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -4876,11 +4919,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function to format the table
           check_species <- table_display_trip(check_species_inspector_data, samplespecies_select[,colnames_samplespecies_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of measurement
-          check_sample_without_measure_inspector_data <- check_sample_without_measure_inspector(dataframe1 = merge(samplespecies_select, samplespeciesmeasure_select, by = "samplespecies_id", all.x = TRUE), output = "report")
+          check_sample_without_measure_inspector_data <- check_sample_without_measure_inspector(dataframe1 = samplespecies_select, dataframe2 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
           check_sample_without_measure <- table_display_trip(check_sample_without_measure_inspector_data, samplespecies_select[,colnames_samplespecies_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of species
-          check_sample_without_species_inspector_data <- check_sample_without_species_inspector(dataframe1 = merge(sample_select, samplespecies_select, by = "sample_id", all.x = TRUE), output = "report")
+          check_sample_without_species_inspector_data <- check_sample_without_species_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, output = "report")
           # Uses a function to format the table
           check_sample_without_species <- table_display_trip(check_sample_without_species_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the subsample number
@@ -4950,13 +4993,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the sample and the existence of the activity
-          check_activity_sample_inspector_data <- check_activity_sample_inspector(dataframe1 = data_sampleactivity, output = "report")
+          check_activity_sample_inspector_data <- check_activity_sample_inspector(dataframe1 = sample_select, dataframe2 = data_sampleactivity, output = "report")
           # Uses a function to format the table
           check_activity_sample <- table_display_trip(check_activity_sample_inspector_data, sample_select[,colnames_sample_id], type_inconsistency = "error")
-          check_activity_sample <- dplyr::rename(
-            .data = check_activity_sample,
-            `Activity Count` = count_activity
-          )
           # Uses a function which indicates whether the sample measurement types is consistent for the species or weight values
           check_ldlf_inspector_data <- check_ldlf_inspector(dataframe1 = samplespecies_select, dataframe2 = sample_select, output = "report")
           # Uses a function to format the table

@@ -4,10 +4,12 @@
 \alias{check_sample_without_species_inspector}
 \title{Gives inconsistencies between the sample and the species sampled in terms of presence}
 \usage{
-check_sample_without_species_inspector(dataframe1, output)
+check_sample_without_species_inspector(dataframe1, dataframe2, output)
 }
 \arguments{
 \item{dataframe1}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_without_species_inspector() function.}
+
+\item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_without_species_inspector() function.}
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 }
@@ -20,6 +22,8 @@ The purpose of the check_sample_without_species_inspector function is to provide
 \details{
 The input dataframe must contain all these columns for the function to work :
 \itemize{
+Dataframe 1:
+ \item{\code{  sample_id}}
 Dataframe 1:
  \item{\code{  sample_id}}
  \item{\code{  samplespecies_id}}
