@@ -4759,13 +4759,17 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
           data_trip_unprecedented<-unique(subset(data_trip, select = -c(harbour_id_departure_trip_previous, harbour_name_departure_trip_previous)))
           # Retrieve trip sample : Retrieve trip activity : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
-          colnames_activity_id <- c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number")
+          colnames_activity_id <- c("activity_id", "vessel_code", "trip_enddate", "activity_date","activity_time", "activity_number", "vesselactivity_code")
           # Retrieve trip sample : retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
           colnames_sample_id <- c("sample_id", "vessel_code", "trip_enddate", "sample_number")
           # Retrieve trip sample species : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
           colnames_samplespecies_id <- c("samplespecies_id", "vessel_code", "trip_enddate", "sample_number", "specie_name", "sizemeasuretype_code")
           # Retrieve trip sample species measure : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
           colnames_samplespeciesmeasure_id <- c("samplespeciesmeasure_id", "vessel_code", "trip_enddate", "sample_number", "specie_name", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")
+          # Checks data consistency
+          if (nrow(data_trip) != length(trip_select()$trip_id)) {
+            warning(text_object_more_or_less(id = trip_select()$trip_id, result_check = data_trip$trip_id))
+          }
           # Uses a function which indicates whether the selected trips contain activities or not
           check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = activity_select, output = "report")
           # Uses a function to format the table
@@ -4964,10 +4968,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Measurement type FL %` = measure1_percentage,
             `Measurement type PD1 %` = measure2_percentage
           )
-          # Checks data consistency
-          if (nrow(data_trip) != length(trip_select()$trip_id)) {
-            warning(text_object_more_or_less(id = trip_select()$trip_id, result_check = data_trip$trip_id))
-          }
           # Uses a function which indicates whether the sample is consistent for the weighting
           check_weighting_inspector_data <- check_weighting_inspector(dataframe1 = sample_select, dataframe2 = data_sampleactivity, dataframe3 = data_trip_unprecedented, dataframe4 = data_landing, output = "report")
           # Uses a function to format the table
@@ -5040,7 +5040,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               dplyr::distinct()
             code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_range_date", name_col = "trip_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number"), colname_info = "NULL")
             eval(parse(text = code_txt))
-            check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("activity_number", "activity_date"))
+            check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("activity_number", "activity_time", "activity_date"))
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = "activity_id")
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
             # Add button and data for plot in table
@@ -5198,7 +5198,9 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
     data <- dplyr::rename(
       .data = data,
       `Activity date` = activity_date,
-      `Activity number` = activity_number
+      `Activity time` = activity_time,
+      `Activity number` = activity_number,
+      `Vessel activity` = vesselactivity_code
     )
   }
   # Modify the table for display purposes specifically for samples : rename column
