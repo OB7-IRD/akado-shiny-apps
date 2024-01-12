@@ -1,5 +1,6 @@
 --- Recovers information about landing
 SELECT
+    l.topiaid::text AS landing_id,
     l.trip::text AS trip_id,
     l.weight::numeric AS landing_weight,
     wc.code::text AS weightcategory_code

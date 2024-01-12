@@ -1,8 +1,8 @@
 --- Reconstructs complete tides from selected trips
 SELECT 
 	trip_tide.topiaid::text AS trip_id, 
-	trip_end_tide.trip_current_end_tide_id::text AS trip_end_tide_id, 
-	trip_end_tide.trip_previous_end_tide_id::text AS trip_previous_end_tide_id
+	trip_tide.landingtotalweight::numeric AS trip_landingtotalweight,
+	trip_end_tide.trip_current_end_tide_id::text AS trip_end_tide_id
 FROM 
  	(
 	-- Search for information on the end trip of the current tide and the end trip of the previous tide
