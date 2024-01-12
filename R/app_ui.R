@@ -217,7 +217,6 @@ app_ui <- function(request) {
       )
     )
   )
-  # system.file("app", "www", "favicon.png",package = "AkadoR")
 }
 
 #' Add external Resources to the Application

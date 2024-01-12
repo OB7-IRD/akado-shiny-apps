@@ -47,18 +47,18 @@ app_server <- function(input, output, session) {
 
   # Date control plot, display in a window
   output$plot_temporal_limit <- plotly::renderPlotly({
-    splitID <- strsplit(input$button_temporal_limit, "&")[[1]]
-    data <- eval(parse(text = splitID[[2]]))
-    startdate <- as.Date(x = splitID[5], format = "%Y-%m-%d")
-    enddate <- as.Date(x = splitID[6], format = "%Y-%m-%d")
+    split_id <- strsplit(input$button_temporal_limit, "&")[[1]]
+    data <- eval(parse(text = split_id[[2]]))
+    startdate <- as.Date(x = split_id[5], format = "%Y-%m-%d")
+    enddate <- as.Date(x = split_id[6], format = "%Y-%m-%d")
     plot_temporal_limit(data, startdate, enddate)
   })
 
   # Date control window
   observeEvent(input$button_temporal_limit, {
-    splitID <- strsplit(input$button_temporal_limit, "&")[[1]]
-    vessel_code <- splitID[4]
-    enddate <- splitID[6]
+    split_id <- strsplit(input$button_temporal_limit, "&")[[1]]
+    vessel_code <- split_id[4]
+    enddate <- split_id[6]
     # Non-breaking hyphen (-)
     enddate <- gsub("-", "&#8209;", enddate)
     showModal(modalDialog(
@@ -89,18 +89,18 @@ app_server <- function(input, output, session) {
   table_server(id = "check_raising_factor", data = calcul_check, number = 8, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
 
   # Table of consistency test school type and association
-  table_server(id = "check_fishing_context", data = calcul_check, number = 9, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
+  table_server(id = "check_fishing_context", data = calcul_check, number = 9, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
 
   # Table of consistency test the succes status and the vessel activity, the type of school or the weight caught
-  table_server(id = "check_operationt", data = calcul_check, number = 10, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
+  table_server(id = "check_operationt", data = calcul_check, number = 10, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
 
   # Table of consistency test the ocean declaration and activity position
-  table_server(id = "check_position", data = calcul_check, number = 11, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
+  table_server(id = "check_position", data = calcul_check, number = 11, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
 
   # Position control plot, display in a window
   output$plot_position <- plotly::renderPlotly({
-    splitID <- strsplit(input$button_position, "&")[[1]]
-    data <- eval(parse(text = splitID[[2]]))
+    split_id <- strsplit(input$button_position, "&")[[1]]
+    data <- eval(parse(text = split_id[[2]]))
     plot_position(data)
   })
 
@@ -109,11 +109,11 @@ app_server <- function(input, output, session) {
     # Local binding global variables
     . <- NULL
     # Split information
-    splitID <- strsplit(input$button_position, "&")[[1]]
-    enddate <- splitID[5]
-    activity_date <- splitID[5]
+    split_id <- strsplit(input$button_position, "&")[[1]]
+    enddate <- split_id[5]
+    activity_date <- split_id[5]
     # Spatial formatting
-    data <- eval(parse(text = splitID[[2]]))
+    data <- eval(parse(text = split_id[[2]]))
     data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
     # Non-breaking hyphen (-)
     enddate <- gsub("-", "&#8209;", enddate)
@@ -123,16 +123,16 @@ app_server <- function(input, output, session) {
         column(3,
                style = "padding-left:5px;padding-right:0px;",
                HTML(paste0("<b>Trip information : </b><br>
-                             <ul><li>Vessel code : ", splitID[4], "</li>
+                             <ul><li>Vessel code : ", split_id[4], "</li>
                              <li>Trip end date : ", enddate, "</li>
                              <li>Activity date : ", activity_date, "</li>
-                             <li>Activity number : ", splitID[7], "</li>
+                             <li>Activity number : ", split_id[7], "</li>
                              <li>Latitude : ", data_geo$Y, "\u00B0</li>
                              <li>Longitude : ", data_geo$X, "\u00B0</li></ul>
                              <b>Problem information : </b><br>
-                             <ul><li>Type : ", splitID[8], "</li>
-                             <li>Ocean trip : ", splitID[9], "</li>
-                             <li>Ocean activity : ", splitID[10], "</li></ul>"))
+                             <ul><li>Type : ", split_id[8], "</li>
+                             <li>Ocean trip : ", split_id[9], "</li>
+                             <li>Ocean activity : ", split_id[10], "</li></ul>"))
         ),
         column(9,
                style = "padding-left:0px;padding-right:5px;",
@@ -148,70 +148,70 @@ app_server <- function(input, output, session) {
   })
 
   # Table of consistency test the sum of the weight indicated for the catch and activity weight
-  table_server(id = "check_weight", data = calcul_check, number = 12, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
+  table_server(id = "check_weight", data = calcul_check, number = 12, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
 
   # Table of consistency test the size class of the samples depending on the species and measurement type is consistent with valid limits
-  table_server(id = "check_length_class", data = calcul_check, number = 13, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_length_class", data = calcul_check, number = 13, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
-  table_server(id = "check_measure", data = calcul_check, number = 14, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_measure", data = calcul_check, number = 14, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the sea surface temperature is consistent with valid limits
-  table_server(id = "check_temperature", data = calcul_check, number = 15, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
+  table_server(id = "check_temperature", data = calcul_check, number = 15, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
 
   # Table of consistency test the species sampled is consistent with species authorized
-  table_server(id = "check_species", data = calcul_check, number = 16, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_species", data = calcul_check, number = 16, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the sample is consistent with the presence of measurement
-  table_server(id = "check_sample_without_measure", data = calcul_check, number = 17, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_sample_without_measure", data = calcul_check, number = 17, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the sample is consistent with the presence of species
   table_server(id = "check_sample_without_species", data = calcul_check, number = 18, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
 
   # Table of consistency test the sample is consistent with the subsample number
-  table_server(id = "check_super_sample_number", data = calcul_check, number = 19, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_super_sample_number", data = calcul_check, number = 19, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the sample well number is consistent with the associated trip well numbers
   table_server(id = "check_well_number", data = calcul_check, number = 20, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
 
   # Table of consistency test the sample is consistent for the percentage of little and big fish sampled
-  table_server(id = "check_little_big", data = calcul_check, number = 21, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_little_big", data = calcul_check, number = 21, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the sample is consistent for the weighting
-  table_server(id = "check_weighting", data = calcul_check, number = 22, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_weighting", data = calcul_check, number = 22, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the sample weight (m10 and p10) is consistent for the global weight
-  table_server(id = "check_weight_sample", data = calcul_check, number = 23, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_weight_sample", data = calcul_check, number = 23, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the sample and the existence of the activity data_sample_activity
   table_server(id = "check_activity_sample", data = calcul_check, number = 24, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
 
   # Table of consistency test the sample measurement types is consistent for the species or weight
-  table_server(id = "check_ldlf", data = calcul_check, number = 25, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_ldlf", data = calcul_check, number = 25, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the small and large sample weights is consistent for the sum of the small and big weights of the associated well
-  table_server(id = "check_distribution", data = calcul_check, number = 26, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px")))
+  table_server(id = "check_distribution", data = calcul_check, number = 26, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px")))
 
   # Table of consistency test the activity position is consistent for VMS position
-  table_server(id = "check_anapo", data = calcul_check, number = 27, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autoWidth = TRUE, columnDefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
+  table_server(id = "check_anapo", data = calcul_check, number = 27, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, autowidth = TRUE, columndefs = list(list(targets = c(1), width = "73px"), list(targets = c(2), width = "73px")))
 
   # Anapo control plot, display in a window
   output$plot_anapo <- plotly::renderPlotly({
-    splitID <- strsplit(input$button_anapo, "&")[[1]]
-    data <- eval(parse(text = splitID[[2]]))
-    activity_time <- splitID[[4]]
-    activity_number <- splitID[[5]]
-    activity_position <- splitID[[6]]
-    activity_crs <- splitID[[7]]
-    vms_crs <- splitID[[8]]
-    date <- splitID[[9]]
-    trip_data <- eval(parse(text = splitID[[10]]))
+    split_id <- strsplit(input$button_anapo, "&")[[1]]
+    data <- eval(parse(text = split_id[[2]]))
+    activity_time <- split_id[[4]]
+    activity_number <- split_id[[5]]
+    activity_position <- split_id[[6]]
+    activity_crs <- split_id[[7]]
+    vms_crs <- split_id[[8]]
+    date <- split_id[[9]]
+    trip_data <- eval(parse(text = split_id[[10]]))
     plot_anapo(data_vms = data, crs_vms = vms_crs, position_activity = activity_position, crs_activity = activity_crs, date = date, time_activity = activity_time, number_activity = activity_number, data_trip = trip_data)
   })
 
   # Anapo control window
   observeEvent(input$button_anapo, {
-    splitID <- strsplit(input$button_anapo, "&")[[1]]
+    split_id <- strsplit(input$button_anapo, "&")[[1]]
     showModal(modalDialog(
       fluidRow(plotly::plotlyOutput("plot_anapo", height = "75vh")),
       title = "",
@@ -399,11 +399,11 @@ app_server <- function(input, output, session) {
   # Summary page text
   output$text_summary <- renderText({
     # Local binding global variables
-    Check <- NULL
+    check <- NULL
     # Grouping of data sets with the addition of the group number, then selection of lines containing inconsistencies
     data_regroup <- calcul_check() %>%
       dplyr::bind_rows(.id = "group_id") %>%
-      dplyr::filter(Check != '<i class="fas fa-check" role="presentation" aria-label="check icon"></i>')
+      dplyr::filter(check != '<i class="fas fa-check" role="presentation" aria-label="check icon"></i>')
     # Text display
     paste0("Number of trips analyzed : ", length(trip_select()$trip_id), " ; Number of trip reports :  ", nrow(unique(data_regroup[, c("Vessel code", "Trip enddate")])), " ; Number of check : ", length(calcul_check()), " ; Number of check with trip reports :  ", length(unique(data_regroup[, "group_id"])))
   })

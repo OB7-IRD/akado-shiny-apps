@@ -823,10 +823,8 @@ check_temporal_limit_inspector <- function(dataframe1,
 check_harbour_inspector <- function(dataframe1,
                                     output) {
   # 0 - Global variables assignement ----
-  harbour_id <- NULL
   harbour_name_landing <- NULL
   harbour_name_departure_trip_previous <- NULL
-  trip_previous_id <- NULL
   harbour_id_landing <- NULL
   harbour_id_departure_trip_previous <- NULL
   # 1 - Arguments verification ----
@@ -955,10 +953,9 @@ check_raising_factor_inspector <- function(dataframe1,
   # 0 - Global variables assignement ----
   trip_id <- NULL
   catch_weight <- NULL
-  tide_id <- NULL
   trip_landingtotalweight <- NULL
   sum_catch_weight <- NULL
-  RF1 <- NULL
+  rf1 <- NULL
   tide_landingtotalweight <- NULL
   tide_sum_catch_weight <- NULL
   lower_limit <- NULL
@@ -1095,24 +1092,24 @@ check_raising_factor_inspector <- function(dataframe1,
   # Merge data
   dataframe3 <- merge(dataframe3, dataframe2, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # RF1 calculation
-  tide_id_data_RF1 <- dataframe3 %>%
+  tide_id_data_rf1 <- dataframe3 %>%
     dplyr::group_by(trip_end_tide_id) %>%
-    dplyr::summarise(RF1 = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), tide_landingtotalweight = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)), tide_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
+    dplyr::summarise(rf1 = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), tide_landingtotalweight = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)), tide_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
   dataframe3$lower_limit <- limit[1]
   dataframe3$upper_limit <- limit[2]
   # Selection of user-supplied trips
   dataframe3 <- merge(data.frame(trip_id = dataframe1$trip_id), unique(dataframe3), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # Merge data
-  dataframe3 <- merge(dataframe3, tide_id_data_RF1, by.x = "trip_end_tide_id", by.y = "trip_end_tide_id", all.x = TRUE)
+  dataframe3 <- merge(dataframe3, tide_id_data_rf1, by.x = "trip_end_tide_id", by.y = "trip_end_tide_id", all.x = TRUE)
   # Compare RF1 to valid limits
   comparison_less <- codama::vector_comparison(
-    first_vector = dataframe3$RF1,
+    first_vector = dataframe3$rf1,
     second_vector = dataframe3$upper_limit,
     comparison_type = "less",
     output = "report"
   )
   comparison_greater <- codama::vector_comparison(
-    first_vector = dataframe3$RF1,
+    first_vector = dataframe3$rf1,
     second_vector = dataframe3$lower_limit,
     comparison_type = "greater",
     output = "report"
@@ -1122,7 +1119,7 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe3[(is.na(dataframe3$tide_landingtotalweight) | dataframe3$tide_landingtotalweight == 0) & is.na(dataframe3$tide_sum_catch_weight), "logical"] <- TRUE
   # Correction of complete tides not yet finished
   dataframe3[(is.na(dataframe3$trip_end_tide_id)), "logical"] <- TRUE
-  dataframe3 <- dplyr::relocate(.data = dataframe3, RF1, .after = logical)
+  dataframe3 <- dplyr::relocate(.data = dataframe3, rf1, .after = logical)
   trip_end_tide_id <- dataframe3$trip_end_tide_id
   dataframe3 <- subset(dataframe3, select = -c(trip_end_tide_id, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, lower_limit, upper_limit))
   if ((sum(dataframe3$logical) + sum(!dataframe3$logical)) != nrow_first) {
@@ -1480,7 +1477,6 @@ check_position_inspector <- function(dataframe1,
                                      output,
                                      ocean_name_nonpriority = "Atlantic") {
   # 0 - Global variables assignement ----
-  activity_schooltype_data <- NULL
   activity_id <- NULL
   zfao_ocean <- NULL
   count_ocean <- NULL
@@ -1626,7 +1622,6 @@ check_weight_inspector <- function(dataframe1,
                                    dataframe2,
                                    output) {
   # 0 - Global variables assignement ----
-  activity_schooltype_data <- NULL
   activity_id <- NULL
   catch_weight <- NULL
   activity_weight <- NULL
@@ -1930,7 +1925,6 @@ check_measure_inspector <- function(dataframe1,
                                     dataframe2,
                                     output) {
   # 0 - Global variables assignement ----
-  trip_weight_capacity_data <- NULL
   sample_id <- NULL
   samplespecies_measuredcount <- NULL
   samplespeciesmeasure_count <- NULL
@@ -2536,14 +2530,14 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   sample_id <- NULL
   samplespecies_subsamplenumber <- NULL
   samplespecies_id <- NULL
-  count_subsamplenumber_N0 <- NULL
+  count_subsamplenumber_n0 <- NULL
   count_subsamplenumber_0 <- NULL
   count_samplespecies <- NULL
   count_subsamplenumber_1 <- NULL
   only_one_subsampling <- NULL
   many_subsampling <- NULL
   count_samplespecies_bis <- NULL
-  count_subsamplenumber_N0_bis <- NULL
+  count_subsamplenumber_n0_bis <- NULL
   count_subsamplenumber_0_bis <- NULL
   count_subsamplenumber_1_bis <- NULL
   sample_supersample <- NULL
@@ -2602,26 +2596,26 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   # Search subsample number in the associations samples ID
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(sample_id) %>%
-    dplyr::summarise(count_subsamplenumber_N0 = sum(samplespecies_subsamplenumber != 0), count_subsamplenumber_0 = sum(samplespecies_subsamplenumber == 0), count_samplespecies = sum(!is.na(unique(samplespecies_id))), count_subsamplenumber_1 = sum(samplespecies_subsamplenumber == 1))
+    dplyr::summarise(count_subsamplenumber_n0 = sum(samplespecies_subsamplenumber != 0), count_subsamplenumber_0 = sum(samplespecies_subsamplenumber == 0), count_samplespecies = sum(!is.na(unique(samplespecies_id))), count_subsamplenumber_1 = sum(samplespecies_subsamplenumber == 1))
   # Merge
   dataframe1$logical <- TRUE
   dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
-  # Case of NA count_subsamplenumber_N0, count_subsamplenumber_0, count_samplespecies or count_subsamplenumber_1
+  # Case of NA count_subsamplenumber_n0, count_subsamplenumber_0, count_samplespecies or count_subsamplenumber_1
   dataframe1 <- dataframe1 %>%
     dplyr::mutate(
-      count_subsamplenumber_N0_bis = dplyr::coalesce(count_subsamplenumber_N0, 0),
+      count_subsamplenumber_n0_bis = dplyr::coalesce(count_subsamplenumber_n0, 0),
       count_subsamplenumber_0_bis = dplyr::coalesce(count_subsamplenumber_0, 0),
       count_samplespecies_bis = dplyr::coalesce(count_samplespecies, 0),
       count_subsamplenumber_1_bis = dplyr::coalesce(count_subsamplenumber_1, 0),
     )
   dataframe1[dataframe1$count_samplespecies_bis == 0, "logical"] <- FALSE
-  dataframe1$only_one_subsampling <- dataframe1$sample_supersample == FALSE & dataframe1$count_subsamplenumber_N0_bis == 0
+  dataframe1$only_one_subsampling <- dataframe1$sample_supersample == FALSE & dataframe1$count_subsamplenumber_n0_bis == 0
   dataframe1$many_subsampling <- dataframe1$sample_supersample == TRUE & dataframe1$count_subsamplenumber_0_bis == 0 & dataframe1$count_samplespecies_bis > 1
   dataframe1[!(dataframe1$only_one_subsampling | dataframe1$many_subsampling), "logical"] <- FALSE
   dataframe1[dataframe1$count_samplespecies_bis == 1 & dataframe1$count_subsamplenumber_1_bis > 0, "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(only_one_subsampling, many_subsampling, count_samplespecies_bis, count_subsamplenumber_N0_bis, count_subsamplenumber_0_bis, count_subsamplenumber_1_bis))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_supersample, count_subsamplenumber_N0, count_subsamplenumber_0, count_subsamplenumber_1, count_samplespecies, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(only_one_subsampling, many_subsampling, count_samplespecies_bis, count_subsamplenumber_n0_bis, count_subsamplenumber_0_bis, count_subsamplenumber_1_bis))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_supersample, count_subsamplenumber_n0, count_subsamplenumber_0, count_subsamplenumber_1, count_samplespecies, .after = logical)
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -2935,7 +2929,7 @@ check_little_big_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (length(species) != length(measuretype) | length(species) != length(sizelimit)) {
+  if (length(species) != length(measuretype) || length(species) != length(sizelimit)) {
     stop(
       format(
         x = Sys.time(),
@@ -4297,14 +4291,14 @@ check_anapo_inspector <- function(dataframe1,
   dataframe1[comparison_harbour$logical, "logical"] <- TRUE
   dataframe_detail <- merge(dataframe3, dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], by.x = c("vms_date", "vessel_code"), by.y = c("activity_date", "vessel_code"))
   # Check if activity whether not in harbour
-  dataframe1_Nharbour <- dataframe1[!comparison_harbour$logical, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")]
-  dataframe3 <- merge(dataframe3, dataframe1_Nharbour, by.x = c("vms_date", "vessel_code"), by.y = c("activity_date", "vessel_code"))
+  dataframe1_nharbour <- dataframe1[!comparison_harbour$logical, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")]
+  dataframe3 <- merge(dataframe3, dataframe1_nharbour, by.x = c("vms_date", "vessel_code"), by.y = c("activity_date", "vessel_code"))
   # Formats spatial data
   dataframe_calcul <- dataframe3 %>%
-    sf::st_as_sf(wkt = "vms_position", crs = vms_crs, remove = F)
+    sf::st_as_sf(wkt = "vms_position", crs = vms_crs, remove = FALSE)
   sf::st_geometry(dataframe_calcul) <- "vms_position_geom"
   dataframe_calcul$activity_position_geom <- dataframe3 %>%
-    sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = F) %>%
+    sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = FALSE) %>%
     sf::st_geometry()
   # Calculation of the minimum distance between the activity and the nearest day's VMS
   dataframe_calcul <- dataframe_calcul %>%
@@ -4397,7 +4391,7 @@ check_anapo_inspector <- function(dataframe1,
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
   moduleServer(id, function(input, output, session) {
-    text_error_trip_select <- eventReactive(input$start_button, {
+    eventReactive(input$start_button, {
       # if no selection element is filled in
       if (sum(isTruthy(parent_in$vessel_number), isTruthy(parent_in$trip_end_date)) == 0 && sum(isTruthy(parent_in$trip_start_date_range), isTruthy(parent_in$trip_end_date_range)) == 0) {
         return("Error: please select a trip")
@@ -4422,7 +4416,7 @@ text_error_trip_select_server <- function(id, parent_in) {
 # Shiny function : Read the .yml file of configuration for the connection
 config_data_server <- function(id, parent_in) {
   moduleServer(id, function(input, output, session) {
-    config_data <- eventReactive(input$start_button, {
+    eventReactive(input$start_button, {
       # If the user has not specified a file and the file exists in the default path, indicates the default path
       if (is.null(parent_in$setting_file_path$datapath) && file.exists(file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"))) {
         path_setting_file <- file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml")
@@ -4444,7 +4438,7 @@ config_data_server <- function(id, parent_in) {
 # Shiny function : Retrieves the list of trips selected by the user
 trip_select_server <- function(id, parent_in, text_error_trip_select, config_data) {
   moduleServer(id, function(input, output, session) {
-    trip_select <- eventReactive(input$start_button, {
+    eventReactive(input$start_button, {
       # If the connection data exists and there was no error in the trip selection, makes the connection
       req(config_data())
       if (text_error_trip_select() == TRUE) {
@@ -4516,7 +4510,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     harbour_name_landing <- NULL
     harbour_name_departure_trip_previous <- NULL
     harbour_id_departure_trip_previous <- NULL
-    harbour_id <- NULL
     schooltype_code <- NULL
     association_object_count <- NULL
     vesselactivity_code <- NULL
@@ -4530,7 +4523,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     sum_count <- NULL
     activity_seasurfacetemperature <- NULL
     sample_supersample <- NULL
-    count_subsamplenumber_N0 <- NULL
+    count_subsamplenumber_n0 <- NULL
     count_subsamplenumber_0 <- NULL
     count_subsamplenumber_1 <- NULL
     count_samplespecies <- NULL
@@ -4546,7 +4539,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     weightedweight <- NULL
     vesseltype_name <- NULL
     sum_landing_weight <- NULL
-    count_activity <- NULL
     weight_small_total <- NULL
     weight_big <- NULL
     activity_date <- NULL
@@ -4555,7 +4547,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     nb_vms <- NULL
     min_distance <- NULL
     max_score <- NULL
-    calcul_check <- reactive({
+    rf1 <- NULL
+    reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select())) {
         # Connection to the base
@@ -4849,7 +4842,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_tide, dataframe3 = data_tide, output = "report")
           # Uses a function to format the table
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
-          check_raising_factor$RF1 <- trunc(check_raising_factor$RF1 * 100000) / 100000
+          check_raising_factor$rf1 <- trunc(check_raising_factor$rf1 * 100000) / 100000
+          # Modify the table for display purposes: rename column
+          check_raising_factor <- dplyr::rename(
+            .data = check_raising_factor,
+            `RF1` = rf1
+          )
           # Uses a function which indicates whether the school type is consistent with the association
           check_fishing_context_inspector_data <- check_fishing_context_inspector(dataframe1 = activity_select, dataframe2 = data_activity_observedsystem, output = "report")
           # Uses a function to format the table
@@ -4937,7 +4935,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_super_sample_number_consistent <- dplyr::rename(
             .data = check_super_sample_number_consistent,
             `Super sample` = sample_supersample,
-            `Counts number sub-sample numbers not 0` = count_subsamplenumber_N0,
+            `Counts number sub-sample numbers not 0` = count_subsamplenumber_n0,
             `Counts number sub-sample numbers equal 0` = count_subsamplenumber_0,
             `Counts number sub-sample numbers equal 1` = count_subsamplenumber_1,
             `Counts number sample species` = count_samplespecies
@@ -5099,7 +5097,7 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
 }
 
 # Shiny function : table display
-table_server <- function(id, data, number, parent_in, text_error_trip_select, trip_select, calcul_check, autoWidth = FALSE, columnDefs = NULL) {
+table_server <- function(id, data, number, parent_in, text_error_trip_select, trip_select, calcul_check, autowidth = FALSE, columndefs = NULL) {
   moduleServer(id, function(input, output, session) {
     output$table <- DT::renderDT(
       {
@@ -5117,7 +5115,7 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
       rownames = FALSE,
       extensions = "Buttons",
       options = list(
-        lengthChange = FALSE, scrollX = TRUE, autoWidth = autoWidth, columnDefs = unlist(list(list(list(className = "dt-left", targets = "_all")), columnDefs), recursive = F), dom = "Bfrtip",
+        lengthChange = FALSE, scrollX = TRUE, autoWidth = autowidth, columnDefs = unlist(list(list(list(className = "dt-left", targets = "_all")), columndefs), recursive = FALSE), dom = "Bfrtip",
         buttons =
           list(
             list(extend = "copy", text = "Copy data displayed"),
@@ -5159,7 +5157,9 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   vessel_code <- NULL
   trip_enddate <- NULL
   activity_date <- NULL
+  activity_time <- NULL
   activity_number <- NULL
+  vesselactivity_code <- NULL
   sample_number <- NULL
   specie_name <- NULL
   sizemeasuretype_code <- NULL
