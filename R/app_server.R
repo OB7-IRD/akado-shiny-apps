@@ -64,14 +64,14 @@ app_server <- function(input, output, session) {
     showModal(modalDialog(
       fluidRow(
         column(3,
-          style = "padding-left:5px;padding-right:0px;",
-          HTML(paste0("<b>Trip information : </b><br>
+               style = "padding-left:5px;padding-right:0px;",
+               HTML(paste0("<b>Trip information : </b><br>
                              <ul><li>Vessel code : ", vessel_code, "</li>
                              <li>Trip end date : ", enddate, "</li></ul>"))
         ),
         column(9,
-          style = "padding-left:0px;padding-right:5px;",
-          plotly::plotlyOutput("plot_temporal_limit")
+               style = "padding-left:0px;padding-right:5px;",
+               plotly::plotlyOutput("plot_temporal_limit")
         )
       ),
       title = "Time coverage detail",
@@ -121,8 +121,8 @@ app_server <- function(input, output, session) {
     showModal(modalDialog(
       fluidRow(
         column(3,
-          style = "padding-left:5px;padding-right:0px;",
-          HTML(paste0("<b>Trip information : </b><br>
+               style = "padding-left:5px;padding-right:0px;",
+               HTML(paste0("<b>Trip information : </b><br>
                              <ul><li>Vessel code : ", splitID[4], "</li>
                              <li>Trip end date : ", enddate, "</li>
                              <li>Activity date : ", activity_date, "</li>
@@ -135,8 +135,8 @@ app_server <- function(input, output, session) {
                              <li>Ocean activity : ", splitID[10], "</li></ul>"))
         ),
         column(9,
-          style = "padding-left:0px;padding-right:5px;",
-          plotly::plotlyOutput("plot_position")
+               style = "padding-left:0px;padding-right:5px;",
+               plotly::plotlyOutput("plot_position")
         )
       ),
       title = "Position",
