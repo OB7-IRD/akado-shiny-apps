@@ -11,7 +11,7 @@ check_little_big_inspector(
   output,
   species = c("YFT", "YFT", "BET", "BET", "ALB", "ALB"),
   measuretype = c("PD1", "FL", "PD1", "FL", "PD1", "FL"),
-  sizelimit = c(24, 80, 24, 77, 23.5, 78),
+  sizelimit = c(24, 80, 25, 77, 23.5, 78),
   size_measure_type = c("FL", "PD1"),
   threshold = 0.9
 )
@@ -29,7 +29,7 @@ check_little_big_inspector(
 
 \item{measuretype}{{\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying small or big fish}
 
-\item{sizelimit}{{\link[base]{numeric}} expected. Default values: c(24, 80, 24, 77, 23.5, 78). Vector of the limit size measure. Third criterion for identifying small or big fish}
+\item{sizelimit}{{\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector of the limit size measure. Third criterion for identifying small or big fish}
 
 \item{size_measure_type}{{\link[base]{character}} expected. Default values: c("FL", "PD1"). Vector with the preferred type of size measurement for small fish and then for big fish}
 

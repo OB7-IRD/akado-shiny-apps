@@ -2784,7 +2784,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying small or big fish
 #' @param measuretype {\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying small or big fish
-#' @param sizelimit {\link[base]{numeric}} expected. Default values: c(24, 80, 24, 77, 23.5, 78). Vector of the limit size measure. Third criterion for identifying small or big fish
+#' @param sizelimit {\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector of the limit size measure. Third criterion for identifying small or big fish
 #' @param size_measure_type {\link[base]{character}} expected. Default values: c("FL", "PD1"). Vector with the preferred type of size measurement for small fish and then for big fish
 #' @param threshold {\link[base]{numeric}} expected. Default values: 0.9. Threshold for percentage of small or big fish
 #' @details
@@ -2814,7 +2814,7 @@ check_little_big_inspector <- function(dataframe1,
                                        output,
                                        species = c("YFT", "YFT", "BET", "BET", "ALB", "ALB"),
                                        measuretype = c("PD1", "FL", "PD1", "FL", "PD1", "FL"),
-                                       sizelimit = c(24, 80, 24, 77, 23.5, 78),
+                                       sizelimit = c(24, 80, 25, 77, 23.5, 78),
                                        size_measure_type = c("FL", "PD1"),
                                        threshold = 0.9) {
   # 0 - Global variables assignement ----
