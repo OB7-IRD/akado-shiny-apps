@@ -4494,7 +4494,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
 # Shiny function : Performs all calculations to test for inconsistencies
 calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data) {
   moduleServer(id, function(input, output, session) {
-    # Local binding global variables
+    # 0 - Global variables assignement ----
     trip_fishingtime <- NULL
     sum_route_fishingtime <- NULL
     trip_seatime <- NULL
@@ -4548,6 +4548,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     min_distance <- NULL
     max_score <- NULL
     rf1 <- NULL
+    # 1 - Data extraction ----
     reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select())) {
@@ -4749,6 +4750,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             # Disconnection to the bases
             DBI::dbDisconnect(data_connection_vms[[2]])
           }
+          # 2 - Data design ----
           # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
           data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_departure_trip_previous, harbour_name_departure_trip_previous)))
           # Retrieve trip sample : Retrieve trip activity : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
