@@ -3310,8 +3310,8 @@ check_weighting_inspector <- function(dataframe1,
   # Check
   dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[1] & dataframe1$weight > weight_limit, "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold), "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > 1, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > 1, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
   # Case NA vessel_type_code sampletype_code
   dataframe1[is.na(dataframe1$vessel_type_code), "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
