@@ -5237,7 +5237,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
 # Function to create a data.frame in character
 data_to_text <- function(name_data, name_col, name_button, colname_id, colname_plot, colname_info) {
   code_txt <- paste0(name_data, " <-", name_data, "%>%dplyr::group_by(", colname_id, ") %>%
-            dplyr::reframe(", name_col, " = paste0(", name_button, ",paste0(deparse(dplyr::across(.cols=c(", paste0(colname_plot, collapse = ","), '))), collapse = ""), "&",', paste0(colname_info, collapse = ', "&",'), "))%>%
+            dplyr::reframe(", name_col, " = paste0(", name_button, ",paste0(deparse(dplyr::across(.cols=c(", paste0(colname_plot, collapse = ","), '))), collapse = "")', ifelse(is.null(colname_info), "", paste0(',"&",',paste0(colname_info, collapse = ', "&",'))), "))%>%
             dplyr::group_by(", colname_id, ") %>% dplyr::filter(dplyr::row_number() == 1)")
   return(code_txt)
 }
