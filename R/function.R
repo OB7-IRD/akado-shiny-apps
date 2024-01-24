@@ -4093,8 +4093,8 @@ check_distribution_inspector <- function(dataframe1,
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_inspector () function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_inspector () function.
-#' @param activity_crs {\link[base]{numeric}} expected. Coordinate Reference Systems for the position activity
-#' @param vms_crs {\link[base]{numeric}} expected. Coordinate Reference Systems for the position VMS
+#' @param activity_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity
+#' @param vms_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position VMS
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param nb_positions_vms_min {\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.
 #' @param threshold {\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.
@@ -4123,8 +4123,8 @@ check_distribution_inspector <- function(dataframe1,
 check_anapo_inspector <- function(dataframe1,
                                   dataframe2,
                                   dataframe3,
-                                  activity_crs,
-                                  vms_crs,
+                                  activity_crs = 4326,
+                                  vms_crs = 4326,
                                   output,
                                   nb_positions_vms_min = 20,
                                   threshold = 10) {
@@ -4290,8 +4290,9 @@ check_anapo_inspector <- function(dataframe1,
   )
   dataframe1[comparison_harbour$logical, "logical"] <- TRUE
   dataframe_detail <- merge(dataframe3, dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], by.x = c("vms_date", "vessel_code"), by.y = c("activity_date", "vessel_code"))
-  # Check if activity whether not in harbour
+  # Check if activity whether not in harbour but with a position of indication
   dataframe1_nharbour <- dataframe1[!comparison_harbour$logical, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")]
+  dataframe1_nharbour <- dataframe1_nharbour[!is.na(dataframe1_nharbour$activity_position),]
   dataframe3 <- merge(dataframe3, dataframe1_nharbour, by.x = c("vms_date", "vessel_code"), by.y = c("activity_date", "vessel_code"))
   # Formats spatial data
   dataframe_calcul <- dataframe3 %>%
@@ -5021,7 +5022,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function which indicates whether the activity position is consistent for VMS position
           if (exists("data_vms")) {
             # Recovers all trip positions
-            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = unique(activity_select$activity_crs), vms_crs = ifelse(length(unique(data_vms$vms_crs)) == 0, 4326, unique(data_vms$vms_crs)), output = "report")
+            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = unique(na.omit(activity_select$activity_crs)), vms_crs = unique(na.omit(data_vms$vms_crs)), output = "report")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], activity_select[, c("activity_id", "trip_id", "activity_number")], by = "activity_id")
             check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot %>%
               dplyr::select("trip_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs") %>%
@@ -5038,13 +5039,18 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo_inspector_dataplot_range_date %>%
               dplyr::group_by(date_group, trip_id, activity_id) %>%
               dplyr::distinct()
-            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_range_date", name_col = "trip_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number"), colname_info = "NULL")
+            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_range_date", name_col = "trip_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number"), colname_info = NULL)
+            eval(parse(text = code_txt))
+            # Data formatting controlled activity
+            check_anapo_inspector_dataplot_activity<-check_anapo_inspector_dataplot %>% dplyr::select(c("activity_id", "activity_date", "activity_time", "activity_position", "activity_number")) %>% dplyr::distinct()
+            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_activity", name_col = "activity_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number"), colname_info = NULL)
             eval(parse(text = code_txt))
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("activity_number", "activity_time", "activity_date"))
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = "activity_id")
+            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = "activity_id")
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
             # Add button and data for plot in table
-            check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_time", "activity_number", "activity_position", "activity_crs", "vms_crs", "activity_date", "trip_data"), name_button = "button_anapo")
+            check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_date","activity_data", "trip_data"), name_button = "button_anapo")
             # Uses a function to format the table
             check_anapo <- table_display_trip(check_anapo, activity_select[, colnames_activity_id], type_inconsistency = "error")
             check_anapo$min_distance <- trunc(check_anapo$min_distance * 1000) / 1000
@@ -5305,7 +5311,7 @@ plot_position <- function(data) {
 }
 
 # Function to create the plot of the consistency of the position for the activity and VMS
-plot_anapo <- function(data_vms, crs_vms, position_activity, crs_activity, date, time_activity, number_activity, data_trip) {
+plot_anapo <- function(data_vms, crs_vms, crs_activity, date, data_activity, data_trip) {
   # Local binding global variables
   . <- NULL
   vms_time <- NULL
@@ -5324,28 +5330,41 @@ plot_anapo <- function(data_vms, crs_vms, position_activity, crs_activity, date,
   data_trip <- data_trip[order(data_trip$date_time), ]
   # Spatial formatting
   if (!all(is.na(data_vms$vms_position))) {
-    data_geo_vms <- sf::st_as_sf(data_vms, wkt = "vms_position", crs = as.numeric(crs_vms)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+    data_geo_vms <- data_vms[!is.na(data_vms$vms_position),] %>% sf::st_as_sf(wkt = "vms_position", crs = as.numeric(crs_vms)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
   }
-  data_geo_activity <- sf::st_as_sfc(x = position_activity, crs = as.numeric(crs_activity)) %>%
-    sf::st_coordinates() %>%
-    tibble::as_tibble()
-  data_geo_trip <- sf::st_as_sf(data_trip, wkt = "activity_position", crs = as.numeric(crs_activity)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+  if (!all(is.na(data_activity$activity_position))) {
+    data_geo_activity <- data_activity[!is.na(data_activity$activity_position),] %>% sf::st_as_sf(wkt = "activity_position", crs = as.numeric(crs_activity)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+  }
+  if (!all(is.na(data_trip$activity_position))) {
+    data_geo_trip <- data_trip[!is.na(data_trip$activity_position),] %>% sf::st_as_sf(wkt = "activity_position", crs = as.numeric(crs_activity)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+  }
   # text hovertemplate
   if (!all(is.na(data_vms$vms_position))) {
     data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc(duration * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000))
   }
-  data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", time_activity, "<br>Activity number:", number_activity, "<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>"))
-  data_geo_trip <- data_geo_trip %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number))
-  # Plot
-  plot <- plotly::plot_ly() %>%
-    plotly::add_trace(name = "Activity", data = data_geo_trip, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(0, 255, 66)", size = 10), line = list(color = "rgb(0, 255, 66)"))
+  if (!all(is.na(data_activity$activity_position))) {
+    data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>"))
+  }
+  if (!all(is.na(data_trip$activity_position))) {
+    data_geo_trip <- data_geo_trip %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number))
+  }
+    # Plot
+  plot <- plotly::plot_ly()%>%
+    plotly::layout(mapbox = list(style = "carto-positron", pitch = 0, zoom = 6))
+  if (!all(is.na(data_trip$activity_position))) {
+    plot <- plot %>%
+      plotly::add_trace(name = "Activity", data = data_geo_trip, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(0, 255, 66)", size = 10), line = list(color = "rgb(0, 255, 66)"))
+  }
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
       plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(0, 50, 255)", size = 10), line = list(color = "rgb(0, 50, 255)"))
   }
-  plot <- plot %>%
+  if (!all(is.na(data_activity$activity_position))) {
+    plot <- plot %>%
     plotly::add_trace(name = "Supecte activity", data = data_geo_activity, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", hovertemplate = ~text, marker = list(color = "rgb(255, 0, 0)", size = 10)) %>%
-    plotly::layout(mapbox = list(style = "carto-positron", center = list(lon = data_geo_activity$X, lat = data_geo_activity$Y), pitch = 0, zoom = 6))
+    plotly::layout(mapbox = list(center = list(lon = data_geo_activity$X, lat = data_geo_activity$Y)))
+  }
+  return(plot)
 }
 
 # Function to list elements with a number of occurrences other than 2

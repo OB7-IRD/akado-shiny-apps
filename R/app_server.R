@@ -199,14 +199,12 @@ app_server <- function(input, output, session) {
   output$plot_anapo <- plotly::renderPlotly({
     split_id <- strsplit(input$button_anapo, "&")[[1]]
     data <- eval(parse(text = split_id[[2]]))
-    activity_time <- split_id[[4]]
-    activity_number <- split_id[[5]]
-    activity_position <- split_id[[6]]
-    activity_crs <- split_id[[7]]
-    vms_crs <- split_id[[8]]
-    date <- split_id[[9]]
-    trip_data <- eval(parse(text = split_id[[10]]))
-    plot_anapo(data_vms = data, crs_vms = vms_crs, position_activity = activity_position, crs_activity = activity_crs, date = date, time_activity = activity_time, number_activity = activity_number, data_trip = trip_data)
+    activity_crs <- split_id[[4]]
+    vms_crs <- split_id[[5]]
+    date <- split_id[[6]]
+    activity_data <- eval(parse(text = split_id[[7]]))
+    trip_data <- eval(parse(text = split_id[[8]]))
+    plot_anapo(data_vms = data, crs_vms = vms_crs, crs_activity = activity_crs, date = date, data_activity = activity_data, data_trip = trip_data)
   })
 
   # Anapo control window

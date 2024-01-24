@@ -8,8 +8,8 @@ check_anapo_inspector(
   dataframe1,
   dataframe2,
   dataframe3,
-  activity_crs,
-  vms_crs,
+  activity_crs = 4326,
+  vms_crs = 4326,
   output,
   nb_positions_vms_min = 20,
   threshold = 10
@@ -22,9 +22,9 @@ check_anapo_inspector(
 
 \item{dataframe3}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_inspector () function.}
 
-\item{activity_crs}{{\link[base]{numeric}} expected. Coordinate Reference Systems for the position activity}
+\item{activity_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity}
 
-\item{vms_crs}{{\link[base]{numeric}} expected. Coordinate Reference Systems for the position VMS}
+\item{vms_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position VMS}
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
