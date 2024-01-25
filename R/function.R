@@ -3823,7 +3823,7 @@ check_ldlf_inspector <- function(dataframe1,
     comparison_type = "difference",
     output = "report"
   )
-  dataframe1$logical_bigsweight <- !(comparison_size_measure_type_big$logical & ((dataframe1$sample_bigsweight == 0 & dataframe1$sample_totalweight == 0) | (is.na(dataframe1$sample_bigsweight) & is.na(dataframe1$sample_totalweight))))
+  dataframe1$logical_bigsweight <- !(comparison_size_measure_type_big$logical & ((is.na(dataframe1$sample_bigsweight) | (!is.na(dataframe1$sample_bigsweight) & dataframe1$sample_bigsweight == 0)) & (is.na(dataframe1$sample_totalweight) | (!is.na(dataframe1$sample_totalweight) & dataframe1$sample_totalweight == 0))))
   # Check smalls weight and measuretype
   comparison_size_measure_type_small <- codama::vector_comparison(
     first_vector = dataframe1$sizemeasuretype_code,
@@ -3831,7 +3831,7 @@ check_ldlf_inspector <- function(dataframe1,
     comparison_type = "difference",
     output = "report"
   )
-  dataframe1$logical_smallsweight <- !(comparison_size_measure_type_small$logical & ((dataframe1$sample_smallsweight == 0 & dataframe1$sample_totalweight == 0) | (is.na(dataframe1$sample_smallsweight) & is.na(dataframe1$sample_totalweight))))
+  dataframe1$logical_smallsweight <- !(comparison_size_measure_type_small$logical & ((is.na(dataframe1$sample_smallsweight) | (!is.na(dataframe1$sample_smallsweight) & dataframe1$sample_smallsweight == 0)) & (is.na(dataframe1$sample_totalweight) | (!is.na(dataframe1$sample_totalweight) & dataframe1$sample_totalweight == 0))))
   # Check
   dataframe1$logical <- dataframe1$logical_species & dataframe1$logical_bigsweight & dataframe1$logical_smallsweight
   # Modify the table for display purposes: add, remove and order column
