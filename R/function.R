@@ -814,36 +814,36 @@ check_temporal_limit_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  trip_id}}
-#'  \item{\code{  harbour_id_departure_trip_previous}}
-#'  \item{\code{  harbour_name_departure_trip_previous}}
-#'  \item{\code{  harbour_id_landing}}
-#'  \item{\code{  harbour_name_landing}}
+#'  \item{\code{  harbour_id_landing_trip_previous}}
+#'  \item{\code{  harbour_name_landing_trip_previous}}
+#'  \item{\code{  harbour_id_departure}}
+#'  \item{\code{  harbour_name_departure}}
 #' }
 #' @export
 check_harbour_inspector <- function(dataframe1,
                                     output) {
   # 0 - Global variables assignement ----
-  harbour_name_landing <- NULL
-  harbour_name_departure_trip_previous <- NULL
-  harbour_id_landing <- NULL
-  harbour_id_departure_trip_previous <- NULL
+  harbour_name_departure <- NULL
+  harbour_name_landing_trip_previous <- NULL
+  harbour_id_departure <- NULL
+  harbour_id_landing_trip_previous <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("trip_id", "harbour_id_departure_trip_previous", "harbour_name_departure_trip_previous", "harbour_id_landing", "harbour_name_landing"),
+    column_name = c("trip_id", "harbour_id_landing_trip_previous", "harbour_name_landing_trip_previous", "harbour_id_departure", "harbour_name_departure"),
     column_type = c("character", "character", "character", "character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("trip_id", "harbour_id_departure_trip_previous", "harbour_name_departure_trip_previous", "harbour_id_landing", "harbour_name_landing"),
+      column_name = c("trip_id", "harbour_id_landing_trip_previous", "harbour_name_landing_trip_previous", "harbour_id_departure", "harbour_name_departure"),
       column_type = c("character", "character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("trip_id", "harbour_id_departure_trip_previous", "harbour_name_departure_trip_previous", "harbour_id_landing", "harbour_name_landing")]
+    dataframe1 <- dataframe1[, c("trip_id", "harbour_id_landing_trip_previous", "harbour_name_landing_trip_previous", "harbour_id_departure", "harbour_name_departure")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -864,18 +864,18 @@ check_harbour_inspector <- function(dataframe1,
   # 2 - Data design ----
   # Compare landing total weight of the trip with vessel capacity
   comparison <- codama::vector_comparison(
-    first_vector = dataframe1$harbour_id_departure_trip_previous,
-    second_vector = dataframe1$harbour_id_landing,
+    first_vector = dataframe1$harbour_id_landing_trip_previous,
+    second_vector = dataframe1$harbour_id_departure,
     comparison_type = "equal",
     output = "report"
   )
   dataframe1$logical <- comparison$logical
   # Management of missing vessel capacity
-  dataframe1[is.na(dataframe1$harbour_id_departure_trip_previous), "logical"] <- FALSE
-  dataframe1[is.na(dataframe1$harbour_id_landing), "logical"] <- FALSE
+  dataframe1[is.na(dataframe1$harbour_id_landing_trip_previous), "logical"] <- FALSE
+  dataframe1[is.na(dataframe1$harbour_id_departure), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_name_landing, harbour_name_departure_trip_previous, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(harbour_id_landing, harbour_id_departure_trip_previous))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_name_departure, harbour_name_landing_trip_previous, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(harbour_id_departure, harbour_id_landing_trip_previous))
   if ((sum(dataframe1$logical) + sum(!dataframe1$logical)) != nrow_first) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
@@ -4508,9 +4508,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     trip_startdate <- NULL
     trip_enddate <- NULL
     button <- NULL
-    harbour_name_landing <- NULL
-    harbour_name_departure_trip_previous <- NULL
-    harbour_id_departure_trip_previous <- NULL
+    harbour_name_departure <- NULL
+    harbour_name_landing_trip_previous <- NULL
+    harbour_id_landing_trip_previous <- NULL
     schooltype_code <- NULL
     association_object_count <- NULL
     vesselactivity_code <- NULL
@@ -4753,7 +4753,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           }
           # 2 - Data design ----
           # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
-          data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_departure_trip_previous, harbour_name_departure_trip_previous)))
+          data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_landing_trip_previous, harbour_name_landing_trip_previous)))
           # Retrieve trip sample : Retrieve trip activity : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
           colnames_activity_id <- c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_number", "vesselactivity_code")
           # Retrieve trip sample : retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
@@ -4838,8 +4838,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Modify the table for display purposes: rename column
           check_harbour <- dplyr::rename(
             .data = check_harbour,
-            `Harbour landing` = harbour_name_landing,
-            `Harbour departure` = harbour_name_departure_trip_previous
+            `Harbour landing` = harbour_name_landing_trip_previous,
+            `Harbour departure` = harbour_name_departure
           )
           # Uses a function which indicates whether the selected trips contain RF1 inconsistent with limit values
           check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_tide, dataframe3 = data_tide, output = "report")
