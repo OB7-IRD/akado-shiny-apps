@@ -5022,7 +5022,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function which indicates whether the activity position is consistent for VMS position
           if (exists("data_vms")) {
             # Recovers all trip positions
-            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = unique(na.omit(activity_select$activity_crs)), vms_crs = unique(na.omit(data_vms$vms_crs)), output = "report")
+            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = ifelse(length(na.omit(unique(activity_select$activity_crs))) == 0, 4326, na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(na.omit(unique(data_vms$vms_crs))) == 0, 4326, na.omit(unique(data_vms$vms_crs))), output = "report")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], activity_select[, c("activity_id", "trip_id", "activity_number")], by = "activity_id")
             check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot %>%
               dplyr::select("trip_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs") %>%
