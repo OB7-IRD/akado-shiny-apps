@@ -4411,7 +4411,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_calcul[as.numeric(dataframe_calcul$duration) > 120 * 2, "score"] <- 0
   dataframe_score_max <- dataframe_calcul %>%
     dplyr::group_by(activity_id) %>%
-    dplyr::summarise(max_score = max(score))
+    dplyr::summarise(max_score = ifelse(length(score)>0, max(score), -Inf))
   dataframe1 <- merge(dataframe1, dataframe_score_max, by = "activity_id", all.x = TRUE)
   # Check the maximum score between activity and VMS
   dataframe1[!is.na(dataframe1$max_score) & dataframe1$max_score >= 0.5, "logical"] <- TRUE
