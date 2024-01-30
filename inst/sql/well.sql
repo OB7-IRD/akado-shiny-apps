@@ -2,7 +2,7 @@
 SELECT
     w.topiaid::text AS well_id,
     w.trip::text AS trip_id,
-    w.well::text AS well_name
+    w.well::text AS well_label
 FROM 
     ps_logbook.well w 
 WHERE 

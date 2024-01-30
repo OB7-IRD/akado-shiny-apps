@@ -2,9 +2,9 @@
 SELECT 
 	trip.trip_id::text AS trip_id, 
 	h.topiaid::text AS harbour_id_landing_trip_previous,
-	h.label1::text AS harbour_name_landing_trip_previous,
-    trip.vessel_type_code::text AS vessel_type_code, 
-    trip.vesseltype_name::text AS vesseltype_name,
+	h.label1::text AS harbour_label_landing_trip_previous,
+    trip.vesseltype_code::text AS vesseltype_code, 
+    trip.vesseltype_label::text AS vesseltype_label,
     trip.trip_fishingtime::numeric AS trip_fishingtime,
     trip.trip_seatime::numeric AS trip_seatime,
     trip.trip_landingtotalweight::numeric AS trip_landingtotalweight, 
@@ -13,13 +13,13 @@ SELECT
     trip.trip_startdate::date AS trip_startdate, 
     trip.trip_enddate::date AS trip_enddate,
     trip.harbour_id::text AS harbour_id_departure,
-	trip.harbour_name::text AS harbour_name_departure
+	trip.harbour_label::text AS harbour_label_departure
 FROM (
 	SELECT 
 		t.topiaid::text AS trip_id,
 		t.vessel::text AS vessel_id, 
-        vt.code::text AS vessel_type_code, 
-        vt.label1::text AS vesseltype_name,
+        vt.code::text AS vesseltype_code, 
+        vt.label1::text AS vesseltype_label,
         t.fishingtime::numeric AS trip_fishingtime,
         t.timeatsea::numeric AS trip_seatime,
         t.landingtotalweight::numeric AS trip_landingtotalweight, 
@@ -28,7 +28,7 @@ FROM (
         t.startdate::date AS trip_startdate, 
         t.enddate::date AS trip_enddate,
         h.topiaid::text AS harbour_id,
-	    h.label1::text AS harbour_name,
+	    h.label1::text AS harbour_label,
 		max(trip_previous_tmp.enddate) AS trip_previous_enddate
 	FROM 
 		ps_common.trip t

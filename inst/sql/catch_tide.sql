@@ -5,7 +5,7 @@ SELECT
     t.topiaid::text AS trip_id,
     c.weight::numeric AS catch_weight,
     sf.code::text AS speciesfate_code,
-    s.faocode::text AS specie_name,
+    s.faocode::text AS species_fao_code, 
     v.code::text AS vesselactivity_code
 FROM 
     ps_common.trip t

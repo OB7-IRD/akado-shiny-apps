@@ -23,8 +23,8 @@ The input dataframe must contain all these columns for the function to work :
 Dataframe 1:
  \item{\code{  trip_id}}
  \item{\code{  harbour_id_landing_trip_previous}}
- \item{\code{  harbour_name_landing_trip_previous}}
+ \item{\code{  harbour_label_landing_trip_previous}}
  \item{\code{  harbour_id_departure}}
- \item{\code{  harbour_name_departure}}
+ \item{\code{  harbour_label_departure}}
 }
 }

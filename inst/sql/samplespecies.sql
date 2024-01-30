@@ -3,7 +3,7 @@ SELECT
     se.topiaid::text AS samplespecies_id,
     se.subsamplenumber::numeric AS samplespecies_subsamplenumber,
     se.sample::text AS sample_id,
-    s.faocode::text AS specie_name,
+    s.faocode::text AS species_fao_code,
     smt.code::text AS sizemeasuretype_code,
     se.measuredcount::numeric AS samplespecies_measuredcount,
     v.code::text AS vessel_code,

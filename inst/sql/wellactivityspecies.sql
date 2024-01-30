@@ -3,7 +3,7 @@ SELECT
     was.topiaid::text AS wellactivityspecies_id, 
 	was.wellactivity::text AS wellactivity_id, 
 	wc.code::text AS weightcategory_code, 
-	s.faocode::text AS specie_name, 
+	s.faocode::text AS species_fao_code, 
 	was.weight::numeric AS wellactivityspecies_weight
 FROM 
     ps_logbook.wellactivityspecies was 

@@ -47,7 +47,7 @@ Dataframe 2:
  \item{\code{  catch_id}}
  \item{\code{  catch_weight}}
  \item{\code{  speciesfate_code}}
- \item{\code{  specie_name}}
+ \item{\code{  species_fao_code}}
  \item{\code{  vesselactivity_code}}
  \item{\code{  trip_id}}
 Dataframe 3:

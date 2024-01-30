@@ -51,7 +51,7 @@ Dataframe 1:
  \item{\code{  sample_totalweight}}
 Dataframe 2:
  \item{\code{  samplespecies_id}}
- \item{\code{  specie_name}}
+ \item{\code{  species_fao_code}}
  \item{\code{  sizemeasuretype_code}}
  \item{\code{  sample_id}}
 Dataframe 3:

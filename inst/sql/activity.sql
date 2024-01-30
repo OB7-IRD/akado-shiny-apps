@@ -14,7 +14,7 @@ SELECT
     st.code::text AS schooltype_code,
     sss.code::text AS successstatus_code,
     va.code::text AS vesselactivity_code,
-    o.label1::text AS ocean_name
+    o.label1::text AS ocean_label
 FROM 
     ps_logbook.activity a 
     INNER JOIN ps_logbook.route r ON a.route = r.topiaid 

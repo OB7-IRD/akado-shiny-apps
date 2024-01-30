@@ -833,35 +833,35 @@ check_temporal_limit_inspector <- function(dataframe1,
 #' Dataframe 1:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  harbour_id_landing_trip_previous}}
-#'  \item{\code{  harbour_name_landing_trip_previous}}
+#'  \item{\code{  harbour_label_landing_trip_previous}}
 #'  \item{\code{  harbour_id_departure}}
-#'  \item{\code{  harbour_name_departure}}
+#'  \item{\code{  harbour_label_departure}}
 #' }
 #' @export
 check_harbour_inspector <- function(dataframe1,
                                     output) {
   # 0 - Global variables assignement ----
-  harbour_name_departure <- NULL
-  harbour_name_landing_trip_previous <- NULL
+  harbour_label_departure <- NULL
+  harbour_label_landing_trip_previous <- NULL
   harbour_id_departure <- NULL
   harbour_id_landing_trip_previous <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("trip_id", "harbour_id_landing_trip_previous", "harbour_name_landing_trip_previous", "harbour_id_departure", "harbour_name_departure"),
+    column_name = c("trip_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_departure", "harbour_label_departure"),
     column_type = c("character", "character", "character", "character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("trip_id", "harbour_id_landing_trip_previous", "harbour_name_landing_trip_previous", "harbour_id_departure", "harbour_name_departure"),
+      column_name = c("trip_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_departure", "harbour_label_departure"),
       column_type = c("character", "character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("trip_id", "harbour_id_landing_trip_previous", "harbour_name_landing_trip_previous", "harbour_id_departure", "harbour_name_departure")]
+    dataframe1 <- dataframe1[, c("trip_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_departure", "harbour_label_departure")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -892,7 +892,7 @@ check_harbour_inspector <- function(dataframe1,
   dataframe1[is.na(dataframe1$harbour_id_landing_trip_previous), "logical"] <- FALSE
   dataframe1[is.na(dataframe1$harbour_id_departure), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_name_departure, harbour_name_landing_trip_previous, .after = logical)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_label_departure, harbour_label_landing_trip_previous, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(harbour_id_departure, harbour_id_landing_trip_previous))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical))>0) {
     all <- c(select, dataframe1$trip_id)
@@ -954,7 +954,7 @@ check_harbour_inspector <- function(dataframe1,
 #'  \item{\code{  catch_id}}
 #'  \item{\code{  catch_weight}}
 #'  \item{\code{  speciesfate_code}}
-#'  \item{\code{  specie_name}}
+#'  \item{\code{  species_fao_code}}
 #'  \item{\code{  vesselactivity_code}}
 #'  \item{\code{  trip_id}}
 #' Dataframe 3:
@@ -981,7 +981,7 @@ check_raising_factor_inspector <- function(dataframe1,
   tide_sum_catch_weight <- NULL
   lower_limit <- NULL
   upper_limit <- NULL
-  specie_name <- NULL
+  species_fao_code <- NULL
   speciesfate_code <- NULL
   vesselactivity_code <- NULL
   # 1 - Arguments verification ----
@@ -1005,19 +1005,19 @@ check_raising_factor_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("catch_id", "catch_weight", "speciesfate_code", "specie_name", "vesselactivity_code", "trip_id"),
+    column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id"),
     column_type = c("character", "numeric", "character", "character", "character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("catch_id", "catch_weight", "speciesfate_code", "specie_name", "vesselactivity_code", "trip_id"),
+      column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id"),
       column_type = c("character", "numeric", "character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "speciesfate_code", "specie_name", "vesselactivity_code", "trip_id")]
+    dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id")]
   }
   if (codama::r_table_checking(
     r_table = dataframe3,
@@ -1105,7 +1105,7 @@ check_raising_factor_inspector <- function(dataframe1,
   # 2 - Data design ----
   # Catch filtration for RF1
   dataframe2 <- dataframe2 %>%
-    dplyr::filter(specie_name %in% species & speciesfate_code %in% speciesfate & !(vesselactivity_code %in% vesselactivity))
+    dplyr::filter(species_fao_code %in% species & speciesfate_code %in% speciesfate & !(vesselactivity_code %in% vesselactivity))
   # Calculation of the sum of weights caught per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(trip_id) %>%
@@ -1489,14 +1489,14 @@ check_operationt_inspector <- function(dataframe1,
 #' @description The purpose of the check_position_inspector function is to provide a table of data that contains an inconsistency with ocean declaration and activity position
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param ocean_name_nonpriority {\link[base]{character}} expected. Default values: Atlantic. Name of the priority ocean when the point is on the border between two oceans.
+#' @param ocean_label_nonpriority {\link[base]{character}} expected. Default values: Atlantic. Name of the priority ocean when the point is on the border between two oceans.
 #' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  activity_id}}
-#'  \item{\code{  ocean_name}}
+#'  \item{\code{  ocean_label}}
 #'  \item{\code{  zfao_ocean}}
 #'  \item{\code{  activity_position}}
 #'  \item{\code{  activity_crs}}
@@ -1505,13 +1505,13 @@ check_operationt_inspector <- function(dataframe1,
 #' @export
 check_position_inspector <- function(dataframe1,
                                      output,
-                                     ocean_name_nonpriority = "Atlantic") {
+                                     ocean_label_nonpriority = "Atlantic") {
   # 0 - Global variables assignement ----
   activity_id <- NULL
   zfao_ocean <- NULL
   count_ocean <- NULL
   type <- NULL
-  ocean_name <- NULL
+  ocean_label <- NULL
   activity_position <- NULL
   activity_crs <- NULL
   logical_ocean <- NULL
@@ -1521,19 +1521,19 @@ check_position_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("activity_id", "ocean_name", "zfao_ocean", "activity_position", "activity_crs", "harbour_id"),
+    column_name = c("activity_id", "ocean_label", "zfao_ocean", "activity_position", "activity_crs", "harbour_id"),
     column_type = c("character", "character", "character", "character", "numeric", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("activity_id", "ocean_name", "zfao_ocean", "activity_position", "activity_crs", "harbour_id"),
+      column_name = c("activity_id", "ocean_label", "zfao_ocean", "activity_position", "activity_crs", "harbour_id"),
       column_type = c("character", "character", "character", "character", "numeric", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("activity_id", "ocean_name", "zfao_ocean", "activity_position", "activity_crs", "harbour_id")]
+    dataframe1 <- dataframe1[, c("activity_id", "ocean_label", "zfao_ocean", "activity_position", "activity_crs", "harbour_id")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1550,12 +1550,12 @@ check_position_inspector <- function(dataframe1,
     ))
   }
   if (codama::r_type_checking(
-    r_object = ocean_name_nonpriority,
+    r_object = ocean_label_nonpriority,
     type = "character",
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = ocean_name_nonpriority,
+      r_object = ocean_label_nonpriority,
       type = "character",
       output = "message"
     ))
@@ -1565,7 +1565,7 @@ check_position_inspector <- function(dataframe1,
   # 2 - Data design ----
   # Indicates whether the ocean is the same
   comparison_ocean <- codama::vector_comparison(
-    first_vector = dataframe1$ocean_name,
+    first_vector = dataframe1$ocean_label,
     second_vector = dataframe1$zfao_ocean,
     comparison_type = "equal",
     output = "report"
@@ -1582,14 +1582,14 @@ check_position_inspector <- function(dataframe1,
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(count_ocean = length(unique(zfao_ocean))) %>%
     dplyr::filter(count_ocean == 2)
-  dataframe1 <- dataframe1[!(dataframe1$activity_id %in% count_ocean_activity$activity_id & dataframe1$zfao_ocean == ocean_name_nonpriority), ]
+  dataframe1 <- dataframe1[!(dataframe1$activity_id %in% count_ocean_activity$activity_id & dataframe1$zfao_ocean == ocean_label_nonpriority), ]
   # Gives the type of location
   dataframe1$type <- "Sea"
   dataframe1$type[is.na(dataframe1$zfao_ocean)] <- "Land"
   dataframe1$type[dataframe1$logical_harbour] <- "Harbour"
   # Case of ocean trip is null :
-  dataframe1$logical[is.na(dataframe1$ocean_name)] <- FALSE
-  dataframe1 <- dplyr::relocate(.data = dataframe1, type, ocean_name, zfao_ocean, .after = logical)
+  dataframe1$logical[is.na(dataframe1$ocean_label)] <- FALSE
+  dataframe1 <- dplyr::relocate(.data = dataframe1, type, ocean_label, zfao_ocean, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(harbour_id))
   activity_sea_land_data_detail <- dataframe1
   dataframe1 <- subset(dataframe1, select = -c(activity_position, activity_crs, logical_ocean, logical_harbour))
@@ -1784,7 +1784,7 @@ check_weight_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  samplespeciesmeasure_id}}
-#'  \item{\code{  specie_name}}
+#'  \item{\code{  species_fao_code}}
 #'  \item{\code{  sizemeasuretype_code}}
 #'  \item{\code{  samplespeciesmeasure_sizeclass}}
 #' }
@@ -1795,7 +1795,7 @@ check_length_class_inspector <- function(dataframe1,
                                          size_measure_type = "FL",
                                          limit = 80) {
   # 0 - Global variables assignement ----
-  specie_name <- NULL
+  species_fao_code <- NULL
   sizemeasuretype_code <- NULL
   samplespeciesmeasure_sizeclass <- NULL
   logical_sizeclass <- NULL
@@ -1806,19 +1806,19 @@ check_length_class_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("samplespeciesmeasure_id", "specie_name", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
+    column_name = c("samplespeciesmeasure_id", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
     column_type = c("character", "character", "character", "numeric"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("samplespeciesmeasure_id", "specie_name", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
+      column_name = c("samplespeciesmeasure_id", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
       column_type = c("character", "character", "character", "numeric"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("samplespeciesmeasure_id", "specie_name", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")]
+    dataframe1 <- dataframe1[, c("samplespeciesmeasure_id", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -1883,7 +1883,7 @@ check_length_class_inspector <- function(dataframe1,
   dataframe1$logical_sizeclass <- comparison_sizeclass$logical
   # Compare specie of the samples
   comparison_species <- codama::vector_comparison(
-    first_vector = dataframe1$specie_name,
+    first_vector = dataframe1$species_fao_code,
     second_vector = species,
     comparison_type = "difference",
     output = "report"
@@ -1899,8 +1899,8 @@ check_length_class_inspector <- function(dataframe1,
   dataframe1$logical_sizemeasuretype <- comparison_sizemeasuretype$logical
   dataframe1$logical <- dataframe1$logical_sizeclass | !dataframe1$logical_sizemeasuretype | !dataframe1$logical_species
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- dplyr::relocate(.data = dataframe1, specie_name, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, seuil, specie_name, sizemeasuretype_code))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, species_fao_code, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, seuil, species_fao_code, sizemeasuretype_code))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical))>0) {
     all <- c(select, dataframe1$samplespeciesmeasure_id)
     number_occurrences <- table(all)
@@ -2211,31 +2211,31 @@ check_temperature_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  samplespecies_id}}
-#'  \item{\code{  specie_name}}
+#'  \item{\code{  species_fao_code}}
 #' }
 #' @export
 check_species_inspector <- function(dataframe1,
                                     output,
                                     species = c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT")) {
   # 0 - Global variables assignement ----
-  specie_name <- NULL
+  species_fao_code <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("samplespecies_id", "specie_name"),
+    column_name = c("samplespecies_id", "species_fao_code"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("samplespecies_id", "specie_name"),
+      column_name = c("samplespecies_id", "species_fao_code"),
       column_type = c("character", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("samplespecies_id", "specie_name")]
+    dataframe1 <- dataframe1[, c("samplespecies_id", "species_fao_code")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -2267,14 +2267,14 @@ check_species_inspector <- function(dataframe1,
   # 2 - Data design ----
   # Compare specie of the samples
   comparison_species <- codama::vector_comparison(
-    first_vector = dataframe1$specie_name,
+    first_vector = dataframe1$species_fao_code,
     second_vector = species,
     comparison_type = "difference",
     output = "report"
   )
   dataframe1$logical <- comparison_species$logical
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- dplyr::relocate(.data = dataframe1, specie_name, .after = logical)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, species_fao_code, .after = logical)
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical))>0) {
     all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
@@ -2755,19 +2755,19 @@ check_well_number_consistent_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("trip_id", "well_name"),
+    column_name = c("trip_id", "well_label"),
     column_type = c("character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("trip_id", "well_name"),
+      column_name = c("trip_id", "well_label"),
       column_type = c("character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("trip_id", "well_name")]
+    dataframe2 <- dataframe2[, c("trip_id", "well_label")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -2788,7 +2788,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
   # 2 - Data design ----
   # merge
   dataframe2$logical <- TRUE
-  dataframe1 <- merge(dataframe1, dataframe2, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_name"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_label"), all.x = TRUE)
   # Search well not link
   dataframe1[is.na(dataframe1$logical), "logical"] <- FALSE
   # Case the well number is empty
@@ -2857,7 +2857,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
 #'  \item{\code{  sample_totalweight}}
 #' Dataframe 2:
 #'  \item{\code{  samplespecies_id}}
-#'  \item{\code{  specie_name}}
+#'  \item{\code{  species_fao_code}}
 #'  \item{\code{  sizemeasuretype_code}}
 #'  \item{\code{  sample_id}}
 #' Dataframe 3:
@@ -2911,19 +2911,19 @@ check_little_big_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
+    column_name = c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id"),
     column_type = c("character", "character", "character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
+      column_name = c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id"),
       column_type = c("character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id")]
+    dataframe2 <- dataframe2[, c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id")]
   }
   if (codama::r_table_checking(
     r_table = dataframe3,
@@ -3038,7 +3038,7 @@ check_little_big_inspector <- function(dataframe1,
   condition <- as.list(as.data.frame(t(data.frame(species, measuretype, sizelimit))))
   # Measurement selection of small individuals
   little <- purrr::map(condition, ~ dataframe1 %>%
-                         dplyr::filter(specie_name == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass < as.numeric(.x[3])))
+                         dplyr::filter(species_fao_code == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass < as.numeric(.x[3])))
   little <- do.call(rbind.data.frame, little)
   # Calculation of the number of measurements of small individuals (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   little <- little %>%
@@ -3046,7 +3046,7 @@ check_little_big_inspector <- function(dataframe1,
     dplyr::summarise(little = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)))
   # Measurement selection of big individuals
   big <- purrr::map(condition, ~ dataframe1 %>%
-                      dplyr::filter(specie_name == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass >= as.numeric(.x[3])))
+                      dplyr::filter(species_fao_code == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass >= as.numeric(.x[3])))
   big <- do.call(rbind.data.frame, big)
   # Calculation of the number of measurements of big individuals (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   big <- big %>%
@@ -3191,11 +3191,11 @@ check_weighting_inspector <- function(dataframe1,
   weightedweight <- NULL
   sum_landing_weight <- NULL
   weight <- NULL
-  vessel_type_code <- NULL
+  vesseltype_code <- NULL
   weightedweight_bis <- NULL
   sum_landing_weight_bis <- NULL
   sampletype_code <- NULL
-  vesseltype_name <- NULL
+  vesseltype_label <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -3234,19 +3234,19 @@ check_weighting_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
-    column_name = c("trip_id", "vessel_type_code", "vesseltype_name"),
+    column_name = c("trip_id", "vesseltype_code", "vesseltype_label"),
     column_type = c("character", "character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
-      column_name = c("trip_id", "vessel_type_code", "vesseltype_name"),
+      column_name = c("trip_id", "vesseltype_code", "vesseltype_label"),
       column_type = c("character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe3 <- dataframe3[, c("trip_id", "vessel_type_code", "vesseltype_name")]
+    dataframe3 <- dataframe3[, c("trip_id", "vesseltype_code", "vesseltype_label")]
   }
   if (codama::r_table_checking(
     r_table = dataframe4,
@@ -3371,16 +3371,16 @@ check_weighting_inspector <- function(dataframe1,
       sum_landing_weight_bis = dplyr::coalesce(sum_landing_weight, 0)
     )
   # Check
-  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[1] & dataframe1$weight > weight_limit, "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold), "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > 1, "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
-  # Case NA vessel_type_code sampletype_code
-  dataframe1[is.na(dataframe1$vessel_type_code), "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vessel_type_code) & dataframe1$vessel_type_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weight > weight_limit, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold), "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > 1, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
+  # Case NA vesseltype_code sampletype_code
+  dataframe1[is.na(dataframe1$vesseltype_code), "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vessel_type_code, weightedweight_bis, sum_landing_weight_bis))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_name, sum_landing_weight, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vesseltype_code, weightedweight_bis, sum_landing_weight_bis))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_label, sum_landing_weight, .after = logical)
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical))>0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -3676,7 +3676,7 @@ check_activity_sample_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  samplespecies_id}}
-#'  \item{\code{  specie_name}}
+#'  \item{\code{  species_fao_code}}
 #'  \item{\code{  sizemeasuretype_code}}
 #'  \item{\code{  sample_id}}
 #' Dataframe 2:
@@ -3700,7 +3700,7 @@ check_ldlf_inspector <- function(dataframe1,
   logical_smallsweight <- NULL
   sample_id <- NULL
   sizemeasuretype_code <- NULL
-  specie_name <- NULL
+  species_fao_code <- NULL
   sample_bigsweight <- NULL
   sample_smallsweight <- NULL
   sample_totalweight <- NULL
@@ -3708,19 +3708,19 @@ check_ldlf_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
+    column_name = c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id"),
     column_type = c("character", "character", "character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id"),
+      column_name = c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id"),
       column_type = c("character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("samplespecies_id", "specie_name", "sizemeasuretype_code", "sample_id")]
+    dataframe1 <- dataframe1[, c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id")]
   }
   if (codama::r_table_checking(
     r_table = dataframe2,
@@ -3802,7 +3802,7 @@ check_ldlf_inspector <- function(dataframe1,
   # 2 - Data design ----
   # Check species and measuretype
   comparison_species <- codama::vector_comparison(
-    first_vector = dataframe1$specie_name,
+    first_vector = dataframe1$species_fao_code,
     second_vector = species,
     comparison_type = "difference",
     output = "report"
@@ -3836,7 +3836,7 @@ check_ldlf_inspector <- function(dataframe1,
   dataframe1$logical <- dataframe1$logical_species & dataframe1$logical_bigsweight & dataframe1$logical_smallsweight
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(logical_species, logical_bigsweight, logical_smallsweight, sample_id))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sizemeasuretype_code, specie_name, sample_bigsweight, sample_smallsweight, sample_totalweight, .after = logical)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sizemeasuretype_code, species_fao_code, sample_bigsweight, sample_smallsweight, sample_totalweight, .after = logical)
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical))>0) {
     all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
@@ -3908,7 +3908,7 @@ check_ldlf_inspector <- function(dataframe1,
 #'  \item{\code{  wellactivityspecies_id}}
 #'  \item{\code{  wellactivity_id}}
 #'  \item{\code{  weightcategory_code}}
-#'  \item{\code{  specie_name}}
+#'  \item{\code{  species_fao_code}}
 #'  \item{\code{  wellactivityspecies_weight}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -3925,10 +3925,10 @@ check_distribution_inspector <- function(dataframe1,
   # 0 - Global variables assignement ----
   well_id <- NULL
   trip_id <- NULL
-  well_name <- NULL
+  well_label <- NULL
   weightcategory_code <- NULL
   wellactivityspecies_weight <- NULL
-  specie_name <- NULL
+  species_fao_code <- NULL
   sample_id <- NULL
   weight_small <- NULL
   weight_small_unknown <- NULL
@@ -3962,19 +3962,19 @@ check_distribution_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("well_id", "well_name", "trip_id"),
+    column_name = c("well_id", "well_label", "trip_id"),
     column_type = c("character", "character", "character"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("well_id", "well_name", "trip_id"),
+      column_name = c("well_id", "well_label", "trip_id"),
       column_type = c("character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("well_id", "well_name", "trip_id")]
+    dataframe2 <- dataframe2[, c("well_id", "well_label", "trip_id")]
   }
   if (codama::r_table_checking(
     r_table = dataframe3,
@@ -3996,19 +3996,19 @@ check_distribution_inspector <- function(dataframe1,
   if (codama::r_table_checking(
     r_table = dataframe4,
     type = "data.frame",
-    column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "specie_name", "wellactivityspecies_weight"),
+    column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "species_fao_code", "wellactivityspecies_weight"),
     column_type = c("character", "character", "character", "character", "numeric"),
     output = "logical"
   ) != TRUE) {
     codama::r_table_checking(
       r_table = dataframe4,
       type = "data.frame",
-      column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "specie_name", "wellactivityspecies_weight"),
+      column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "species_fao_code", "wellactivityspecies_weight"),
       column_type = c("character", "character", "character", "character", "numeric"),
       output = "message"
     )
   } else {
-    dataframe4 <- dataframe4[, c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "specie_name", "wellactivityspecies_weight")]
+    dataframe4 <- dataframe4[, c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "species_fao_code", "wellactivityspecies_weight")]
   }
   # Checks the type and values of output
   if (codama::r_type_checking(
@@ -4076,25 +4076,25 @@ check_distribution_inspector <- function(dataframe1,
   dataframe2 <- merge(dataframe2, dataframe4, by = "wellactivity_id", all.x = TRUE)
   # Calculation small weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2_small <- dataframe2 %>%
-    dplyr::group_by(well_id, trip_id, well_name) %>%
+    dplyr::group_by(well_id, trip_id, well_label) %>%
     dplyr::filter(weightcategory_code %in% weightcategory_small) %>%
     dplyr::reframe(weight_small = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   dataframe2_small_unknown <- dataframe2 %>%
-    dplyr::group_by(well_id, trip_id, well_name) %>%
-    dplyr::filter(weightcategory_code %in% weightcategory_unknown & specie_name %in% species) %>%
+    dplyr::group_by(well_id, trip_id, well_label) %>%
+    dplyr::filter(weightcategory_code %in% weightcategory_unknown & species_fao_code %in% species) %>%
     dplyr::reframe(weight_small_unknown = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   # Calculation big weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2_big <- dataframe2 %>%
-    dplyr::group_by(well_id, trip_id, well_name) %>%
+    dplyr::group_by(well_id, trip_id, well_label) %>%
     dplyr::filter(weightcategory_code %in% weightcategory_big) %>%
     dplyr::reframe(weight_big = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   # Merge
-  dataframe1 <- merge(dataframe1, dataframe2_small, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_name"), all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe2_small_unknown, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_name"), all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe2_big, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_name"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2_small, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_label"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2_small_unknown, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_label"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2_big, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_label"), all.x = TRUE)
   # Calculation small weight total (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe1 <- dataframe1 %>%
     dplyr::group_by(sample_id) %>%
@@ -4589,8 +4589,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     trip_startdate <- NULL
     trip_enddate <- NULL
     button <- NULL
-    harbour_name_departure <- NULL
-    harbour_name_landing_trip_previous <- NULL
+    harbour_label_departure <- NULL
+    harbour_label_landing_trip_previous <- NULL
     harbour_id_landing_trip_previous <- NULL
     schooltype_code <- NULL
     association_object_count <- NULL
@@ -4598,7 +4598,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     successstatus_code <- NULL
     activity_weight <- NULL
     type <- NULL
-    ocean_name <- NULL
+    ocean_label <- NULL
     zfao_ocean <- NULL
     sum_catch_weight <- NULL
     sum_measuredcount <- NULL
@@ -4619,7 +4619,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     measure2_percentage <- NULL
     sampletype_code <- NULL
     weightedweight <- NULL
-    vesseltype_name <- NULL
+    vesseltype_label <- NULL
     sum_landing_weight <- NULL
     weight_small_total <- NULL
     weight_big <- NULL
@@ -4834,15 +4834,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           }
           # 2 - Data design ----
           # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
-          data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_landing_trip_previous, harbour_name_landing_trip_previous)))
+          data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_landing_trip_previous, harbour_label_landing_trip_previous)))
           # Retrieve trip sample : Retrieve trip activity : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
           colnames_activity_id <- c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_number", "vesselactivity_code")
           # Retrieve trip sample : retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
           colnames_sample_id <- c("sample_id", "vessel_code", "trip_enddate", "sample_number")
           # Retrieve trip sample species : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
-          colnames_samplespecies_id <- c("samplespecies_id", "vessel_code", "trip_enddate", "sample_number", "specie_name", "sizemeasuretype_code")
+          colnames_samplespecies_id <- c("samplespecies_id", "vessel_code", "trip_enddate", "sample_number", "species_fao_code", "sizemeasuretype_code")
           # Retrieve trip sample species measure : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
-          colnames_samplespeciesmeasure_id <- c("samplespeciesmeasure_id", "vessel_code", "trip_enddate", "sample_number", "specie_name", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")
+          colnames_samplespeciesmeasure_id <- c("samplespeciesmeasure_id", "vessel_code", "trip_enddate", "sample_number", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")
           # Checks data consistency
           if (nrow(data_trip) != length(trip_select()$trip_id)) {
             warning(text_object_more_or_less(id = trip_select()$trip_id, result_check = data_trip$trip_id))
@@ -4919,8 +4919,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Modify the table for display purposes: rename column
           check_harbour <- dplyr::rename(
             .data = check_harbour,
-            `Harbour landing` = harbour_name_landing_trip_previous,
-            `Harbour departure` = harbour_name_departure
+            `Harbour landing` = harbour_label_landing_trip_previous,
+            `Harbour departure` = harbour_label_departure
           )
           # Uses a function which indicates whether the selected trips contain RF1 inconsistent with limit values
           check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_tide, dataframe3 = data_tide, output = "report")
@@ -4957,14 +4957,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function which indicates whether the ocean declaration is consistent with activity position
           check_position_inspector_data <- check_position_inspector(dataframe1 = merge(activity_select, data_activity_spatial, by = "activity_id", all.x = TRUE), output = "report")
           # Add button and data for plot in table
-          check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_name", "zfao_ocean"), name_button = "button_position")
+          check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "zfao_ocean"), name_button = "button_position")
           # Uses a function to format the table
           check_position <- table_display_trip(check_position, activity_select[, colnames_activity_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_position <- dplyr::rename(
             .data = check_position,
             `Type` = type,
-            `Ocean trip` = ocean_name,
+            `Ocean trip` = ocean_label,
             `Ocean activity` = zfao_ocean,
             `Details problem` = button
           )
@@ -5061,7 +5061,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = sample_totalweight,
             `Sample type` = sampletype_code,
             `Sum weighted weights` = weightedweight,
-            `Vessel type` = vesseltype_name,
+            `Vessel type` = vesseltype_label,
             `Sum weight fresh landings baitboats` = sum_landing_weight
           )
           # Uses a function which indicates whether the sample weight (m10 and p10) is consistent for the global weight
@@ -5250,7 +5250,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   activity_number <- NULL
   vesselactivity_code <- NULL
   sample_number <- NULL
-  specie_name <- NULL
+  species_fao_code <- NULL
   sizemeasuretype_code <- NULL
   samplespeciesmeasure_sizeclass <- NULL
   # Retrieves the name of the column containing the ID
@@ -5303,7 +5303,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   if (length(grep("^samplespecies", colnames(data), value = TRUE)) != 0) {
     data <- dplyr::rename(
       .data = data,
-      `FAO code` = specie_name,
+      `FAO code` = species_fao_code,
       `Size measure type` = sizemeasuretype_code
     )
   }

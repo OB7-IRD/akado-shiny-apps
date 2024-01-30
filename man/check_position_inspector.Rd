@@ -7,7 +7,7 @@
 check_position_inspector(
   dataframe1,
   output,
-  ocean_name_nonpriority = "Atlantic"
+  ocean_label_nonpriority = "Atlantic"
 )
 }
 \arguments{
@@ -15,7 +15,7 @@ check_position_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{ocean_name_nonpriority}{{\link[base]{character}} expected. Default values: Atlantic. Name of the priority ocean when the point is on the border between two oceans.}
+\item{ocean_label_nonpriority}{{\link[base]{character}} expected. Default values: Atlantic. Name of the priority ocean when the point is on the border between two oceans.}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
@@ -28,7 +28,7 @@ The input dataframe must contain all these columns for the function to work :
 \itemize{
 Dataframe 1:
  \item{\code{  activity_id}}
- \item{\code{  ocean_name}}
+ \item{\code{  ocean_label}}
  \item{\code{  zfao_ocean}}
  \item{\code{  activity_position}}
  \item{\code{  activity_crs}}

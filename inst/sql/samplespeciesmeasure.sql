@@ -4,7 +4,7 @@ SELECT
     ssm.sizeclass::numeric AS samplespeciesmeasure_sizeclass,
     ssm.count::numeric AS samplespeciesmeasure_count,
     ssm.samplespecies::text AS samplespecies_id,
-    s.faocode::text AS specie_name, 
+    s.faocode::text AS species_fao_code, 
     smt.code::text AS sizemeasuretype_code,
     sa.topiaid::text AS sample_id,
     v.code::text AS vessel_code,
