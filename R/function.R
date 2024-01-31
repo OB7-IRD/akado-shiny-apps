@@ -2842,9 +2842,9 @@ check_well_number_consistent_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_little_big_inspector() function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_little_big_inspector() function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param species {\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying small or big fish
-#' @param measuretype {\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying small or big fish
-#' @param sizelimit {\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector of the limit size measure. Third criterion for identifying small or big fish
+#' @param species {\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying big fish (other values are small fish)
+#' @param measuretype {\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying big fish (other values are small fish)
+#' @param sizelimit {\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector for defining the lower or equal limit for size measurement. Third criterion for identifying big fish (other values are small fish)
 #' @param size_measure_type {\link[base]{character}} expected. Default values: c("FL", "PD1"). Vector with the preferred type of size measurement for small fish and then for big fish
 #' @param threshold {\link[base]{numeric}} expected. Default values: 0.9. Threshold for percentage of small or big fish
 #' @details
@@ -3040,6 +3040,7 @@ check_little_big_inspector <- function(dataframe1,
   little <- purrr::map(condition, ~ dataframe1 %>%
                          dplyr::filter(species_fao_code == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass < as.numeric(.x[3])))
   little <- do.call(rbind.data.frame, little)
+  little <- dataframe1 %>% dplyr::filter(!(species_fao_code %in% species)) %>% dplyr::bind_rows(little)
   # Calculation of the number of measurements of small individuals (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   little <- little %>%
     dplyr::group_by(sample_id) %>%

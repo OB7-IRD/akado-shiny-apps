@@ -25,11 +25,11 @@ check_little_big_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{species}{{\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying small or big fish}
+\item{species}{{\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying big fish (other values are small fish)}
 
-\item{measuretype}{{\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying small or big fish}
+\item{measuretype}{{\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying big fish (other values are small fish)}
 
-\item{sizelimit}{{\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector of the limit size measure. Third criterion for identifying small or big fish}
+\item{sizelimit}{{\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector for defining the lower or equal limit for size measurement. Third criterion for identifying big fish (other values are small fish)}
 
 \item{size_measure_type}{{\link[base]{character}} expected. Default values: c("FL", "PD1"). Vector with the preferred type of size measurement for small fish and then for big fish}
 
