@@ -42,3 +42,6 @@ get_golem_config <- function(
     use_parent = use_parent
   )
 }
+
+# Defines an empty path associated with PROJ_LIB to avoid conflicts with system parameters defined on the user's computer
+Sys.setenv(PROJ_LIB = "")
