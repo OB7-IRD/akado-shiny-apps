@@ -934,8 +934,8 @@ check_harbour_inspector <- function(dataframe1,
 }
 
 #' @name check_raising_factor_inspector
-#' @title Gives the inconsistencies between RF1 and limits values
-#' @description The purpose of the check_raising_factor_inspector function is to provide a table of data that contains an inconsistency with the RF1 and the valid limits (Default : 0.9 ; 1.1)
+#' @title Gives the inconsistencies between RF1 and threshold values
+#' @description The purpose of the check_raising_factor_inspector function is to provide a table of data that contains an inconsistency with the RF1 and the valid threshold (Default : 0.9 ; 1.1)
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
@@ -943,7 +943,7 @@ check_harbour_inspector <- function(dataframe1,
 #' @param species {\link[base]{character}} expected. Default values: c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"). Vector of the inventory of species used to calculate catch weight in RF1.
 #' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.
 #' @param vesselactivity {\link[base]{character}} expected. Default values: c("25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.
-#' @param limit {\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable limits for RF1.
+#' @param threshold {\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable threshold for RF1.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -970,7 +970,7 @@ check_raising_factor_inspector <- function(dataframe1,
                                            species = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"),
                                            speciesfate = "6",
                                            vesselactivity = c("25", "27", "29"),
-                                           limit = c(0.9, 1.1)) {
+                                           threshold = c(0.9, 1.1)) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
   catch_weight <- NULL
@@ -979,8 +979,8 @@ check_raising_factor_inspector <- function(dataframe1,
   rf1 <- NULL
   tide_landingtotalweight <- NULL
   tide_sum_catch_weight <- NULL
-  lower_limit <- NULL
-  upper_limit <- NULL
+  lower_threshold <- NULL
+  upper_threshold <- NULL
   species_fao_code <- NULL
   speciesfate_code <- NULL
   vesselactivity_code <- NULL
@@ -1086,15 +1086,15 @@ check_raising_factor_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  # Checks the type of limit
+  # Checks the type of threshold
   if (codama::r_type_checking(
-    r_object = limit,
+    r_object = threshold,
     type = "numeric",
     length = 2L,
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = limit,
+      r_object = threshold,
       type = "numeric",
       length = 2L,
       output = "message"
@@ -1116,22 +1116,22 @@ check_raising_factor_inspector <- function(dataframe1,
   tide_id_data_rf1 <- dataframe3 %>%
     dplyr::group_by(trip_end_tide_id) %>%
     dplyr::summarise(rf1 = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), tide_landingtotalweight = ifelse(all(is.na(trip_landingtotalweight)), trip_landingtotalweight[NA_integer_], sum(trip_landingtotalweight, na.rm = TRUE)), tide_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
-  dataframe3$lower_limit <- limit[1]
-  dataframe3$upper_limit <- limit[2]
+  dataframe3$lower_threshold <- threshold[1]
+  dataframe3$upper_threshold <- threshold[2]
   # Selection of user-supplied trips
   dataframe3 <- merge(data.frame(trip_id = dataframe1$trip_id), unique(dataframe3), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # Merge data
   dataframe3 <- merge(dataframe3, tide_id_data_rf1, by.x = "trip_end_tide_id", by.y = "trip_end_tide_id", all.x = TRUE)
-  # Compare RF1 to valid limits
+  # Compare RF1 to valid threshold
   comparison_less <- codama::vector_comparison(
     first_vector = dataframe3$rf1,
-    second_vector = dataframe3$upper_limit,
+    second_vector = dataframe3$upper_threshold,
     comparison_type = "less",
     output = "report"
   )
   comparison_greater <- codama::vector_comparison(
     first_vector = dataframe3$rf1,
-    second_vector = dataframe3$lower_limit,
+    second_vector = dataframe3$lower_threshold,
     comparison_type = "greater",
     output = "report"
   )
@@ -1142,7 +1142,7 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe3[(is.na(dataframe3$trip_end_tide_id)), "logical"] <- TRUE
   dataframe3 <- dplyr::relocate(.data = dataframe3, rf1, .after = logical)
   trip_end_tide_id <- dataframe3$trip_end_tide_id
-  dataframe3 <- subset(dataframe3, select = -c(trip_end_tide_id, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, lower_limit, upper_limit))
+  dataframe3 <- subset(dataframe3, select = -c(trip_end_tide_id, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, lower_threshold, upper_threshold))
   if ((sum(dataframe3$logical, na.rm = TRUE) + sum(!dataframe3$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe3$logical))>0) {
     all <- c(select, dataframe3$trip_id)
     number_occurrences <- table(all)
@@ -1210,7 +1210,7 @@ check_fishing_context_inspector <- function(dataframe1,
   activity_id <- NULL
   schooltype_code <- NULL
   association_object_count <- NULL
-  seuil <- NULL
+  threshold <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -1282,12 +1282,12 @@ check_fishing_context_inspector <- function(dataframe1,
     dplyr::summarise(association_object_count = dplyr::n())
   # Merge
   dataframe1 <- merge(dataframe1, dataframe2, all.x = TRUE)
-  dataframe1$seuil <- 0
+  dataframe1$threshold <- 0
   dataframe1$association_object_count[is.na(dataframe1$association_object_count)] <- 0
   # Indicates whether or not an object-type association exists
   comparison <- codama::vector_comparison(
     first_vector = dataframe1$association_object_count,
-    second_vector = dataframe1$seuil,
+    second_vector = dataframe1$threshold,
     comparison_type = "greater",
     output = "report"
   )
@@ -1297,7 +1297,7 @@ check_fishing_context_inspector <- function(dataframe1,
   # Unknown benches and NA: no constraint
   dataframe1$logical[is.na(dataframe1$schooltype_code) | dataframe1$schooltype_code == "0"] <- TRUE
   dataframe1 <- dplyr::relocate(.data = dataframe1, schooltype_code, association_object_count, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(seuil))
+  dataframe1 <- subset(dataframe1, select = -c(threshold))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical))>0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
@@ -1361,7 +1361,7 @@ check_operationt_inspector <- function(dataframe1,
   successstatus_code <- NULL
   schooltype_code <- NULL
   activity_weight <- NULL
-  seuil <- NULL
+  threshold <- NULL
   logical_successstatus_vesselactivity <- NULL
   logical_successstatus_schooltype <- NULL
   logical_successstatus_weight <- NULL
@@ -1401,10 +1401,10 @@ check_operationt_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Indicates whether the vessel activity requires a success status
-  dataframe1$seuil <- "6"
+  dataframe1$threshold <- "6"
   comparison_successstatus_vesselactivity <- codama::vector_comparison(
     first_vector = dataframe1$vesselactivity_code,
-    second_vector = dataframe1$seuil,
+    second_vector = dataframe1$threshold,
     comparison_type = "equal",
     output = "report"
   )
@@ -1412,10 +1412,10 @@ check_operationt_inspector <- function(dataframe1,
   # Case of success status NA: must not have activity 6 (inverse of the result obtained)
   dataframe1$logical_successstatus_vesselactivity[is.na(dataframe1$successstatus_code)] <- !dataframe1$logical_successstatus_vesselactivity[is.na(dataframe1$successstatus_code)]
   # Indicates indeterminate school must not have positive or negative success status
-  dataframe1$seuil <- "0"
+  dataframe1$threshold <- "0"
   logical_successstatus_schooltype_indeterminate <- codama::vector_comparison(
     first_vector = dataframe1$schooltype_code,
-    second_vector = dataframe1$seuil,
+    second_vector = dataframe1$threshold,
     comparison_type = "difference",
     output = "report"
   )
@@ -1427,10 +1427,10 @@ check_operationt_inspector <- function(dataframe1,
   # Case of success status NA: no constraints
   dataframe1$logical_successstatus_schooltype[is.na(dataframe1$successstatus_code)] <- TRUE
   # Indicates whether captured weight is greater than 0
-  dataframe1$seuil <- 0
+  dataframe1$threshold <- 0
   comparison_successstatus_weight <- codama::vector_comparison(
     first_vector = dataframe1$activity_weight,
-    second_vector = dataframe1$seuil,
+    second_vector = dataframe1$threshold,
     comparison_type = "greater",
     output = "report"
   )
@@ -1444,7 +1444,7 @@ check_operationt_inspector <- function(dataframe1,
   # Combines test results
   dataframe1$logical <- dataframe1$logical_successstatus_vesselactivity & dataframe1$logical_successstatus_schooltype_indeterminate & dataframe1$logical_successstatus_schooltype & dataframe1$logical_successstatus_weight
   dataframe1 <- dplyr::relocate(.data = dataframe1, vesselactivity_code, successstatus_code, schooltype_code, activity_weight, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(seuil, logical_successstatus_vesselactivity, logical_successstatus_schooltype_indeterminate, logical_successstatus_schooltype, logical_successstatus_weight))
+  dataframe1 <- subset(dataframe1, select = -c(threshold, logical_successstatus_vesselactivity, logical_successstatus_schooltype_indeterminate, logical_successstatus_schooltype, logical_successstatus_weight))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical))>0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
@@ -1771,13 +1771,13 @@ check_weight_inspector <- function(dataframe1,
 }
 
 #' @name check_length_class_inspector
-#' @title Gives the inconsistencies between size class of the samples depending on the species and measurement type and the valid limits
-#' @description The purpose of the check_length_class_inspector function is to provide a table of data that contains an inconsistency between the size class of the samples depending on the species and measurement type and the valid limits (Default : 80)
+#' @title Gives the inconsistencies between size class of the samples depending on the species and measurement type and the valid threshold
+#' @description The purpose of the check_length_class_inspector function is to provide a table of data that contains an inconsistency between the size class of the samples depending on the species and measurement type and the valid threshold (Default : 80)
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values: c("YFT", "BET", "ALB"). Vector of the species inventory controlled.
 #' @param size_measure_type {\link[base]{character}} expected. Default values: "FL". Vector of the size measure type controlled.
-#' @param limit {\link[base]{numeric}} expected. Default values: 80. Limit of the size measure
+#' @param threshold {\link[base]{numeric}} expected. Default values: 80. Threshold of the size measure
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -1793,7 +1793,7 @@ check_length_class_inspector <- function(dataframe1,
                                          output,
                                          species = c("YFT", "BET", "ALB"),
                                          size_measure_type = "FL",
-                                         limit = 80) {
+                                         threshold = 80) {
   # 0 - Global variables assignement ----
   species_fao_code <- NULL
   sizemeasuretype_code <- NULL
@@ -1801,7 +1801,6 @@ check_length_class_inspector <- function(dataframe1,
   logical_sizeclass <- NULL
   logical_sizemeasuretype <- NULL
   logical_species <- NULL
-  seuil <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -1857,13 +1856,13 @@ check_length_class_inspector <- function(dataframe1,
     ))
   }
   if (codama::r_type_checking(
-    r_object = limit,
+    r_object = threshold,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = limit,
+      r_object = threshold,
       type = "numeric",
       length = 1L,
       output = "message"
@@ -1872,11 +1871,11 @@ check_length_class_inspector <- function(dataframe1,
   select <- dataframe1$samplespeciesmeasure_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
-  dataframe1$seuil <- limit
+  dataframe1$threshold <- threshold
   # Compare size class of the samples
   comparison_sizeclass <- codama::vector_comparison(
     first_vector = dataframe1$samplespeciesmeasure_sizeclass,
-    second_vector = dataframe1$seuil,
+    second_vector = dataframe1$threshold,
     comparison_type = "less_equal",
     output = "report"
   )
@@ -1900,7 +1899,7 @@ check_length_class_inspector <- function(dataframe1,
   dataframe1$logical <- dataframe1$logical_sizeclass | !dataframe1$logical_sizemeasuretype | !dataframe1$logical_species
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, species_fao_code, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, seuil, species_fao_code, sizemeasuretype_code))
+  dataframe1 <- subset(dataframe1, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, threshold, species_fao_code, sizemeasuretype_code))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical))>0) {
     all <- c(select, dataframe1$samplespeciesmeasure_id)
     number_occurrences <- table(all)
@@ -1926,7 +1925,7 @@ check_length_class_inspector <- function(dataframe1,
   }
   # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!dataframe1$logical), " samples with measurements ", paste0(size_measure_type, collapse = ", "), ", for species ", paste0(species, collapse = ", "), ", greater than ", limit)))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " samples with measurements ", paste0(size_measure_type, collapse = ", "), ", for species ", paste0(species, collapse = ", "), ", greater than ", threshold)))
   }
   if (output == "report") {
     return(dataframe1)
@@ -2083,11 +2082,11 @@ check_measure_inspector <- function(dataframe1,
 }
 
 #' @name check_temperature_inspector
-#' @title Gives the inconsistencies between activity sea surface temperature and valid limits
-#' @description The purpose of the check_temperature_inspector function is to provide a table of data that contains an inconsistency between the sea surface temperature for the activity and valid limits
+#' @title Gives the inconsistencies between activity sea surface temperature and valid threshold
+#' @description The purpose of the check_temperature_inspector function is to provide a table of data that contains an inconsistency between the sea surface temperature for the activity and valid threshold
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param limit {\link[base]{numeric}} expected. Default values: 15 and 32. Vector containing the lower and upper acceptable limits for sea surface temperature.
+#' @param threshold {\link[base]{numeric}} expected. Default values: 15 and 32. Vector containing the lower and upper acceptable threshold for sea surface temperature.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -2099,11 +2098,11 @@ check_measure_inspector <- function(dataframe1,
 #' @export
 check_temperature_inspector <- function(dataframe1,
                                         output,
-                                        limit = c(15, 32)) {
+                                        threshold = c(15, 32)) {
   # 0 - Global variables assignement ----
   activity_seasurfacetemperature <- NULL
-  lower_limit <- NULL
-  upper_limit <- NULL
+  lower_threshold <- NULL
+  upper_threshold <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -2139,18 +2138,18 @@ check_temperature_inspector <- function(dataframe1,
   select <- dataframe1$activity_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
-  # Compare RF1 to valid limits
-  dataframe1$lower_limit <- limit[1]
-  dataframe1$upper_limit <- limit[2]
+  # Compare RF1 to valid threshold
+  dataframe1$lower_threshold <- threshold[1]
+  dataframe1$upper_threshold <- threshold[2]
   comparison_less <- codama::vector_comparison(
     first_vector = dataframe1$activity_seasurfacetemperature,
-    second_vector = dataframe1$upper_limit,
+    second_vector = dataframe1$upper_threshold,
     comparison_type = "less_equal",
     output = "report"
   )
   comparison_greater <- codama::vector_comparison(
     first_vector = dataframe1$activity_seasurfacetemperature,
-    second_vector = dataframe1$lower_limit,
+    second_vector = dataframe1$lower_threshold,
     comparison_type = "greater_equal",
     output = "report"
   )
@@ -2159,7 +2158,7 @@ check_temperature_inspector <- function(dataframe1,
   dataframe1[is.na(dataframe1$activity_seasurfacetemperature), "logical"] <- TRUE
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, activity_seasurfacetemperature, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(lower_limit, upper_limit))
+  dataframe1 <- subset(dataframe1, select = -c(lower_threshold, upper_threshold))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical))>0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
@@ -2842,9 +2841,9 @@ check_well_number_consistent_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_little_big_inspector() function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_little_big_inspector() function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param species {\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying big fish (other values are small fish)
-#' @param measuretype {\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying big fish (other values are small fish)
-#' @param sizelimit {\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector for defining the lower or equal limit for size measurement. Third criterion for identifying big fish (other values are small fish)
+#' @param species_big {\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying big fish (other values are small fish)
+#' @param size_measure_type_big {\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying big fish (other values are small fish)
+#' @param threshold_size_big {\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector for defining the lower or equal for threshold size measurement. Third criterion for identifying big fish (other values are small fish)
 #' @param size_measure_type {\link[base]{character}} expected. Default values: c("FL", "PD1"). Vector with the preferred type of size measurement for small fish and then for big fish
 #' @param threshold {\link[base]{numeric}} expected. Default values: 0.9. Threshold for percentage of small or big fish
 #' @details
@@ -2872,9 +2871,9 @@ check_little_big_inspector <- function(dataframe1,
                                        dataframe2,
                                        dataframe3,
                                        output,
-                                       species = c("YFT", "YFT", "BET", "BET", "ALB", "ALB"),
-                                       measuretype = c("PD1", "FL", "PD1", "FL", "PD1", "FL"),
-                                       sizelimit = c(24, 80, 25, 77, 23.5, 78),
+                                       species_big = c("YFT", "YFT", "BET", "BET", "ALB", "ALB"),
+                                       size_measure_type_big = c("PD1", "FL", "PD1", "FL", "PD1", "FL"),
+                                       threshold_size_big = c(24, 80, 25, 77, 23.5, 78),
                                        size_measure_type = c("FL", "PD1"),
                                        threshold = 0.9) {
   # 0 - Global variables assignement ----
@@ -2957,45 +2956,45 @@ check_little_big_inspector <- function(dataframe1,
     ))
   }
   if (codama::r_type_checking(
-    r_object = species,
+    r_object = species_big,
     type = "character",
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = species,
+      r_object = species_big,
       type = "character",
       output = "message"
     ))
   }
   if (codama::r_type_checking(
-    r_object = measuretype,
+    r_object = size_measure_type_big,
     type = "character",
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = measuretype,
+      r_object = size_measure_type_big,
       type = "character",
       output = "message"
     ))
   }
   if (codama::r_type_checking(
-    r_object = sizelimit,
+    r_object = threshold_size_big,
     type = "numeric",
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = sizelimit,
+      r_object = threshold_size_big,
       type = "numeric",
       output = "message"
     ))
   }
-  if (length(species) != length(measuretype) || length(species) != length(sizelimit)) {
+  if (length(species_big) != length(size_measure_type_big) || length(species_big) != length(threshold_size_big)) {
     stop(
       format(
         x = Sys.time(),
         "%Y-%m-%d %H:%M:%S"
       ),
-      " - Error, the following arguments must be of the same size : \"species\", \"measuretype\" and \"sizelimit\"\n"
+      " - Error, the following arguments must be of the same size : \"species_big\", \"size_measure_type_big\" and \"threshold_size_big\"\n"
     )
   }
   if (codama::r_type_checking(
@@ -3035,12 +3034,12 @@ check_little_big_inspector <- function(dataframe1,
     dplyr::group_by(sample_id, sample_smallsweight, sample_bigsweight, sample_totalweight) %>%
     dplyr::summarise(total_count = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)), .groups = "keep")
   # Small and large category conditions
-  condition <- as.list(as.data.frame(t(data.frame(species, measuretype, sizelimit))))
+  condition <- as.list(as.data.frame(t(data.frame(species_big, size_measure_type_big, threshold_size_big))))
   # Measurement selection of small individuals
   little <- purrr::map(condition, ~ dataframe1 %>%
                          dplyr::filter(species_fao_code == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass < as.numeric(.x[3])))
   little <- do.call(rbind.data.frame, little)
-  little <- dataframe1 %>% dplyr::filter(!(species_fao_code %in% species)) %>% dplyr::bind_rows(little)
+  little <- dataframe1 %>% dplyr::filter(!(species_fao_code %in% species_big)) %>% dplyr::bind_rows(little)
   # Calculation of the number of measurements of small individuals (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   little <- little %>%
     dplyr::group_by(sample_id) %>%
@@ -3141,7 +3140,7 @@ check_little_big_inspector <- function(dataframe1,
 #' @param dataframe4 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param vessel_type {\link[base]{character}} expected. Default values: c("6", "2"). List of two elements, the first is the seine vessel type code, and the second is the baitboat type code.
-#' @param weight_limit {\link[base]{numeric}} expected. Default values: 100. Seiner weight threshold limit
+#' @param threshold_weight {\link[base]{numeric}} expected. Default values: 100. Seiner threshold weight
 #' @param threshold {\link[base]{numeric}} expected. Default values: 0.95. Percentage threshold between weight and weighted weight for seiners
 #' @param sampletype_code_landing_baitboat {\link[base]{character}} expected. Default values: c("11"). List of sample type codes for baitboat fresh landings
 #' @param landingtype_baitboat {\link[base]{character}} expected. Default values: c("L-YFT-10", "L-BET-10", "L-TUN-10"). List of codes for fresh baitboat landings
@@ -3175,7 +3174,7 @@ check_weighting_inspector <- function(dataframe1,
                                       dataframe4,
                                       output,
                                       vessel_type = c("6", "2"),
-                                      weight_limit = 100,
+                                      threshold_weight = 100,
                                       threshold = 0.95,
                                       sampletype_code_landing_baitboat = c("11"),
                                       landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10")) {
@@ -3294,13 +3293,13 @@ check_weighting_inspector <- function(dataframe1,
     ))
   }
   if (codama::r_type_checking(
-    r_object = weight_limit,
+    r_object = threshold_weight,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = weight_limit,
+      r_object = threshold_weight,
       type = "numeric",
       length = 1L,
       output = "message"
@@ -3372,7 +3371,7 @@ check_weighting_inspector <- function(dataframe1,
       sum_landing_weight_bis = dplyr::coalesce(sum_landing_weight, 0)
     )
   # Check
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weight > weight_limit, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weight > threshold_weight, "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold), "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > 1, "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
@@ -4175,7 +4174,7 @@ check_distribution_inspector <- function(dataframe1,
 #' @param activity_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity
 #' @param vms_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position VMS
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param nb_positions_vms_min {\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.
+#' @param minimum_number_vms {\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.
 #' @param threshold {\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -4205,7 +4204,7 @@ check_anapo_inspector <- function(dataframe1,
                                   activity_crs = 4326,
                                   vms_crs = 4326,
                                   output,
-                                  nb_positions_vms_min = 20,
+                                  minimum_number_vms = 20,
                                   threshold = 10) {
   # 0 - Global variables assignement ----
   vms_date <- NULL
@@ -4319,13 +4318,13 @@ check_anapo_inspector <- function(dataframe1,
     ))
   }
   if (codama::r_type_checking(
-    r_object = nb_positions_vms_min,
+    r_object = minimum_number_vms,
     type = "numeric",
     length = 1L,
     output = "logical"
   ) != TRUE) {
     return(codama::r_type_checking(
-      r_object = nb_positions_vms_min,
+      r_object = minimum_number_vms,
       type = "numeric",
       length = 1L,
       output = "message"
@@ -4417,7 +4416,7 @@ check_anapo_inspector <- function(dataframe1,
   # Check the maximum score between activity and VMS
   dataframe1[!is.na(dataframe1$max_score) & dataframe1$max_score >= 0.5, "logical"] <- TRUE
   # Check if the number of vms for the day exceeds the threshold
-  dataframe1[dataframe1$nb_vms_bis < nb_positions_vms_min, "logical"] <- FALSE
+  dataframe1[dataframe1$nb_vms_bis < minimum_number_vms, "logical"] <- FALSE
   # Recovers all activity positions for the detailed table
   # Data with calcul VMS
   dataframe_detail <- merge(dataframe_detail, dataframe_calcul, by = c("activity_id", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position"), all.x = TRUE)
@@ -4923,7 +4922,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Harbour landing` = harbour_label_landing_trip_previous,
             `Harbour departure` = harbour_label_departure
           )
-          # Uses a function which indicates whether the selected trips contain RF1 inconsistent with limit values
+          # Uses a function which indicates whether the selected trips contain RF1 inconsistent with threshold values
           check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_tide, dataframe3 = data_tide, output = "report")
           # Uses a function to format the table
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
@@ -4979,7 +4978,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Activity weight` = activity_weight,
             `Sum catch weight` = sum_catch_weight
           )
-          # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid limits
+          # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid threshold
           check_length_class_inspector_data <- check_length_class_inspector(dataframe1 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
           check_length_class <- table_display_trip(check_length_class_inspector_data, samplespeciesmeasure_select[, colnames_samplespeciesmeasure_id], type_inconsistency = "error")
@@ -4993,7 +4992,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Number individuals measured sample` = sum_measuredcount,
             `Sum numbers individuals size class` = sum_count
           )
-          # Uses a function which indicates whether that sea surface temperature is consistent with the valid limits
+          # Uses a function which indicates whether that sea surface temperature is consistent with the valid threshold
           check_temperature_inspector_data <- check_temperature_inspector(dataframe1 = activity_select, output = "report")
           # Uses a function to format the table
           check_temperature <- table_display_trip(check_temperature_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")

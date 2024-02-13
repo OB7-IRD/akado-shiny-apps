@@ -9,9 +9,9 @@ check_little_big_inspector(
   dataframe2,
   dataframe3,
   output,
-  species = c("YFT", "YFT", "BET", "BET", "ALB", "ALB"),
-  measuretype = c("PD1", "FL", "PD1", "FL", "PD1", "FL"),
-  sizelimit = c(24, 80, 25, 77, 23.5, 78),
+  species_big = c("YFT", "YFT", "BET", "BET", "ALB", "ALB"),
+  size_measure_type_big = c("PD1", "FL", "PD1", "FL", "PD1", "FL"),
+  threshold_size_big = c(24, 80, 25, 77, 23.5, 78),
   size_measure_type = c("FL", "PD1"),
   threshold = 0.9
 )
@@ -25,11 +25,11 @@ check_little_big_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{species}{{\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying big fish (other values are small fish)}
+\item{species_big}{{\link[base]{character}} expected. Default values:  c("YFT", "YFT", "BET", "BET", "ALB", "ALB"). Vector of the species. First criterion for identifying big fish (other values are small fish)}
 
-\item{measuretype}{{\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying big fish (other values are small fish)}
+\item{size_measure_type_big}{{\link[base]{character}} expected. Default values: c("PD1", "FL", "PD1", "FL", "PD1", "FL"). Vector of the size measure type. Second criterion for identifying big fish (other values are small fish)}
 
-\item{sizelimit}{{\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector for defining the lower or equal limit for size measurement. Third criterion for identifying big fish (other values are small fish)}
+\item{threshold_size_big}{{\link[base]{numeric}} expected. Default values: c(24, 80, 25, 77, 23.5, 78). Vector for defining the lower or equal for threshold size measurement. Third criterion for identifying big fish (other values are small fish)}
 
 \item{size_measure_type}{{\link[base]{character}} expected. Default values: c("FL", "PD1"). Vector with the preferred type of size measurement for small fish and then for big fish}
 

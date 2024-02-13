@@ -11,7 +11,7 @@ check_weighting_inspector(
   dataframe4,
   output,
   vessel_type = c("6", "2"),
-  weight_limit = 100,
+  threshold_weight = 100,
   threshold = 0.95,
   sampletype_code_landing_baitboat = c("11"),
   landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10")
@@ -30,7 +30,7 @@ check_weighting_inspector(
 
 \item{vessel_type}{{\link[base]{character}} expected. Default values: c("6", "2"). List of two elements, the first is the seine vessel type code, and the second is the baitboat type code.}
 
-\item{weight_limit}{{\link[base]{numeric}} expected. Default values: 100. Seiner weight threshold limit}
+\item{threshold_weight}{{\link[base]{numeric}} expected. Default values: 100. Seiner threshold weight}
 
 \item{threshold}{{\link[base]{numeric}} expected. Default values: 0.95. Percentage threshold between weight and weighted weight for seiners}
 

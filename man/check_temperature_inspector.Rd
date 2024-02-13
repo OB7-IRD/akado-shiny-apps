@@ -2,22 +2,22 @@
 % Please edit documentation in R/function.R
 \name{check_temperature_inspector}
 \alias{check_temperature_inspector}
-\title{Gives the inconsistencies between activity sea surface temperature and valid limits}
+\title{Gives the inconsistencies between activity sea surface temperature and valid threshold}
 \usage{
-check_temperature_inspector(dataframe1, output, limit = c(15, 32))
+check_temperature_inspector(dataframe1, output, threshold = c(15, 32))
 }
 \arguments{
 \item{dataframe1}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.}
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{limit}{{\link[base]{numeric}} expected. Default values: 15 and 32. Vector containing the lower and upper acceptable limits for sea surface temperature.}
+\item{threshold}{{\link[base]{numeric}} expected. Default values: 15 and 32. Vector containing the lower and upper acceptable threshold for sea surface temperature.}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 }
 \description{
-The purpose of the check_temperature_inspector function is to provide a table of data that contains an inconsistency between the sea surface temperature for the activity and valid limits
+The purpose of the check_temperature_inspector function is to provide a table of data that contains an inconsistency between the sea surface temperature for the activity and valid threshold
 }
 \details{
 The input dataframe must contain all these columns for the function to work :

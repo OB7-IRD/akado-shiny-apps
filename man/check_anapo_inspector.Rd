@@ -11,7 +11,7 @@ check_anapo_inspector(
   activity_crs = 4326,
   vms_crs = 4326,
   output,
-  nb_positions_vms_min = 20,
+  minimum_number_vms = 20,
   threshold = 10
 )
 }
@@ -28,7 +28,7 @@ check_anapo_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{nb_positions_vms_min}{{\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.}
+\item{minimum_number_vms}{{\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.}
 
 \item{threshold}{{\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.}
 }

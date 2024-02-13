@@ -2,7 +2,7 @@
 % Please edit documentation in R/function.R
 \name{check_raising_factor_inspector}
 \alias{check_raising_factor_inspector}
-\title{Gives the inconsistencies between RF1 and limits values}
+\title{Gives the inconsistencies between RF1 and threshold values}
 \usage{
 check_raising_factor_inspector(
   dataframe1,
@@ -12,7 +12,7 @@ check_raising_factor_inspector(
   species = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"),
   speciesfate = "6",
   vesselactivity = c("25", "27", "29"),
-  limit = c(0.9, 1.1)
+  threshold = c(0.9, 1.1)
 )
 }
 \arguments{
@@ -30,13 +30,13 @@ check_raising_factor_inspector(
 
 \item{vesselactivity}{{\link[base]{character}} expected. Default values: c("25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.}
 
-\item{limit}{{\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable limits for RF1.}
+\item{threshold}{{\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable threshold for RF1.}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 }
 \description{
-The purpose of the check_raising_factor_inspector function is to provide a table of data that contains an inconsistency with the RF1 and the valid limits (Default : 0.9 ; 1.1)
+The purpose of the check_raising_factor_inspector function is to provide a table of data that contains an inconsistency with the RF1 and the valid threshold (Default : 0.9 ; 1.1)
 }
 \details{
 The input dataframe must contain all these columns for the function to work :
