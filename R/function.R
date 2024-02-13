@@ -4531,8 +4531,8 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
           db_host = config_data()[["databases_configuration"]][["observe_vmot6"]][["host"]],
           db_port = config_data()[["databases_configuration"]][["observe_vmot6"]][["port"]]
         )
-        # If the database is "observe_", read, transform and execute the SQL query that selects the trips according to the user parameters
-        if (any(grep("observe_", data_connection[1]))) {
+        # If the database is "observe", read, transform and execute the SQL query that selects the trips according to the user parameters
+        if (any(grep("observe", data_connection[1]))) {
           # Selected trip with the vessel code and the end date of the trip
           if (isTruthy(parent_in$vessel_number) && isTruthy(parent_in$trip_end_date)) {
             trip_id_data <- furdeb::data_extraction(
@@ -4642,8 +4642,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           db_host = config_data()[["databases_configuration"]][["observe_vmot6"]][["host"]],
           db_port = config_data()[["databases_configuration"]][["observe_vmot6"]][["port"]]
         )
-        # If the database is "observe_", read, transform and execute the SQL query that selects the trips according to the user parameters
-        if (any(grep("observe_", data_connection[1]))) {
+        # If the database is "observe", read, transform and execute the SQL query that selects the trips according to the user parameters
+        if (any(grep("observe", data_connection[1]))) {
           # Uses a function to extract data from activity
           activity_select <- furdeb::data_extraction(
             type = "database",
