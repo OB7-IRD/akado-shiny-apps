@@ -5225,10 +5225,10 @@ window_button_download <- function(number) {
   )
 }
 
-table_ui <- function(id, title, text = NULL) {
+table_ui <- function(id, title, size_box = "col-sm-12 col-md-6 col-lg-6", text = NULL) {
   div(
     id = paste0("div_", id),
-    class = "col-sm-12 col-md-6 col-lg-4",
+    class = size_box,
     shinydashboard::box(
       width = "100%",
       title = title,

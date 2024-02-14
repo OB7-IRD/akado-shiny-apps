@@ -194,7 +194,8 @@ app_ui <- function(request) {
         tabName = "anapo",
         fluidPage(
           table_ui(id = "check_anapo", title = "Anapo", text = "<ul><li>There must be at least 20 VMS positions during the day</li>
-                 <li>There must be at least one VMS position nearer than 10 miles away OR the score (resulting from geographical and temporal distance) must be greater than or equal to 0.5 OR the position must be in a harbour</li></ul>")
+                 <li>There must be at least one VMS position nearer than 10 miles away OR the score (resulting from geographical and temporal distance) must be greater than or equal to 0.5 OR the position must be in a harbour</li></ul>",
+                 size_box = "col-sm-12 col-md-12 col-lg-12")
         )
       ),
       shinydashboard::tabItem(
