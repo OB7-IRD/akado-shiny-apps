@@ -5131,7 +5131,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = "activity_id")
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
             # Add button and data for plot in table
-            check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_date","activity_data", "trip_data"), name_button = "button_anapo")
+            check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_date","activity_data", "trip_data"), name_button = "button_anapo", choice_select_row="all")
             # Uses a function to format the table
             check_anapo <- table_display_trip(check_anapo, activity_select[, colnames_activity_id], type_inconsistency = "error")
             check_anapo$min_distance <- trunc(check_anapo$min_distance * 1000) / 1000
@@ -5330,17 +5330,41 @@ data_to_text <- function(name_data, name_col, name_button, colname_id, colname_p
 }
 
 # Function to create the button in the table that will create the plot
-data_button_plot <- function(data_plot, data_display, data_id, colname_id, colname_plot, colname_info, name_button) {
+data_button_plot <- function(data_plot, data_display, data_id, colname_id, colname_plot, colname_info, name_button, choice_select_row = "error") {
   # Global variables assignement
   buttontmp <- NULL
+  # Arguments verification
+  if (codama::r_type_checking(
+    r_object = choice_select_row,
+    type = "character",
+    allowed_value = c("all", "error", "valid"),
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = choice_select_row,
+      type = "character",
+      allowed_value = c("all", "error", "valid"),
+      output = "message"
+    ))
+  }
   # Add line identification
   data_plot <- merge(data_id, data_plot, by.x = colname_id, by.y = colname_id, all.x = TRUE)
   # Add button and data for plot in table
   code_txt <- data_to_text(name_data = "data_plot", name_col = "buttontmp", name_button = '"button&"', colname_id = colname_id, colname_plot = colname_plot, colname_info = colname_info)
   eval(parse(text = code_txt))
   data_display <- merge(data_display, data_plot, by = colname_id)
+  # Select the lines that will display a plot
+  if(choice_select_row == "all"){
+    select_row<-rep(TRUE,nrow(data_display))
+  }
+  if(choice_select_row == "error"){
+    select_row<-data_display$logical == FALSE
+  }
+  if(choice_select_row == "valid"){
+    select_row<-data_display$logical == TRUE
+  }
   data_display$button <- NA
-  data_display$button[data_display$logical == FALSE] <- sapply(which(data_display$logical == FALSE), function(c) {
+  data_display$button[select_row] <- sapply(which(select_row), function(c) {
     as.character(shiny::actionButton(inputId = data_display$buttontmp[c], label = "Detail", onclick = paste0('Shiny.setInputValue(\"', name_button, '\", this.id, {priority: \"event\"})')))
   })
   data_display <- subset(data_display, select = -c(buttontmp))
