@@ -5186,7 +5186,7 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
 }
 
 # Shiny function : table display
-table_server <- function(id, data, number, parent_in, text_error_trip_select, trip_select, calcul_check, autowidth = FALSE, columndefs = NULL) {
+table_server <- function(id, data, number, parent_in, text_error_trip_select, trip_select, calcul_check, column_no_wrap = NULL) {
   moduleServer(id, function(input, output, session) {
     output$table <- DT::renderDT(
       {
@@ -5194,23 +5194,23 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
         if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
           data <- data()[[number]]
           if (parent_in$type_line_check_trip == "inconsistent") {
-            return(data[data$Check != as.character(icon("check")), ])
-          } else {
-            return(data)
+            data<-data[data$Check != as.character(icon("check")), ]
           }
+          data<-DT::datatable(data, escape = FALSE,
+                              rownames = FALSE,
+                              extensions = "Buttons",
+                              options = list(
+                                lengthChange = FALSE, scrollX = TRUE, dom = "Bfrtip",
+                                buttons =
+                                  list(
+                                    list(extend = "copy", text = "Copy data displayed"),
+                                    list(extend = "collection", text = "Download all data", action = DT::JS(paste0("function ( e, dt, node, config ) {Shiny.setInputValue('button_download', ", number, ", {priority: 'event'});}")))
+                                  )
+                              )) %>% DT::formatStyle(columns = column_no_wrap, "white-space"="nowrap")
+          return(data)
+
         }
-      },
-      escape = FALSE,
-      rownames = FALSE,
-      extensions = "Buttons",
-      options = list(
-        lengthChange = FALSE, scrollX = TRUE, autoWidth = autowidth, columnDefs = unlist(list(list(list(className = "dt-left", targets = "_all")), columndefs), recursive = FALSE), dom = "Bfrtip",
-        buttons =
-          list(
-            list(extend = "copy", text = "Copy data displayed"),
-            list(extend = "collection", text = "Download all data", action = DT::JS(paste0("function ( e, dt, node, config ) {Shiny.setInputValue('button_download', ", number, ", {priority: 'event'});}")))
-          )
-      )
+      }
     )
   })
 }
