@@ -4804,6 +4804,16 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = activity_select$activity_id)
           )
+          # Uses a function to extract data from transmittingbuoy
+          data_transmittingbuoy <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "transmittingbuoy.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = activity_select$activity_id)
+          )
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           if (!is.null(config_data()[["databases_configuration"]][["vms"]])) {
@@ -5105,8 +5115,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             # Recovers all trip positions
             check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = ifelse(length(na.omit(unique(activity_select$activity_crs))) == 0, 4326, na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(na.omit(unique(data_vms$vms_crs))) == 0, 4326, na.omit(unique(data_vms$vms_crs))), output = "report")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], activity_select[, c("activity_id", "trip_id", "activity_number")], by = "activity_id")
+            # Add information on whether the activity is linked to a grounding (object or buoy) or not in data plot
+            data_tmp_grounding <- column_grounding(data = check_anapo_inspector_dataplot, data_transmittingbuoy = data_transmittingbuoy)
+            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, data_tmp_grounding, by = "activity_id")
+            # Selecting useful data for the plot
             check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot %>%
-              dplyr::select("trip_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs") %>%
+              dplyr::select("trip_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs", "grounding") %>%
               dplyr::group_by(trip_id) %>%
               dplyr::distinct()
             # Retrieves activity positions for the previous, current and next day
@@ -5120,18 +5134,22 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo_inspector_dataplot_range_date %>%
               dplyr::group_by(date_group, trip_id, activity_id) %>%
               dplyr::distinct()
-            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_range_date", name_col = "trip_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number"), colname_info = NULL)
+            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_range_date", name_col = "trip_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number", "grounding"), colname_info = NULL)
             eval(parse(text = code_txt))
             # Data formatting controlled activity
-            check_anapo_inspector_dataplot_activity<-check_anapo_inspector_dataplot %>% dplyr::select(c("activity_id", "activity_date", "activity_time", "activity_position", "activity_number")) %>% dplyr::distinct()
-            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_activity", name_col = "activity_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number"), colname_info = NULL)
+            check_anapo_inspector_dataplot_activity<-check_anapo_inspector_dataplot %>% dplyr::select(c("activity_id", "activity_date", "activity_time", "activity_position", "activity_number", "grounding")) %>% dplyr::distinct()
+            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_activity", name_col = "activity_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number", "grounding"), colname_info = NULL)
             eval(parse(text = code_txt))
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("activity_number", "activity_time", "activity_date"))
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = "activity_id")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = "activity_id")
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
+            # Add information on whether the activity is linked to a grounding (object or buoy) or not in table
+            check_anapo_inspector_data_table <- check_anapo_inspector_data[[1]]
+            data_tmp_grounding <- column_grounding(data = check_anapo_inspector_data_table, data_transmittingbuoy = data_transmittingbuoy)
+            check_anapo_inspector_data_table<- merge(check_anapo_inspector_data_table, data_tmp_grounding, by = "activity_id")
             # Add button and data for plot in table
-            check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_date","activity_data", "trip_data"), name_button = "button_anapo", choice_select_row="all")
+            check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data_table, data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_date","activity_data", "trip_data", "grounding"), name_button = "button_anapo", choice_select_row="all")
             # Uses a function to format the table
             check_anapo <- table_display_trip(check_anapo, activity_select[, colnames_activity_id], type_inconsistency = "error")
             check_anapo$min_distance <- trunc(check_anapo$min_distance * 1000) / 1000
@@ -5141,6 +5159,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               `Number of VMS` = nb_vms,
               `Minimale distance` = min_distance,
               `Maximum score` = max_score,
+              `Grounding` = grounding,
               `Details problem` = button
             )
           } else {
@@ -5448,17 +5467,21 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, date, data_activity, dat
     data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc(duration * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000))
   }
   if (!all(is.na(data_activity$activity_position))) {
-    data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>"))
+    data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Position:%{lat}\u00B0,%{lon}\u00B0","<br>Grounding:", grounding, "<extra></extra>"))
   }
   if (!all(is.na(data_trip$activity_position))) {
-    data_geo_trip <- data_geo_trip %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number))
+    data_geo_trip <- data_geo_trip %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Grounding:", grounding))
   }
     # Plot
   plot <- plotly::plot_ly()%>%
     plotly::layout(mapbox = list(style = "carto-positron", pitch = 0, zoom = 6))
   if (!all(is.na(data_trip$activity_position))) {
+    data_geo_trip_grounding <- data_geo_trip %>% dplyr::filter(grounding)
+    data_geo_trip_Ngrounding <- data_geo_trip %>% dplyr::filter(!grounding)
     plot <- plot %>%
-      plotly::add_trace(name = "Activity", data = data_geo_trip, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(0, 255, 66)", size = 10), line = list(color = "rgb(0, 255, 66)"))
+      plotly::add_trace(name = "Activity (solely grounding object)", data = data_geo_trip_grounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(142, 52, 0)", size = 10))
+    plot <- plot %>%
+      plotly::add_trace(name = "Activity", data = data_geo_trip_Ngrounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(0, 255, 66)", size = 10), line = list(color = "rgb(0, 255, 66)"))
   }
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
@@ -5466,10 +5489,105 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, date, data_activity, dat
   }
   if (!all(is.na(data_activity$activity_position))) {
     plot <- plot %>%
-    plotly::add_trace(name = "Supecte activity", data = data_geo_activity, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", hovertemplate = ~text, marker = list(color = "rgb(255, 0, 0)", size = 10)) %>%
+    plotly::add_trace(name = "Suspicious activity", data = data_geo_activity, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", hovertemplate = ~text, marker = list(color = "rgb(255, 0, 0)", size = 10)) %>%
     plotly::layout(mapbox = list(center = list(lon = data_geo_activity$X, lat = data_geo_activity$Y)))
   }
   return(plot)
+}
+
+column_grounding <- function(data,
+                             data_transmittingbuoy,
+                             transmittingbuoyoperation_grounding_code = c("4", "5")) {
+  # 1 - Arguments verification ----
+  if (codama::r_table_checking(
+    r_table = data,
+    type = "data.frame",
+    column_name = c("activity_id"),
+    column_type = c("character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = data,
+      type = "data.frame",
+      column_name = c("activity_id"),
+      column_type = c("character"),
+      output = "message"
+    )
+  } else {
+    data <- data[, c("activity_id"), drop = FALSE]
+  }
+  if (codama::r_table_checking(
+    r_table = data_transmittingbuoy,
+    type = "data.frame",
+    column_name = c("activity_id", "transmittingbuoyoperation_code"),
+    column_type = c("character", "character"),
+    output = "logical"
+  ) != TRUE) {
+    codama::r_table_checking(
+      r_table = data_transmittingbuoy,
+      type = "data.frame",
+      column_name = c("activity_id", "transmittingbuoyoperation_code"),
+      column_type = c("character", "character"),
+      output = "message"
+    )
+  } else {
+    data_transmittingbuoy <- data_transmittingbuoy[, c("activity_id", "transmittingbuoyoperation_code")]
+  }
+  if (codama::r_type_checking(
+    r_object = transmittingbuoyoperation_grounding_code,
+    type = "character",
+    output = "logical"
+  ) != TRUE) {
+    return(codama::r_type_checking(
+      r_object = transmittingbuoyoperation_grounding_code,
+      type = "character",
+      output = "message"
+    ))
+  }
+  # 2 - Data design ----
+  select <- data$activity_id
+  nrow_first <- length(unique(select))
+  data<- data %>% dplyr::distinct()
+  data$grounding <- FALSE
+  # Recovers activity linked solely to grounding
+  activity_grounding_transmittingbuoy <- data_transmittingbuoy %>%
+    dplyr::group_by(activity_id) %>%
+    dplyr::summarise(all_grounding = sum(transmittingbuoyoperation_code %in% transmittingbuoyoperation_grounding_code) == dplyr::n()) %>%
+    dplyr::filter(all_grounding)
+  if (length(activity_grounding_transmittingbuoy) >0) {
+    comparison_transmittingbuoy <- codama::vector_comparison(
+      first_vector = data$activity_id,
+      second_vector = activity_grounding_transmittingbuoy$activity_id,
+      comparison_type = "difference",
+      output = "report"
+    )
+    data$grounding <- data$grounding | comparison_transmittingbuoy$logical
+  }
+  if ((sum(data$grounding, na.rm = TRUE) + sum(!data$grounding, na.rm = TRUE)) != nrow_first | sum(is.na(data$grounding))>0) {
+    all <- c(select, data$activity_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    if (sum(is.na(data$grounding))>0) {
+      text <- paste0(text, "Unknown control result", "(", sum(is.na(data$grounding)), "):", paste0(data$activity_id[is.na(data$grounding)], collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  return(data)
 }
 
 # Function to list elements with a number of occurrences other than 2
