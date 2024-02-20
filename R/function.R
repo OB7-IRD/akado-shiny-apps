@@ -4379,7 +4379,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_calcul$activity_position_geom <- dataframe3 %>%
     sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = FALSE) %>%
     sf::st_geometry()
-  # Calculation of the minimum distance between the activity and the nearest day's VMS
+  # Calculation of the minimum distance between the activity and the nearest day's VMS in nautical mile
   dataframe_calcul <- dataframe_calcul %>%
     dplyr::mutate(distance = units::drop_units(sf::st_distance(x = activity_position_geom, y = vms_position_geom, by_element = TRUE) / 1852))
   # Remove formats spatial data
@@ -4397,18 +4397,18 @@ check_anapo_inspector <- function(dataframe1,
   # Gives a temporary hour for activities that are missing an hour
   dataframe_calcul$activity_time_bis <- dataframe_calcul$activity_time
   dataframe_calcul[is.na(dataframe_calcul$activity_time), "activity_time_bis"] <- "00:00:00"
-  # Calculates time between activity and VMS point
+  # Calculates time between activity and VMS point in milliseconds
   dataframe_calcul <- dataframe_calcul %>%
     dplyr::mutate(activity_date_time = as.POSIXct(paste(vms_date, activity_time_bis)), vms_date_time = as.POSIXct(paste(vms_date, vms_time)))
   dataframe_calcul <- dataframe_calcul %>%
-    dplyr::mutate(duration = abs(activity_date_time - vms_date_time))
+    dplyr::mutate(duration = difftime(activity_date_time, vms_date_time, units = "secs") * 1000)
   # Gives a duration for activities that are missing an hour
   dataframe_calcul[is.na(dataframe_calcul$activity_time), "duration"] <- 1
   # Score calculation
   dataframe_calcul <- dataframe_calcul %>%
-    dplyr::mutate(score = (2^(-distance / threshold)) * (2^(-as.numeric(duration) / 120)))
+    dplyr::mutate(score = (2^(-distance / threshold)) * (2^(-as.numeric(duration) / (2*60*60*1000))))
   dataframe_calcul[dataframe_calcul$distance > threshold * 2, "score"] <- 0
-  dataframe_calcul[as.numeric(dataframe_calcul$duration) > 120 * 2, "score"] <- 0
+  dataframe_calcul[as.numeric(dataframe_calcul$duration) > (4*60*60*1000), "score"] <- 0
   dataframe_score_max <- dataframe_calcul %>%
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(max_score = ifelse(length(score)>0, max(score), -Inf))
@@ -5464,7 +5464,7 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, date, data_activity, dat
   }
   # text hovertemplate
   if (!all(is.na(data_vms$vms_position))) {
-    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc(duration * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000))
+    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc((duration / 60000) * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000))
   }
   if (!all(is.na(data_activity$activity_position))) {
     data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Position:%{lat}\u00B0,%{lon}\u00B0","<br>Grounding:", grounding, "<extra></extra>"))
