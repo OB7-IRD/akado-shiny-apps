@@ -5480,7 +5480,7 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   if (!all(is.na(data_trip$activity_position))) {
     data_geo_trip <- data_geo_trip %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Grounding:", grounding))
   }
-    # Plot
+  # Plot
   plot <- plotly::plot_ly()%>%
     plotly::layout(mapbox = list(style = "carto-positron", pitch = 0, zoom = 6))
   if (!all(is.na(data_trip$activity_position))) {
@@ -5489,11 +5489,11 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
     plot <- plot %>%
       plotly::add_trace(name = "Activity (solely grounding object)", data = data_geo_trip_grounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(142, 52, 0)", size = 10))
     plot <- plot %>%
-      plotly::add_trace(name = "Activity", data = data_geo_trip_Ngrounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(0, 255, 66)", size = 10), line = list(color = "rgb(0, 255, 66)"))
+      plotly::add_trace(name = "Activity", data = data_geo_trip_Ngrounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = colorRampPalette(c("#B2FF00","#006415"))(nrow(data_geo_trip_Ngrounding)), size = 10), line = list(color = "#11BC00"))
   }
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
-      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(0, 50, 255)", size = 10), line = list(color = "rgb(0, 50, 255)"))
+      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = colorRampPalette(c("#00F7FF","#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF"))
   }
   if (!all(is.na(data_activity$activity_position))) {
     plot <- plot %>%
