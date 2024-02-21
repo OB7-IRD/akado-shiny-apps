@@ -4367,11 +4367,18 @@ check_anapo_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1[comparison_harbour$logical, "logical"] <- TRUE
-  dataframe_detail <- merge(dataframe3, dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], by.x = c("vms_date", "vessel_code"), by.y = c("activity_date", "vessel_code"))
+  # Retrieves VMS positions for the previous, current and next day
+  dataframe3$date_group <- dataframe3$vms_date
+  dataframe3_prior <- dataframe3 %>% dplyr::mutate(date_group = vms_date - 1)
+  dataframe3_post <- dataframe3 %>% dplyr::mutate(date_group = vms_date + 1)
+  dataframe3 <- rbind(dataframe3, dataframe3_prior, dataframe3_post) %>%
+    dplyr::group_by(date_group, vms_position) %>%
+    dplyr::distinct()
+  dataframe_detail <- merge(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by.x = c("activity_date", "vessel_code"), by.y = c("date_group", "vessel_code"))
   # Check if activity whether not in harbour but with a position of indication
   dataframe1_nharbour <- dataframe1[!comparison_harbour$logical, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")]
   dataframe1_nharbour <- dataframe1_nharbour[!is.na(dataframe1_nharbour$activity_position),]
-  dataframe3 <- merge(dataframe3, dataframe1_nharbour, by.x = c("vms_date", "vessel_code"), by.y = c("activity_date", "vessel_code"))
+  dataframe3 <- merge(dataframe1_nharbour, dataframe3, by.x = c("activity_date", "vessel_code"), by.y = c("date_group", "vessel_code"))
   # Formats spatial data
   dataframe_calcul <- dataframe3 %>%
     sf::st_as_sf(wkt = "vms_position", crs = vms_crs, remove = FALSE)
@@ -4419,12 +4426,8 @@ check_anapo_inspector <- function(dataframe1,
   dataframe1[dataframe1$nb_vms_bis < minimum_number_vms, "logical"] <- FALSE
   # Recovers all activity positions for the detailed table
   # Data with calcul VMS
-  dataframe_detail <- merge(dataframe_detail, dataframe_calcul, by = c("activity_id", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position"), all.x = TRUE)
-  # Data without calcul VMS
-  dataframe_detail <- dataframe_detail %>% dplyr::rename(
-    activity_date = vms_date,
-  )
-  dataframe_detail <- dplyr::bind_rows(dataframe_detail, dplyr::anti_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by = c("activity_date" = "vms_date", "vessel_code" = "vessel_code")))
+  dataframe_detail <- merge(dataframe_detail, dataframe_calcul, by = c("activity_id","activity_date", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position"), all.x = TRUE)
+  dataframe_detail <- dplyr::bind_rows(dataframe_detail, dplyr::anti_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by = c("activity_date" = "activity_date", "vessel_code" = "vessel_code")))
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
   dataframe_detail <- subset(dataframe_detail, select = -c(vessel_code, min_distance, activity_time_bis, activity_date_time, vms_date_time))
@@ -5144,7 +5147,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = "activity_id")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = "activity_id")
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
-            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot", name_col = "data_plot", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vms_position", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_date","activity_data", "trip_data", "grounding"))
+            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot", name_col = "data_plot", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vms_position","vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_date","activity_data", "trip_data", "grounding"))
             eval(parse(text = code_txt))
             # Number of the table containing the Anapo plot information in calcul_check_server
             check_anapo_inspector_dataplot$num_table <- 28
@@ -5452,7 +5455,7 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, date, data_activity, dat
   activity_number <- NULL
   # Format date time and order
   if (!all(is.na(data_vms$vms_position))) {
-    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(date, vms_time)))
+    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time)))
     data_vms <- data_vms[order(data_vms$date_time), ]
   }
   data_trip <- data_trip %>% dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time)))
@@ -5469,7 +5472,7 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, date, data_activity, dat
   }
   # text hovertemplate
   if (!all(is.na(data_vms$vms_position))) {
-    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc((duration / 60000) * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000))
+    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", vms_date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc((duration / 60000) * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000))
   }
   if (!all(is.na(data_activity$activity_position))) {
     data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Position:%{lat}\u00B0,%{lon}\u00B0","<br>Grounding:", grounding, "<extra></extra>"))
