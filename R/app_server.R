@@ -202,10 +202,9 @@ app_server <- function(input, output, session) {
     data <- eval(parse(text = data_all_click[[1]]))
     activity_crs <- data_all_click[[3]]
     vms_crs <- data_all_click[[4]]
-    date <- data_all_click[[5]]
-    activity_data <- eval(parse(text = data_all_click[[6]]))
-    trip_data <- eval(parse(text = data_all_click[[7]]))
-    plot_anapo(data_vms = data, crs_vms = vms_crs, crs_activity = activity_crs, date = date, data_activity = activity_data, data_trip = trip_data)
+    activity_data <- eval(parse(text = data_all_click[[5]]))
+    trip_data <- eval(parse(text = data_all_click[[6]]))
+    plot_anapo(data_vms = data, crs_vms = vms_crs, crs_activity = activity_crs, data_activity = activity_data, data_trip = trip_data)
   })
 
   # Anapo control window

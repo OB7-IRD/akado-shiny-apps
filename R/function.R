@@ -5147,7 +5147,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = "activity_id")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = "activity_id")
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
-            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot", name_col = "data_plot", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vms_position","vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_date","activity_data", "trip_data", "grounding"))
+            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot", name_col = "data_plot", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vms_position","vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs","activity_data", "trip_data"))
             eval(parse(text = code_txt))
             # Number of the table containing the Anapo plot information in calcul_check_server
             check_anapo_inspector_dataplot$num_table <- 28
@@ -5443,7 +5443,7 @@ plot_position <- function(data) {
 }
 
 # Function to create the plot of the consistency of the position for the activity and VMS
-plot_anapo <- function(data_vms, crs_vms, crs_activity, date, data_activity, data_trip) {
+plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip) {
   # Local binding global variables
   . <- NULL
   vms_time <- NULL
@@ -5475,7 +5475,7 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, date, data_activity, dat
     data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", vms_date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc((duration / 60000) * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000))
   }
   if (!all(is.na(data_activity$activity_position))) {
-    data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Position:%{lat}\u00B0,%{lon}\u00B0","<br>Grounding:", grounding, "<extra></extra>"))
+    data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Position:%{lat}\u00B0,%{lon}\u00B0","<br>Grounding:", grounding, "<extra></extra>"))
   }
   if (!all(is.na(data_trip$activity_position))) {
     data_geo_trip <- data_geo_trip %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Grounding:", grounding))
