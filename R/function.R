@@ -5461,6 +5461,8 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   duration <- NULL
   score <- NULL
   activity_number <- NULL
+  # Remove missing position in vms
+  data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
   if (!all(is.na(data_vms$vms_position))) {
     data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time)))
