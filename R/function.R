@@ -4387,8 +4387,12 @@ check_anapo_inspector <- function(dataframe1,
     sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = FALSE) %>%
     sf::st_geometry()
   # Calculation of the minimum distance between the activity and the nearest day's VMS in nautical mile
+  # Define nautical miles (as per ICAO notation)
+  units::install_unit("NM", "1852 m", "Nautical mile")
+  threshold <- units::set_units(threshold, NM)
   dataframe_calcul <- dataframe_calcul %>%
-    dplyr::mutate(distance = units::drop_units(sf::st_distance(x = activity_position_geom, y = vms_position_geom, by_element = TRUE) / 1852))
+    dplyr::mutate(distance = sf::st_distance(x = activity_position_geom, y = vms_position_geom, by_element = TRUE))
+  units(dataframe_calcul$distance) <- units::make_units(NM)
   # Remove formats spatial data
   dataframe_calcul <- dataframe_calcul %>%
     sf::st_drop_geometry() %>%
@@ -4413,7 +4417,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_calcul[is.na(dataframe_calcul$activity_time), "duration"] <- 1
   # Score calculation
   dataframe_calcul <- dataframe_calcul %>%
-    dplyr::mutate(score = (2^(-distance / threshold)) * (2^(-as.numeric(duration) / (2*60*60*1000))))
+    dplyr::mutate(score = (2^( units::drop_units(-distance / threshold))) * (2^(-as.numeric(duration) / (2*60*60*1000))))
   dataframe_calcul[dataframe_calcul$distance > threshold * 2, "score"] <- 0
   dataframe_calcul[as.numeric(dataframe_calcul$duration) > (4*60*60*1000), "score"] <- 0
   dataframe_score_max <- dataframe_calcul %>%
