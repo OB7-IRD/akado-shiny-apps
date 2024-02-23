@@ -4381,10 +4381,10 @@ check_anapo_inspector <- function(dataframe1,
   dataframe3 <- merge(dataframe1_nharbour, dataframe3, by.x = c("activity_date", "vessel_code"), by.y = c("date_group", "vessel_code"))
   # Formats spatial data
   dataframe_calcul <- dataframe3 %>%
-    sf::st_as_sf(wkt = "vms_position", crs = vms_crs, remove = FALSE)
+    sf::st_as_sf(wkt = "vms_position", crs = vms_crs, remove = FALSE) %>% sf::st_transform(vms_position, crs = 4326)
   sf::st_geometry(dataframe_calcul) <- "vms_position_geom"
   dataframe_calcul$activity_position_geom <- dataframe3 %>%
-    sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = FALSE) %>%
+    sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = FALSE) %>% sf::st_transform(vms_position, crs = 4326) %>%
     sf::st_geometry()
   # Calculation of the minimum distance between the activity and the nearest day's VMS in nautical mile
   # Define nautical miles (as per ICAO notation)
