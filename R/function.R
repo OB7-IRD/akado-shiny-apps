@@ -4399,7 +4399,8 @@ check_anapo_inspector <- function(dataframe1,
     dplyr::select(-activity_position_geom)
   dataframe_calcul_min <- dataframe_calcul %>%
     dplyr::group_by(activity_id) %>%
-    dplyr::summarise(min_distance = min(distance))
+    dplyr::summarise(min_distance = ifelse(length(distance)>0, min(distance), Inf))
+  units(dataframe_calcul_min$min_distance) <- units::make_units(NM)
   dataframe1 <- merge(dataframe1, dataframe_calcul_min, by = "activity_id", all.x = TRUE)
   # Check if distance between activity and nearest VMS point below threshold
   dataframe1[!is.na(dataframe1$min_distance) & dataframe1$min_distance < threshold, "logical"] <- TRUE
