@@ -193,7 +193,7 @@ app_server <- function(input, output, session) {
   table_server(id = "check_distribution", data = calcul_check, number = 26, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the activity position is consistent for VMS position
-  table_server(id = "check_anapo", data = calcul_check, number = 27, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2,3))
+  table_server(id = "check_anapo", data = calcul_check, number = 27, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3, 12, 13, 14))
 
   # Anapo control plot, display in a window
   output$plot_anapo <- plotly::renderPlotly({

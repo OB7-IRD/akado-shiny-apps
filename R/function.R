@@ -5123,11 +5123,20 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, data_tmp_grounding, by = "activity_id")
             # Selecting useful data for the plot
             check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot %>%
-              dplyr::select("trip_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs", "grounding") %>%
+              dplyr::select("trip_id", "activity_id", "activity_date", "activity_time", "activity_position", "activity_number", "activity_crs", "grounding") %>%
               dplyr::group_by(trip_id) %>%
               dplyr::distinct()
+            # Add position information for activities n, n-1 and n+1 (not just related to grounding)
+            check_anapo_inspector_data_table <- check_anapo_inspector_data[[1]]
+            check_anapo_inspector_data_table <- merge(check_anapo_inspector_data_table, check_anapo_inspector_dataplot_trip[,c("trip_id","activity_id","activity_date","activity_number","grounding","activity_position")], by ="activity_id")
+            check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>% dplyr::mutate(activity_position_display = gsub("POINT\\(|\\)", "", activity_position))
+            check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>% dplyr::mutate(activity_position_prior = replace(activity_position_display, grounding, NA)) %>% dplyr::group_by(trip_id) %>% dplyr::arrange(activity_date, activity_number) %>% tidyr::fill(activity_position_prior, .direction = "down") %>% dplyr::mutate(activity_position_prior = dplyr::lag(activity_position_prior))
+            check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>% dplyr::mutate(activity_position_post = replace(activity_position_display, grounding, NA)) %>% dplyr::group_by(trip_id) %>% dplyr::arrange(activity_date, activity_number) %>% tidyr::fill(activity_position_post, .direction = "up") %>% dplyr::mutate(activity_position_post = dplyr::lead(activity_position_post))
+            check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>%
+              dplyr::ungroup() %>%
+              dplyr::select(-c("trip_id","activity_date", "activity_number", "activity_position"))
             # Retrieves activity positions for the previous, current and next day
-            check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group = activity_date)
+            check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot_trip %>% dplyr::select(-c("activity_id")) %>% dplyr::mutate(date_group = activity_date)
             check_anapo_inspector_dataplot_trip_prior <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group = activity_date - 1)
             check_anapo_inspector_dataplot_trip_post <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group = activity_date + 1)
             check_anapo_inspector_dataplot_range_date <- rbind(check_anapo_inspector_dataplot_trip, check_anapo_inspector_dataplot_trip_prior, check_anapo_inspector_dataplot_trip_post) %>%
@@ -5152,10 +5161,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             # Number of the table containing the Anapo plot information in calcul_check_server
             check_anapo_inspector_dataplot$num_table <- 28
             check_anapo_inspector_dataplot$num_row <- 1:nrow(check_anapo_inspector_dataplot)
-            # Add information on whether the activity is linked to a grounding (object or buoy) or not in table
-            check_anapo_inspector_data_table <- check_anapo_inspector_data[[1]]
-            data_tmp_grounding <- column_grounding(data = check_anapo_inspector_data_table, data_transmittingbuoy = data_transmittingbuoy)
-            check_anapo_inspector_data_table<- merge(check_anapo_inspector_data_table, data_tmp_grounding, by = "activity_id")
             # Add button and data for plot in table
             check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data_table, data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = NULL, colname_info = c("num_table", "num_row"), name_button = "button_anapo", choice_select_row="all")
             # Uses a function to format the table
@@ -5168,6 +5173,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               `Minimale distance` = min_distance,
               `Maximum score` = max_score,
               `Grounding` = grounding,
+              `Position activity` = activity_position_display,
+              `Position previous activity (not grounding)` = activity_position_prior,
+              `Position next activity (not grounding)` = activity_position_post,
               `Details problem` = button
             )
           } else {
