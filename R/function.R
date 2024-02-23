@@ -5117,7 +5117,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           if (exists("data_vms")) {
             # Recovers all trip positions
             check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = ifelse(length(na.omit(unique(activity_select$activity_crs))) == 0, 4326, na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(na.omit(unique(data_vms$vms_crs))) == 0, 4326, na.omit(unique(data_vms$vms_crs))), output = "report")
-            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], activity_select[, c("activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = "activity_id")
+            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], activity_select[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = "activity_id")
             # Add information on whether the activity is linked to a grounding (object or buoy) or not in data plot
             data_tmp_grounding <- column_grounding(data = check_anapo_inspector_dataplot, data_transmittingbuoy = data_transmittingbuoy)
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, data_tmp_grounding, by = "activity_id")
@@ -5149,10 +5149,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_range_date", name_col = "trip_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
             eval(parse(text = code_txt))
             # Data formatting controlled activity
-            check_anapo_inspector_dataplot_activity<-check_anapo_inspector_dataplot %>% dplyr::select(c("activity_id", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code")) %>% dplyr::distinct()
-            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_activity", name_col = "activity_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
+            check_anapo_inspector_dataplot_activity<-check_anapo_inspector_dataplot %>% dplyr::select(c("vessel_code", "trip_enddate", "activity_id", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code")) %>% dplyr::distinct()
+            code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_activity", name_col = "activity_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
             eval(parse(text = code_txt))
-            check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("activity_number", "activity_time", "vesselactivity_code"))
+            check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("vessel_code", "trip_enddate", "activity_number", "activity_time", "vesselactivity_code"))
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = "activity_id")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = "activity_id")
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
