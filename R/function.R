@@ -81,7 +81,7 @@ check_trip_activity_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
@@ -215,7 +215,7 @@ check_fishing_time_inspector <- function(dataframe1,
   dataframe1$logical <- comparison$logical
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, trip_fishingtime, sum_route_fishingtime, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
@@ -351,7 +351,7 @@ check_sea_time_inspector <- function(dataframe1,
   dataframe1 <- dplyr::relocate(.data = dataframe1, trip_seatime, sum_route_seatime, .after = logical)
   # Management of the 0 value for the time at sea
   dataframe1[!is.na(dataframe1$trip_seatime) & dataframe1$trip_seatime == 0, "logical"] <- FALSE
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
@@ -467,7 +467,7 @@ check_landing_consistent_inspector <- function(dataframe1,
   dataframe1[is.na(dataframe1$vessel_capacity), "logical"] <- FALSE
   # Management of the 0 value for vessel capacity
   dataframe1[!is.na(dataframe1$vessel_capacity) & dataframe1$vessel_capacity == 0, "logical"] <- FALSE
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
@@ -611,7 +611,7 @@ check_landing_total_weight_inspector <- function(dataframe1,
   dataframe1[is.na(dataframe1$trip_landingtotalweight), "logical"] <- FALSE
   # Management of missing sum of the landing
   dataframe1[is.na(dataframe1$sum_weightlanding) & !is.na(dataframe1$trip_landingtotalweight) & dataframe1$trip_landingtotalweight > 0, "logical"] <- FALSE
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
@@ -782,7 +782,7 @@ check_temporal_limit_inspector <- function(dataframe1,
   # Management of missing trip start and end date
   dataframe1[is.na(dataframe1$trip_startdate) | is.na(dataframe1$trip_enddate), "logical"] <- FALSE
   dataframe1 <- subset(dataframe1, select = -c(trip_startdate, trip_enddate))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
@@ -894,7 +894,7 @@ check_harbour_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_label_departure, harbour_label_landing_trip_previous, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(harbour_id_departure, harbour_id_landing_trip_previous))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
@@ -1143,7 +1143,7 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe3 <- dplyr::relocate(.data = dataframe3, rf1, .after = logical)
   trip_end_tide_id <- dataframe3$trip_end_tide_id
   dataframe3 <- subset(dataframe3, select = -c(trip_end_tide_id, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, lower_threshold, upper_threshold))
-  if ((sum(dataframe3$logical, na.rm = TRUE) + sum(!dataframe3$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe3$logical)) > 0) {
+  if ((sum(dataframe3$logical, na.rm = TRUE) + sum(!dataframe3$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe3$logical)) > 0) {
     all <- c(select, dataframe3$trip_id)
     number_occurrences <- table(all)
     text <- ""
@@ -1298,7 +1298,7 @@ check_fishing_context_inspector <- function(dataframe1,
   dataframe1$logical[is.na(dataframe1$schooltype_code) | dataframe1$schooltype_code == "0"] <- TRUE
   dataframe1 <- dplyr::relocate(.data = dataframe1, schooltype_code, association_object_count, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(threshold))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
@@ -1445,7 +1445,7 @@ check_operationt_inspector <- function(dataframe1,
   dataframe1$logical <- dataframe1$logical_successstatus_vesselactivity & dataframe1$logical_successstatus_schooltype_indeterminate & dataframe1$logical_successstatus_schooltype & dataframe1$logical_successstatus_weight
   dataframe1 <- dplyr::relocate(.data = dataframe1, vesselactivity_code, successstatus_code, schooltype_code, activity_weight, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(threshold, logical_successstatus_vesselactivity, logical_successstatus_schooltype_indeterminate, logical_successstatus_schooltype, logical_successstatus_weight))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
@@ -1593,7 +1593,7 @@ check_position_inspector <- function(dataframe1,
   dataframe1 <- subset(dataframe1, select = -c(harbour_id))
   activity_sea_land_data_detail <- dataframe1
   dataframe1 <- subset(dataframe1, select = -c(activity_position, activity_crs, logical_ocean, logical_harbour))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
@@ -1731,7 +1731,7 @@ check_weight_inspector <- function(dataframe1,
   dataframe1[is.na(dataframe1$activity_weight) & is.na(dataframe1$sum_catch_weight), "logical"] <- TRUE
   # Management of the 0 value for the weight activity
   dataframe1[!is.na(dataframe1$activity_weight) & dataframe1$activity_weight == 0 & is.na(dataframe1$sum_catch_weight), "logical"] <- TRUE
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
@@ -1900,7 +1900,7 @@ check_length_class_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, species_fao_code, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, threshold, species_fao_code, sizemeasuretype_code))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$samplespeciesmeasure_id)
     number_occurrences <- table(all)
     text <- ""
@@ -2042,7 +2042,7 @@ check_measure_inspector <- function(dataframe1,
   dataframe1[is.na(dataframe1$sum_measuredcount), "logical"] <- FALSE
   # Management of missing count measurements by sample and by species and by size class
   dataframe1[is.na(dataframe1$sum_count), "logical"] <- FALSE
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
@@ -2159,7 +2159,7 @@ check_temperature_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, activity_seasurfacetemperature, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(lower_threshold, upper_threshold))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
@@ -2274,7 +2274,7 @@ check_species_inspector <- function(dataframe1,
   dataframe1$logical <- comparison_species$logical
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, species_fao_code, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
     text <- ""
@@ -2396,7 +2396,7 @@ check_sample_without_measure_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
     text <- ""
@@ -2518,7 +2518,7 @@ check_sample_without_species_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
@@ -2669,7 +2669,7 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(only_one_subsampling, many_subsampling, count_samplespecies_bis, count_subsamplenumber_n0_bis, count_subsamplenumber_0_bis, count_subsamplenumber_1_bis))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_supersample, count_subsamplenumber_n0, count_subsamplenumber_0, count_subsamplenumber_1, count_samplespecies, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
@@ -2795,7 +2795,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_well, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
@@ -2881,6 +2881,7 @@ check_little_big_inspector <- function(dataframe1,
   sample_smallsweight <- NULL
   sample_bigsweight <- NULL
   sample_totalweight <- NULL
+  species_fao_code <- NULL
   samplespeciesmeasure_count <- NULL
   sizemeasuretype_code <- NULL
   sample_smallsweight_bis <- NULL
@@ -3094,7 +3095,7 @@ check_little_big_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   total_count <- subset(total_count, select = -c(total_count, little, big, measure1, measure2, sample_smallsweight_bis, sample_bigsweight_bis, sample_totalweight_bis))
   total_count <- dplyr::relocate(.data = total_count, sample_smallsweight, sample_bigsweight, sample_totalweight, little_percentage, big_percentage, measure1_percentage, measure2_percentage, .after = logical)
-  if ((sum(total_count$logical, na.rm = TRUE) + sum(!total_count$logical, na.rm = TRUE)) != nrow_first | sum(is.na(total_count$logical)) > 0) {
+  if ((sum(total_count$logical, na.rm = TRUE) + sum(!total_count$logical, na.rm = TRUE)) != nrow_first || sum(is.na(total_count$logical)) > 0) {
     all <- c(select, total_count$sample_id)
     number_occurrences <- table(all)
     text <- ""
@@ -3383,7 +3384,7 @@ check_weighting_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vesseltype_code, weightedweight_bis, sum_landing_weight_bis))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_label, sum_landing_weight, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
@@ -3503,7 +3504,7 @@ check_weight_sample_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(weight_calculation))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_totalweight, sample_smallsweight, sample_bigsweight, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
@@ -3624,7 +3625,7 @@ check_activity_sample_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
@@ -3839,7 +3840,7 @@ check_ldlf_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(logical_species, logical_bigsweight, logical_smallsweight, sample_id))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sizemeasuretype_code, species_fao_code, sample_bigsweight, sample_smallsweight, sample_totalweight, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
     text <- ""
@@ -4128,7 +4129,7 @@ check_distribution_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_small_unknown, weight_small, sample_smallsweight_bis, sample_bigsweight_bis, weight_small_total_bis, weight_big_bis))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_well, weight_small_total, weight_big, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
@@ -4227,6 +4228,10 @@ check_anapo_inspector <- function(dataframe1,
   activity_date <- NULL
   activity_time <- NULL
   activity_position <- NULL
+  date_group <- NULL
+  vms_position <- NULL
+  NM <- NULL
+  ms <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = dataframe1,
@@ -4442,7 +4447,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe1 <- subset(dataframe1, select = -c(nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
   dataframe_detail <- subset(dataframe_detail, select = -c(vessel_code, min_distance, activity_time_bis, activity_date_time, vms_date_time))
   dataframe_detail <- dataframe_detail %>% dplyr::mutate(vms_crs = vms_crs, activity_crs = activity_crs)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first | sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
@@ -4643,6 +4648,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     min_distance <- NULL
     max_score <- NULL
     rf1 <- NULL
+    activity_position <- NULL
+    activity_position_display <- NULL
+    grounding <- NULL
+    activity_number <- NULL
+    activity_position_prior <- NULL
+    activity_position_post <- NULL
     # 1 - Data extraction ----
     reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
@@ -5184,7 +5195,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             eval(parse(text = code_txt))
             # Number of the table containing the Anapo plot information in calcul_check_server
             check_anapo_inspector_dataplot$num_table <- 28
-            check_anapo_inspector_dataplot$num_row <- 1:nrow(check_anapo_inspector_dataplot)
+            check_anapo_inspector_dataplot$num_row <- seq_len(nrow(check_anapo_inspector_dataplot))
             # Add button and data for plot in table
             check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data_table, data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = NULL, colname_info = c("num_table", "num_row"), name_button = "button_anapo", choice_select_row = "all")
             # Uses a function to format the table
@@ -5484,6 +5495,9 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   duration <- NULL
   score <- NULL
   activity_number <- NULL
+  vms_date <- NULL
+  vesselactivity_code <- NULL
+  grounding <- NULL
   # Remove missing position in vms
   data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
@@ -5524,11 +5538,11 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
     plotly::layout(mapbox = list(style = "carto-positron", pitch = 0, zoom = 6))
   if (!all(is.na(data_trip$activity_position))) {
     data_geo_trip_grounding <- data_geo_trip %>% dplyr::filter(grounding)
-    data_geo_trip_Ngrounding <- data_geo_trip %>% dplyr::filter(!grounding)
+    data_geo_trip_nongrounding <- data_geo_trip %>% dplyr::filter(!grounding)
     plot <- plot %>%
       plotly::add_trace(name = "Activity (solely grounding object)", data = data_geo_trip_grounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(142, 52, 0)", size = 10))
     plot <- plot %>%
-      plotly::add_trace(name = "Activity", data = data_geo_trip_Ngrounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = colorRampPalette(c("#B2FF00", "#006415"))(nrow(data_geo_trip_Ngrounding)), size = 10), line = list(color = "#11BC00"))
+      plotly::add_trace(name = "Activity", data = data_geo_trip_nongrounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = colorRampPalette(c("#B2FF00", "#006415"))(nrow(data_geo_trip_nongrounding)), size = 10), line = list(color = "#11BC00"))
   }
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
@@ -5545,6 +5559,10 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
 column_grounding <- function(data,
                              data_transmittingbuoy,
                              transmittingbuoyoperation_grounding_code = c("4", "5")) {
+  # 0 - Global variables assignement ----
+  activity_id <- NULL
+  transmittingbuoyoperation_code <- NULL
+  all_grounding <- NULL
   # 1 - Arguments verification ----
   if (codama::r_table_checking(
     r_table = data,
@@ -5610,7 +5628,7 @@ column_grounding <- function(data,
     )
     data$grounding <- data$grounding | comparison_transmittingbuoy$logical
   }
-  if ((sum(data$grounding, na.rm = TRUE) + sum(!data$grounding, na.rm = TRUE)) != nrow_first | sum(is.na(data$grounding)) > 0) {
+  if ((sum(data$grounding, na.rm = TRUE) + sum(!data$grounding, na.rm = TRUE)) != nrow_first || sum(is.na(data$grounding)) > 0) {
     all <- c(select, data$activity_id)
     number_occurrences <- table(all)
     text <- ""
