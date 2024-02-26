@@ -4387,7 +4387,7 @@ check_anapo_inspector <- function(dataframe1,
     sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = FALSE) %>% sf::st_transform(vms_position, crs = 4326) %>%
     sf::st_geometry()
   # Calculation of the minimum distance between the activity and the nearest day's VMS in nautical mile
-  # Define nautical miles (as per ICAO notation)
+  # Define nautical miles
   units::install_unit("NM", "1852 m", "Nautical mile")
   threshold <- units::set_units(threshold, NM)
   dataframe_calcul <- dataframe_calcul %>%
@@ -4412,13 +4412,14 @@ check_anapo_inspector <- function(dataframe1,
   # Calculates time between activity and VMS point in milliseconds
   dataframe_calcul <- dataframe_calcul %>%
     dplyr::mutate(activity_date_time = as.POSIXct(paste(vms_date, activity_time_bis)), vms_date_time = as.POSIXct(paste(vms_date, vms_time)))
+  units::install_unit("ms", "1000 secs", "Milliseconds")
   dataframe_calcul <- dataframe_calcul %>%
-    dplyr::mutate(duration = difftime(activity_date_time, vms_date_time, units = "secs") * 1000)
+    dplyr::mutate(duration = units::set_units(as.numeric(difftime(activity_date_time, vms_date_time, units = "secs") * 1000), ms))
   # Gives a duration for activities that are missing an hour
   dataframe_calcul[is.na(dataframe_calcul$activity_time), "duration"] <- 1
   # Score calculation
   dataframe_calcul <- dataframe_calcul %>%
-    dplyr::mutate(score = (2^( units::drop_units(-distance / threshold))) * (2^(-as.numeric(duration) / (2*60*60*1000))))
+    dplyr::mutate(score = (2^( units::drop_units(-distance / threshold))) * (2^(-units::drop_units(duration) / (2*60*60*1000))))
   dataframe_calcul[dataframe_calcul$distance > threshold * 2, "score"] <- 0
   dataframe_calcul[as.numeric(dataframe_calcul$duration) > (4*60*60*1000), "score"] <- 0
   dataframe_score_max <- dataframe_calcul %>%
