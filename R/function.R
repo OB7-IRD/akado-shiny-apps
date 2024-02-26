@@ -5137,7 +5137,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Uses a function which indicates whether the activity position is consistent for VMS position
           if (exists("data_vms")) {
             # Recovers all trip positions
-            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = ifelse(length(na.omit(unique(activity_select$activity_crs))) == 0, 4326, na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(na.omit(unique(data_vms$vms_crs))) == 0, 4326, na.omit(unique(data_vms$vms_crs))), output = "report")
+            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = ifelse(length(stats::na.omit(unique(activity_select$activity_crs))) == 0, 4326, stats::na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(data_vms$vms_crs))), output = "report")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], activity_select[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = "activity_id")
             # Add information on whether the activity is linked to a grounding (object or buoy) or not in data plot
             data_tmp_grounding <- column_grounding(data = check_anapo_inspector_dataplot, data_transmittingbuoy = data_transmittingbuoy)
@@ -5542,11 +5542,11 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
     plot <- plot %>%
       plotly::add_trace(name = "Activity (solely grounding object)", data = data_geo_trip_grounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(142, 52, 0)", size = 10))
     plot <- plot %>%
-      plotly::add_trace(name = "Activity", data = data_geo_trip_nongrounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = colorRampPalette(c("#B2FF00", "#006415"))(nrow(data_geo_trip_nongrounding)), size = 10), line = list(color = "#11BC00"))
+      plotly::add_trace(name = "Activity", data = data_geo_trip_nongrounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#B2FF00", "#006415"))(nrow(data_geo_trip_nongrounding)), size = 10), line = list(color = "#11BC00"))
   }
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
-      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF"))
+      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF"))
   }
   if (!all(is.na(data_activity$activity_position))) {
     plot <- plot %>%
