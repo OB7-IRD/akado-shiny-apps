@@ -198,7 +198,7 @@ app_server <- function(input, output, session) {
   # Anapo control plot, display in a window
   output$plot_anapo <- plotly::renderPlotly({
     split_id <- strsplit(input$button_anapo, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]),"data_plot"][[1]], "&")[[1]]
+    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]), "data_plot"][[1]], "&")[[1]]
     data <- eval(parse(text = data_all_click[[1]]))
     activity_crs <- data_all_click[[3]]
     vms_crs <- data_all_click[[4]]
@@ -210,28 +210,28 @@ app_server <- function(input, output, session) {
   # Anapo control window
   observeEvent(input$button_anapo, {
     split_id <- strsplit(input$button_anapo, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]),"data_plot"][[1]], "&")[[1]]
+    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]), "data_plot"][[1]], "&")[[1]]
     activity_data <- eval(parse(text = data_all_click[[5]]))
     activity_crs <- data_all_click[[3]]
     # Spatial formatting
     data_geo <- sf::st_as_sf(activity_data, wkt = "activity_position", crs = activity_crs) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
     # Non-breaking hyphen (-)
-    enddate <- gsub("-", "&#8209;", activity_data[1,"trip_enddate", drop = TRUE])
-    activity_date <- gsub("-", "&#8209;", activity_data[1,"activity_date", drop = TRUE])
+    enddate <- gsub("-", "&#8209;", activity_data[1, "trip_enddate", drop = TRUE])
+    activity_date <- gsub("-", "&#8209;", activity_data[1, "activity_date", drop = TRUE])
     showModal(modalDialog(
       fluidRow(
         column(3,
                style = "padding-left:5px;padding-right:0px;",
                HTML(paste0("<b>Trip information : </b><br>
-                             <ul><li>Vessel code : ", activity_data[1,"vessel_code", drop = TRUE], "</li>
+                             <ul><li>Vessel code : ", activity_data[1, "vessel_code", drop = TRUE], "</li>
                              <li>Trip end date : ", enddate, "</li>
                              <li>Activity date : ", activity_date, "</li>
-                             <li>Activity time : ", activity_data[1,"activity_time", drop = TRUE], "</li>
-                             <li>Activity number : ", activity_data[1,"activity_number", drop = TRUE], "</li>
-                             <li>Vessel activity : ", activity_data[1,"vesselactivity_code", drop = TRUE], "</li>
+                             <li>Activity time : ", activity_data[1, "activity_time", drop = TRUE], "</li>
+                             <li>Activity number : ", activity_data[1, "activity_number", drop = TRUE], "</li>
+                             <li>Vessel activity : ", activity_data[1, "vesselactivity_code", drop = TRUE], "</li>
                              <li>Latitude : ", data_geo$Y, "\u00B0</li>
                              <li>Longitude : ", data_geo$X, "\u00B0</li>
-                             <li>Grounding : ", activity_data[1,"grounding", drop = TRUE], "</li></ul>"))
+                             <li>Grounding : ", activity_data[1, "grounding", drop = TRUE], "</li></ul>"))
         ),
         column(9,
                style = "padding-left:0px;padding-right:5px;",
