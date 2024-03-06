@@ -4882,10 +4882,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             warning(text_object_more_or_less(id = trip_select()$trip_id, result_check = data_trip$trip_id))
           }
           # Uses a function which indicates whether the selected trips contain activities or not
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check trip activity inspector", sep = "")
           check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = activity_select, output = "report")
           # Uses a function to format the table
           check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
           # Uses a function which indicates whether the selected trips contain fishing time inconsistent
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check fishing time inspector", sep = "")
           check_fishing_time_inspector_data <- check_fishing_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
           # Uses a function to format the table
           check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select(), type_inconsistency = "error")
@@ -4896,6 +4898,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum route fishing time` = sum_route_fishingtime
           )
           # Uses a function which indicates whether the selected trips contain sea time inconsistent
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sea time inspector", sep = "")
           check_sea_time_inspector_data <- check_sea_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
           # Uses a function to format the table
           check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_select(), type_inconsistency = "error")
@@ -4906,6 +4909,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum route sea time` = sum_route_seatime
           )
           # Uses a function which indicates whether the selected trips contain landing total weight inconsistent with vessel capacity
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing consistent inspector", sep = "")
           check_landing_consistent_inspector_data <- check_landing_consistent_inspector(dataframe1 = data_trip_unprecedented, output = "report")
           # Uses a function to format the table
           check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_select(), type_inconsistency = "warning")
@@ -4916,6 +4920,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = trip_weighttotal
           )
           # Uses a function which indicates whether the selected trips contain the total landed weight for canneries inconsistent with the weights of each landing for the canneries
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing total weight inspector", sep = "")
           check_landing_total_weight_inspector_data <- check_landing_total_weight_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_landing, output = "report", epsilon = config_data()[["epsilon"]])
           # Uses a function to format the table
           check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_select(), type_inconsistency = "error")
@@ -4926,6 +4931,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum landing weight` = sum_weightlanding
           )
           # Uses a function which indicates whether the selected trips contain the trip start and end date inconsistent with the dates of activity
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check temporal limit inspector", sep = "")
           check_temporal_limit_inspector_data <- check_temporal_limit_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
           # Data preparation
           check_temporal_limit <- check_temporal_limit_inspector_data[[1]]
@@ -4947,6 +4953,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Details problem` = button
           )
           # Uses a function which indicates whether the selected trips contain the trip harbour of departure of the current trip inconsistent with the harbour of landing of the previous trip
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check harbour inspector", sep = "")
           check_harbour_inspector_data <- check_harbour_inspector(dataframe1 = data_trip, output = "report")
           # Uses a function to format the table
           check_harbour <- table_display_trip(check_harbour_inspector_data, trip_select(), type_inconsistency = "error")
@@ -4957,6 +4964,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Harbour departure` = harbour_label_departure
           )
           # Uses a function which indicates whether the selected trips contain RF1 inconsistent with threshold values
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check raising factor inspector", sep = "")
           check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_tide, dataframe3 = data_tide, output = "report")
           # Uses a function to format the table
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
@@ -4967,6 +4975,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `RF1` = rf1
           )
           # Uses a function which indicates whether the school type is consistent with the association
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check fishing context inspector", sep = "")
           check_fishing_context_inspector_data <- check_fishing_context_inspector(dataframe1 = activity_select, dataframe2 = data_activity_observedsystem, output = "report")
           # Uses a function to format the table
           check_fishing_context <- table_display_trip(check_fishing_context_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
@@ -4977,6 +4986,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Number of associations object` = association_object_count
           )
           # Uses a function which indicates whether the succes status is consistent with the vessel activity, the type of school or the weight caught
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check operation inspector", sep = "")
           check_operationt_inspector_data <- check_operationt_inspector(dataframe1 = activity_select, output = "report")
           # Uses a function to format the table
           check_operationt <- table_display_trip(check_operationt_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
@@ -4989,6 +4999,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Weigth` = activity_weight
           )
           # Uses a function which indicates whether the ocean declaration is consistent with activity position
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check position inspector", sep = "")
           check_position_inspector_data <- check_position_inspector(dataframe1 = merge(activity_select, data_activity_spatial, by = "activity_id", all.x = TRUE), output = "report")
           # Add button and data for plot in table
           check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "zfao_ocean"), name_button = "button_position")
@@ -5003,6 +5014,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Details problem` = button
           )
           # Uses a function which indicates whether that sum of the weight indicated for the catch is consistent with activity weight
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weight inspector", sep = "")
           check_weight_inspector_data <- check_weight_inspector(dataframe1 = activity_select, dataframe2 = data_catch, output = "report")
           # Uses a function to format the table
           check_weight <- table_display_trip(check_weight_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
@@ -5013,10 +5025,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum catch weight` = sum_catch_weight
           )
           # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid threshold
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check length class inspector", sep = "")
           check_length_class_inspector_data <- check_length_class_inspector(dataframe1 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
           check_length_class <- table_display_trip(check_length_class_inspector_data, samplespeciesmeasure_select[, colnames_samplespeciesmeasure_id], type_inconsistency = "error")
           # Uses a function which indicates whether that total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check measure inspector", sep = "")
           check_measure_inspector_data <- check_measure_inspector(dataframe1 = samplespecies_select, dataframe2 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
           check_measure <- table_display_trip(check_measure_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
@@ -5027,6 +5041,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum numbers individuals size class` = sum_count
           )
           # Uses a function which indicates whether that sea surface temperature is consistent with the valid threshold
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check temperature inspector", sep = "")
           check_temperature_inspector_data <- check_temperature_inspector(dataframe1 = activity_select, output = "report")
           # Uses a function to format the table
           check_temperature <- table_display_trip(check_temperature_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
@@ -5035,18 +5050,22 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sea surface temperature` = activity_seasurfacetemperature
           )
           # Uses a function which indicates whether that species sampled is consistent with species authorized
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check species inspector", sep = "")
           check_species_inspector_data <- check_species_inspector(dataframe1 = samplespecies_select, output = "report")
           # Uses a function to format the table
           check_species <- table_display_trip(check_species_inspector_data, samplespecies_select[, colnames_samplespecies_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of measurement
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sample without measure inspector", sep = "")
           check_sample_without_measure_inspector_data <- check_sample_without_measure_inspector(dataframe1 = samplespecies_select, dataframe2 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
           check_sample_without_measure <- table_display_trip(check_sample_without_measure_inspector_data, samplespecies_select[, colnames_samplespecies_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the presence of species
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sample without species inspector", sep = "")
           check_sample_without_species_inspector_data <- check_sample_without_species_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, output = "report")
           # Uses a function to format the table
           check_sample_without_species <- table_display_trip(check_sample_without_species_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample is consistent with the subsample number
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check super sample number consistent inspector", sep = "")
           check_super_sample_number_consistent_inspector_data <- check_super_sample_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, output = "report")
           # Uses a function to format the table
           check_super_sample_number_consistent <- table_display_trip(check_super_sample_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
@@ -5059,6 +5078,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Counts number sample species` = count_samplespecies
           )
           # Uses a function which indicates whether the sample well number is consistent with the associated trip well numbers
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check well number consistent inspector", sep = "")
           check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_well, output = "report")
           # Uses a function to format the table
           check_well_number_consistent <- table_display_trip(check_well_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
@@ -5067,6 +5087,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Well` = sample_well
           )
           # Uses a function which indicates whether the sample is consistent for the percentage of little and big fish sampled
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check little big inspector", sep = "")
           check_little_big_inspector_data <- check_little_big_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, dataframe3 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
           check_little_big <- table_display_trip(check_little_big_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
@@ -5085,6 +5106,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Measurement type PD1 %` = measure2_percentage
           )
           # Uses a function which indicates whether the sample is consistent for the weighting
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weighting inspector", sep = "")
           check_weighting_inspector_data <- check_weighting_inspector(dataframe1 = sample_select, dataframe2 = data_sampleactivity, dataframe3 = data_trip_unprecedented, dataframe4 = data_landing, output = "report")
           # Uses a function to format the table
           check_weighting <- table_display_trip(check_weighting_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
@@ -5099,6 +5121,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Sum weight fresh landings baitboats` = sum_landing_weight
           )
           # Uses a function which indicates whether the sample weight (m10 and p10) is consistent for the global weight
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weight sample inspector", sep = "")
           check_weight_sample_inspector_data <- check_weight_sample_inspector(dataframe1 = sample_select, output = "report")
           # Uses a function to format the table
           check_weight_sample <- table_display_trip(check_weight_sample_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
@@ -5109,10 +5132,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the sample and the existence of the activity
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check activity sample inspector", sep = "")
           check_activity_sample_inspector_data <- check_activity_sample_inspector(dataframe1 = sample_select, dataframe2 = data_sampleactivity, output = "report")
           # Uses a function to format the table
           check_activity_sample <- table_display_trip(check_activity_sample_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
           # Uses a function which indicates whether the sample measurement types is consistent for the species or weight values
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check ldlf inspector", sep = "")
           check_ldlf_inspector_data <- check_ldlf_inspector(dataframe1 = samplespecies_select, dataframe2 = sample_select, output = "report")
           # Uses a function to format the table
           check_ldlf <- table_display_trip(check_ldlf_inspector_data, samplespecies_select[, colnames_samplespecies_id], type_inconsistency = "error")
@@ -5123,6 +5148,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Total weight` = sample_totalweight
           )
           # Uses a function which indicates whether the small and large sample weights is consistent for the sum of the small and big weights of the associated well
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check distribution inspector", sep = "")
           check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = wellactivity_select, dataframe4 = data_wellactivityspecies, output = "report")
           # Uses a function to format the table
           check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
@@ -5136,6 +5162,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function which indicates whether the activity position is consistent for VMS position
           if (exists("data_vms")) {
+            message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check anapo inspector", sep = "")
             # Recovers all trip positions
             check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = ifelse(length(stats::na.omit(unique(activity_select$activity_crs))) == 0, 4326, stats::na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(data_vms$vms_crs))), output = "report")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], activity_select[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = "activity_id")
