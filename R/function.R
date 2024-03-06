@@ -20,13 +20,13 @@ check_trip_activity_inspector <- function(dataframe1,
                                           output) {
   # 0 - Global variables assignement ----
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("trip_id"),
     column_type = c("character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -37,13 +37,13 @@ check_trip_activity_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("trip_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("trip_id", "activity_id"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -55,12 +55,12 @@ check_trip_activity_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("trip_id", "activity_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -148,13 +148,13 @@ check_fishing_time_inspector <- function(dataframe1,
   trip_fishingtime <- NULL
   sum_route_fishingtime <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("trip_id", "trip_fishingtime"),
     column_type = c("character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -165,13 +165,13 @@ check_fishing_time_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "trip_fishingtime")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("route_id", "trip_id", "route_fishingtime"),
     column_type = c("character", "character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -183,12 +183,12 @@ check_fishing_time_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("route_id", "trip_id", "route_fishingtime")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -282,13 +282,13 @@ check_sea_time_inspector <- function(dataframe1,
   trip_seatime <- NULL
   sum_route_seatime <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("trip_id", "trip_seatime"),
     column_type = c("character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -299,13 +299,13 @@ check_sea_time_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "trip_seatime")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("route_id", "trip_id", "route_seatime"),
     column_type = c("character", "character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -317,12 +317,12 @@ check_sea_time_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("route_id", "trip_id", "route_seatime")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -415,13 +415,13 @@ check_landing_consistent_inspector <- function(dataframe1,
   trip_landingtotalweight <- NULL
   trip_localmarkettotalweight <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight", "vessel_capacity"),
     column_type = c("character", "numeric", "numeric", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -433,12 +433,12 @@ check_landing_consistent_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight", "vessel_capacity")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -537,13 +537,13 @@ check_landing_total_weight_inspector <- function(dataframe1,
   sum_weightlanding <- NULL
   difference <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("trip_id", "trip_landingtotalweight"),
     column_type = c("character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -554,13 +554,13 @@ check_landing_total_weight_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "trip_landingtotalweight")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("landing_id", "landing_weight", "trip_id"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -572,12 +572,12 @@ check_landing_total_weight_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("landing_id", "landing_weight", "trip_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -683,13 +683,13 @@ check_temporal_limit_inspector <- function(dataframe1,
   nb_day <- NULL
   logical_tmp <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("trip_id", "trip_startdate", "trip_enddate"),
     column_type = c("character", "Date", "Date"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -700,13 +700,13 @@ check_temporal_limit_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "trip_startdate", "trip_enddate")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("route_id", "activity_date", "trip_id"),
     column_type = c("character", "Date", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -718,12 +718,12 @@ check_temporal_limit_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("route_id", "activity_date", "trip_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -846,13 +846,13 @@ check_harbour_inspector <- function(dataframe1,
   harbour_id_departure <- NULL
   harbour_id_landing_trip_previous <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("trip_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_departure", "harbour_label_departure"),
     column_type = c("character", "character", "character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -864,12 +864,12 @@ check_harbour_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("trip_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_departure", "harbour_label_departure")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -985,13 +985,13 @@ check_raising_factor_inspector <- function(dataframe1,
   speciesfate_code <- NULL
   vesselactivity_code <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("trip_id"),
     column_type = c("character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -1002,13 +1002,13 @@ check_raising_factor_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("trip_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id"),
     column_type = c("character", "numeric", "character", "character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -1019,13 +1019,13 @@ check_raising_factor_inspector <- function(dataframe1,
   } else {
     dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
     column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
@@ -1037,12 +1037,12 @@ check_raising_factor_inspector <- function(dataframe1,
     dataframe3 <- dataframe3[, c("trip_id", "trip_landingtotalweight", "trip_end_tide_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -1051,11 +1051,11 @@ check_raising_factor_inspector <- function(dataframe1,
     ))
   }
   # Checks the type of species
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = species,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
@@ -1063,11 +1063,11 @@ check_raising_factor_inspector <- function(dataframe1,
     ))
   }
   # Checks the type of speciesfate
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = speciesfate,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = speciesfate,
       type = "character",
@@ -1075,11 +1075,11 @@ check_raising_factor_inspector <- function(dataframe1,
     ))
   }
   # Checks the type of vesselactivity
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = vesselactivity,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = vesselactivity,
       type = "character",
@@ -1087,12 +1087,12 @@ check_raising_factor_inspector <- function(dataframe1,
     ))
   }
   # Checks the type of threshold
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = threshold,
     type = "numeric",
     length = 2L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = threshold,
       type = "numeric",
@@ -1212,13 +1212,13 @@ check_fishing_context_inspector <- function(dataframe1,
   association_object_count <- NULL
   threshold <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("activity_id", "schooltype_code"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -1229,13 +1229,13 @@ check_fishing_context_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "schooltype_code")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("observedsystem_id", "activity_id", "schooltype_code"),
     column_type = c("character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -1247,12 +1247,12 @@ check_fishing_context_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("observedsystem_id", "activity_id", "schooltype_code")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -1260,11 +1260,11 @@ check_fishing_context_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = schooltype_object,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = schooltype_object,
       type = "character",
@@ -1366,13 +1366,13 @@ check_operationt_inspector <- function(dataframe1,
   logical_successstatus_schooltype <- NULL
   logical_successstatus_weight <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("activity_id", "schooltype_code", "successstatus_code", "activity_weight", "vesselactivity_code"),
     column_type = c("character", "character", "character", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -1384,12 +1384,12 @@ check_operationt_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("activity_id", "schooltype_code", "successstatus_code", "activity_weight", "vesselactivity_code")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -1518,13 +1518,13 @@ check_position_inspector <- function(dataframe1,
   logical_harbour <- NULL
   harbour_id <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("activity_id", "ocean_label", "zfao_ocean", "activity_position", "activity_crs", "harbour_id"),
     column_type = c("character", "character", "character", "character", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -1536,12 +1536,12 @@ check_position_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("activity_id", "ocean_label", "zfao_ocean", "activity_position", "activity_crs", "harbour_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -1549,11 +1549,11 @@ check_position_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = ocean_label_nonpriority,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = ocean_label_nonpriority,
       type = "character",
@@ -1660,13 +1660,13 @@ check_weight_inspector <- function(dataframe1,
   activity_weight <- NULL
   sum_catch_weight <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("activity_id", "activity_weight"),
     column_type = c("character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -1677,13 +1677,13 @@ check_weight_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "activity_weight")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("catch_id", "catch_weight", "activity_id"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -1695,12 +1695,12 @@ check_weight_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "activity_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -1802,13 +1802,13 @@ check_length_class_inspector <- function(dataframe1,
   logical_sizemeasuretype <- NULL
   logical_species <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("samplespeciesmeasure_id", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
     column_type = c("character", "character", "character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -1820,12 +1820,12 @@ check_length_class_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("samplespeciesmeasure_id", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -1833,34 +1833,34 @@ check_length_class_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = species,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = size_measure_type,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = size_measure_type,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = threshold,
     type = "numeric",
     length = 1L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = threshold,
       type = "numeric",
@@ -1969,13 +1969,13 @@ check_measure_inspector <- function(dataframe1,
   sum_measuredcount <- NULL
   sum_count <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("samplespecies_id", "samplespecies_measuredcount", "sample_id"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -1986,13 +1986,13 @@ check_measure_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("samplespecies_id", "samplespecies_measuredcount", "sample_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_count", "sample_id"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -2004,12 +2004,12 @@ check_measure_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("samplespeciesmeasure_id", "samplespeciesmeasure_count", "sample_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -2104,13 +2104,13 @@ check_temperature_inspector <- function(dataframe1,
   lower_threshold <- NULL
   upper_threshold <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("activity_id", "activity_seasurfacetemperature"),
     column_type = c("character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -2122,12 +2122,12 @@ check_temperature_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("activity_id", "activity_seasurfacetemperature")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -2219,13 +2219,13 @@ check_species_inspector <- function(dataframe1,
   # 0 - Global variables assignement ----
   species_fao_code <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("samplespecies_id", "species_fao_code"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -2237,12 +2237,12 @@ check_species_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("samplespecies_id", "species_fao_code")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -2250,11 +2250,11 @@ check_species_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = species,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
@@ -2335,13 +2335,13 @@ check_sample_without_measure_inspector <- function(dataframe1,
                                                    output) {
   # 0 - Global variables assignement ----
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("samplespecies_id"),
     column_type = c("character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -2352,13 +2352,13 @@ check_sample_without_measure_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("samplespecies_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("samplespecies_id", "samplespeciesmeasure_id"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -2370,12 +2370,12 @@ check_sample_without_measure_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("samplespecies_id", "samplespeciesmeasure_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -2457,13 +2457,13 @@ check_sample_without_species_inspector <- function(dataframe1,
                                                    output) {
   # 0 - Global variables assignement ----
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id"),
     column_type = c("character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -2474,13 +2474,13 @@ check_sample_without_species_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("sample_id", "samplespecies_id"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -2492,12 +2492,12 @@ check_sample_without_species_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("sample_id", "samplespecies_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -2595,13 +2595,13 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   count_subsamplenumber_1_bis <- NULL
   sample_supersample <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_supersample"),
     column_type = c("character", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -2612,13 +2612,13 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_supersample")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -2630,12 +2630,12 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -2734,13 +2734,13 @@ check_well_number_consistent_inspector <- function(dataframe1,
   trip_id <- NULL
   sample_well <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_well", "trip_id"),
     column_type = c("character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -2751,13 +2751,13 @@ check_well_number_consistent_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_well", "trip_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("trip_id", "well_label"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -2769,12 +2769,12 @@ check_well_number_consistent_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("trip_id", "well_label")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -2892,13 +2892,13 @@ check_little_big_inspector <- function(dataframe1,
   measure1_percentage <- NULL
   measure2_percentage <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
     column_type = c("character", "numeric", "numeric", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -2908,13 +2908,13 @@ check_little_big_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id"),
     column_type = c("character", "character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -2925,13 +2925,13 @@ check_little_big_inspector <- function(dataframe1,
   } else {
     dataframe2 <- dataframe2[, c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
     column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id"),
     column_type = c("character", "numeric", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
@@ -2943,12 +2943,12 @@ check_little_big_inspector <- function(dataframe1,
     dataframe3 <- dataframe3[, c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -2956,33 +2956,33 @@ check_little_big_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = species_big,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = species_big,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = size_measure_type_big,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = size_measure_type_big,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = threshold_size_big,
     type = "numeric",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = threshold_size_big,
       type = "numeric",
@@ -2998,12 +2998,12 @@ check_little_big_inspector <- function(dataframe1,
       " - Error, the following arguments must be of the same size : \"species_big\", \"size_measure_type_big\" and \"threshold_size_big\"\n"
     )
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = size_measure_type,
     type = "character",
     length = 2L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = size_measure_type,
       type = "character",
@@ -3011,12 +3011,12 @@ check_little_big_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = threshold,
     type = "numeric",
     length = 1L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = threshold,
       type = "numeric",
@@ -3200,13 +3200,13 @@ check_weighting_inspector <- function(dataframe1,
   sampletype_code <- NULL
   vesseltype_label <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code"),
     column_type = c("character", "numeric", "numeric", "numeric", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -3217,13 +3217,13 @@ check_weighting_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("sample_id", "sampleactivity_weightedweight"),
     column_type = c("character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -3234,13 +3234,13 @@ check_weighting_inspector <- function(dataframe1,
   } else {
     dataframe2 <- dataframe2[, c("sample_id", "sampleactivity_weightedweight")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
     column_name = c("trip_id", "vesseltype_code", "vesseltype_label"),
     column_type = c("character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
@@ -3251,13 +3251,13 @@ check_weighting_inspector <- function(dataframe1,
   } else {
     dataframe3 <- dataframe3[, c("trip_id", "vesseltype_code", "vesseltype_label")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe4,
     type = "data.frame",
     column_name = c("trip_id", "landing_weight", "weightcategory_code"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe4,
       type = "data.frame",
@@ -3269,12 +3269,12 @@ check_weighting_inspector <- function(dataframe1,
     dataframe4 <- dataframe4[, c("trip_id", "landing_weight", "weightcategory_code")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -3282,12 +3282,12 @@ check_weighting_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = vessel_type,
     type = "character",
     length = 2L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = vessel_type,
       type = "character",
@@ -3295,12 +3295,12 @@ check_weighting_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = threshold_weight,
     type = "numeric",
     length = 1L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = threshold_weight,
       type = "numeric",
@@ -3308,12 +3308,12 @@ check_weighting_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = threshold,
     type = "numeric",
     length = 1L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = threshold,
       type = "numeric",
@@ -3321,22 +3321,22 @@ check_weighting_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = landingtype_baitboat,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = landingtype_baitboat,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = sampletype_code_landing_baitboat,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = sampletype_code_landing_baitboat,
       type = "character",
@@ -3449,13 +3449,13 @@ check_weight_sample_inspector <- function(dataframe1,
   weight_calculation <- NULL
   sample_totalweight <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
     column_type = c("character", "numeric", "numeric", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -3467,12 +3467,12 @@ check_weight_sample_inspector <- function(dataframe1,
     dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -3565,13 +3565,13 @@ check_activity_sample_inspector <- function(dataframe1,
                                             output) {
   # 0 - Global variables assignement ----
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id"),
     column_type = c("character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -3582,13 +3582,13 @@ check_activity_sample_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("sample_id", "activity_id"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -3600,12 +3600,12 @@ check_activity_sample_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("sample_id", "activity_id")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -3708,13 +3708,13 @@ check_ldlf_inspector <- function(dataframe1,
   sample_smallsweight <- NULL
   sample_totalweight <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id"),
     column_type = c("character", "character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -3725,13 +3725,13 @@ check_ldlf_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
     column_type = c("character", "numeric", "numeric", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -3743,12 +3743,12 @@ check_ldlf_inspector <- function(dataframe1,
     dataframe2 <- dataframe2[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -3756,44 +3756,44 @@ check_ldlf_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = species,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = size_measure_type_species,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = size_measure_type_species,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = size_measure_type_big,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = size_measure_type_big,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = size_measure_type_small,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = size_measure_type_small,
       type = "character",
@@ -3945,13 +3945,13 @@ check_distribution_inspector <- function(dataframe1,
   weight_big_bis <- NULL
   sample_well <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight"),
     column_type = c("character", "character", "character", "numeric", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -3962,13 +3962,13 @@ check_distribution_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("well_id", "well_label", "trip_id"),
     column_type = c("character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -3979,13 +3979,13 @@ check_distribution_inspector <- function(dataframe1,
   } else {
     dataframe2 <- dataframe2[, c("well_id", "well_label", "trip_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
     column_name = c("wellactivity_id", "well_id"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
@@ -3996,13 +3996,13 @@ check_distribution_inspector <- function(dataframe1,
   } else {
     dataframe3 <- dataframe3[, c("wellactivity_id", "well_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe4,
     type = "data.frame",
     column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "species_fao_code", "wellactivityspecies_weight"),
     column_type = c("character", "character", "character", "character", "numeric"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe4,
       type = "data.frame",
@@ -4014,12 +4014,12 @@ check_distribution_inspector <- function(dataframe1,
     dataframe4 <- dataframe4[, c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "species_fao_code", "wellactivityspecies_weight")]
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -4027,44 +4027,44 @@ check_distribution_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = species,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = weightcategory_small,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = weightcategory_small,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = weightcategory_big,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = weightcategory_big,
       type = "character",
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = weightcategory_unknown,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = weightcategory_unknown,
       type = "character",
@@ -4233,13 +4233,13 @@ check_anapo_inspector <- function(dataframe1,
   NM <- NULL
   ms <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
     column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code"),
     column_type = c("character", "Date", "character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
@@ -4250,13 +4250,13 @@ check_anapo_inspector <- function(dataframe1,
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
     column_name = c("activity_id", "harbour_id"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
@@ -4267,13 +4267,13 @@ check_anapo_inspector <- function(dataframe1,
   } else {
     dataframe2 <- dataframe2[, c("activity_id", "harbour_id")]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
     column_name = c("vms_date", "vms_time", "vms_position", "vessel_code"),
     column_type = c("Date", "character", "character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
@@ -4284,12 +4284,12 @@ check_anapo_inspector <- function(dataframe1,
   } else {
     dataframe3 <- dataframe3[, c("vms_date", "vms_time", "vms_position", "vessel_code")]
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = activity_crs,
     type = "numeric",
     length = 1L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = activity_crs,
       type = "numeric",
@@ -4297,12 +4297,12 @@ check_anapo_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = vms_crs,
     type = "numeric",
     length = 1L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = vms_crs,
       type = "numeric",
@@ -4311,12 +4311,12 @@ check_anapo_inspector <- function(dataframe1,
     ))
   }
   # Checks the type and values of output
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = output,
     type = "character",
     allowed_value = c("message", "report", "logical"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = output,
       type = "character",
@@ -4324,12 +4324,12 @@ check_anapo_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = minimum_number_vms,
     type = "numeric",
     length = 1L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = minimum_number_vms,
       type = "numeric",
@@ -4337,12 +4337,12 @@ check_anapo_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = threshold,
     type = "numeric",
     length = 1L,
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = threshold,
       type = "numeric",
@@ -5255,12 +5255,12 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
   moduleServer(id, function(input, output, session) {
     output$text <- renderText({
       # If there are errors in the selection parameters
-      if (text_error_trip_select() != TRUE) {
+      if (!text_error_trip_select()) {
         showNotification(id = "notif_warning", ui = text_error_trip_select(), type = "error")
         return(paste0("<span style=\"color:red\">", text_error_trip_select(), "</span>"))
       }
       # If the connection file is missing
-      if (text_error_trip_select() == TRUE && !isTruthy(config_data())) {
+      if (text_error_trip_select() && !isTruthy(config_data())) {
         text <- "Error: There is no configuration file for the connection to the base"
         showNotification(id = "notif_warning", ui = text, type = "error")
         return(paste0("<span style=\"color:red\">", text, ", please either select one using the \"settings\" tab or put it in ", file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"), "</span>"))
@@ -5430,12 +5430,12 @@ data_button_plot <- function(data_plot, data_display, data_id, colname_id, colna
   # Global variables assignement
   buttontmp <- NULL
   # Arguments verification
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = choice_select_row,
     type = "character",
     allowed_value = c("all", "error", "valid"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = choice_select_row,
       type = "character",
@@ -5591,13 +5591,13 @@ column_grounding <- function(data,
   transmittingbuoyoperation_code <- NULL
   all_grounding <- NULL
   # 1 - Arguments verification ----
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = data,
     type = "data.frame",
     column_name = c("activity_id"),
     column_type = c("character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = data,
       type = "data.frame",
@@ -5608,13 +5608,13 @@ column_grounding <- function(data,
   } else {
     data <- data[, c("activity_id"), drop = FALSE]
   }
-  if (codama::r_table_checking(
+  if (!codama::r_table_checking(
     r_table = data_transmittingbuoy,
     type = "data.frame",
     column_name = c("activity_id", "transmittingbuoyoperation_code"),
     column_type = c("character", "character"),
     output = "logical"
-  ) != TRUE) {
+  )) {
     codama::r_table_checking(
       r_table = data_transmittingbuoy,
       type = "data.frame",
@@ -5625,11 +5625,11 @@ column_grounding <- function(data,
   } else {
     data_transmittingbuoy <- data_transmittingbuoy[, c("activity_id", "transmittingbuoyoperation_code")]
   }
-  if (codama::r_type_checking(
+  if (!codama::r_type_checking(
     r_object = transmittingbuoyoperation_grounding_code,
     type = "character",
     output = "logical"
-  ) != TRUE) {
+  )) {
     return(codama::r_type_checking(
       r_object = transmittingbuoyoperation_grounding_code,
       type = "character",
