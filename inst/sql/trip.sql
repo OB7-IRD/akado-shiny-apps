@@ -35,7 +35,7 @@ FROM (
         LEFT JOIN common.vessel v ON t.vessel = v.topiaid 
         LEFT JOIN common.vesseltype vt ON v.vesseltype = vt.topiaid 
         LEFT JOIN common.harbour h ON t.departureharbour = h.topiaid
-		LEFT JOIN  ps_common.trip trip_previous_tmp ON t.vessel = trip_previous_tmp.vessel AND trip_previous_tmp.enddate <= t.startdate AND coalesce(trip_previous_tmp.logbookprogram,'NULL') IN (?select_item_1)
+		LEFT JOIN  ps_common.trip trip_previous_tmp ON t.vessel = trip_previous_tmp.vessel AND trip_previous_tmp.topiaid <> t.topiaid AND trip_previous_tmp.enddate <= t.startdate AND coalesce(trip_previous_tmp.logbookprogram,'NULL') IN (?select_item_1)
 	WHERE 
 		t.topiaid IN (?select_item_2)
 	GROUP BY t.topiaid, vt.code, vt.label1, v.capacity, h.topiaid, h.label1
