@@ -1,6 +1,7 @@
 --- Recovers information about trip
 SELECT 
 	trip.trip_id::text AS trip_id, 
+	trip_previous.topiaid::text AS trip_previous_id,
 	h.topiaid::text AS harbour_id_landing_trip_previous,
 	h.label1::text AS harbour_label_landing_trip_previous,
     trip.vesseltype_code::text AS vesseltype_code, 

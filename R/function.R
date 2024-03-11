@@ -834,10 +834,11 @@ check_temporal_limit_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  trip_id}}
-#'  \item{\code{  harbour_id_landing_trip_previous}}
-#'  \item{\code{  harbour_label_landing_trip_previous}}
 #'  \item{\code{  harbour_id_departure}}
 #'  \item{\code{  harbour_label_departure}}
+#'  \item{\code{  trip_previous_id}}
+#'  \item{\code{  harbour_id_landing_trip_previous}}
+#'  \item{\code{  harbour_label_landing_trip_previous}}
 #' }
 #' @export
 check_harbour_inspector <- function(dataframe1,
@@ -851,19 +852,19 @@ check_harbour_inspector <- function(dataframe1,
   if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("trip_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_departure", "harbour_label_departure"),
-    column_type = c("character", "character", "character", "character", "character"),
+    column_name = c("trip_id", "harbour_id_departure", "harbour_label_departure", "trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous"),
+    column_type = c("character", "character", "character", "character", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("trip_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_departure", "harbour_label_departure"),
-      column_type = c("character", "character", "character", "character", "character"),
+      column_name = c("trip_id", "harbour_id_departure", "harbour_label_departure", "trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous"),
+      column_type = c("character", "character", "character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("trip_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_departure", "harbour_label_departure")]
+    dataframe1 <- dataframe1[, c("trip_id", "harbour_id_departure", "harbour_label_departure", "trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous")]
   }
   # Checks the type and values of output
   if (!codama::r_type_checking(
@@ -890,12 +891,14 @@ check_harbour_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  # Management of missing vessel capacity
+  # Management of missing harbour
   dataframe1[is.na(dataframe1$harbour_id_landing_trip_previous), "logical"] <- FALSE
-  dataframe1[is.na(dataframe1$harbour_id_departure), "logical"] <- FALSE
+  dataframe1[is.na(dataframe1$harbour_id_departure) & !is.na(dataframe1$trip_previous_id), "logical"] <- FALSE
+  # Management of not trip previous
+  dataframe1[is.na(dataframe1$trip_previous_id), "logical"] <- TRUE
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_label_departure, harbour_label_landing_trip_previous, .after = logical)
-  dataframe1 <- subset(dataframe1, select = -c(harbour_id_departure, harbour_id_landing_trip_previous))
+  dataframe1 <- subset(dataframe1, select = -c(harbour_id_departure, harbour_id_landing_trip_previous, trip_previous_id))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)

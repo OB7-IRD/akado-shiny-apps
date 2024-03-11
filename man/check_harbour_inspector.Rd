@@ -22,9 +22,10 @@ The input dataframe must contain all these columns for the function to work :
 \itemize{
 Dataframe 1:
  \item{\code{  trip_id}}
- \item{\code{  harbour_id_landing_trip_previous}}
- \item{\code{  harbour_label_landing_trip_previous}}
  \item{\code{  harbour_id_departure}}
  \item{\code{  harbour_label_departure}}
+ \item{\code{  trip_previous_id}}
+ \item{\code{  harbour_id_landing_trip_previous}}
+ \item{\code{  harbour_label_landing_trip_previous}}
 }
 }
