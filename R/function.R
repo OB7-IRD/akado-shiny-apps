@@ -966,6 +966,7 @@ check_harbour_inspector <- function(dataframe1,
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  trip_landingtotalweight}}
 #'  \item{\code{  trip_end_tide_id}}
+#'  \item{\code{  vessel_id}}
 #' }
 #' @export
 check_raising_factor_inspector <- function(dataframe1,
@@ -1027,19 +1028,19 @@ check_raising_factor_inspector <- function(dataframe1,
   if (!codama::r_table_checking(
     r_table = dataframe3,
     type = "data.frame",
-    column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id"),
-    column_type = c("character", "numeric", "character"),
+    column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id", "vessel_id"),
+    column_type = c("character", "numeric", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe3,
       type = "data.frame",
-      column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id"),
-      column_type = c("character", "numeric", "character"),
+      column_name = c("trip_id", "trip_landingtotalweight", "trip_end_tide_id", "vessel_id"),
+      column_type = c("character", "numeric", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe3 <- dataframe3[, c("trip_id", "trip_landingtotalweight", "trip_end_tide_id")]
+    dataframe3 <- dataframe3[, c("trip_id", "trip_landingtotalweight", "trip_end_tide_id", "vessel_id")]
   }
   # Checks the type and values of output
   if (!codama::r_type_checking(
@@ -1117,6 +1118,10 @@ check_raising_factor_inspector <- function(dataframe1,
     dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
   # Merge data
   dataframe3 <- merge(dataframe3, dataframe2, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  # Add of a logic that indicates whether the tide is finished or not
+  dataframe3$logical_full_tide <- !is.na(dataframe3$trip_end_tide_id)
+  # For unfinished tides (no end-of-tide id) indicates the vessel id for the end-of-tide id (for each ship, allows you to group together all the trips of the non-finished tide)
+  dataframe3[is.na(dataframe3$trip_end_tide_id),"trip_end_tide_id"] <- paste0("vessel_id_", dataframe3[is.na(dataframe3$trip_end_tide_id),"vessel_id"])
   # RF1 calculation
   tide_id_data_rf1 <- dataframe3 %>%
     dplyr::group_by(trip_end_tide_id) %>%
@@ -1144,10 +1149,9 @@ check_raising_factor_inspector <- function(dataframe1,
   # Corrects missing RF1s when nothing has been landed and there is no capture
   dataframe3[(is.na(dataframe3$tide_landingtotalweight) | dataframe3$tide_landingtotalweight == 0) & is.na(dataframe3$tide_sum_catch_weight), "logical"] <- TRUE
   # Correction of complete tides not yet finished
-  dataframe3[(is.na(dataframe3$trip_end_tide_id)), "logical"] <- TRUE
+  dataframe3[!is.na(dataframe3$logical_full_tide) & !dataframe3$logical_full_tide, "logical"] <- TRUE
   dataframe3 <- dplyr::relocate(.data = dataframe3, rf1, .after = logical)
-  trip_end_tide_id <- dataframe3$trip_end_tide_id
-  dataframe3 <- subset(dataframe3, select = -c(trip_end_tide_id, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, lower_threshold, upper_threshold))
+  dataframe3 <- subset(dataframe3, select = -c(trip_end_tide_id, logical_full_tide, sum_catch_weight, trip_landingtotalweight, tide_landingtotalweight, tide_sum_catch_weight, lower_threshold, upper_threshold, vessel_id))
   if ((sum(dataframe3$logical, na.rm = TRUE) + sum(!dataframe3$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe3$logical)) > 0) {
     all <- c(select, dataframe3$trip_id)
     number_occurrences <- table(all)
