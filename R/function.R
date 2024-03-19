@@ -1144,13 +1144,13 @@ check_raising_factor_inspector <- function(dataframe1,
   comparison_less <- codama::vector_comparison(
     first_vector = dataframe3$rf1,
     second_vector = dataframe3$upper_threshold,
-    comparison_type = "less",
+    comparison_type = "less_equal",
     output = "report"
   )
   comparison_greater <- codama::vector_comparison(
     first_vector = dataframe3$rf1,
     second_vector = dataframe3$lower_threshold,
-    comparison_type = "greater",
+    comparison_type = "greater_equal",
     output = "report"
   )
   dataframe3$logical <- comparison_less$logical & comparison_greater$logical
