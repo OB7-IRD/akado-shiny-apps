@@ -9,7 +9,8 @@ check_raising_factor_inspector(
   dataframe2,
   dataframe3,
   output,
-  species = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"),
+  country_species = list(`1` = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), `4` =
+    c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")),
   speciesfate = "6",
   vesselactivity = c("25", "27", "29"),
   threshold = c(0.9, 1.1)
@@ -24,7 +25,7 @@ check_raising_factor_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{species}{{\link[base]{character}} expected. Default values: c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"). Vector of the inventory of species used to calculate catch weight in RF1.}
+\item{country_species}{{\link[base]{character}} expected. Default values: list("1" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).}
 
 \item{speciesfate}{{\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.}
 
@@ -50,6 +51,7 @@ Dataframe 2:
  \item{\code{  species_fao_code}}
  \item{\code{  vesselactivity_code}}
  \item{\code{  trip_id}}
+ \item{\code{  country_flagcountry}}
 Dataframe 3:
  \item{\code{  trip_id}}
  \item{\code{  trip_landingtotalweight}}

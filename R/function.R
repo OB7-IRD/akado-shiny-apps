@@ -945,7 +945,7 @@ check_harbour_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param species {\link[base]{character}} expected. Default values: c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"). Vector of the inventory of species used to calculate catch weight in RF1.
+#' @param country_species {\link[base]{character}} expected. Default values: list("1" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).
 #' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.
 #' @param vesselactivity {\link[base]{character}} expected. Default values: c("25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.
 #' @param threshold {\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable threshold for RF1.
@@ -962,6 +962,7 @@ check_harbour_inspector <- function(dataframe1,
 #'  \item{\code{  species_fao_code}}
 #'  \item{\code{  vesselactivity_code}}
 #'  \item{\code{  trip_id}}
+#'  \item{\code{  country_flagcountry}}
 #' Dataframe 3:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  trip_landingtotalweight}}
@@ -973,7 +974,7 @@ check_raising_factor_inspector <- function(dataframe1,
                                            dataframe2,
                                            dataframe3,
                                            output,
-                                           species = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"),
+                                           country_species = list("1" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")),
                                            speciesfate = "6",
                                            vesselactivity = c("25", "27", "29"),
                                            threshold = c(0.9, 1.1)) {
@@ -1011,19 +1012,19 @@ check_raising_factor_inspector <- function(dataframe1,
   if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id"),
-    column_type = c("character", "numeric", "character", "character", "character", "character"),
+    column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id", "country_flagcountry"),
+    column_type = c("character", "numeric", "character", "character", "character", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id"),
-      column_type = c("character", "numeric", "character", "character", "character", "character"),
+      column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id", "country_flagcountry"),
+      column_type = c("character", "numeric", "character", "character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id")]
+    dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id", "country_flagcountry")]
   }
   if (!codama::r_table_checking(
     r_table = dataframe3,
@@ -1056,15 +1057,15 @@ check_raising_factor_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  # Checks the type of species
+  # Checks the type of country_species
   if (!codama::r_type_checking(
-    r_object = species,
-    type = "character",
+    r_object = country_species,
+    type = "list",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = species,
-      type = "character",
+      r_object = country_species,
+      type = "list",
       output = "message"
     ))
   }
@@ -1110,8 +1111,15 @@ check_raising_factor_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Catch filtration for RF1
-  dataframe2 <- dataframe2 %>%
-    dplyr::filter(species_fao_code %in% species & speciesfate_code %in% speciesfate & !(vesselactivity_code %in% vesselactivity))
+  ## Selection species when the list is available for the country and selection species fate
+  condition<-as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species)), speciesfate = I(rep(list(speciesfate),length(country_species)))))))
+  dataframe2_select_species <- purrr::map(condition, ~ dataframe2 %>% dplyr::filter((country_flagcountry %in% .x[[1]] & species_fao_code %in% .x[[2]] & speciesfate_code %in% .x[[3]])))
+  dataframe2_select_species <- do.call(rbind.data.frame, dataframe2_select_species)
+  ## Selection all species when the list is not available for the country
+  dataframe2<- rbind(dataframe2_select_species ,dataframe2 %>% dplyr::filter(!(country_flagcountry %in% names(country_species))))
+  ## Selection vessel activity
+   dataframe2 <- dataframe2 %>%
+     dplyr::filter(!(vesselactivity_code %in% vesselactivity))
   # Calculation of the sum of weights caught per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(trip_id) %>%
