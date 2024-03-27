@@ -1,8 +1,8 @@
 #' @name check_trip_activity_inspector
 #' @title Gives the inconsistencies between the trip and the associated activities in terms of presence
 #' @description The purpose of the check_trip_activity_inspector function is to provide a table of data that contains an inconsistency between the trip and the presence or not of activity associated with this trip
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_trip_activity_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_trip_activity_inspector () function.
 #' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -123,8 +123,8 @@ check_trip_activity_inspector <- function(dataframe1,
 #' @name check_fishing_time_inspector
 #' @title Gives the inconsistencies between the sum of the fishing times indicated for the route and the one indicated for the trip
 #' @description The purpose of the check_fishing_time_inspector function is to provide a table of data that contains an inconsistency between the sum of the fishing times indicated for the route and the one indicated for the trip
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_time_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_time_inspector () function.
 #' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -259,8 +259,8 @@ check_fishing_time_inspector <- function(dataframe1,
 #' @name check_sea_time_inspector
 #' @title Gives the inconsistencies between the sum of the sea times indicated for the route and the one indicated for the trip
 #' @description The purpose of the check_sea_time_inspector function is to provide a table of data that contains an inconsistency between the sum of the sea times indicated for the route and the one indicated for the trip
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sea_time_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sea_time_inspector () function.
 #' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -396,7 +396,7 @@ check_sea_time_inspector <- function(dataframe1,
 #' @name check_landing_consistent_inspector
 #' @title Gives the inconsistencies between the total landed weight for canneries and local market in the trip and vessel capacity link to trip
 #' @description The purpose of the check_landing_consistent_inspector function is to provide a table of data that contains an inconsistency with the total landed weight greater than vessel capacity for the trip
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_landing_consistent_inspector () function.
 #' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -511,8 +511,8 @@ check_landing_consistent_inspector <- function(dataframe1,
 #' @name check_landing_total_weight_inspector
 #' @title Gives the inconsistencies between the total weight landed during the trip for the canneries and the sum of the weights of each landing for the canneries linked to the trip
 #' @description The purpose of the check_landing_total_weight_inspector function is to provide a table of data that contains an inconsistency between the sum of the weights of each landing for the canneries and the one indicated for the trip
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_landing_total_weight_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_landing_total_weight_inspector () function.
 #' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param epsilon {\link[base]{numeric}} expected, default : 0.01. Gives the threshold at which the difference is considered too large.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -655,8 +655,8 @@ check_landing_total_weight_inspector <- function(dataframe1,
 #' @name check_temporal_limit_inspector
 #' @title Gives the inconsistencies between trip start and end date and the dates of activity
 #' @description The purpose of the check_temporal_limit_inspector function is to provide a table of data that contains an inconsistency between trip start and end date and the dates of activity (activity date outside the trip ranges, several occurrences of the activity date, ...)
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_temporal_limit_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_temporal_limit_inspector () function.
 #' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first at the trip level and the second at the activity date level), a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -826,7 +826,7 @@ check_temporal_limit_inspector <- function(dataframe1,
 #' @name check_harbour_inspector
 #' @title Gives the inconsistencies between the harbour of landing of the previous trip and the harbour of departure of the current trip
 #' @description The purpose of the check_harbour_inspector function is to provide a table of data that contains an inconsistency with the harbour of landing of the previous trip and the harbour of departure of the current trip
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_harbour_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -941,9 +941,9 @@ check_harbour_inspector <- function(dataframe1,
 #' @name check_raising_factor_inspector
 #' @title Gives the inconsistencies between RF1 and threshold values
 #' @description The purpose of the check_raising_factor_inspector function is to provide a table of data that contains an inconsistency with the RF1 and the valid threshold (Default : 0.9 ; 1.1)
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_raising_factor_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_raising_factor_inspector () function.
+#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_raising_factor_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param country_species {\link[base]{character}} expected. Default values: list("1" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).
 #' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.
@@ -1202,8 +1202,8 @@ check_raising_factor_inspector <- function(dataframe1,
 #' @name check_fishing_context_inspector
 #' @title Gives the inconsistencies between the school type and the association
 #' @description The purpose of the check_fishing_context_inspector function is to provide a table of data that contains an inconsistency with school type and the association
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_context_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_context_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param schooltype_object {\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -1357,7 +1357,7 @@ check_fishing_context_inspector <- function(dataframe1,
 #' @name check_operationt_inspector
 #' @title Gives the inconsistencies between fishing success status, vessel activity, type of school or weight caught
 #' @description The purpose of the check_operationt_inspector function is to provide a table of data that contains an inconsistency with succes status and vessel activity, the type of school or the weight caught
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_operationt_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -1504,7 +1504,7 @@ check_operationt_inspector <- function(dataframe1,
 #' @name check_position_inspector
 #' @title Gives the inconsistencies between the ocean declared for the trip and the position of the activity
 #' @description The purpose of the check_position_inspector function is to provide a table of data that contains an inconsistency with ocean declaration and activity position
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_position_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param ocean_label_nonpriority {\link[base]{character}} expected. Default values: Atlantic. Name of the priority ocean when the point is on the border between two oceans.
 #' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
@@ -1652,8 +1652,8 @@ check_position_inspector <- function(dataframe1,
 #' @name check_weight_inspector
 #' @title Gives the inconsistencies between the sum of the weight indicated for catches and the one indicated for the activity
 #' @description The purpose of the check_weight_inspector function is to provide a table of data that contains an inconsistency between the sum of the weight indicated for the catch and the one indicated for the activity
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weight_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weight_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -1790,7 +1790,7 @@ check_weight_inspector <- function(dataframe1,
 #' @name check_length_class_inspector
 #' @title Gives the inconsistencies between size class of the samples depending on the species and measurement type and the valid threshold
 #' @description The purpose of the check_length_class_inspector function is to provide a table of data that contains an inconsistency between the size class of the samples depending on the species and measurement type and the valid threshold (Default : 80)
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_length_class_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values: c("YFT", "BET", "ALB"). Vector of the species inventory controlled.
 #' @param size_measure_type {\link[base]{character}} expected. Default values: "FL". Vector of the size measure type controlled.
@@ -1959,8 +1959,8 @@ check_length_class_inspector <- function(dataframe1,
 #' @name check_measure_inspector
 #' @title Gives the inconsistencies between the total number of individuals measured per sample and the sum of individuals per sample, species and size class
 #' @description The purpose of the check_measure_inspector function is to provide a table of data that contains an inconsistency between the total number of individuals measured per sample and the sum of individuals per sample, species and size class
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
-#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_measure_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_measure_inspector () function.
 #' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -2101,7 +2101,7 @@ check_measure_inspector <- function(dataframe1,
 #' @name check_temperature_inspector
 #' @title Gives the inconsistencies between activity sea surface temperature and valid threshold
 #' @description The purpose of the check_temperature_inspector function is to provide a table of data that contains an inconsistency between the sea surface temperature for the activity and valid threshold
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_temperature_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param threshold {\link[base]{numeric}} expected. Default values: 15 and 32. Vector containing the lower and upper acceptable threshold for sea surface temperature.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -2215,10 +2215,217 @@ check_temperature_inspector <- function(dataframe1,
   }
 }
 
+#' @name check_weighting_sample_inspector
+#' @title Gives the inconsistencies between the sample weighting and catch weight
+#' @description The purpose of the check_weighting_sample_inspector function is to provide a table of data that contains an inconsistency between the sample weighting and catch weight for activity
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_sample_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_sample_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param species {\link[base]{character}} expected. Default values: c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"). list of the inventory of species (FAO code) used to compare to sample weighting.
+#' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to compare to sample weighting.
+#' @param epsilon {\link[base]{numeric}} expected, default : 0.01. Gives the threshold at which the difference is considered too large.
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  catch_id}}
+#'  \item{\code{  catch_weight}}
+#'  \item{\code{  speciesfate_code}}
+#'  \item{\code{  species_fao_code}}
+#'  \item{\code{  activity_id}}
+#' Dataframe 2:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  sampleactivity_weightedweight}}
+#'  \item{\code{  activity_id}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
+check_weighting_sample_inspector <- function(dataframe1,
+                                      dataframe2,
+                                      output,
+                                      species = c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"),
+                                      speciesfate = "6",
+                                      epsilon = 0.01) {
+  # 0 - Global variables assignement ----
+  sample_id <- NULL
+  sample_smallsweight <- NULL
+  sample_bigsweight <- NULL
+  sample_totalweight <- NULL
+  weight_calculation <- NULL
+  sampleactivity_weightedweight <- NULL
+  trip_id <- NULL
+  weightcategory_code <- NULL
+  landing_weight <- NULL
+  weightedweight <- NULL
+  sum_landing_weight <- NULL
+  weight <- NULL
+  vesseltype_code <- NULL
+  weightedweight_bis <- NULL
+  sum_landing_weight_bis <- NULL
+  sampletype_code <- NULL
+  vesseltype_label <- NULL
+  # 1 - Arguments verification ----
+  if (!codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "activity_id"),
+    column_type = c("character", "numeric", "character", "character", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "activity_id"),
+      column_type = c("character", "numeric", "character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "activity_id")]
+  }
+  if (!codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("sample_id", "sampleactivity_weightedweight", "activity_id"),
+    column_type = c("character", "numeric", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("sample_id", "sampleactivity_weightedweight", "activity_id"),
+      column_type = c("character", "numeric", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("sample_id", "sampleactivity_weightedweight", "activity_id")]
+  }
+  # Checks the type and values of output
+  if (!codama::r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = species,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = species,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = speciesfate,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = speciesfate,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = epsilon,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = epsilon,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  select <- dataframe1$activity_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Calculation weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  dataframe_weight_calculation <- dataframe1 %>%
+    dplyr::group_by(activity_id) %>%
+    dplyr::filter(species_fao_code %in% species & speciesfate_code %in% speciesfate) %>%
+    dplyr::summarise(weight = ifelse(all(is.na(catch_weight)), 0, sum(catch_weight, na.rm = TRUE)))
+  # Calculation weightedweight for sample (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  dataframe2 <- dataframe2 %>%
+    dplyr::group_by(activity_id) %>%
+    dplyr::summarise(weightedweight = ifelse(all(is.na(sampleactivity_weightedweight)), 0, sum(sampleactivity_weightedweight, na.rm = TRUE)))
+  # Merge
+  dataframe1 <- dataframe1 %>%
+      dplyr::select(activity_id) %>%
+      dplyr::distinct()
+  dataframe1 <- merge(dataframe1, dataframe_weight_calculation, by = "activity_id", all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe2, by = "activity_id", all.x = TRUE)
+  # Calcul difference
+  dataframe1$difference <- ifelse(is.na(dataframe1$weight), 0, dataframe1$weight) - ifelse(is.na(dataframe1$weightedweight), 0, dataframe1$weightedweight)
+  dataframe1$difference <- abs(dataframe1$difference)
+  dataframe1$epsilon <- epsilon
+  # Compare sum difference with epsilon
+  comparison <- codama::vector_comparison(
+    first_vector = dataframe1$difference,
+    second_vector = dataframe1$epsilon,
+    comparison_type = "less_equal",
+    output = "report"
+  )
+  dataframe1$logical <- comparison$logical
+  # Management of missing sample
+  dataframe1[is.na(dataframe1$weightedweight) | (!is.na(dataframe1$weightedweight) & dataframe1$weightedweight == 0), "logical"] <- TRUE
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- subset(dataframe1, select = -c(epsilon, difference))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, weight, weightedweight, .after = logical)
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+    all <- c(select, dataframe1$activity_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    if (sum(is.na(dataframe1$logical)) > 0) {
+      text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " samples inconsistency with weighted weight", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 #' @name check_species_inspector
 #' @title Gives the inconsistencies between species sampled and species authorized
 #' @description The purpose of the check_species_inspector function is to provide a table of data that contains an inconsistency between the species sampled and species authorized
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_inspector () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_species_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values: c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"). Vector of the species authorized.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -5066,6 +5273,16 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             .data = check_temperature,
             `Sea surface temperature` = activity_seasurfacetemperature
           )
+          # Uses a function which indicates whether that catch weight for activity is consistent with the sample weighting
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weighting sample inspector", sep = "")
+          check_weighting_sample_inspector_data <- check_weighting_sample_inspector(dataframe1 = data_catch, dataframe2 = data_sampleactivity, output = "report")
+          # Uses a function to format the table
+          check_weighting_sample <- table_display_trip(check_weighting_sample_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
+          check_weighting_sample <- dplyr::rename(
+            .data = check_weighting_sample,
+            `Sum catch weight ` = weight,
+            `Sum sample weighted weight`  = weightedweight
+          )
           # Uses a function which indicates whether that species sampled is consistent with species authorized
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check species inspector", sep = "")
           check_species_inspector_data <- check_species_inspector(dataframe1 = samplespecies_select, output = "report")
@@ -5238,7 +5455,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot", name_col = "data_plot", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vms_position", "vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_data", "trip_data"))
             eval(parse(text = code_txt))
             # Number of the table containing the Anapo plot information in calcul_check_server
-            check_anapo_inspector_dataplot$num_table <- 28
+            check_anapo_inspector_dataplot$num_table <- 29
             check_anapo_inspector_dataplot$num_row <- seq_len(nrow(check_anapo_inspector_dataplot))
             # Add button and data for plot in table
             check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data_table, data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = NULL, colname_info = c("num_table", "num_row"), name_button = "button_anapo", choice_select_row = "all")
@@ -5260,7 +5477,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           } else {
             check_anapo <- data.frame()
           }
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot))
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot))
         }
       }
     })

@@ -153,6 +153,9 @@ app_server <- function(input, output, session) {
   # Table of consistency test the sea surface temperature is consistent with valid limits
   table_server(id = "check_temperature", data = calcul_check, number = 15, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3))
 
+  # Table of consistency test the catch weight for activity is consistent with the sample weighting
+  table_server(id = "check_weighting_sample", data = calcul_check, number = 16, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3))
+
   # Table of consistency test the size class of the samples depending on the species and measurement type is consistent with valid limits
   table_server(id = "check_length_class", data = calcul_check, number = 13, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
@@ -160,40 +163,40 @@ app_server <- function(input, output, session) {
   table_server(id = "check_measure", data = calcul_check, number = 14, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the species sampled is consistent with species authorized
-  table_server(id = "check_species", data = calcul_check, number = 16, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_species", data = calcul_check, number = 17, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the sample is consistent with the presence of measurement
-  table_server(id = "check_sample_without_measure", data = calcul_check, number = 17, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_sample_without_measure", data = calcul_check, number = 18, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the sample is consistent with the presence of species
-  table_server(id = "check_sample_without_species", data = calcul_check, number = 18, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_sample_without_species", data = calcul_check, number = 19, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the sample is consistent with the subsample number
-  table_server(id = "check_super_sample_number", data = calcul_check, number = 19, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_super_sample_number", data = calcul_check, number = 20, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the sample well number is consistent with the associated trip well numbers
-  table_server(id = "check_well_number", data = calcul_check, number = 20, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_well_number", data = calcul_check, number = 21, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the sample is consistent for the percentage of little and big fish sampled
-  table_server(id = "check_little_big", data = calcul_check, number = 21, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_little_big", data = calcul_check, number = 22, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the sample is consistent for the weighting
-  table_server(id = "check_weighting", data = calcul_check, number = 22, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_weighting", data = calcul_check, number = 23, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the sample weight (m10 and p10) is consistent for the global weight
-  table_server(id = "check_weight_sample", data = calcul_check, number = 23, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_weight_sample", data = calcul_check, number = 24, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the sample and the existence of the activity data_sample_activity
-  table_server(id = "check_activity_sample", data = calcul_check, number = 24, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_activity_sample", data = calcul_check, number = 25, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the sample measurement types is consistent for the species or weight
-  table_server(id = "check_ldlf", data = calcul_check, number = 25, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_ldlf", data = calcul_check, number = 26, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the small and large sample weights is consistent for the sum of the small and big weights of the associated well
-  table_server(id = "check_distribution", data = calcul_check, number = 26, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+  table_server(id = "check_distribution", data = calcul_check, number = 27, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
   # Table of consistency test the activity position is consistent for VMS position
-  table_server(id = "check_anapo", data = calcul_check, number = 27, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3, 12, 13, 14))
+  table_server(id = "check_anapo", data = calcul_check, number = 28, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3, 12, 13, 14))
 
   # Anapo control plot, display in a window
   output$plot_anapo <- plotly::renderPlotly({
@@ -276,6 +279,7 @@ app_server <- function(input, output, session) {
       insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_temperature", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_weighting_sample", anim = TRUE, animType = "fade")
       # Sample
       shinyjs::show(id = "div_check_length_class", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_measure", anim = TRUE, animType = "fade")
@@ -320,6 +324,7 @@ app_server <- function(input, output, session) {
       shinyjs::hide(id = "div_check_position", anim = FALSE)
       shinyjs::hide(id = "div_check_weight", anim = FALSE)
       shinyjs::hide(id = "div_check_temperature", anim = FALSE)
+      shinyjs::hide(id = "div_check_weighting_sample", anim = FALSE)
       shinyjs::hide(id = "div_check_length_class", anim = FALSE)
       shinyjs::hide(id = "div_check_measure", anim = FALSE)
       shinyjs::hide(id = "div_check_species", anim = FALSE)
@@ -352,6 +357,7 @@ app_server <- function(input, output, session) {
       shinyjs::hide(id = "div_check_position", anim = FALSE)
       shinyjs::hide(id = "div_check_weight", anim = FALSE)
       shinyjs::hide(id = "div_check_temperature", anim = FALSE)
+      shinyjs::hide(id = "div_check_weighting_sample", anim = FALSE)
       shinyjs::hide(id = "div_check_length_class", anim = FALSE)
       shinyjs::hide(id = "div_check_measure", anim = FALSE)
       shinyjs::hide(id = "div_check_species", anim = FALSE)
@@ -397,6 +403,7 @@ app_server <- function(input, output, session) {
       insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_temperature", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_weighting_sample", anim = TRUE, animType = "fade")
       # Sample
       shinyjs::show(id = "div_check_length_class", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_measure", anim = TRUE, animType = "fade")
