@@ -221,7 +221,11 @@ app_server <- function(input, output, session) {
     activity_data <- eval(parse(text = data_all_click[[5]]))
     activity_crs <- data_all_click[[3]]
     # Spatial formatting
-    data_geo <- sf::st_as_sf(activity_data, wkt = "activity_position", crs = activity_crs) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+    if(!is.na(activity_data$activity_position)){
+      data_geo <- sf::st_as_sf(activity_data, wkt = "activity_position", crs = activity_crs) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+    }else{
+      data_geo <- data.frame(Y= c(), X = c())
+    }
     # Non-breaking hyphen (-)
     enddate <- gsub("-", "&#8209;", activity_data[1, "trip_enddate", drop = TRUE])
     activity_date <- gsub("-", "&#8209;", activity_data[1, "activity_date", drop = TRUE])

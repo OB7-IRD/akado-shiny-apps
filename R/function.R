@@ -5814,7 +5814,8 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   }
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
-      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF"))
+      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF"))%>%
+      plotly::layout(mapbox = list(center = list(lon = data_geo_vms$X[1], lat = data_geo_vms$Y[1])))
   }
   if (!all(is.na(data_activity$activity_position))) {
     plot <- plot %>%
