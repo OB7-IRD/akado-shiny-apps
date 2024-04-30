@@ -1603,6 +1603,7 @@ check_position_inspector <- function(dataframe1,
   # Gives the type of location
   dataframe1$type <- "Sea"
   dataframe1$type[is.na(dataframe1$zfao_ocean)] <- "Land"
+  dataframe1$type[is.na(dataframe1$activity_position)] <- "No position"
   dataframe1$type[dataframe1$logical_harbour] <- "Harbour"
   # Case of ocean trip is null :
   dataframe1$logical[is.na(dataframe1$ocean_label)] <- FALSE
@@ -5737,12 +5738,18 @@ plot_position <- function(data) {
   # Local binding global variables
   . <- NULL
   # Spatial formatting
-  data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
-  # Plot
-  plotly::plot_ly(
-    data = data_geo, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>"
-  ) %>%
-    plotly::layout(showlegend = FALSE, mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
+  if(!is.na(data$activity_position)){
+    data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+    # Plot
+    plotly::plot_ly(
+      data = data_geo, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>"
+    ) %>%
+      plotly::layout(showlegend = FALSE, mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
+  }else{
+    # Plot
+    plotly::plot_ly(type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>") %>%
+      plotly::layout(showlegend = FALSE, mapbox = list(style = "carto-positron"))
+  }
 }
 
 # Function to create the plot of the consistency of the position for the activity and VMS
