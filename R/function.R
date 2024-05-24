@@ -463,10 +463,6 @@ check_landing_consistent_inspector <- function(dataframe1,
   dataframe1$logical <- comparison$logical
   dataframe1 <- dplyr::relocate(.data = dataframe1, vessel_capacity, trip_weighttotal, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(trip_landingtotalweight, trip_localmarkettotalweight))
-  # Management of missing vessel capacity
-  dataframe1[is.na(dataframe1$vessel_capacity), "logical"] <- FALSE
-  # Management of the 0 value for vessel capacity
-  dataframe1[!is.na(dataframe1$vessel_capacity) & dataframe1$vessel_capacity == 0, "logical"] <- FALSE
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
