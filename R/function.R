@@ -213,8 +213,6 @@ check_fishing_time_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  # Management of the 0 value for fishing time
-  dataframe1[dataframe1$trip_fishingtime == 0 & is.na(dataframe1$sum_route_fishingtime), "logical"] <- TRUE
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, trip_fishingtime, sum_route_fishingtime, .after = logical)
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
