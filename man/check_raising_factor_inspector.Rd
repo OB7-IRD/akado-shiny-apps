@@ -51,7 +51,7 @@ Dataframe 2:
  \item{\code{  species_fao_code}}
  \item{\code{  vesselactivity_code}}
  \item{\code{  trip_id}}
- \item{\code{  country_flagcountry}}
+ \item{\code{  country_fleetcountry}}
 Dataframe 3:
  \item{\code{  trip_id}}
  \item{\code{  trip_landingtotalweight}}

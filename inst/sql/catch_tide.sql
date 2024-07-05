@@ -7,7 +7,7 @@ SELECT
     sf.code::text AS speciesfate_code,
     s.faocode::text AS species_fao_code, 
     va.code::text AS vesselactivity_code,
-    co.code::text AS country_flagcountry
+    co.code::text AS country_fleetcountry
 FROM 
     ps_common.trip t
     LEFT JOIN ps_logbook.route r ON r.trip = t.topiaid
@@ -17,6 +17,6 @@ FROM
     LEFT JOIN ps_common.vesselactivity va ON a.vesselactivity = va.topiaid
     LEFT JOIN common.species s ON c.species = s.topiaid
     INNER JOIN common.vessel v ON t.vessel = v.topiaid
-    LEFT JOIN common.country co ON v.flagcountry = co.topiaid
+    LEFT JOIN common.country co ON v.fleetcountry = co.topiaid
 WHERE 
     t.topiaid IN (?select_item) 
