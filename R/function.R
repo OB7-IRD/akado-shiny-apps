@@ -940,7 +940,7 @@ check_harbour_inspector <- function(dataframe1,
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_raising_factor_inspector () function.
 #' @param dataframe4 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_raising_factor_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param country_species {\link[base]{character}} expected. Default values: list("1" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).
+#' @param country_species {\link[base]{character}} expected. Default values: list("1" = c("TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).
 #' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.
 #' @param vesselactivity {\link[base]{character}} expected. Default values: c("23", "25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.
 #' @param threshold {\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable threshold for RF1.
@@ -974,7 +974,7 @@ check_raising_factor_inspector <- function(dataframe1,
                                            dataframe3,
                                            dataframe4,
                                            output,
-                                           country_species = list("1" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")),
+                                           country_species = list("1" = c("TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")),
                                            speciesfate = "6",
                                            vesselactivity = c("23", "25", "27", "29"),
                                            threshold = c(0.9, 1.1)) {
