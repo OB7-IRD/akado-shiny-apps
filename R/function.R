@@ -1190,8 +1190,6 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe4$logical <- comparison_less$logical & comparison_greater$logical
   # Corrects missing RF1s when nothing has been landed and there is no capture
   dataframe4[(is.na(dataframe4$tide_landingtotalweight) | dataframe4$tide_landingtotalweight == 0) & is.na(dataframe4$tide_sum_catch_weight), "logical"] <- TRUE
-  # Correction of complete tides not yet finished
-  dataframe4[!is.na(dataframe4$logical_full_tide) & !dataframe4$logical_full_tide, "logical"] <- TRUE
   dataframe4 <- dplyr::relocate(.data = dataframe4, rf1, .after = logical)
   dataframe4 <- subset(dataframe4, select = -c(trip_end_tide_id, logical_full_tide, sum_catch_weight, sum_landing_weight, tide_sum_landing_weight, tide_sum_catch_weight, lower_threshold, upper_threshold, vessel_id, country_fleetcountry))
   if ((sum(dataframe4$logical, na.rm = TRUE) + sum(!dataframe4$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe4$logical)) > 0) {
@@ -5138,7 +5136,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # 2 - Data design ----
           # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
           data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_landing_trip_previous, harbour_label_landing_trip_previous)))
-          # Retrieve trip sample : Retrieve trip activity : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
+          # Retrieve trip : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
+          colnames_trip_id <- c("trip_id", "vessel_code", "trip_enddate")
+          # Retrieve trip activity : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
           colnames_activity_id <- c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_number", "vesselactivity_code")
           # Retrieve trip sample : retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
           colnames_sample_id <- c("sample_id", "vessel_code", "trip_enddate", "sample_number")
@@ -5154,12 +5154,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check trip activity inspector", sep = "")
           check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = activity_select, output = "report")
           # Uses a function to format the table
-          check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select(), type_inconsistency = "warning")
+          check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "warning")
           # Uses a function which indicates whether the selected trips contain fishing time inconsistent
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check fishing time inspector", sep = "")
           check_fishing_time_inspector_data <- check_fishing_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
           # Uses a function to format the table
-          check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select(), type_inconsistency = "error")
+          check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_fishing_time <- dplyr::rename(
             .data = check_fishing_time,
@@ -5170,7 +5170,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sea time inspector", sep = "")
           check_sea_time_inspector_data <- check_sea_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
           # Uses a function to format the table
-          check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_select(), type_inconsistency = "error")
+          check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_sea_time <- dplyr::rename(
             .data = check_sea_time,
@@ -5181,7 +5181,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing consistent inspector", sep = "")
           check_landing_consistent_inspector_data <- check_landing_consistent_inspector(dataframe1 = data_trip_unprecedented, output = "report")
           # Uses a function to format the table
-          check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_select(), type_inconsistency = "warning")
+          check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "warning")
           # Modify the table for display purposes: rename column
           check_landing_consistent <- dplyr::rename(
             .data = check_landing_consistent,
@@ -5192,7 +5192,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing total weight inspector", sep = "")
           check_landing_total_weight_inspector_data <- check_landing_total_weight_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_landing, output = "report", epsilon = config_data()[["epsilon"]])
           # Uses a function to format the table
-          check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_select(), type_inconsistency = "error")
+          check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_landing_total_weigh <- dplyr::rename(
             .data = check_landing_total_weigh,
@@ -5215,7 +5215,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Add button and data for plot in table
           check_temporal_limit <- data_button_plot(data_plot = check_temporal_limit_data_plot, data_display = check_temporal_limit, data_id = trip_select(), colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("trip_id", "vessel_code", "trip_startdate", "trip_enddate"), name_button = "button_temporal_limit")
           # Uses a function to format the table
-          check_temporal_limit <- table_display_trip(check_temporal_limit, trip_select(), type_inconsistency = "error")
+          check_temporal_limit <- table_display_trip(check_temporal_limit, trip_select()[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_temporal_limit <- dplyr::rename(
             .data = check_temporal_limit,
@@ -5225,7 +5225,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check harbour inspector", sep = "")
           check_harbour_inspector_data <- check_harbour_inspector(dataframe1 = data_trip, output = "report")
           # Uses a function to format the table
-          check_harbour <- table_display_trip(check_harbour_inspector_data, trip_select(), type_inconsistency = "error")
+          check_harbour <- table_display_trip(check_harbour_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_harbour <- dplyr::rename(
             .data = check_harbour,
@@ -5236,11 +5236,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check raising factor inspector", sep = "")
           check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_tide, dataframe3 = data_landing_tide, dataframe4 = data_tide, output = "report")
           # Uses a function to format the table
-          check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select(), type_inconsistency = "info")
+          check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select()[,], type_inconsistency = "info")
           check_raising_factor$rf1 <- trunc(check_raising_factor$rf1 * 100000) / 100000
           # Modify the table for display purposes: rename column
           check_raising_factor <- dplyr::rename(
             .data = check_raising_factor,
+            `Landing well status` = wellcontentstatus_landing_label,
             `RF1` = rf1
           )
           # Uses a function which indicates whether the school type is consistent with the association
