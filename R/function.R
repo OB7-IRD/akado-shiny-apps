@@ -1166,7 +1166,7 @@ check_raising_factor_inspector <- function(dataframe1,
   # Add of a logic that indicates whether the tide is finished or not
   dataframe4$logical_full_tide <- !is.na(dataframe4$trip_end_tide_id)
   # For unfinished tides (no end-of-tide id) indicates the vessel id for the end-of-tide id (for each ship, allows you to group together all the trips of the non-finished tide)
-  dataframe4[is.na(dataframe4$trip_end_tide_id),"trip_end_tide_id"] <- paste0("vessel_id_", dataframe4[is.na(dataframe4$trip_end_tide_id),"vessel_id"])
+  dataframe4[is.na(dataframe4$trip_end_tide_id),"trip_end_tide_id"] <- paste0("vessel_id_", dataframe4[is.na(dataframe4$trip_end_tide_id),"vessel_id", drop = TRUE])
   # RF1 calculation
   tide_id_data_rf1 <- dataframe4 %>%
     dplyr::group_by(trip_end_tide_id) %>%
