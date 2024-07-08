@@ -11,7 +11,7 @@ check_raising_factor_inspector(
   dataframe4,
   output,
   country_species = list(`1` = c("TUN", "ALB", "YFT", "BET", "SKJ"), `4` = c("LOT",
-    "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")),
+    "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*", "KAW", "FRZ", "BLT")),
   speciesfate = "6",
   vesselactivity = c("23", "25", "27", "29"),
   threshold = c(0.9, 1.1)
@@ -28,7 +28,7 @@ check_raising_factor_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{country_species}{{\link[base]{character}} expected. Default values: list("1" = c("TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).}
+\item{country_species}{{\link[base]{character}} expected. Default values: list("1" = c("TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*", "KAW", "FRZ", "BLT")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).}
 
 \item{speciesfate}{{\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.}
 
