@@ -13,7 +13,7 @@ check_raising_factor_inspector(
   country_species = list(`1` = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), `4` =
     c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")),
   speciesfate = "6",
-  vesselactivity = c("25", "27", "29"),
+  vesselactivity = c("23", "25", "27", "29"),
   threshold = c(0.9, 1.1)
 )
 }
@@ -32,7 +32,7 @@ check_raising_factor_inspector(
 
 \item{speciesfate}{{\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.}
 
-\item{vesselactivity}{{\link[base]{character}} expected. Default values: c("25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.}
+\item{vesselactivity}{{\link[base]{character}} expected. Default values: c("23", "25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.}
 
 \item{threshold}{{\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable threshold for RF1.}
 }

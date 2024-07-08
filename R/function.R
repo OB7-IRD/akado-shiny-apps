@@ -942,7 +942,7 @@ check_harbour_inspector <- function(dataframe1,
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param country_species {\link[base]{character}} expected. Default values: list("1" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).
 #' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.
-#' @param vesselactivity {\link[base]{character}} expected. Default values: c("25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.
+#' @param vesselactivity {\link[base]{character}} expected. Default values: c("23", "25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.
 #' @param threshold {\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable threshold for RF1.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -976,7 +976,7 @@ check_raising_factor_inspector <- function(dataframe1,
                                            output,
                                            country_species = list("1" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*")),
                                            speciesfate = "6",
-                                           vesselactivity = c("25", "27", "29"),
+                                           vesselactivity = c("23", "25", "27", "29"),
                                            threshold = c(0.9, 1.1)) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
