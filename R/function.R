@@ -1130,12 +1130,15 @@ check_raising_factor_inspector <- function(dataframe1,
   # Add country_fleetcountry for catch
   dataframe2 <- merge(dataframe2, unique(dataframe4[, c("trip_id", "country_fleetcountry")]), by = "trip_id", all.x = TRUE)
   # Catch filtration for RF1
-  ## Selection species when the list is available for the country and selection species fate
-  condition<-as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species)), speciesfate = I(rep(list(speciesfate),length(country_species)))))))
-  dataframe2_select_species <- purrr::map(condition, ~ dataframe2 %>% dplyr::filter((country_fleetcountry %in% .x[[1]] & species_fao_code %in% .x[[2]] & speciesfate_code %in% .x[[3]])))
+  ## Selection species when the list is available for the country and selection species
+  condition<-as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species))))))
+  dataframe2_select_species <- purrr::map(condition, ~ dataframe2 %>% dplyr::filter((country_fleetcountry %in% .x[[1]] & species_fao_code %in% .x[[2]])))
   dataframe2_select_species <- do.call(rbind.data.frame, dataframe2_select_species)
   ## Selection all species when the list is not available for the country
   dataframe2<- rbind(dataframe2_select_species ,dataframe2 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
+  ## Selection species fate
+  dataframe2 <- dataframe2 %>%
+    dplyr::filter((speciesfate_code %in% speciesfate))
   ## Selection vessel activity
    dataframe2 <- dataframe2 %>%
      dplyr::filter(!(vesselactivity_code %in% vesselactivity))
