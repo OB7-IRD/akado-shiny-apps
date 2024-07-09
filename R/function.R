@@ -984,7 +984,7 @@ check_raising_factor_inspector <- function(dataframe1,
   trip_landingtotalweight <- NULL
   sum_catch_weight <- NULL
   rf1 <- NULL
-  tide_landingtotalweight <- NULL
+  tide_sum_landing_weight <- NULL
   tide_sum_catch_weight <- NULL
   lower_threshold <- NULL
   upper_threshold <- NULL
@@ -1192,7 +1192,7 @@ check_raising_factor_inspector <- function(dataframe1,
   )
   dataframe4$logical <- comparison_less$logical & comparison_greater$logical
   # Corrects missing RF1s when nothing has been landed and there is no capture
-  dataframe4[(is.na(dataframe4$tide_landingtotalweight) | dataframe4$tide_landingtotalweight == 0) & is.na(dataframe4$tide_sum_catch_weight), "logical"] <- TRUE
+  dataframe4[(is.na(dataframe4$tide_sum_landing_weight) | dataframe4$tide_sum_landing_weight == 0) & is.na(dataframe4$tide_sum_catch_weight), "logical"] <- TRUE
   dataframe4 <- dplyr::relocate(.data = dataframe4, rf1, .after = logical)
   dataframe4 <- subset(dataframe4, select = -c(trip_end_tide_id, logical_full_tide, sum_catch_weight, sum_landing_weight, tide_sum_landing_weight, tide_sum_catch_weight, lower_threshold, upper_threshold, vessel_id, country_fleetcountry))
   if ((sum(dataframe4$logical, na.rm = TRUE) + sum(!dataframe4$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe4$logical)) > 0) {
