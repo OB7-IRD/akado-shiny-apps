@@ -1,9 +1,9 @@
 --- Reconstructs complete tides from selected trips
 SELECT 
 	trip_tide.topiaid::text AS trip_id, 
-	trip_tide.landingtotalweight::numeric AS trip_landingtotalweight,
 	trip_end_tide.trip_current_end_tide_id::text AS trip_end_tide_id,
-	trip_tide.vessel::text AS vessel_id
+	trip_tide.vessel::text AS vessel_id,
+	c.code::text AS country_fleetcountry
 FROM 
  	(
 	-- Search for information on the end trip of the current tide and the end trip of the previous tide
@@ -37,3 +37,5 @@ FROM
 		(coalesce(trip_current_end_tide.logbookprogram,'NULL') IN (?select_item_1) OR trip_current_end_tide.topiaid IS NULL) 
 	) AS trip_end_tide
 	LEFT JOIN ps_common.trip trip_tide ON trip_tide.vessel = trip_end_tide.vessel AND (trip_end_tide.trip_current_end_tide_enddate IS NULL OR trip_tide.enddate <= trip_end_tide.trip_current_end_tide_enddate) AND (trip_end_tide.trip_previous_end_tide_enddate IS NULL OR trip_tide.enddate > trip_end_tide.trip_previous_end_tide_enddate) AND coalesce(trip_tide.logbookprogram,'NULL') IN (?select_item_1)
+	LEFT JOIN common.vessel v on trip_tide.vessel = v.topiaid
+	LEFT JOIN common.country c ON v.fleetcountry = c.topiaid 
