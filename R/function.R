@@ -4613,7 +4613,9 @@ check_anapo_inspector <- function(dataframe1,
   select <- dataframe1$activity_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
-  # Calculation number vms (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
+  # Remove VMS without position
+  dataframe3 <- dataframe3 %>% dplyr::filter(!is.na(vms_position))
+  # Calculation number vms
   dataframe3_nb_vms <- dataframe3 %>%
     dplyr::group_by(vms_date, vessel_code) %>%
     dplyr::summarise(nb_vms = dplyr::n(), .groups = "keep")
