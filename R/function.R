@@ -1491,8 +1491,6 @@ check_operationt_inspector <- function(dataframe1,
   dataframe1$logical_successstatus_weight[!is.na(dataframe1$successstatus_code) & dataframe1$successstatus_code == "0"] <- !dataframe1$logical_successstatus_weight[!is.na(dataframe1$successstatus_code) & dataframe1$successstatus_code == "0"]
   # NA success status: no constraints
   dataframe1$logical_successstatus_weight[is.na(dataframe1$successstatus_code)] <- TRUE
-  # NA weight: no constraints
-  dataframe1$logical_successstatus_weight[is.na(dataframe1$activity_weight)] <- TRUE
   # Combines test results
   dataframe1$logical <- dataframe1$logical_successstatus_vesselactivity & dataframe1$logical_successstatus_schooltype_indeterminate & dataframe1$logical_successstatus_schooltype & dataframe1$logical_successstatus_weight
   dataframe1 <- dplyr::relocate(.data = dataframe1, vesselactivity_code, successstatus_code, schooltype_code, activity_weight, .after = logical)
