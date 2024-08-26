@@ -111,7 +111,7 @@ app_server <- function(input, output, session) {
     # Split information
     split_id <- strsplit(input$button_position, "&")[[1]]
     enddate <- split_id[5]
-    activity_date <- split_id[5]
+    activity_date <- split_id[6]
     # Spatial formatting
     data <- eval(parse(text = split_id[[2]]))
     if(!is.na(data$activity_position)){
