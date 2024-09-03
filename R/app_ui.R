@@ -12,7 +12,7 @@ app_ui <- function(request) {
     titleWidth = 550
   )
   header$children[[2]]$children[[1]] <- list(
-    tags$a(tags$img(src = "www/favicon.png", height = "100%", align = "left"), target = "_blank"),
+    tags$a(tags$img(src = file.path("www", "favicon.png"), height = "100%", align = "left"), target = "_blank"),
     header$children[[2]]$children[[1]]
   )
   tagList(
