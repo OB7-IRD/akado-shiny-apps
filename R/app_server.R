@@ -8,7 +8,7 @@ app_server <- function(input, output, session) {
 
   # Verification that the user is authorized to connect to AkadoR
   res_auth <- shinymanager::secure_server(
-    check_credentials = shinymanager::check_credentials(file.path(path.expand("~"), ".appconfig", "akador", "database.sqlite"))
+    check_credentials = set_authentication_result()
   )
 
   # Error message if the date range is not correct
