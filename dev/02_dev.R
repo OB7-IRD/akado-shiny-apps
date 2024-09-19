@@ -106,6 +106,7 @@ usethis::use_package("units")
 usethis::use_package("purrr")
 usethis::use_package("tibble")
 usethis::use_package("tidyr")
+usethis::use_package("shinymanager")
 
 usethis::use_dev_package("codama", remote = "OB7-IRD/codama")
 usethis::use_dev_package("furdeb", remote = "OB7-IRD/furdeb")

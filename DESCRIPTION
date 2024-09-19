@@ -26,6 +26,7 @@ Imports:
     shinycssloaders,
     shinydashboard,
     shinyjs,
+    shinymanager,
     tibble,
     tidyr,
     units,
