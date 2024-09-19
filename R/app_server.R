@@ -5,6 +5,12 @@
 #' @import shiny
 #' @noRd
 app_server <- function(input, output, session) {
+
+  # Verification that the user is authorized to connect to AkadoR
+  res_auth <- shinymanager::secure_server(
+    check_credentials = set_authentication_result()
+  )
+
   # Error message if the date range is not correct
   output$error_date_select <- renderText({
     if (isTruthy(input$trip_start_date_range) && isTruthy(input$trip_end_date_range) && input$trip_start_date_range > input$trip_end_date_range) {
