@@ -6,16 +6,34 @@
 \usage{
 check_position_inspector(
   dataframe1,
+  dataframe2,
+  path_shp_sea,
   output,
-  ocean_label_nonpriority = "Atlantic"
+  activity_crs = 4326,
+  harbour_crs = 4326,
+  layer_shp_sea = "World_Seas",
+  buffer_harbour = 11100,
+  buffer_sea = 925
 )
 }
 \arguments{
 \item{dataframe1}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_position_inspector () function.}
 
+\item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_position_inspector () function.}
+
+\item{path_shp_sea}{{\link[base]{character}} expected. Path to the folder containing the seas shapefile}
+
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{ocean_label_nonpriority}{{\link[base]{character}} expected. Default values: Atlantic. Name of the priority ocean when the point is on the border between two oceans.}
+\item{activity_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity}
+
+\item{harbour_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position harbour}
+
+\item{layer_shp_sea}{{\link[base]{character}} expected. Default values: World_Seas. Layer to containing the seas shapefile (cf : Flanders Marine Institute. IHO Sea Areas, version 1. Available online at https://www.marineregions.org/)}
+
+\item{buffer_harbour}{{\link[base]{numeric}} expected. Default values: 11100. Buffer to be used for harbour, in meter}
+
+\item{buffer_sea}{{\link[base]{numeric}} expected. Default values: 925. Buffer to be used for seas, in meter}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
@@ -29,9 +47,11 @@ The input dataframe must contain all these columns for the function to work :
 Dataframe 1:
  \item{\code{  activity_id}}
  \item{\code{  ocean_label}}
- \item{\code{  zfao_ocean}}
  \item{\code{  activity_position}}
- \item{\code{  activity_crs}}
- \item{\code{  harbour_id}}
+ \item{\code{  trip_id}}
+Dataframe 2:
+ \item{\code{  trip_id}}
+ \item{\code{  harbour_position_departure}}
+ \item{\code{  harbour_position_landing}}
 }
 }

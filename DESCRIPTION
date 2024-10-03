@@ -27,6 +27,7 @@ Imports:
     shinydashboard,
     shinyjs,
     shinymanager,
+    terra,
     tibble,
     tidyr,
     units,
