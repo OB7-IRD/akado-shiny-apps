@@ -4,12 +4,10 @@
 \alias{start_configuration}
 \title{AkadoR startup configuration}
 \usage{
-start_configuration(secure_connection = FALSE, set_timeout = 60)
+start_configuration(secure_connection = FALSE)
 }
 \arguments{
 \item{secure_connection}{{\link[base]{logical}} expected. Default values: FALSE. If you wish to enable secure connection to the application, set TRUE}
-
-\item{set_timeout}{{\link[base]{numeric}} expected. Default values: 60. Session expiry time (in minutes) before disconnection in standby mode if secure connection is enabled}
 }
 \description{
 The purpose of the start_configuration function is to configure startup, secure connection to the application, ...

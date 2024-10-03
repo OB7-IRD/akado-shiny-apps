@@ -33,10 +33,6 @@ set_start_configuration <- function(path_file_configuration = file.path(path.exp
       names_argument <- c(names_argument, "secure_connection")
       value_argument <- append(value_argument, file_configuration[["start_AkadoR_configuration"]][["secure_connection"]])
     }
-    if (!is.null(file_configuration[["start_AkadoR_configuration"]][["set_timeout"]])) {
-      names_argument <- c(names_argument, "set_timeout")
-      value_argument <- append(value_argument, file_configuration[["start_AkadoR_configuration"]][["set_timeout"]])
-    }
     # Configure application launch with recovered parameters
     call_start_configuration <- do.call("start_configuration", stats::setNames(value_argument, names_argument))
   } else {
@@ -50,9 +46,8 @@ set_start_configuration <- function(path_file_configuration = file.path(path.exp
 #' @title AkadoR startup configuration
 #' @description The purpose of the start_configuration function is to configure startup, secure connection to the application, ...
 #' @param secure_connection {\link[base]{logical}} expected. Default values: FALSE. If you wish to enable secure connection to the application, set TRUE
-#' @param set_timeout {\link[base]{numeric}} expected. Default values: 60. Session expiry time (in minutes) before disconnection in standby mode if secure connection is enabled
 #' @export
-start_configuration <- function(secure_connection = FALSE, set_timeout = 60) {
+start_configuration <- function(secure_connection = FALSE) {
   # 1 - Arguments verification ----
   # Checks the type of secure_connection
   if (!codama::r_type_checking(
@@ -64,20 +59,6 @@ start_configuration <- function(secure_connection = FALSE, set_timeout = 60) {
     return(codama::r_type_checking(
       r_object = secure_connection,
       type = "logical",
-      length = 1L,
-      output = "message"
-    ))
-  }
-  # Checks the type of set_timeout
-  if (!codama::r_type_checking(
-    r_object = set_timeout,
-    type = "numeric",
-    length = 1L,
-    output = "logical"
-  )) {
-    return(codama::r_type_checking(
-      r_object = set_timeout,
-      type = "numeric",
       length = 1L,
       output = "message"
     ))
@@ -111,9 +92,7 @@ start_configuration <- function(secure_connection = FALSE, set_timeout = 60) {
         ),
       # Language
       choose_language = c("en", "es", "fr"),
-      language = "en",
-      # Time out 1h
-      timeout = set_timeout
+      language = "en"
     )
   } else {
     call_ui <- app_ui
@@ -121,12 +100,12 @@ start_configuration <- function(secure_connection = FALSE, set_timeout = 60) {
   return(call_ui)
 }
 
-#' @name set_authentication_result
-#' @title AkadoR set authentication
-#' @description The purpose of the set_authentication_result function allows application launch parameters to be modified by an external file
+#' @name set_server_authentication
+#' @title AkadoR set server authentication
+#' @description The purpose of the set_server_authentication function allows application launch parameters to be modified by an external file
 #' @param path_file_configuration {\link[base]{character}} expected. Default values: file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"). Path to file containing configuration parameters, default value adapts to different operating systems
 #' @export
-set_authentication_result <- function(path_file_configuration = file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml")) {
+set_server_authentication <- function(path_file_configuration = file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml")) {
   # 1 - Arguments verification ----
   # Checks the type of path_file_configuration
   if (!codama::r_type_checking(
@@ -156,21 +135,26 @@ set_authentication_result <- function(path_file_configuration = file.path(path.e
       names_argument <- c(names_argument, "path_database")
       value_argument <- append(value_argument, file_configuration[["start_AkadoR_configuration"]][["path_database"]])
     }
-    # Configure authentication with recovered parameters
-    call_authentication_result <- do.call("authentication_result", stats::setNames(value_argument, names_argument))
+    if (!is.null(file_configuration[["start_AkadoR_configuration"]][["set_timeout"]])) {
+      names_argument <- c(names_argument, "set_timeout")
+      value_argument <- append(value_argument, file_configuration[["start_AkadoR_configuration"]][["set_timeout"]])
+    }
+    # Configure server authentication with recovered parameters
+    call_server_authentication <- do.call("server_authentication", stats::setNames(value_argument, names_argument))
   } else {
     message("No application startup configuration file found")
-    call_authentication_result <- authentication_result()
+    call_server_authentication <- server_authentication()
   }
-  return(call_authentication_result)
+  return(call_server_authentication)
 }
 
-#' @name authentication_result
+#' @name server_authentication
 #' @title Authentication result for secure connection to AkadoR
-#' @description The purpose of the authentication_result function enables connection authentication
+#' @description The purpose of the server_authentication function enables connection authentication
 #' @param path_database {\link[base]{character}} expected. Default values: file.path(path.expand("~"), ".appconfig", "akador", "database_connection.sqlite"). Path to file containing data base connection, default value adapts to different operating systems
+#' @param set_timeout {\link[base]{numeric}} expected. Default values: 60. Session expiry time (in minutes) before disconnection in standby mode if secure connection is enabled
 #' @export
-authentication_result <- function(path_database = file.path(path.expand("~"), ".appconfig", "akador", "database_connection.sqlite")) {
+server_authentication <- function(path_database = file.path(path.expand("~"), ".appconfig", "akador", "database_connection.sqlite"), set_timeout = 60) {
   # 1 - Arguments verification ----
   # Checks the type of path_database
   if (!codama::r_type_checking(
@@ -182,6 +166,20 @@ authentication_result <- function(path_database = file.path(path.expand("~"), ".
     return(codama::r_type_checking(
       r_object = path_database,
       type = "character",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  # Checks the type of set_timeout
+  if (!codama::r_type_checking(
+    r_object = set_timeout,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = set_timeout,
+      type = "numeric",
       length = 1L,
       output = "message"
     ))
@@ -212,8 +210,12 @@ authentication_result <- function(path_database = file.path(path.expand("~"), ".
       )
     }
   }
-
  # Authentication result
   call_check_credentials <- shinymanager::check_credentials(path_database)
-  return(call_check_credentials)
+# Server Authentication
+  call_secure_server <- shinymanager::secure_server(
+    check_credentials = call_check_credentials,
+    timeout = set_timeout
+  )
+  return(call_secure_server)
 }
