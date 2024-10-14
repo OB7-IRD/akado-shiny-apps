@@ -4813,40 +4813,58 @@ check_anapo_inspector <- function(dataframe1,
   dataframe3 <- rbind(dataframe3, dataframe3_prior, dataframe3_post) %>%
     dplyr::group_by(date_group, vms_position) %>%
     dplyr::distinct()
-  dataframe_detail <- merge(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by.x = c("activity_date", "vessel_code"), by.y = c("date_group", "vessel_code"))
-  # Check if activity whether not in harbour but with a position of indication
-  dataframe1_nharbour <- dataframe1[!comparison_harbour$logical, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")]
-  dataframe1_nharbour <- dataframe1_nharbour[!is.na(dataframe1_nharbour$activity_position), ]
-  dataframe3 <- merge(dataframe1_nharbour, dataframe3, by.x = c("activity_date", "vessel_code"), by.y = c("date_group", "vessel_code"))
+  dataframe3 <- merge(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position", "logical")], dataframe3, by.x = c("activity_date", "vessel_code"), by.y = c("date_group", "vessel_code"))
   # Formats spatial data
-  dataframe_calcul <- dataframe3 %>%
-    sf::st_as_sf(wkt = "vms_position", crs = vms_crs, remove = FALSE) %>%
-    sf::st_transform(vms_position, crs = 4326)
-  sf::st_geometry(dataframe_calcul) <- "vms_position_geom"
-  dataframe_calcul$activity_position_geom <- dataframe3 %>%
-    sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = FALSE) %>%
-    sf::st_transform(vms_position, crs = 4326) %>%
-    sf::st_geometry()
+   dataframe_vms_geo <- dataframe3 %>%
+      dplyr::filter(!logical & !is.na(activity_position)) %>%
+      dplyr::select(vms_position) %>%
+      dplyr::distinct() %>%
+      sf::st_as_sf(wkt = "vms_position", crs = vms_crs, remove = FALSE) %>%
+      sf::st_transform(vms_position, crs = 4326)
+  sf::st_geometry(dataframe_vms_geo) <- "vms_position_geometry"
+  dataframe_activity_geo <- dataframe3 %>%
+      dplyr::filter(!logical & !is.na(activity_position)) %>%
+      dplyr::select(activity_position) %>%
+      dplyr::distinct() %>%
+      sf::st_as_sf(wkt = "activity_position", crs = vms_crs, remove = FALSE) %>%
+      sf::st_transform(activity_position, crs = 4326)
+  sf::st_geometry(dataframe_activity_geo) <- "activity_position_geometry"
+  # Select unique pair vms/activity
+  pair_position <- dataframe3 %>%
+      dplyr::filter(!logical & !is.na(activity_position)) %>%
+      dplyr::select(vms_position, activity_position) %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(pair_position = paste0(activity_position,"_", vms_position))
+  pair_position <-merge(pair_position, dataframe_vms_geo, by ="vms_position", all.x = TRUE)
+  pair_position <-merge(pair_position, dataframe_activity_geo, by ="activity_position", all.x = TRUE)
   # Calculation of the minimum distance between the activity and the nearest day's VMS in nautical mile
   # Define nautical miles
   units::install_unit("NM", "1852 m", "Nautical mile")
   threshold <- units::set_units(threshold, NM)
-  dataframe_calcul <- dataframe_calcul %>%
-    dplyr::mutate(distance = sf::st_distance(x = activity_position_geom, y = vms_position_geom, by_element = TRUE))
-  units(dataframe_calcul$distance) <- units::make_units(NM)
+  pair_position <- pair_position %>%
+      dplyr::mutate(distance = sf::st_distance(x = activity_position_geometry, y = vms_position_geometry, by_element = TRUE))
+  units(pair_position$distance) <- units::make_units(NM)
   # Remove formats spatial data
-  dataframe_calcul <- dataframe_calcul %>%
-    sf::st_drop_geometry() %>%
-    dplyr::select(-activity_position_geom)
-  dataframe_calcul_min <- dataframe_calcul %>%
+  pair_position <- pair_position %>%
+      sf::st_drop_geometry() %>%
+      dplyr::select(-c(activity_position_geometry, vms_position_geometry))
+  dataframe3 <- merge(dataframe3, pair_position[, c("distance", "vms_position", "activity_position")], by = c("vms_position", "activity_position"), all.x = TRUE)
+  rm(pair_position)
+  dataframe3 <- dataframe3 %>%
     dplyr::group_by(activity_id) %>%
-    dplyr::summarise(min_distance = ifelse(length(distance) > 0, min(distance), Inf))
-  units(dataframe_calcul_min$min_distance) <- units::make_units(NM)
+    dplyr::mutate(min_distance = ifelse(length(distance) > 0, min(distance), Inf)) %>%
+    dplyr::ungroup()
+  units(dataframe3$min_distance) <- units::make_units(NM)
+  dataframe_calcul_min <- dataframe3 %>%
+    dplyr::select(activity_id, min_distance) %>%
+    dplyr::distinct()
   dataframe1 <- merge(dataframe1, dataframe_calcul_min, by = "activity_id", all.x = TRUE)
   # Check if distance between activity and nearest VMS point below threshold
   dataframe1[!is.na(dataframe1$min_distance) & dataframe1$min_distance < threshold, "logical"] <- TRUE
-  dataframe_calcul <- merge(dataframe_calcul, dataframe_calcul_min, by = "activity_id", all.x = TRUE)
-  dataframe_calcul <- dataframe_calcul %>% dplyr::filter(min_distance >= threshold)
+  dataframe_calcul <- dataframe3 %>%
+    dplyr::filter(!logical & !is.na(activity_position)) %>%
+    subset(select=-c(logical)) %>%
+    dplyr::filter(min_distance >= threshold)
   # Gives a temporary hour for activities that are missing an hour
   dataframe_calcul$activity_time_bis <- dataframe_calcul$activity_time
   dataframe_calcul[is.na(dataframe_calcul$activity_time), "activity_time_bis"] <- "00:00:00"
@@ -4873,7 +4891,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe1[dataframe1$nb_vms_bis < minimum_number_vms, "logical"] <- FALSE
   # Recovers all activity positions for the detailed table
   # Data with calcul VMS
-  dataframe_detail <- merge(dataframe_detail, dataframe_calcul, by = c("activity_id", "activity_date", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position"), all.x = TRUE)
+  dataframe_detail <- dplyr::bind_rows(dataframe_calcul, dplyr::anti_join(subset(dataframe3, select=-c(logical)), dataframe_calcul, by = c("activity_id", "activity_date", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position")))
   dataframe_detail <- dplyr::bind_rows(dataframe_detail, dplyr::anti_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by = c("activity_date" = "activity_date", "vessel_code" = "vessel_code")))
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
@@ -5630,6 +5648,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               dplyr::distinct()
             # Add position information for activities n, n-1 and n+1 (not just related to grounding)
             check_anapo_inspector_data_table <- check_anapo_inspector_data[[1]]
+            rm(check_anapo_inspector_data)
             check_anapo_inspector_data_table <- merge(check_anapo_inspector_data_table, check_anapo_inspector_dataplot_trip[, c("trip_id", "activity_id", "activity_date", "activity_number", "grounding", "activity_position")], by = "activity_id")
             check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>% dplyr::mutate(activity_position_display = gsub("POINT\\(|\\)", "", activity_position))
             check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>%
@@ -5875,8 +5894,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
 # Function to create a data.frame in character
 data_to_text <- function(name_data, name_col, name_button, colname_id, colname_plot, colname_info) {
   code_txt <- paste0(name_data, " <-", name_data, "%>%dplyr::group_by(", colname_id, ") %>%
-            dplyr::reframe(", name_col, " = paste0(", name_button, ",paste0(deparse(dplyr::across(.cols=c(", paste0(colname_plot, collapse = ","), '))), collapse = "")', ifelse(is.null(colname_info), "", paste0(',"&",', paste0(colname_info, collapse = ', "&",'))), "))%>%
-            dplyr::group_by(", colname_id, ") %>% dplyr::filter(dplyr::row_number() == 1)")
+            dplyr::reframe(", name_col, " = paste0(", name_button, ",paste0(deparse(dplyr::across(.cols=c(", paste0(colname_plot, collapse = ","), '))), collapse = "")', ifelse(is.null(colname_info), "", paste0(',"&",', paste0("unique(", colname_info ,")", collapse = ', "&",'))), "))")
   return(code_txt)
 }
 
