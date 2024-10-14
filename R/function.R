@@ -4857,7 +4857,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_calcul <- dataframe_calcul %>%
     dplyr::mutate(duration = units::set_units(as.numeric(difftime(activity_date_time, vms_date_time, units = "secs") * 1000), ms))
   # Gives a duration for activities that are missing an hour
-  dataframe_calcul[is.na(dataframe_calcul$activity_time), "duration"] <- 1
+  dataframe_calcul[is.na(dataframe_calcul$activity_time), "duration"] <- units::set_units(1, ms)
   # Score calculation
   dataframe_calcul <- dataframe_calcul %>%
     dplyr::mutate(score = (2^(units::drop_units(-distance / threshold))) * (2^(-units::drop_units(duration) / (2 * 60 * 60 * 1000))))
@@ -5657,7 +5657,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               dplyr::group_by(date_group, trip_id) %>%
               dplyr::distinct()
             check_anapo_inspector_dataplot_range_date <- merge(check_anapo_inspector_dataplot_range_date, activity_select[, c("activity_date", "trip_id", "activity_id")], by.x = c("date_group", "trip_id"), by.y = c("activity_date", "trip_id"))
-            check_anapo_inspector_dataplot_range_date %>%
+            check_anapo_inspector_dataplot_range_date <- check_anapo_inspector_dataplot_range_date %>%
               dplyr::group_by(date_group, trip_id, activity_id) %>%
               dplyr::distinct()
             code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_range_date", name_col = "trip_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
@@ -5696,6 +5696,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             )
           } else {
             check_anapo <- data.frame()
+            check_anapo_inspector_dataplot <- data.frame()
           }
           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot))
         }
