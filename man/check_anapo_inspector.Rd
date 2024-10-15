@@ -9,10 +9,12 @@ check_anapo_inspector(
   dataframe2,
   dataframe3,
   activity_crs = 4326,
+  harbour_crs = 4326,
   vms_crs = 4326,
   output,
   minimum_number_vms = 20,
-  threshold = 10
+  threshold = 10,
+  buffer_harbour = 11100
 )
 }
 \arguments{
@@ -24,6 +26,8 @@ check_anapo_inspector(
 
 \item{activity_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity}
 
+\item{harbour_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position harbour}
+
 \item{vms_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position VMS}
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
@@ -31,6 +35,8 @@ check_anapo_inspector(
 \item{minimum_number_vms}{{\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.}
 
 \item{threshold}{{\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.}
+
+\item{buffer_harbour}{{\link[base]{numeric}} expected. Default values: 11100. Buffer to be used for harbour, in meter}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
@@ -46,16 +52,16 @@ Dataframe 1:
  \item{\code{  activity_date}}
  \item{\code{  activity_time}}
  \item{\code{  activity_position}}
- \item{\code{  activity_crs}}
- \item{\code{  vessel_code}}
+ \item{\code{  trip_id}}
 Dataframe 2:
- \item{\code{  activity_id}}
- \item{\code{  harbour_id}}
+ \item{\code{  trip_id}}
+ \item{\code{  vessel_code}}
+ \item{\code{  harbour_position_departure}}
+ \item{\code{  harbour_position_landing}}
 Dataframe 3:
  \item{\code{  vms_date}}
  \item{\code{  vms_time}}
  \item{\code{  vms_position}}
- \item{\code{  vms_crs}}
  \item{\code{  vessel_code}}
 }
 }

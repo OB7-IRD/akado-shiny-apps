@@ -11,6 +11,7 @@ SELECT
     trip.trip_landingtotalweight::numeric AS trip_landingtotalweight, 
     trip.trip_localmarkettotalweight::numeric AS trip_localmarkettotalweight,
     trip.vessel_capacity::numeric AS vessel_capacity,
+    trip.vessel_code::text AS vessel_code,
     trip.trip_startdate::date AS trip_startdate, 
     trip.trip_enddate::date AS trip_enddate,
     trip.harbour_id_departure::text AS harbour_id_departure,
@@ -28,6 +29,7 @@ FROM (
         t.landingtotalweight::numeric AS trip_landingtotalweight, 
         t.localmarkettotalweight::numeric AS trip_localmarkettotalweight,
         v.capacity::numeric AS vessel_capacity,
+        v.code::text AS vessel_code,
         t.startdate::date AS trip_startdate, 
         t.enddate::date AS trip_enddate,
         hd.topiaid::text AS harbour_id_departure,
@@ -44,7 +46,7 @@ FROM (
 		LEFT JOIN  ps_common.trip trip_previous_tmp ON t.vessel = trip_previous_tmp.vessel AND trip_previous_tmp.topiaid <> t.topiaid AND trip_previous_tmp.enddate <= t.startdate AND coalesce(trip_previous_tmp.logbookprogram,'NULL') IN (?select_item_1)
 	WHERE 
 		t.topiaid IN (?select_item_2)
-	GROUP BY t.topiaid, vt.topiaid, v.capacity, hd.topiaid, hl.topiaid
+	GROUP BY t.topiaid, vt.topiaid, v.topiaid, hd.topiaid, hl.topiaid
 	) AS trip
 	-- trip selection and corresponding info for the previous trip (same date and same ship)
 	LEFT JOIN ps_common.trip trip_previous ON trip.vessel_id = trip_previous.vessel AND trip.trip_previous_enddate = trip_previous.enddate 

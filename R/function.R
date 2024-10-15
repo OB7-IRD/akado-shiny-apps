@@ -4605,10 +4605,12 @@ check_distribution_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_inspector () function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_inspector () function.
 #' @param activity_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity
+#' @param harbour_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position harbour
 #' @param vms_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position VMS
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param minimum_number_vms {\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.
 #' @param threshold {\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.
+#' @param buffer_harbour {\link[base]{numeric}} expected. Default values: 11100. Buffer to be used for harbour, in meter
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
@@ -4617,16 +4619,16 @@ check_distribution_inspector <- function(dataframe1,
 #'  \item{\code{  activity_date}}
 #'  \item{\code{  activity_time}}
 #'  \item{\code{  activity_position}}
-#'  \item{\code{  activity_crs}}
-#'  \item{\code{  vessel_code}}
+#'  \item{\code{  trip_id}}
 #' Dataframe 2:
-#'  \item{\code{  activity_id}}
-#'  \item{\code{  harbour_id}}
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  vessel_code}}
+#'  \item{\code{  harbour_position_departure}}
+#'  \item{\code{  harbour_position_landing}}
 #' Dataframe 3:
 #'  \item{\code{  vms_date}}
 #'  \item{\code{  vms_time}}
 #'  \item{\code{  vms_position}}
-#'  \item{\code{  vms_crs}}
 #'  \item{\code{  vessel_code}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
@@ -4635,16 +4637,25 @@ check_anapo_inspector <- function(dataframe1,
                                   dataframe2,
                                   dataframe3,
                                   activity_crs = 4326,
+                                  harbour_crs = 4326,
                                   vms_crs = 4326,
                                   output,
                                   minimum_number_vms = 20,
-                                  threshold = 10) {
+                                  threshold = 10,
+                                  buffer_harbour = 11100) {
   # 0 - Global variables assignement ----
+  trip_id <- NULL
+  harbour_position_departure <- NULL
+  harbour_buffer_departure <- NULL
+  harbour_position_landing <- NULL
+  harbour_buffer_landing <- NULL
+  logical_harbourdeparture <- NULL
+  logical_harbourlanding <- NULL
   vms_date <- NULL
   vessel_code <- NULL
   nb_vms <- NULL
-  activity_position_geom <- NULL
-  vms_position_geom <- NULL
+  activity_position_geometry <- NULL
+  vms_position_geometry <- NULL
   activity_id <- NULL
   distance <- NULL
   min_distance <- NULL
@@ -4666,36 +4677,36 @@ check_anapo_inspector <- function(dataframe1,
   if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code"),
+    column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "trip_id"),
     column_type = c("character", "Date", "character", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code"),
+      column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "trip_id"),
       column_type = c("character", "Date", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("activity_id", "activity_date", "activity_time", "activity_position", "vessel_code")]
+    dataframe1 <- dataframe1[, c("activity_id", "activity_date", "activity_time", "activity_position", "trip_id")]
   }
   if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("activity_id", "harbour_id"),
-    column_type = c("character", "character"),
+    column_name = c("trip_id", "vessel_code", "harbour_position_departure", "harbour_position_landing"),
+    column_type = c("character", "character", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("activity_id", "harbour_id"),
-      column_type = c("character", "character"),
+      column_name = c("trip_id", "vessel_code", "harbour_position_departure", "harbour_position_landing"),
+      column_type = c("character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("activity_id", "harbour_id")]
+    dataframe2 <- dataframe2[, c("trip_id", "vessel_code", "harbour_position_departure", "harbour_position_landing")]
   }
   if (!codama::r_table_checking(
     r_table = dataframe3,
@@ -4780,9 +4791,86 @@ check_anapo_inspector <- function(dataframe1,
       output = "message"
     ))
   }
+  if (!codama::r_type_checking(
+    r_object = buffer_harbour,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = buffer_harbour,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
   select <- dataframe1$activity_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
+  # Indicates activity whether in harbour
+  dataframe1 <- merge(dataframe1, dataframe2, by = "trip_id", all.x = TRUE)
+  # Indicates whether in land harbour
+  dataframe1$logical <- FALSE
+  # Formats spatial data activity
+  dataframe_activity_geo <- dataframe1 %>%
+    dplyr::filter(!is.na(activity_position)) %>%
+    sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = FALSE) %>%
+    sf::st_transform(activity_position, crs = 4326)
+  sf::st_geometry(dataframe_activity_geo) <- "activity_position_geometry"
+  # If harbour departure position exists
+  if (sum(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_departure)) > 0) {
+    # Formats spatial data harbourdeparture, add buffer in meter
+    data_geo_harbourdeparture <- dataframe1 %>%
+      dplyr::filter(!is.na(activity_position) & !is.na(harbour_position_departure)) %>%
+      dplyr::select(harbour_position_departure) %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(harbour_buffer_departure = harbour_position_departure) %>%
+      sf::st_as_sf(wkt = "harbour_buffer_departure", crs = harbour_crs) %>%
+      sf::st_transform(harbour_buffer_departure, crs = 4326) %>%
+      terra::vect() %>%
+      terra::buffer(width = buffer_harbour) %>%
+      sf::st_as_sf()
+    # Calculates the intersection between activity and harbourdeparture
+    dataframe_activity_geo_harbourdeparture <- dataframe_activity_geo %>% dplyr::filter(!is.na(harbour_position_departure))
+    intersect_harbourdeparture <- sapply(seq_len(nrow(data_geo_harbourdeparture)), function(x) lengths(sf::st_intersects(dataframe_activity_geo_harbourdeparture[dataframe_activity_geo_harbourdeparture$harbour_position_departure == data_geo_harbourdeparture$harbour_position_departure[x], 1], data_geo_harbourdeparture[x, 1])))
+    intersect_harbourdeparture_index <- sapply(seq_len(nrow(data_geo_harbourdeparture)), function(x) which(dataframe_activity_geo_harbourdeparture$harbour_position_departure == data_geo_harbourdeparture$harbour_position_departure[x]))
+    dataframe_activity_geo_harbourdeparture$nb_port_intersect <- 0
+    dataframe_activity_geo_harbourdeparture$nb_port_intersect[unlist(intersect_harbourdeparture_index)] <- unlist(intersect_harbourdeparture)
+    dataframe_activity_geo_harbourdeparture$logical_harbourdeparture <- dataframe_activity_geo_harbourdeparture$nb_port_intersect != 0
+    # Logical harbourdeparture
+    dataframe1 <- merge(dataframe1, data.frame(dataframe_activity_geo_harbourdeparture)[, c("activity_id", "logical_harbourdeparture")], by = "activity_id", all.x = TRUE)
+    dataframe1$logical_harbourdeparture[is.na(dataframe1$logical_harbourdeparture)] <- FALSE
+  }else {
+    dataframe1$logical_harbourdeparture <- FALSE
+  }
+  # If harbour landing position exists
+  if (sum(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_landing)) > 0) {
+    # Formats spatial data harbourlanding, add buffer in meter
+    data_geo_harbourlanding <- dataframe1 %>%
+      dplyr::filter(!is.na(activity_position) & !is.na(harbour_position_landing)) %>%
+      dplyr::select(harbour_position_landing) %>%
+      dplyr::distinct() %>%
+      dplyr::mutate(harbour_buffer_landing = harbour_position_landing) %>%
+      sf::st_as_sf(wkt = "harbour_buffer_landing", crs = harbour_crs) %>%
+      sf::st_transform(harbour_buffer_landing, crs = 4326) %>%
+      terra::vect() %>%
+      terra::buffer(width = buffer_harbour) %>%
+      sf::st_as_sf()
+    # Calculates the intersection between activity and harbourlanding
+    dataframe_activity_geo_harbourlanding <- dataframe_activity_geo %>% dplyr::filter(!is.na(harbour_position_landing))
+    intersect_harbourlanding <- sapply(seq_len(nrow(data_geo_harbourlanding)), function(x) lengths(sf::st_intersects(dataframe_activity_geo_harbourlanding[dataframe_activity_geo_harbourlanding$harbour_position_landing == data_geo_harbourlanding$harbour_position_landing[x], 1], data_geo_harbourlanding[x, 1])))
+    intersect_harbourlanding_index <- sapply(seq_len(nrow(data_geo_harbourlanding)), function(x) which(dataframe_activity_geo_harbourlanding$harbour_position_landing == data_geo_harbourlanding$harbour_position_landing[x]))
+    dataframe_activity_geo_harbourlanding$nb_port_intersect <- 0
+    dataframe_activity_geo_harbourlanding$nb_port_intersect[unlist(intersect_harbourlanding_index)] <- unlist(intersect_harbourlanding)
+    dataframe_activity_geo_harbourlanding$logical_harbourlanding <- dataframe_activity_geo_harbourlanding$nb_port_intersect != 0
+    # Logical in harbourlanding
+    dataframe1 <- merge(dataframe1, data.frame(dataframe_activity_geo_harbourlanding)[, c("activity_id", "logical_harbourlanding")], by = "activity_id", all.x = TRUE)
+    dataframe1$logical_harbourlanding[is.na(dataframe1$logical_harbourlanding)] <- FALSE
+  }else {
+    dataframe1$logical_harbourlanding <- FALSE
+  }
+  # Logical in harbour
+  dataframe1$logical <- dataframe1$logical | dataframe1$logical_harbourdeparture | dataframe1$logical_harbourlanding
   # Remove VMS without position
   dataframe3 <- dataframe3 %>% dplyr::filter(!is.na(vms_position))
   # Calculation number vms
@@ -4790,22 +4878,12 @@ check_anapo_inspector <- function(dataframe1,
     dplyr::group_by(vms_date, vessel_code) %>%
     dplyr::summarise(nb_vms = dplyr::n(), .groups = "keep")
   # Merge
-  dataframe1$logical <- FALSE
   dataframe1 <- merge(dataframe1, dataframe3_nb_vms, by.x = c("activity_date", "vessel_code"), by.y = c("vms_date", "vessel_code"), all.x = TRUE)
   # Case of NA nb_vms
   dataframe1 <- dataframe1 %>%
     dplyr::mutate(
       nb_vms_bis = dplyr::coalesce(nb_vms, 0),
     )
-  # Indicates activity whether in harbour
-  dataframe2 <- dataframe2[!is.na(dataframe2$harbour_id), ]
-  comparison_harbour <- codama::vector_comparison(
-    first_vector = dataframe1$activity_id,
-    second_vector = dataframe2$activity_id,
-    comparison_type = "difference",
-    output = "report"
-  )
-  dataframe1[comparison_harbour$logical, "logical"] <- TRUE
   # Retrieves VMS positions for the previous, current and next day
   dataframe3$date_group <- dataframe3$vms_date
   dataframe3_prior <- dataframe3 %>% dplyr::mutate(date_group = vms_date - 1)
@@ -4814,7 +4892,7 @@ check_anapo_inspector <- function(dataframe1,
     dplyr::group_by(date_group, vms_position) %>%
     dplyr::distinct()
   dataframe3 <- merge(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position", "logical")], dataframe3, by.x = c("activity_date", "vessel_code"), by.y = c("date_group", "vessel_code"))
-  # Formats spatial data
+  # Formats spatial data vms
    dataframe_vms_geo <- dataframe3 %>%
       dplyr::filter(!logical & !is.na(activity_position)) %>%
       dplyr::select(vms_position) %>%
@@ -4822,14 +4900,10 @@ check_anapo_inspector <- function(dataframe1,
       sf::st_as_sf(wkt = "vms_position", crs = vms_crs, remove = FALSE) %>%
       sf::st_transform(vms_position, crs = 4326)
   sf::st_geometry(dataframe_vms_geo) <- "vms_position_geometry"
-  dataframe_activity_geo <- dataframe3 %>%
-      dplyr::filter(!logical & !is.na(activity_position)) %>%
-      dplyr::select(activity_position) %>%
-      dplyr::distinct() %>%
-      sf::st_as_sf(wkt = "activity_position", crs = vms_crs, remove = FALSE) %>%
-      sf::st_transform(activity_position, crs = 4326)
-  sf::st_geometry(dataframe_activity_geo) <- "activity_position_geometry"
   # Select unique pair vms/activity
+  dataframe_activity_geo <- dataframe_activity_geo %>%
+    dplyr::select(activity_position, activity_position_geometry) %>%
+    dplyr::distinct()
   pair_position <- dataframe3 %>%
       dplyr::filter(!logical & !is.na(activity_position)) %>%
       dplyr::select(vms_position, activity_position) %>%
@@ -4894,7 +4968,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_detail <- dplyr::bind_rows(dataframe_calcul, dplyr::anti_join(subset(dataframe3, select=-c(logical)), dataframe_calcul, by = c("activity_id", "activity_date", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position")))
   dataframe_detail <- dplyr::bind_rows(dataframe_detail, dplyr::anti_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by = c("activity_date" = "activity_date", "vessel_code" = "vessel_code")))
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
+  dataframe1 <- subset(dataframe1, select = -c(trip_id, harbour_position_departure, harbour_position_landing, logical_harbourdeparture, logical_harbourlanding, nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
   dataframe_detail <- subset(dataframe_detail, select = -c(vessel_code, min_distance, activity_time_bis, activity_date_time, vms_date_time))
   dataframe_detail <- dataframe_detail %>% dplyr::mutate(vms_crs = vms_crs, activity_crs = activity_crs)
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
@@ -5277,16 +5351,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = activity_select$activity_id)
           )
-          # Uses a function to extract data from activity_harbour
-          data_activity_spatial <- furdeb::data_extraction(
-            type = "database",
-            file_path = system.file("sql",
-                                    "activity_spatial.sql",
-                                    package = "AkadoR"
-            ),
-            database_connection = data_connection,
-            anchor = list(select_item = activity_select$activity_id)
-          )
           # Uses a function to extract data from transmittingbuoy
           data_transmittingbuoy <- furdeb::data_extraction(
             type = "database",
@@ -5636,7 +5700,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           if (exists("data_vms")) {
             message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check anapo inspector", sep = "")
             # Recovers all trip positions
-            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_activity_spatial, dataframe3 = data_vms, activity_crs = ifelse(length(stats::na.omit(unique(activity_select$activity_crs))) == 0, 4326, stats::na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(data_vms$vms_crs))), output = "report")
+            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_trip, dataframe3 = data_vms, activity_crs = ifelse(length(stats::na.omit(unique(activity_select$activity_crs))) == 0, 4326, stats::na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(data_vms$vms_crs))), output = "report")
             check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], activity_select[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = "activity_id")
             # Add information on whether the activity is linked to a grounding (object or buoy) or not in data plot
             data_tmp_grounding <- column_grounding(data = check_anapo_inspector_dataplot, data_transmittingbuoy = data_transmittingbuoy)
