@@ -4,7 +4,7 @@
 \alias{check_weight_inspector}
 \title{Gives the inconsistencies between the sum of the weight indicated for catches and the one indicated for the activity}
 \usage{
-check_weight_inspector(dataframe1, dataframe2, output)
+check_weight_inspector(dataframe1, dataframe2, output, epsilon = 0.01)
 }
 \arguments{
 \item{dataframe1}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weight_inspector () function.}
@@ -12,6 +12,8 @@ check_weight_inspector(dataframe1, dataframe2, output)
 \item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weight_inspector () function.}
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
+
+\item{epsilon}{{\link[base]{numeric}} expected, default : 0.01. Gives the threshold at which the difference is considered too large.}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"

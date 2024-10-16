@@ -581,6 +581,20 @@ check_landing_total_weight_inspector <- function(dataframe1,
       output = "message"
     ))
   }
+  # Checks the type of epsilon
+  if (!codama::r_type_checking(
+    r_object = epsilon,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = epsilon,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
   select <- dataframe1$trip_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
@@ -1861,6 +1875,7 @@ check_position_inspector <- function(dataframe1,
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weight_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weight_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param epsilon {\link[base]{numeric}} expected, default : 0.01. Gives the threshold at which the difference is considered too large.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -1876,12 +1891,14 @@ check_position_inspector <- function(dataframe1,
 #' @export
 check_weight_inspector <- function(dataframe1,
                                    dataframe2,
-                                   output) {
+                                   output,
+                                   epsilon = 0.01) {
   # 0 - Global variables assignement ----
   activity_id <- NULL
   catch_weight <- NULL
   activity_weight <- NULL
   sum_catch_weight <- NULL
+  difference <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -1931,6 +1948,20 @@ check_weight_inspector <- function(dataframe1,
       output = "message"
     ))
   }
+  # Checks the type of epsilon
+  if (!codama::r_type_checking(
+    r_object = epsilon,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = epsilon,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
   select <- dataframe1$activity_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
@@ -1938,22 +1969,27 @@ check_weight_inspector <- function(dataframe1,
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
-  # Group the pair to compare
+  # Merge and calcul difference
   dataframe1 <- merge(dataframe1, dataframe2, by = "activity_id", all.x = TRUE)
+  dataframe1$difference <- ifelse(is.na(dataframe1$activity_weight), 0, dataframe1$activity_weight) - ifelse(is.na(dataframe1$sum_catch_weight), 0, dataframe1$sum_catch_weight)
+  dataframe1$difference <- abs(dataframe1$difference)
+  dataframe1$epsilon <- epsilon
   # Compare weight of the activity or the sum of the catch
+  # Compare sum difference with epsilon
   comparison <- codama::vector_comparison(
-    first_vector = dataframe1$activity_weight,
-    second_vector = dataframe1$sum_catch_weight,
-    comparison_type = "equal",
+    first_vector = dataframe1$difference,
+    second_vector = dataframe1$epsilon,
+    comparison_type = "less_equal",
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- dplyr::relocate(.data = dataframe1, activity_weight, sum_catch_weight, .after = logical)
   # Management of the NA value for the weight activity and catch
   dataframe1[is.na(dataframe1$activity_weight) & is.na(dataframe1$sum_catch_weight), "logical"] <- TRUE
   # Management of the 0 value for the weight activity
   dataframe1[!is.na(dataframe1$activity_weight) & dataframe1$activity_weight == 0 & is.na(dataframe1$sum_catch_weight), "logical"] <- TRUE
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- dplyr::relocate(.data = dataframe1, activity_weight, sum_catch_weight, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(difference, epsilon))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
