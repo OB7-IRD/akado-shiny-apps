@@ -5866,6 +5866,10 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
         if (parent_in$type_line_check_trip == "inconsistent") {
           data <- data[data$Check != as.character(icon("check")), ]
         }
+        # If data is empty
+        if(ncol(data) == 0){
+          column_no_wrap <- NULL
+        }
         data <- DT::datatable(data,
                               escape = FALSE,
                               rownames = FALSE,
