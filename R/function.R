@@ -5435,9 +5435,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Retrieve trip sample : retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
           colnames_sample_id <- c("sample_id", "vessel_code", "trip_enddate", "sample_number")
           # Retrieve trip sample species : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
-          colnames_samplespecies_id <- c("samplespecies_id", "vessel_code", "trip_enddate", "sample_number", "species_fao_code", "sizemeasuretype_code")
+          colnames_samplespecies_id <- c("samplespecies_id", "vessel_code", "trip_enddate", "sample_number", "samplespecies_subsamplenumber", "species_fao_code", "sizemeasuretype_code")
           # Retrieve trip sample species measure : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
-          colnames_samplespeciesmeasure_id <- c("samplespeciesmeasure_id", "vessel_code", "trip_enddate", "sample_number", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")
+          colnames_samplespeciesmeasure_id <- c("samplespeciesmeasure_id", "vessel_code", "trip_enddate", "sample_number", "samplespecies_subsamplenumber", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")
           # Checks data consistency
           if (nrow(data_trip) != length(trip_select()$trip_id)) {
             warning(text_object_more_or_less(id = trip_select()$trip_id, result_check = data_trip$trip_id))
@@ -5977,6 +5977,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   if (length(grep("^samplespecies", colnames(data), value = TRUE)) != 0) {
     data <- dplyr::rename(
       .data = data,
+     `Sub sample number` = samplespecies_subsamplenumber,
       `FAO code` = species_fao_code,
       `Size measure type` = sizemeasuretype_code
     )

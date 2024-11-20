@@ -9,7 +9,8 @@ SELECT
     sa.topiaid::text AS sample_id,
     v.code::text AS vessel_code,
     t.enddate::date AS trip_enddate,
-    sa.number::integer AS sample_number
+    sa.number::integer AS sample_number,
+    se.subsamplenumber::numeric AS samplespecies_subsamplenumber
  FROM 
     ps_logbook.samplespeciesmeasure ssm 
     INNER JOIN ps_logbook.samplespecies se ON ssm.samplespecies = se.topiaid
