@@ -5599,7 +5599,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Modify the table for display purposes: rename column
           check_measure <- dplyr::rename(
             .data = check_measure,
-            `Number individuals measured sample` = sum_measuredcount,
+            `Sum numbers individuals sample species` = sum_measuredcount,
             `Sum numbers individuals size class` = sum_count
           )
           # Uses a function which indicates whether that sea surface temperature is consistent with the valid threshold
