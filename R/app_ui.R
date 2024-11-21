@@ -178,7 +178,7 @@ app_ui <- function(request) {
           table_ui(id = "check_length_class", title = "Size class", text = "<ul><li>Indicates FL measurements of species 'YFT', 'BET', 'ALB' greater than 80</li></ul>"),
           table_ui(id = "check_measure", title = "Measurement", text = "<ul><li>Indicates per sample whether the sum of individuals measured in the species samples is different from the sum of individuals measured in the size classes</li></ul>"),
           table_ui(id = "check_species", title = "Species", text = "<ul><li>Indicates species not conforming with respect to the following list:'YFT', 'SKJ', 'BET', 'ALB', 'LTA', 'FRI', 'TUN', 'KAW', 'LOT'</li></ul>"),
-          table_ui(id = "check_sample_without_measure", title = "Sample without measurement"),
+          table_ui(id = "check_sample_without_measure", title = "Sample without measurement", text = "<ul><li>Indicates species samples that have no size measurement</li></ul>"),
           table_ui(id = "check_sample_without_species", title = "Sample without species"),
           table_ui(id = "check_super_sample_number", title = "Super sample", text = "<ul><li>Sub-sample numbers must be consistent</li></ul>"),
           table_ui(id = "check_well_number", title = "Well", text = "<ul><li>The sample well must exist in the trip well plan</li></ul>"),
