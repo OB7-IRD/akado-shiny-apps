@@ -180,7 +180,8 @@ app_ui <- function(request) {
           table_ui(id = "check_species", title = "Species", text = "<ul><li>Indicates species not conforming with respect to the following list:'YFT', 'SKJ', 'BET', 'ALB', 'LTA', 'FRI', 'TUN', 'KAW', 'LOT'</li></ul>"),
           table_ui(id = "check_sample_without_measure", title = "Sample without measurement", text = "<ul><li>Indicates species samples that have no size measurement</li></ul>"),
           table_ui(id = "check_sample_without_species", title = "Sample without species", text = "<ul><li>Indicates samples that have no species samples</li></ul>"),
-          table_ui(id = "check_super_sample_number", title = "Super sample", text = "<ul><li>Sub-sample numbers must be consistent</li></ul>"),
+          table_ui(id = "check_super_sample_number", title = "Super sample", text = "<ul><li>If the sample is a super sample, then there must be several sub-samples, numbered from 1</li>
+                   <li>Otherwise there must be a single sub-sample, numbered 0</li></ul>"),
           table_ui(id = "check_well_number", title = "Well", text = "<ul><li>The sample well must exist in the trip well plan</li></ul>"),
           table_ui(id = "check_little_big", title = "Ratio of small over big fish", text = "<ul><li>The percentages of small over big fish must be consistent within the sample</li></ul>"),
           table_ui(id = "check_weighting", title = "Weighting", text = "<ul><li>The weighting for each sample must be coherent</li></ul>"),

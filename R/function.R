@@ -3115,7 +3115,7 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   # Search subsample number in the associations samples ID
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(sample_id) %>%
-    dplyr::summarise(count_subsamplenumber_n0 = sum(samplespecies_subsamplenumber != 0), count_subsamplenumber_0 = sum(samplespecies_subsamplenumber == 0), count_samplespecies = sum(!is.na(unique(samplespecies_id))), count_subsamplenumber_1 = sum(samplespecies_subsamplenumber == 1))
+    dplyr::summarise(count_subsamplenumber_n0 = sum(samplespecies_subsamplenumber != 0), count_subsamplenumber_0 = sum(samplespecies_subsamplenumber == 0), count_samplespecies = sum(!is.na(unique(samplespecies_id))), count_subsamplenumber = sum(!is.na(unique(samplespecies_subsamplenumber))), count_subsamplenumber_1 = sum(samplespecies_subsamplenumber == 1))
   # Merge
   dataframe1$logical <- TRUE
   dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
@@ -3125,16 +3125,17 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
       count_subsamplenumber_n0_bis = dplyr::coalesce(count_subsamplenumber_n0, 0),
       count_subsamplenumber_0_bis = dplyr::coalesce(count_subsamplenumber_0, 0),
       count_samplespecies_bis = dplyr::coalesce(count_samplespecies, 0),
+      count_subsamplenumber_bis = dplyr::coalesce(count_subsamplenumber, 0),
       count_subsamplenumber_1_bis = dplyr::coalesce(count_subsamplenumber_1, 0),
     )
   dataframe1[dataframe1$count_samplespecies_bis == 0, "logical"] <- FALSE
   dataframe1$only_one_subsampling <- dataframe1$sample_supersample == FALSE & dataframe1$count_subsamplenumber_n0_bis == 0
-  dataframe1$many_subsampling <- dataframe1$sample_supersample == TRUE & dataframe1$count_subsamplenumber_0_bis == 0 & dataframe1$count_samplespecies_bis > 1
+  dataframe1$many_subsampling <- dataframe1$sample_supersample == TRUE & dataframe1$count_subsamplenumber_0_bis == 0 & dataframe1$count_subsamplenumber_bis > 1
   dataframe1[!(dataframe1$only_one_subsampling | dataframe1$many_subsampling), "logical"] <- FALSE
-  dataframe1[dataframe1$count_samplespecies_bis == 1 & dataframe1$count_subsamplenumber_1_bis > 0, "logical"] <- FALSE
+  dataframe1[dataframe1$count_subsamplenumber_bis == 1 & dataframe1$count_subsamplenumber_1_bis > 0, "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(only_one_subsampling, many_subsampling, count_samplespecies_bis, count_subsamplenumber_n0_bis, count_subsamplenumber_0_bis, count_subsamplenumber_1_bis))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_supersample, count_subsamplenumber_n0, count_subsamplenumber_0, count_subsamplenumber_1, count_samplespecies, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(only_one_subsampling, many_subsampling, count_samplespecies_bis, count_subsamplenumber_bis, count_subsamplenumber_n0_bis, count_subsamplenumber_0_bis, count_subsamplenumber_1_bis, count_samplespecies))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_supersample, count_subsamplenumber_n0, count_subsamplenumber_0, count_subsamplenumber_1, count_subsamplenumber, .after = logical)
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -5647,7 +5648,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Counts number sub-sample numbers not 0` = count_subsamplenumber_n0,
             `Counts number sub-sample numbers equal 0` = count_subsamplenumber_0,
             `Counts number sub-sample numbers equal 1` = count_subsamplenumber_1,
-            `Counts number sample species` = count_samplespecies
+            `Counts number different sub-sample numbers` = count_subsamplenumber
           )
           # Uses a function which indicates whether the sample well number is consistent with the associated trip well numbers
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check well number consistent inspector", sep = "")
