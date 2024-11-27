@@ -61,7 +61,7 @@ Dataframe 3:
  \item{\code{  trip_id}}
 Dataframe 4:
  \item{\code{  trip_id}}
- \item{\code{  trip_end_tide_id}}
+ \item{\code{  trip_end_full_trip_id}}
  \item{\code{  vessel_id}}
  \item{\code{  country_fleetcountry}}
 }

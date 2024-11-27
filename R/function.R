@@ -978,7 +978,7 @@ check_harbour_inspector <- function(dataframe1,
 #'  \item{\code{  trip_id}}
 #' Dataframe 4:
 #'  \item{\code{  trip_id}}
-#'  \item{\code{  trip_end_tide_id}}
+#'  \item{\code{  trip_end_full_trip_id}}
 #'  \item{\code{  vessel_id}}
 #'  \item{\code{  country_fleetcountry}}
 #' }
@@ -995,16 +995,20 @@ check_raising_factor_inspector <- function(dataframe1,
   # 0 - Global variables assignement ----
   trip_id <- NULL
   catch_weight <- NULL
-  trip_landingtotalweight <- NULL
   sum_catch_weight <- NULL
   rf1 <- NULL
-  tide_sum_landing_weight <- NULL
-  tide_sum_catch_weight <- NULL
+  full_trip_sum_landing_weight <- NULL
+  full_trip_sum_catch_weight <- NULL
   lower_threshold <- NULL
   upper_threshold <- NULL
-  species_fao_code <- NULL
   speciesfate_code <- NULL
   vesselactivity_code <- NULL
+  country_fleetcountry <- NULL
+  landing_weight <- NULL
+  sum_landing_weight <- NULL
+  trip_end_full_trip_id <- NULL
+  vessel_id <- NULL
+  logical_full_trip <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -1060,19 +1064,19 @@ check_raising_factor_inspector <- function(dataframe1,
   if (!codama::r_table_checking(
     r_table = dataframe4,
     type = "data.frame",
-    column_name = c("trip_id", "trip_end_tide_id", "vessel_id", "country_fleetcountry"),
+    column_name = c("trip_id", "trip_end_full_trip_id", "vessel_id", "country_fleetcountry"),
     column_type = c("character", "character", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe4,
       type = "data.frame",
-      column_name = c("trip_id", "trip_end_tide_id", "vessel_id", "country_fleetcountry"),
+      column_name = c("trip_id", "trip_end_full_trip_id", "vessel_id", "country_fleetcountry"),
       column_type = c("character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe4 <- dataframe4[, c("trip_id", "trip_end_tide_id", "vessel_id", "country_fleetcountry")]
+    dataframe4 <- dataframe4[, c("trip_id", "trip_end_full_trip_id", "vessel_id", "country_fleetcountry")]
   }
   # Checks the type and values of output
   if (!codama::r_type_checking(
@@ -1145,17 +1149,17 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe2 <- merge(dataframe2, unique(dataframe4[, c("trip_id", "country_fleetcountry")]), by = "trip_id", all.x = TRUE)
   # Catch filtration for RF1
   ## Selection species when the list is available for the country and selection species
-  condition<-as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species))))))
+  condition <- as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species))))))
   dataframe2_select_species <- purrr::map(condition, ~ dataframe2 %>% dplyr::filter((country_fleetcountry %in% .x[[1]] & species_fao_code %in% .x[[2]])))
   dataframe2_select_species <- do.call(rbind.data.frame, dataframe2_select_species)
   ## Selection all species when the list is not available for the country
-  dataframe2<- rbind(dataframe2_select_species ,dataframe2 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
+  dataframe2 <- rbind(dataframe2_select_species, dataframe2 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
   ## Selection species fate
   dataframe2 <- dataframe2 %>%
     dplyr::filter((speciesfate_code %in% speciesfate))
   ## Selection vessel activity
-   dataframe2 <- dataframe2 %>%
-     dplyr::filter(!(vesselactivity_code %in% vesselactivity))
+  dataframe2 <- dataframe2 %>%
+    dplyr::filter(!(vesselactivity_code %in% vesselactivity))
   # Calculation of the sum of weights caught per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(trip_id) %>%
@@ -1166,31 +1170,31 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe3 <- merge(dataframe3, unique(dataframe4[, c("trip_id", "country_fleetcountry")]), by = "trip_id", all.x = TRUE)
   # Landing filtration for RF1
   ## Selection species when the list is available for the country and selection species fate
-  condition<-as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species))))))
+  condition <- as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species))))))
   dataframe3_select_species <- purrr::map(condition, ~ dataframe3 %>% dplyr::filter((country_fleetcountry %in% .x[[1]] & species_fao_code %in% .x[[2]])))
   dataframe3_select_species <- do.call(rbind.data.frame, dataframe3_select_species)
   ## Selection all species when the list is not available for the country
-  dataframe3<- rbind(dataframe3_select_species ,dataframe3 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
+  dataframe3 <- rbind(dataframe3_select_species, dataframe3 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
   # Calculation of the sum of weights caught per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe3 <- dataframe3 %>%
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_landing_weight = ifelse(all(is.na(landing_weight)), landing_weight[NA_integer_], sum(landing_weight, na.rm = TRUE)))
   # Merge data
   dataframe4 <- merge(dataframe4, dataframe3, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
-  # Add of a logic that indicates whether the tide is finished or not
-  dataframe4$logical_full_tide <- !is.na(dataframe4$trip_end_tide_id)
-  # For unfinished tides (no end-of-tide id) indicates the vessel id for the end-of-tide id (for each ship, allows you to group together all the trips of the non-finished tide)
-  dataframe4[is.na(dataframe4$trip_end_tide_id),"trip_end_tide_id"] <- paste0("vessel_id_", dataframe4[is.na(dataframe4$trip_end_tide_id),"vessel_id", drop = TRUE])
+  # Add of a logic that indicates whether the full trip is finished or not
+  dataframe4$logical_full_trip <- !is.na(dataframe4$trip_end_full_trip_id)
+  # For unfinished full trips (no end-of-full-trip id) indicates the vessel id for the end-of-full-trip id (for each ship, allows you to group together all the trips of the non-finished full trip)
+  dataframe4[is.na(dataframe4$trip_end_full_trip_id), "trip_end_full_trip_id"] <- paste0("vessel_id_", dataframe4[is.na(dataframe4$trip_end_full_trip_id), "vessel_id", drop = TRUE])
   # RF1 calculation
-  tide_id_data_rf1 <- dataframe4 %>%
-    dplyr::group_by(trip_end_tide_id) %>%
-    dplyr::summarise(rf1 = ifelse(all(is.na(sum_landing_weight)), sum_landing_weight[NA_integer_], sum(sum_landing_weight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), tide_sum_landing_weight = ifelse(all(is.na(sum_landing_weight)), sum_landing_weight[NA_integer_], sum(sum_landing_weight, na.rm = TRUE)), tide_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
+  full_trip_id_data_rf1 <- dataframe4 %>%
+    dplyr::group_by(trip_end_full_trip_id) %>%
+    dplyr::summarise(rf1 = ifelse(all(is.na(sum_landing_weight)), sum_landing_weight[NA_integer_], sum(sum_landing_weight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), full_trip_sum_landing_weight = ifelse(all(is.na(sum_landing_weight)), sum_landing_weight[NA_integer_], sum(sum_landing_weight, na.rm = TRUE)), full_trip_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
   dataframe4$lower_threshold <- threshold[1]
   dataframe4$upper_threshold <- threshold[2]
   # Selection of user-supplied trips
   dataframe4 <- merge(data.frame(trip_id = dataframe1$trip_id), unique(dataframe4), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
   # Merge data
-  dataframe4 <- merge(dataframe4, tide_id_data_rf1, by.x = "trip_end_tide_id", by.y = "trip_end_tide_id", all.x = TRUE)
+  dataframe4 <- merge(dataframe4, full_trip_id_data_rf1, by.x = "trip_end_full_trip_id", by.y = "trip_end_full_trip_id", all.x = TRUE)
   # Compare RF1 to valid threshold
   comparison_less <- codama::vector_comparison(
     first_vector = dataframe4$rf1,
@@ -1206,9 +1210,9 @@ check_raising_factor_inspector <- function(dataframe1,
   )
   dataframe4$logical <- comparison_less$logical & comparison_greater$logical
   # Corrects missing RF1s when nothing has been landed and there is no capture
-  dataframe4[(is.na(dataframe4$tide_sum_landing_weight) | dataframe4$tide_sum_landing_weight == 0) & is.na(dataframe4$tide_sum_catch_weight), "logical"] <- TRUE
+  dataframe4[(is.na(dataframe4$full_trip_sum_landing_weight) | dataframe4$full_trip_sum_landing_weight == 0) & is.na(dataframe4$full_trip_sum_catch_weight), "logical"] <- TRUE
   dataframe4 <- dplyr::relocate(.data = dataframe4, rf1, .after = logical)
-  dataframe4 <- subset(dataframe4, select = -c(trip_end_tide_id, logical_full_tide, sum_catch_weight, sum_landing_weight, tide_sum_landing_weight, tide_sum_catch_weight, lower_threshold, upper_threshold, vessel_id, country_fleetcountry))
+  dataframe4 <- subset(dataframe4, select = -c(trip_end_full_trip_id, logical_full_trip, sum_catch_weight, sum_landing_weight, full_trip_sum_landing_weight, full_trip_sum_catch_weight, lower_threshold, upper_threshold, vessel_id, country_fleetcountry))
   if ((sum(dataframe4$logical, na.rm = TRUE) + sum(!dataframe4$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe4$logical)) > 0) {
     all <- c(select, dataframe4$trip_id)
     number_occurrences <- table(all)
@@ -1247,6 +1251,7 @@ check_raising_factor_inspector <- function(dataframe1,
     }
   }
 }
+
 
 #' @name check_fishing_context_inspector
 #' @title Gives the inconsistencies between the school type and the association
@@ -5338,35 +5343,35 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = trip_select()$trip_id)
           )
-          # Uses a function to extract data from tide
-          data_tide <- furdeb::data_extraction(
+          # Uses a function to extract data from full trip
+          data_full_trip <- furdeb::data_extraction(
             type = "database",
             file_path = system.file("sql",
-                                    "tide_id.sql",
+                                    "full_trip_id.sql",
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
             anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id)
           )
-          # Uses a function to extract data from catch of the tide
-          data_catch_tide <- furdeb::data_extraction(
+          # Uses a function to extract data from catch of the full trip
+          data_catch_full_trip <- furdeb::data_extraction(
             type = "database",
             file_path = system.file("sql",
-                                    "catch_tide.sql",
+                                    "catch_full_trip.sql",
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = data_tide$trip_id)
+            anchor = list(select_item = data_full_trip$trip_id)
           )
-          # Uses a function to extract data from landing of the tide
-          data_landing_tide <- furdeb::data_extraction(
+          # Uses a function to extract data from landing of the full trip
+          data_landing_full_trip <- furdeb::data_extraction(
             type = "database",
             file_path = system.file("sql",
-                                    "landing_tide.sql",
+                                    "landing_full_trip.sql",
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = data_tide$trip_id)
+            anchor = list(select_item = data_full_trip$trip_id)
           )
           # Uses a function to extract data from activity_observedsystem
           data_activity_observedsystem <- furdeb::data_extraction(
@@ -5527,7 +5532,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function which indicates whether the selected trips contain RF1 inconsistent with threshold values
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check raising factor inspector", sep = "")
-          check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_tide, dataframe3 = data_landing_tide, dataframe4 = data_tide, output = "report")
+          check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_full_trip, dataframe3 = data_landing_full_trip, dataframe4 = data_full_trip, output = "report")
           # Uses a function to format the table
           check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select()[,], type_inconsistency = "info")
           check_raising_factor$rf1 <- trunc(check_raising_factor$rf1 * 100000) / 100000
