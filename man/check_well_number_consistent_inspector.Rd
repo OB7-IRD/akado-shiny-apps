@@ -4,14 +4,24 @@
 \alias{check_well_number_consistent_inspector}
 \title{Gives the inconsistencies between sample well number and associated trip well numbers}
 \usage{
-check_well_number_consistent_inspector(dataframe1, dataframe2, output)
+check_well_number_consistent_inspector(
+  dataframe1,
+  dataframe2,
+  dataframe3,
+  output,
+  vesseltype = c("5", "6", "10")
+)
 }
 \arguments{
 \item{dataframe1}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.}
 
 \item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.}
 
+\item{dataframe3}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.}
+
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
+
+\item{vesseltype}{{\link[base]{character}} expected. Default values: c("5", "6", "10"). Vector of codes for vessel types with a well plan.}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -27,7 +37,11 @@ Dataframe 1:
  \item{\code{  sample_well}}
  \item{\code{  trip_id}}
 Dataframe 2:
+ \item{\code{  well_id}}
  \item{\code{  trip_id}}
- \item{\code{  well_well}}
+ \item{\code{  well_label}}
+Dataframe 3:
+ \item{\code{  trip_id}}
+ \item{\code{  vesseltype_code}}
 }
 }

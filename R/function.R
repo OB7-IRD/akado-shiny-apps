@@ -3185,7 +3185,9 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
 #' @description The purpose of the check_well_number_consistent_inspector  function is to provide a table of data that contains an inconsistency between sample well number and associated trip well numbers
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.
+#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param vesseltype {\link[base]{character}} expected. Default values: c("5", "6", "10"). Vector of codes for vessel types with a well plan.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
@@ -3194,14 +3196,20 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
 #'  \item{\code{  sample_well}}
 #'  \item{\code{  trip_id}}
 #' Dataframe 2:
+#'  \item{\code{  well_id}}
 #'  \item{\code{  trip_id}}
-#'  \item{\code{  well_well}}
+#'  \item{\code{  well_label}}
+#' Dataframe 3:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  vesseltype_code}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @export
 check_well_number_consistent_inspector <- function(dataframe1,
                                                    dataframe2,
-                                                   output) {
+                                                   dataframe3,
+                                                   output,
+                                                   vesseltype = c("5", "6", "10")) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
   sample_well <- NULL
@@ -3226,19 +3234,36 @@ check_well_number_consistent_inspector <- function(dataframe1,
   if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("trip_id", "well_label"),
-    column_type = c("character", "character"),
+    column_name = c("well_id", "trip_id", "well_label"),
+    column_type = c("character", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("trip_id", "well_label"),
+      column_name = c("well_id", "trip_id", "well_label"),
+      column_type = c("character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("well_id", "trip_id", "well_label")]
+  }
+  if (!codama::r_table_checking(
+    r_table = dataframe3,
+    type = "data.frame",
+    column_name = c("trip_id", "vesseltype_code"),
+    column_type = c("character", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe3,
+      type = "data.frame",
+      column_name = c("trip_id", "vesseltype_code"),
       column_type = c("character", "character"),
       output = "message"
     )
   } else {
-    dataframe2 <- dataframe2[, c("trip_id", "well_label")]
+    dataframe3 <- dataframe3[, c("trip_id", "vesseltype_code")]
   }
   # Checks the type and values of output
   if (!codama::r_type_checking(
@@ -3254,18 +3279,32 @@ check_well_number_consistent_inspector <- function(dataframe1,
       output = "message"
     ))
   }
+  if (!codama::r_type_checking(
+    r_object = vesseltype,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = vesseltype,
+      type = "character",
+      output = "message"
+    ))
+  }
   select <- dataframe1$sample_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
-  # merge
+  # Merge
   dataframe2$logical <- TRUE
   dataframe1 <- merge(dataframe1, dataframe2, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_label"), all.x = TRUE)
+  dataframe1 <- merge(dataframe1, dataframe3, by = c("trip_id"), all.x = TRUE)
   # Search well not link
   dataframe1[is.na(dataframe1$logical), "logical"] <- FALSE
   # Case the well number is empty
   dataframe1[is.na(dataframe1$sample_well), "logical"] <- FALSE
+  # Vessel types without a well plan
+  dataframe1[!(dataframe1$vesseltype_code %in% vesseltype), "logical"] <- TRUE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(trip_id))
+  dataframe1 <- subset(dataframe1, select = -c(trip_id, well_id, vesseltype_code))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_well, .after = logical)
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
@@ -5657,7 +5696,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function which indicates whether the sample well number is consistent with the associated trip well numbers
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check well number consistent inspector", sep = "")
-          check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_well, output = "report")
+          check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = data_trip, output = "report")
           # Uses a function to format the table
           check_well_number_consistent <- table_display_trip(check_well_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
           check_well_number_consistent <- dplyr::rename(
