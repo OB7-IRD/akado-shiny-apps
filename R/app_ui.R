@@ -169,7 +169,11 @@ app_ui <- function(request) {
                  <li>If the position and ocean are different, you need to check these fields with the logbook</li></ul>"),
           table_ui(id = "check_weight", title = "Total Catch Weight", text = "<ul><li>If the values are different, you must transfer the sum of the elementary captures to the activity</li></ul>"),
           table_ui(id = "check_temperature", title = "Temperature", text = "<ul><li>Indicates whether the temperature is between 15 and 32 for the activity</li></ul>"),
-          table_ui(id = "check_weighting_sample", title = "Weighting sample", text = "<ul><li>Indicates whether the sum of the catch weights for the activity is consistent with the sum of the sample weighted weights link for the activity</li></ul>")
+          table_ui(id = "check_weighting_sample", title = "Weighting sample", text = "<ul><li>Indicates whether the sum of the catch weights for the activity is consistent with the sum of the sample weighted weights link for the activity</li></ul>"),
+          table_ui(id = "check_time_route", title = "Time route", text = "<ul><li>Indicates whether sea time and fishing time exceed their maximum limits (default 24 for sea time and 13 for fishing time).</li>
+                   <li>Indicates whether sea time is less than fishing time</li>
+                   <li>Indicates whether sea time equals 0 while sea activities are associated</li>
+                   <li>Indicates whether fishing time equals 0 while fishing activities are associated</li></ul>")
           )
       ),
       shinydashboard::tabItem(

@@ -16,7 +16,7 @@ Imports:
     DBI,
     dplyr,
     DT,
-    furdeb,
+    furdeb (>= 1.0.0),
     golem (>= 0.4.1),
     magrittr,
     plotly,

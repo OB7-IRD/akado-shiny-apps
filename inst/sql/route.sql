@@ -4,8 +4,12 @@ SELECT
     r.trip::text AS trip_id,
     r.fishingtime::numeric AS route_fishingtime,
     r.timeatsea::numeric AS route_seatime,
-    r."date"::date AS activity_date
+    r."date"::date AS activity_date,
+    v.code::text AS vessel_code,
+    t.enddate::date AS trip_enddate
 FROM 
     ps_logbook.route r 
+    INNER JOIN ps_common.trip t ON r.trip = t.topiaid
+    INNER JOIN common.vessel v ON t.vessel = v.topiaid
 WHERE 
-    r.trip IN (?select_item)
+    t.topiaid IN (?select_item)

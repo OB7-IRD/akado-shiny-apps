@@ -2664,6 +2664,311 @@ check_weighting_sample_inspector <- function(dataframe1,
   }
 }
 
+#' @name check_time_route_inspector
+#' @title Gives the inconsistencies between the fishing times or sea times indicated for the route and activities carried out
+#' @description The purpose of the check_time_route_inspector function is to provide a table of data that contains an inconsistency between the fishing times or sea times indicated for the route and activities carried out
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_time_route_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_time_route_inspector () function.
+#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_time_route_inspector () function.
+#' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param max_seatime {\link[base]{numeric}} expected. Default values: 24. Maximum valid time for sea time
+#' @param max_fishingtime {\link[base]{numeric}} expected. Default values: 13. Maximum valid time for fishing time
+#' @param vesselactivity_seatime {\link[base]{character}} expected. Default values: c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "18", "19", "20", "22", "23", "24", "25", "26", "27", "29", "30", "31", "32", "36", "37", "38", "39", "50", "99", "101", "101", "102", "102", "103"). Code activities. First criterion for identifying activities that must have sea time
+#' @param objectoperation_seatime {\link[base]{character}} expected. Default values: c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA, "99", NA, NA). Code object operation. Second criterion for identifying activities that must have sea time (Indicate NA if you want the code object operation to be missing)
+#' @param vesselactivity_fishingtime {\link[base]{character}} expected. Default values: c("2", "3", "4", "6", '6', "8", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "19", "20", "23", "25", "26", "27", "29", "30", "31", "102", "102"). Code activities. First criterion for identifying activities that must have fishing time
+#' @param objectoperation_fishingtime {\link[base]{character}} expected. Default values: c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA). Code object operation. Second criterion for identifying activities that must have fishing time (Indicate NA if you want the code object operation to be missing)
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  route_id}}
+#'  \item{\code{  route_seatime}}
+#'  \item{\code{  route_fishingtime}}
+#' Dataframe 2:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  vesselactivity_code}}
+#'  \item{\code{  route_id}}
+#' Dataframe 3:
+#'  \item{\code{  floatingobject_id}}
+#'  \item{\code{  objectoperation_code}}
+#'  \item{\code{  activity_id}}
+#' }
+#' @export
+check_time_route_inspector <- function(dataframe1,
+                                       dataframe2,
+                                       dataframe3,
+                                       output,
+                                       max_seatime = 24,
+                                       max_fishingtime = 13,
+                                       vesselactivity_seatime = c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "18", "19", "20", "22", "23", "24", "25", "26", "27", "29", "30", "31", "32", "36", "37", "38", "39", "50", "99", "101", "101", "102", "102", "103"),
+                                       objectoperation_seatime = c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA, "99", NA, NA),
+                                       vesselactivity_fishingtime = c("2", "3", "4", "6", "6", "8", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "19", "20", "23", "25", "26", "27", "29", "30", "31", "102", "102"),
+                                       objectoperation_fishingtime = c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA)) {
+  # 0 - Global variables assignement ----
+  route_id <- NULL
+  route_seatime <- NULL
+  route_fishingtime <- NULL
+  activity_id <- NULL
+  threshold <- NULL
+  logical_activity_seatime <- NULL
+  logical_activity_fishingtime <- NULL
+  # 1 - Arguments verification ----
+  if (!codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("route_id", "route_seatime", "route_fishingtime"),
+    column_type = c("character", "numeric", "numeric"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("route_id", "route_seatime", "route_fishingtime"),
+      column_type = c("character", "numeric", "numeric"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("route_id", "route_seatime", "route_fishingtime")]
+  }
+  if (!codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("activity_id", "vesselactivity_code", "route_id"),
+    column_type = c("character", "character", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("activity_id", "vesselactivity_code", "route_id"),
+      column_type = c("character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("activity_id", "vesselactivity_code", "route_id")]
+  }
+  if (!codama::r_table_checking(
+    r_table = dataframe3,
+    type = "data.frame",
+    column_name = c("floatingobject_id", "objectoperation_code", "activity_id"),
+    column_type = c("character", "character", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe3,
+      type = "data.frame",
+      column_name = c("floatingobject_id", "objectoperation_code", "activity_id"),
+      column_type = c("character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe3 <- dataframe3[, c("floatingobject_id", "objectoperation_code", "activity_id")]
+  }
+  # Checks the type and values of output
+  if (!codama::r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = max_seatime,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = max_seatime,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = max_fishingtime,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = max_fishingtime,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  if (length(vesselactivity_seatime) != length(objectoperation_seatime)) {
+    stop(
+      format(
+        x = Sys.time(),
+        "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Error, the following arguments must be of the same size : \"vesselactivity_seatime\", \"objectoperation_seatime\"\n"
+    )
+  }
+  if (!codama::r_type_checking(
+    r_object = vesselactivity_seatime,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = vesselactivity_seatime,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = objectoperation_seatime,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = objectoperation_seatime,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (length(vesselactivity_fishingtime) != length(objectoperation_fishingtime)) {
+    stop(
+      format(
+        x = Sys.time(),
+        "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Error, the following arguments must be of the same size : \"vesselactivity_fishingtime\", \"objectoperation_fishingtime\"\n"
+    )
+  }
+  if (!codama::r_type_checking(
+    r_object = vesselactivity_fishingtime,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = vesselactivity_fishingtime,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = objectoperation_fishingtime,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = objectoperation_fishingtime,
+      type = "character",
+      output = "message"
+    ))
+  }
+  select <- dataframe1$route_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Compare sea time and the threshold
+  dataframe1$threshold <- max_seatime
+  comparison_sea_threshold <- codama::vector_comparison(
+    first_vector = dataframe1$route_seatime,
+    second_vector = dataframe1$threshold,
+    comparison_type = "less_equal",
+    output = "report"
+  )
+  # Compare fishing time and the threshold
+  dataframe1$threshold <- max_fishingtime
+  comparison_fishing_threshold <- codama::vector_comparison(
+    first_vector = dataframe1$route_fishingtime,
+    second_vector = dataframe1$threshold,
+    comparison_type = "less_equal",
+    output = "report"
+  )
+  dataframe1$logical <- comparison_sea_threshold$logical & comparison_fishing_threshold$logical
+  # Sea time must be equal to or greater than fishing time
+  dataframe1[!is.na(dataframe1$route_fishingtime) & dataframe1$route_fishingtime > 0 & !is.na(dataframe1$route_seatime) & dataframe1$route_seatime < dataframe1$route_fishingtime, "logical"] <- FALSE
+  # Merge
+  data_route_activity_objectoperation <- merge(dataframe1, dataframe2, by = "route_id", all.x = TRUE)
+  data_route_activity_objectoperation <- merge(data_route_activity_objectoperation, dataframe3, by = "activity_id", all.x = TRUE)
+  # Sea time category conditions
+  condition_seatime <- as.list(as.data.frame(t(data.frame(vesselactivity_seatime, objectoperation_seatime))))
+  # Selection of activities that must have sea time
+  activity_seatime <- purrr::map(condition_seatime, ~ data_route_activity_objectoperation %>%
+                                   dplyr::filter(vesselactivity_code == .x[1] & objectoperation_code == .x[2]))
+  activity_seatime <- do.call(rbind.data.frame, activity_seatime)
+  # Count the number of activities requiring time at sea per route
+  activity_seatime <- activity_seatime %>%
+    dplyr::group_by(route_id, route_seatime) %>%
+    dplyr::summarise(nb_activity_must_seatime = length(unique(activity_id)), logical_activity_seatime = FALSE)
+  activity_seatime$logical_activity_seatime <- FALSE
+  # Time at sea per route are correct
+  activity_seatime[!is.na(activity_seatime$route_seatime) & activity_seatime$route_seatime > 0, "logical_activity_seatime"] <- TRUE
+  # Merge
+  dataframe1 <- merge(dataframe1, activity_seatime, by = c("route_id", "route_seatime"), all.x = TRUE)
+  dataframe1[is.na(dataframe1$nb_activity_must_seatime), "nb_activity_must_seatime"] <- 0
+  dataframe1[is.na(dataframe1$logical_activity_seatime), "logical_activity_seatime"] <- TRUE
+  # Fishing time time category conditions
+  condition_fishingtime <- as.list(as.data.frame(t(data.frame(vesselactivity_fishingtime, objectoperation_fishingtime))))
+  # Selection of activities that must have fishing time
+  activity_fishingtime <- purrr::map(condition_fishingtime, ~ data_route_activity_objectoperation %>%
+                                   dplyr::filter(vesselactivity_code == .x[1] & objectoperation_code == .x[2]))
+  activity_fishingtime <- do.call(rbind.data.frame, activity_fishingtime)
+  # Count the number of activities requiring time at sea per route
+  activity_fishingtime <- activity_fishingtime %>%
+    dplyr::group_by(route_id, route_fishingtime) %>%
+    dplyr::summarise(nb_activity_must_fishingtime = length(unique(activity_id)))
+  activity_fishingtime$logical_activity_fishingtime <- FALSE
+  # Fishing time per route are correct
+  activity_fishingtime[!is.na(activity_fishingtime$route_fishingtime) & activity_fishingtime$route_fishingtime > 0, "logical_activity_fishingtime"] <- TRUE
+  # Merge
+  dataframe1 <- merge(dataframe1, activity_fishingtime, by = c("route_id", "route_fishingtime"), all.x = TRUE)
+  dataframe1[is.na(dataframe1$nb_activity_must_fishingtime), "nb_activity_must_fishingtime"] <- 0
+  dataframe1[is.na(dataframe1$logical_activity_fishingtime), "logical_activity_fishingtime"] <- TRUE
+  dataframe1$logical <- dataframe1$logical & dataframe1$logical_activity_seatime & dataframe1$logical_activity_fishingtime
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- subset(dataframe1, select = -c(threshold, logical_activity_seatime, logical_activity_fishingtime))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, route_seatime, route_fishingtime, .after = logical)
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+    all <- c(select, dataframe1$route_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    if (sum(is.na(dataframe1$logical)) > 0) {
+      text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$route_id[is.na(dataframe1$logical)], collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " routes with sea time or fishing time inconsistency", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 #' @name check_species_inspector
 #' @title Gives the inconsistencies between species sampled and species authorized
 #' @description The purpose of the check_species_inspector function is to provide a table of data that contains an inconsistency between the species sampled and species authorized
@@ -5152,7 +5457,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
 }
 
 # Shiny function : Performs all calculations to test for inconsistencies
-calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data) {
+calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data, referential_file) {
   moduleServer(id, function(input, output, session) {
     # 0 - Global variables assignement ----
     trip_fishingtime <- NULL
@@ -5213,6 +5518,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     activity_number <- NULL
     activity_position_prior <- NULL
     activity_position_post <- NULL
+    route_seatime <- NULL
+    route_fishingtime <- NULL
+    nb_activity_must_seatime <- NULL
+    nb_activity_must_fishingtime <- NULL
+    time_at_sea <- NULL
+    activity_code_observe <- NULL
+    objectoperation_code_observe <- NULL
+    fishing_time <- NULL
     # 1 - Data extraction ----
     reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
@@ -5328,7 +5641,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             anchor = list(select_item = wellactivity_select$wellactivity_id)
           )
           # Uses a function to extract data from route
-          data_route <- furdeb::data_extraction(
+          route_select <- furdeb::data_extraction(
             type = "database",
             file_path = system.file("sql",
                                     "route.sql",
@@ -5397,6 +5710,16 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             database_connection = data_connection,
             anchor = list(select_item = activity_select$activity_id)
           )
+          # Uses a function to extract data from floatingobject
+          data_floatingobject <- furdeb::data_extraction(
+            type = "database",
+            file_path = system.file("sql",
+                                    "floatingobject.sql",
+                                    package = "AkadoR"
+            ),
+            database_connection = data_connection,
+            anchor = list(select_item = activity_select$activity_id)
+          )
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
           if (!is.null(config_data()[["databases_configuration"]][["vms"]])) {
@@ -5428,9 +5751,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # 2 - Data design ----
           # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
           data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_landing_trip_previous, harbour_label_landing_trip_previous)))
-          # Retrieve trip : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
+          # Retrieve trip : retrieve the vessel code, end of the trip of all the trip that have been selected
           colnames_trip_id <- c("trip_id", "vessel_code", "trip_enddate")
-          # Retrieve trip activity : retrieve the vessel code, end of the trip, date of th activity and activity number of all the activity that have been selected
+          # Retrieve trip route : retrieve the vessel code, end of the trip, date of route of all the route that have been selected
+          colnames_route_id <- c("route_id", "vessel_code", "trip_enddate", "activity_date")
+          # Retrieve trip activity : retrieve the vessel code, end of the trip, date of activity and activity number of all the activity that have been selected
           colnames_activity_id <- c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_number", "vesselactivity_code")
           # Retrieve trip sample : retrieve the vessel code, end of the trip and sample number of all the sample that have been selected
           colnames_sample_id <- c("sample_id", "vessel_code", "trip_enddate", "sample_number")
@@ -5449,7 +5774,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "warning")
           # Uses a function which indicates whether the selected trips contain fishing time inconsistent
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check fishing time inspector", sep = "")
-          check_fishing_time_inspector_data <- check_fishing_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
+          check_fishing_time_inspector_data <- check_fishing_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = route_select, output = "report")
           # Uses a function to format the table
           check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5460,7 +5785,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function which indicates whether the selected trips contain sea time inconsistent
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sea time inspector", sep = "")
-          check_sea_time_inspector_data <- check_sea_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
+          check_sea_time_inspector_data <- check_sea_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = route_select, output = "report")
           # Uses a function to format the table
           check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -5493,7 +5818,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function which indicates whether the selected trips contain the trip start and end date inconsistent with the dates of activity
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check temporal limit inspector", sep = "")
-          check_temporal_limit_inspector_data <- check_temporal_limit_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_route, output = "report")
+          check_temporal_limit_inspector_data <- check_temporal_limit_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = route_select, output = "report")
           # Data preparation
           check_temporal_limit <- check_temporal_limit_inspector_data[[1]]
           check_temporal_limit_data_plot <- check_temporal_limit_inspector_data[[2]]
@@ -5618,8 +5943,37 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_weighting_sample <- table_display_trip(check_weighting_sample_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
           check_weighting_sample <- dplyr::rename(
             .data = check_weighting_sample,
-            `Sum catch weight ` = weight,
+            `Sum catch weight` = weight,
             `Sum sample weighted weight`  = weightedweight
+          )
+          # Uses a function which indicates whether that time for route is consistent with the activity
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check time route inspector", sep = "")
+          # Recovery time allocation references by activity
+          vesselactivity_seatime <- referential_file()[["time_allocation_activity_code_ref"]] %>%
+            dplyr:: filter(time_at_sea == 1) %>%
+            dplyr::mutate(activity_code_observe = as.character(activity_code_observe)) %>%
+            dplyr::pull(activity_code_observe)
+          objectoperation_seatime <- referential_file()[["time_allocation_activity_code_ref"]] %>%
+            dplyr:: filter(time_at_sea == 1) %>%
+            dplyr::mutate(objectoperation_code_observe = as.character(objectoperation_code_observe)) %>%
+            dplyr::pull(objectoperation_code_observe)
+          vesselactivity_fishingtime <- referential_file()[["time_allocation_activity_code_ref"]] %>%
+            dplyr:: filter(fishing_time == 1) %>%
+            dplyr::mutate(activity_code_observe = as.character(activity_code_observe)) %>%
+            dplyr::pull(activity_code_observe)
+          objectoperation_fishingtime <- referential_file()[["time_allocation_activity_code_ref"]] %>%
+            dplyr:: filter(fishing_time == 1) %>%
+            dplyr::mutate(objectoperation_code_observe = as.character(objectoperation_code_observe)) %>%
+            dplyr::pull(objectoperation_code_observe)
+          check_time_route_inspector_data <- check_time_route_inspector(dataframe1 = route_select, dataframe2 = activity_select, dataframe3 = data_floatingobject, vesselactivity_seatime = vesselactivity_seatime, objectoperation_seatime = objectoperation_seatime, vesselactivity_fishingtime = vesselactivity_fishingtime, objectoperation_fishingtime = objectoperation_fishingtime, output = "report")
+          # Uses a function to format the table
+          check_time_route <- table_display_trip(check_time_route_inspector_data, route_select[, colnames_route_id], type_inconsistency = "error")
+          check_time_route <- dplyr::rename(
+            .data = check_time_route,
+            `Sea time` = route_seatime,
+            `Fishing time` = route_fishingtime,
+            `Number activities must sea time` = nb_activity_must_seatime,
+            `Number activities must fishing time` = nb_activity_must_fishingtime
           )
           # Uses a function which indicates whether that species sampled is consistent with species authorized
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check species inspector", sep = "")
@@ -5817,7 +6171,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo <- data.frame()
             check_anapo_inspector_dataplot <- data.frame()
           }
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot))
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route))
         }
       }
     })
@@ -5956,6 +6310,13 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
     `Trip enddate` = trip_enddate,
     Check = logical
   )
+  # Modify the table for display purposes specifically for routes : rename column
+  if (length(grep("^route_", colnames(data), value = TRUE)) != 0) {
+    data <- dplyr::rename(
+      .data = data,
+      `Activity date` = activity_date
+    )
+  }
   # Modify the table for display purposes specifically for activities : rename column
   if (length(grep("^activity_", colnames(data), value = TRUE)) != 0) {
     data <- dplyr::rename(

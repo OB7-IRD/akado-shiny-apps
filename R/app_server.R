@@ -25,8 +25,15 @@ app_server <- function(input, output, session) {
   # Retrieves the list of trips selected by the user
   trip_select <- trip_select_server(id = "start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data)
 
+  # Read the referential file
+  referential_file <- reactive({
+    # Reading the file with time allocation references by activity
+    time_allocation_activity_code_ref <- utils::read.csv(file = system.file("time_allocation_activity_code_ref.csv", package = "furdeb"), header = TRUE, sep = ";")
+    return(list(time_allocation_activity_code_ref = time_allocation_activity_code_ref))
+  })
+
   # Performs all calculations to test for inconsistencies
-  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data)
+  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file)
 
   # Displays the errors and notifications that occur when you want to start the calculation
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
@@ -164,6 +171,9 @@ app_server <- function(input, output, session) {
   # Table of consistency test the catch weight for activity is consistent with the sample weighting
   table_server(id = "check_weighting_sample", data = calcul_check, number = 16, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3))
 
+  # Table of consistency test the time for route is consistent with the activity
+  table_server(id = "check_time_route", data = calcul_check, number = 30, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3))
+
   # Table of consistency test the size class of the samples depending on the species and measurement type is consistent with valid limits
   table_server(id = "check_length_class", data = calcul_check, number = 13, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
@@ -292,6 +302,9 @@ app_server <- function(input, output, session) {
       insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_temperature", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_weighting_sample", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      shinyjs::show(id = "div_check_time_route", anim = TRUE, animType = "fade")
       # Sample
       shinyjs::show(id = "div_check_length_class", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_measure", anim = TRUE, animType = "fade")
@@ -350,6 +363,7 @@ app_server <- function(input, output, session) {
       shinyjs::hide(id = "div_check_activity_sample", anim = FALSE)
       shinyjs::hide(id = "div_check_ldlf", anim = FALSE)
       shinyjs::hide(id = "div_check_distribution", anim = FALSE)
+      shinyjs::hide(id = "div_check_time_route", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
       # Anapo
@@ -383,6 +397,7 @@ app_server <- function(input, output, session) {
       shinyjs::hide(id = "div_check_activity_sample", anim = FALSE)
       shinyjs::hide(id = "div_check_ldlf", anim = FALSE)
       shinyjs::hide(id = "div_check_distribution", anim = FALSE)
+      shinyjs::hide(id = "div_check_time_route", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
@@ -416,6 +431,9 @@ app_server <- function(input, output, session) {
       insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_temperature", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_weighting_sample", anim = TRUE, animType = "fade")
+      insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+      shinyjs::show(id = "div_check_time_route", anim = TRUE, animType = "fade")
       # Sample
       shinyjs::show(id = "div_check_length_class", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_measure", anim = TRUE, animType = "fade")
