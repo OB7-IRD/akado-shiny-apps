@@ -6062,10 +6062,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_little_big_inspector_data <- check_little_big_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, dataframe3 = samplespeciesmeasure_select, output = "report")
           # Uses a function to format the table
           check_little_big <- table_display_trip(check_little_big_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
-          check_little_big$little_percentage <- trunc(check_little_big$little_percentage * 1000) / 1000
-          check_little_big$big_percentage <- trunc(check_little_big$big_percentage * 1000) / 1000
-          check_little_big$measure1_percentage <- trunc(check_little_big$measure1_percentage * 1000) / 1000
-          check_little_big$measure2_percentage <- trunc(check_little_big$measure2_percentage * 1000) / 1000
+          check_little_big$little_percentage <- trunc(check_little_big$little_percentage * 1000) / 10
+          check_little_big$big_percentage <- trunc(check_little_big$big_percentage * 1000) / 10
+          check_little_big$measure1_percentage <- trunc(check_little_big$measure1_percentage * 1000) / 10
+          check_little_big$measure2_percentage <- trunc(check_little_big$measure2_percentage * 1000) / 10
           check_little_big <- dplyr::rename(
             .data = check_little_big,
             `Small fish weight` = sample_smallsweight,
