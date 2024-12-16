@@ -1860,7 +1860,7 @@ check_position_inspector <- function(dataframe1,
   }
   # 3 - Export ----
   if (output == "message") {
-    return(print(paste0("There are ", sum(!dataframe1$logical), " activity with school types that do not correspond to the observed associations")))
+    return(print(paste0("There are ", sum(!dataframe1$logical), " activity with position is inconsistent, outside the ocean declared for the trip")))
   }
   if (output == "report") {
     return(list(dataframe1, activity_sea_land_data_detail))
@@ -2964,6 +2964,206 @@ check_time_route_inspector <- function(dataframe1,
   }
   if (output == "report") {
     return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
+#' @name check_eez_inspector
+#' @title Gives the inconsistencies between the fishing area declared and calculated for the activity
+#' @description The purpose of the check_eez_inspector function is to provide a table of data that contains an inconsistency between the fishing area declared and calculated with position for the activity fishing
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weight_inspector () function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Layer to containing the eez shapefile (example cf : Flanders Marine Institute (2023). Maritime Boundaries Geodatabase: Maritime Boundaries and Exclusive Economic Zones (200NM), version 12. Available online at https://www.marineregions.org/. https://doi.org/10.14284/632)
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param activity_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity
+#' @param internationalwaters_code {\link[base]{character}} expected. Default values: "XIN". iso3 code corresponding to international waters
+#' @param vesselactivity {\link[base]{character}} expected. Default values: c("6"). Vector of inventory of codes for activities that must have a zee zone
+#' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  vesselactivity_code}}
+#'  \item{\code{  fpazone_code}}
+#'  \item{\code{  fpazone_country_iso3}}
+#'  \item{\code{  activity_position}}
+#' Dataframe 2:
+#'  \item{\code{  ISO_TER1}}
+#'  \item{\code{  ISO_TER2}}
+#'  \item{\code{  ISO_TER3}}
+#'  \item{\code{  geometry}}
+#' }
+#' @export
+check_eez_inspector <- function(dataframe1,
+                                dataframe2,
+                                output,
+                                activity_crs = 4326,
+                                internationalwaters_code = "XIN",
+                                vesselactivity = c("6")) {
+  # 0 - Global variables assignement ----
+  activity_position <- NULL
+  activity_id <- NULL
+  fpazone_code <- NULL
+  fpazone_country_iso3 <- NULL
+  ISO_TER1 <- NULL
+  ISO_TER2 <- NULL
+  ISO_TER3 <- NULL
+  logical_eez <- NULL
+  # 1 - Arguments verification ----
+  if (!codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("activity_id", "vesselactivity_code", "fpazone_code", "fpazone_country_iso3", "activity_position"),
+    column_type = c("character", "character", "character", "character", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("activity_id", "vesselactivity_code", "fpazone_code", "fpazone_country_iso3", "activity_position"),
+      column_type = c("character", "character", "character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("activity_id", "vesselactivity_code", "fpazone_code", "fpazone_country_iso3", "activity_position")]
+  }
+  if (!codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("ISO_TER1", "ISO_TER2", "ISO_TER3", "geometry"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("ISO_TER1", "ISO_TER2", "ISO_TER3", "geometry"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("ISO_TER1", "ISO_TER2", "ISO_TER3", "geometry")]
+  }
+  # Checks the type and values of output
+  if (!codama::r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = activity_crs,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = activity_crs,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = internationalwaters_code,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = internationalwaters_code,
+      type = "character",
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = vesselactivity,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = vesselactivity,
+      type = "character",
+      output = "message"
+    ))
+  }
+  select <- dataframe1$activity_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Checks for the presence of a declared fishing zone
+  dataframe1$logical <- !c(is.na(dataframe1$fpazone_code) & is.na(dataframe1$fpazone_country_iso3))
+  # Formats spatial data activity
+  data_geo_activity <- dataframe1 %>%
+    dplyr::filter(!is.na(activity_position) & !c(is.na(fpazone_code) & is.na(fpazone_country_iso3))) %>%
+    sf::st_as_sf(wkt = "activity_position", crs = activity_crs) %>%
+    sf::st_transform(activity_position, crs = 4326)
+  # Calculates the intersection between activity and eez
+  if (nrow(data_geo_activity) > 0) {
+    intersect_eez <- terra::intersect(data_geo_activity %>%
+                                        terra::vect(), dataframe2 %>%
+                                        terra::vect()) %>%
+      sf::st_as_sf() %>%
+      sf::st_drop_geometry()
+    # Compares declared country with calculated country
+    intersect_eez <- intersect_eez %>%
+      dplyr::group_by(activity_id) %>%
+      dplyr::summarise(logical_eez = sum(c(fpazone_code, fpazone_country_iso3) %in% c(ISO_TER1, ISO_TER2, ISO_TER3)) > 0)
+    # Merge
+    dataframe1 <- merge(dataframe1, intersect_eez, by = "activity_id", all.x = TRUE)
+  }else {
+    dataframe1$logical_eez <- NA
+  }
+  # Case of international waters : the calculated country must be missing
+  dataframe1[is.na(dataframe1$logical_eez) & ((dataframe1$fpazone_code %in% internationalwaters_code & dataframe1$fpazone_country_iso3 %in% internationalwaters_code) | (is.na(dataframe1$fpazone_code) & dataframe1$fpazone_country_iso3 %in% internationalwaters_code) | (dataframe1$fpazone_code %in% internationalwaters_code & is.na(dataframe1$fpazone_country_iso3))), "logical_eez"] <- TRUE
+  # Case of no calculated country
+  dataframe1[is.na(dataframe1$logical_eez), "logical_eez"] <- FALSE
+  dataframe1$logical <- dataframe1$logical & dataframe1$logical_eez
+  # Case of vesselactivity with no constraints if missing declared fishing zone
+  dataframe1$logical[!(dataframe1$vesselactivity_code %in% vesselactivity) & is.na(dataframe1$fpazone_code) & is.na(dataframe1$fpazone_country_iso3)] <- TRUE
+  dataframe1 <- subset(dataframe1, select = -c(logical_eez))
+  activity_data_detail <- dataframe1
+  activity_data_detail <- activity_data_detail %>%
+    dplyr::mutate(activity_crs = activity_crs)
+  dataframe1 <- subset(dataframe1, select = -c(activity_position))
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+    all <- c(select, dataframe1$activity_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    if (sum(is.na(dataframe1$logical)) > 0) {
+      text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " activity with declared eez that do not correspond to calculated eez")))
+  }
+  if (output == "report") {
+    return(list(dataframe1, activity_data_detail))
   }
   if (output == "logical") {
     if (sum(!dataframe1$logical) == 0) {
@@ -5571,6 +5771,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     activity_code_observe <- NULL
     objectoperation_code_observe <- NULL
     fishing_time <- NULL
+    fpazone_code <- NULL
+    fpazone_country_iso3 <- NULL
     # 1 - Data extraction ----
     reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
@@ -6020,6 +6222,20 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Number activities must sea time` = nb_activity_must_seatime,
             `Number activities must fishing time` = nb_activity_must_fishingtime
           )
+          # Uses a function which indicates whether the eez declaration is consistent with activity position
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check eez inspector", sep = "")
+          check_eez_inspector_data <- check_eez_inspector(dataframe1 = activity_select, dataframe2 = referential_file()[["shape_eez"]], output = "report")
+          # Add button and data for plot in table
+          check_eez <- data_button_plot(data_plot = check_eez_inspector_data[[2]], data_display = check_eez_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3"), name_button = "button_eez", choice_select_row = "all")
+          # Uses a function to format the table
+          check_eez <- table_display_trip(check_eez, activity_select[, colnames_activity_id], type_inconsistency = "warning")
+          # Modify the table for display purposes: rename column
+          check_eez <- dplyr::rename(
+            .data = check_eez,
+            `EEZ` = fpazone_code,
+            `Country EEZ` = fpazone_country_iso3,
+            `Details problem` = button
+          )
           # Uses a function which indicates whether that species sampled is consistent with species authorized
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check species inspector", sep = "")
           check_species_inspector_data <- check_species_inspector(dataframe1 = samplespecies_select, output = "report")
@@ -6216,7 +6432,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo <- data.frame()
             check_anapo_inspector_dataplot <- data.frame()
           }
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route))
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez))
         }
       }
     })
@@ -6501,6 +6717,36 @@ plot_position <- function(data) {
   }
 }
 
+# Function to create the plot of the consistency of the eez for the activity
+plot_eez <- function(data, referential_geographical_shape) {
+  # Local binding global variables
+  . <- NULL
+  ISO_TER1 <- NULL
+  ISO_TER2 <- NULL
+  ISO_TER3 <- NULL
+  # Remove empty geometry
+  referential_geographical_shape <- referential_geographical_shape[!sf::st_is_empty(referential_geographical_shape), ]
+  # text hovertemplate
+  referential_geographical_shape <- referential_geographical_shape %>% dplyr::mutate(text = paste("Country 1:", ISO_TER1, "<br>Country 2:", ISO_TER2, "<br>Country 3:", ISO_TER3))
+  # Spatial formatting
+  plot <- plotly::plot_ly()
+  if (!is.na(data$activity_position)) {
+    data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+    # Plot
+    plot <- plot %>%
+      plotly::add_trace(name = "Activity", data = data_geo, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>"
+    ) %>%
+      plotly::layout(mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
+  }else {
+    # Plot
+    plot <- plot %>%
+      plotly::layout(mapbox = list(style = "carto-positron"))
+  }
+  plot <- plot %>%
+    plotly::add_sf(name = "EEZ", data = referential_geographical_shape, type = "scattermapbox",  mode = "lines", text = ~text, hovertemplate = "%{text}<extra></extra>", fill = "none")
+  return(plot)
+  }
+
 # Function to create the plot of the consistency of the position for the activity and VMS
 plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip) {
   # Local binding global variables
@@ -6563,7 +6809,7 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   }
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
-      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF"))%>%
+      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF")) %>%
       plotly::layout(mapbox = list(center = list(lon = data_geo_vms$X[1], lat = data_geo_vms$Y[1])))
   }
   if (!all(is.na(data_activity$activity_position))) {

@@ -29,7 +29,13 @@ app_server <- function(input, output, session) {
   referential_file <- reactive({
     # Reading the file with time allocation references by activity
     time_allocation_activity_code_ref <- utils::read.csv(file = system.file("time_allocation_activity_code_ref.csv", package = "furdeb"), header = TRUE, sep = ";")
-    return(list(time_allocation_activity_code_ref = time_allocation_activity_code_ref))
+    # Reading the file with eez shapes
+    shape_eez <- sf::read_sf(dsn =  system.file("shp", "EEZ", package = "AkadoR"), layer = "eez_v12_lowres")
+    # Correct eez shapes by adding the zone code for "Joint regime area: Senegal / Guinea-Bissau"
+    shape_eez[shape_eez$MRGID == 48964, ]$ISO_TER3 <- "XSG"
+    shape_eez[shape_eez$MRGID == 48964, ]$TERRITORY3 <- "Joint regime area: Senegal / Guinea-Bissau"
+    shape_eez[shape_eez$MRGID == 48964, ]$SOVEREIGN3 <- "Joint regime area: Senegal / Guinea-Bissau"
+    return(list(time_allocation_activity_code_ref = time_allocation_activity_code_ref, shape_eez = shape_eez))
   })
 
   # Performs all calculations to test for inconsistencies
@@ -174,6 +180,62 @@ app_server <- function(input, output, session) {
   # Table of consistency test the time for route is consistent with the activity
   table_server(id = "check_time_route", data = calcul_check, number = 30, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3))
 
+  # Table of consistency test the eez for activity is consistent with the position
+  table_server(id = "check_eez", data = calcul_check, number = 31, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3))
+
+  # EEZ control plot, display in a window
+  output$plot_eez <- plotly::renderPlotly({
+    split_id <- strsplit(input$button_eez, "&")[[1]]
+    data <- eval(parse(text = split_id[[2]]))
+    plot_eez(data = data, referential_geographical_shape = referential_file()[["shape_eez"]])
+  })
+
+  # EEZ control window
+  observeEvent(input$button_eez, {
+    # Local binding global variables
+    . <- NULL
+    # Split information
+    split_id <- strsplit(input$button_eez, "&")[[1]]
+    enddate <- split_id[5]
+    activity_date <- split_id[6]
+    # Spatial formatting
+    data <- eval(parse(text = split_id[[2]]))
+    if (!is.na(data$activity_position)) {
+      data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+    }else {
+      data_geo <- data.frame(Y = c(), X = c())
+    }
+    # Non-breaking hyphen (-)
+    enddate <- gsub("-", "&#8209;", enddate)
+    activity_date <- gsub("-", "&#8209;", activity_date)
+    showModal(modalDialog(
+      fluidRow(
+        column(3,
+               style = "padding-left:5px;padding-right:0px;",
+               HTML(paste0("<b>Trip information : </b><br>
+                             <ul><li>Vessel code : ", split_id[4], "</li>
+                             <li>Trip end date : ", enddate, "</li>
+                             <li>Activity date : ", activity_date, "</li>
+                             <li>Activity number : ", split_id[7], "</li>
+                             <li>Latitude : ", data_geo$Y, "\u00B0</li>
+                             <li>Longitude : ", data_geo$X, "\u00B0</li></ul>
+                             <b>Problem information : </b><br>
+                            <ul><li>Declared eez : ", split_id[8], "</li>
+                            <li>Declared country eez : ", split_id[9], "</li></ul>"))
+        ),
+        column(9,
+               style = "padding-left:0px;padding-right:5px;",
+               plotly::plotlyOutput("plot_eez")
+        )
+      ),
+      title = "EEZ",
+      size = "l",
+      fade = TRUE,
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+
   # Table of consistency test the size class of the samples depending on the species and measurement type is consistent with valid limits
   table_server(id = "check_length_class", data = calcul_check, number = 13, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
@@ -305,6 +367,7 @@ app_server <- function(input, output, session) {
       insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_time_route", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_eez", anim = TRUE, animType = "fade")
       # Sample
       shinyjs::show(id = "div_check_length_class", anim = TRUE, animType = "fade")
       shinyjs::show(id = "div_check_measure", anim = TRUE, animType = "fade")
@@ -364,6 +427,7 @@ app_server <- function(input, output, session) {
       shinyjs::hide(id = "div_check_ldlf", anim = FALSE)
       shinyjs::hide(id = "div_check_distribution", anim = FALSE)
       shinyjs::hide(id = "div_check_time_route", anim = FALSE)
+      shinyjs::hide(id = "div_check_eez", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
       # Anapo
@@ -401,6 +465,8 @@ app_server <- function(input, output, session) {
       # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
+      # Activity
+      shinyjs::show(id = "div_check_eez", anim = TRUE, animType = "fade")
       # Anapo
       shinyjs::hide(id = "div_check_anapo", anim = FALSE)
     }
@@ -410,6 +476,7 @@ app_server <- function(input, output, session) {
       shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
       shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
       shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
+      shinyjs::hide(id = "div_check_eez", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_sea_time", anim = TRUE, time = 1, animType = "fade")

@@ -173,7 +173,9 @@ app_ui <- function(request) {
           table_ui(id = "check_time_route", title = "Time route", text = "<ul><li>Indicates whether sea time and fishing time exceed their maximum limits (default 24 for sea time and 13 for fishing time).</li>
                    <li>Indicates whether sea time is less than fishing time</li>
                    <li>Indicates whether sea time equals 0 while sea activities are associated</li>
-                   <li>Indicates whether fishing time equals 0 while fishing activities are associated</li></ul>")
+                   <li>Indicates whether fishing time equals 0 while fishing activities are associated</li></ul>"),
+          table_ui(id = "check_eez", title = "EEZ", text = "<ul><li>Indicates when the declared and calculated eez are different</li>
+                   <li>Indicates when there is no declared eez for fishing activities </li></ul>")
           )
       ),
       shinydashboard::tabItem(

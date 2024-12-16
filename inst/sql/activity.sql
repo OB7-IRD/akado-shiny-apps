@@ -15,7 +15,9 @@ SELECT
     sss.code::text AS successstatus_code,
     va.code::text AS vesselactivity_code,
     o.label1::text AS ocean_label,
-    r.topiaid::text AS route_id
+    r.topiaid::text AS route_id,
+    c.iso3code::text AS fpazone_country_iso3,
+    f.code::text AS fpazone_code
 FROM 
     ps_logbook.activity a 
     INNER JOIN ps_logbook.route r ON a.route = r.topiaid 
@@ -25,5 +27,7 @@ FROM
     LEFT JOIN ps_logbook.setsuccessstatus sss ON a.setsuccessstatus = sss.topiaid 
     LEFT JOIN ps_common.vesselactivity va ON a.vesselactivity = va.topiaid 
     LEFT JOIN common.ocean o ON t.ocean = o.topiaid 
+    LEFT JOIN common.fpazone f ON a.currentfpazone = f.topiaid 
+    LEFT JOIN common.country c ON f.country = c.topiaid 
 WHERE 
     t.topiaid IN (?select_item) 
