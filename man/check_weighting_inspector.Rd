@@ -12,9 +12,10 @@ check_weighting_inspector(
   output,
   vessel_type = c("6", "2"),
   threshold_weight = 100,
-  threshold = 0.95,
+  threshold_ratio = 0.95,
   sampletype_code_landing_baitboat = c("11"),
-  landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10")
+  landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10"),
+  threshold_baitboat = 1
 )
 }
 \arguments{
@@ -32,11 +33,13 @@ check_weighting_inspector(
 
 \item{threshold_weight}{{\link[base]{numeric}} expected. Default values: 100. Seiner threshold weight}
 
-\item{threshold}{{\link[base]{numeric}} expected. Default values: 0.95. Percentage threshold between weight and weighted weight for seiners}
+\item{threshold_ratio}{{\link[base]{numeric}} expected. Default values: 0.95. Percentage threshold between weight and weighted weight for seiners}
 
 \item{sampletype_code_landing_baitboat}{{\link[base]{character}} expected. Default values: c("11"). List of sample type codes for baitboat fresh landings}
 
 \item{landingtype_baitboat}{{\link[base]{character}} expected. Default values: c("L-YFT-10", "L-BET-10", "L-TUN-10"). List of codes for fresh baitboat landings}
+
+\item{threshold_baitboat}{{\link[base]{numeric}} expected. Default values: 1. Threshold for baitboats with respect to the difference between the weighted weight and the landed fresh weight and the difference between the weight and the weighted weight}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"

@@ -4160,9 +4160,10 @@ check_little_big_inspector <- function(dataframe1,
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param vessel_type {\link[base]{character}} expected. Default values: c("6", "2"). List of two elements, the first is the seine vessel type code, and the second is the baitboat type code.
 #' @param threshold_weight {\link[base]{numeric}} expected. Default values: 100. Seiner threshold weight
-#' @param threshold {\link[base]{numeric}} expected. Default values: 0.95. Percentage threshold between weight and weighted weight for seiners
+#' @param threshold_ratio {\link[base]{numeric}} expected. Default values: 0.95. Percentage threshold between weight and weighted weight for seiners
 #' @param sampletype_code_landing_baitboat {\link[base]{character}} expected. Default values: c("11"). List of sample type codes for baitboat fresh landings
 #' @param landingtype_baitboat {\link[base]{character}} expected. Default values: c("L-YFT-10", "L-BET-10", "L-TUN-10"). List of codes for fresh baitboat landings
+#' @param threshold_baitboat {\link[base]{numeric}} expected. Default values: 1. Threshold for baitboats with respect to the difference between the weighted weight and the landed fresh weight and the difference between the weight and the weighted weight
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
@@ -4194,9 +4195,10 @@ check_weighting_inspector <- function(dataframe1,
                                       output,
                                       vessel_type = c("6", "2"),
                                       threshold_weight = 100,
-                                      threshold = 0.95,
+                                      threshold_ratio = 0.95,
                                       sampletype_code_landing_baitboat = c("11"),
-                                      landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10")) {
+                                      landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10"),
+                                      threshold_baitboat = 1) {
   # 0 - Global variables assignement ----
   sample_id <- NULL
   sample_smallsweight <- NULL
@@ -4325,13 +4327,13 @@ check_weighting_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = threshold,
+    r_object = threshold_ratio,
     type = "numeric",
     length = 1L,
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = threshold,
+      r_object = threshold_ratio,
       type = "numeric",
       length = 1L,
       output = "message"
@@ -4356,6 +4358,19 @@ check_weighting_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = sampletype_code_landing_baitboat,
       type = "character",
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = threshold_baitboat,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = threshold_baitboat,
+      type = "numeric",
+      length = 1L,
       output = "message"
     ))
   }
@@ -4391,9 +4406,9 @@ check_weighting_inspector <- function(dataframe1,
     )
   # Check
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weight > threshold_weight, "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold), "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > 1, "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$weight) > 1, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold_ratio), "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > threshold_baitboat, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$weight) > threshold_baitboat, "logical"] <- FALSE
   # Case NA vesseltype_code sampletype_code
   dataframe1[is.na(dataframe1$vesseltype_code), "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
