@@ -191,7 +191,7 @@ app_ui <- function(request) {
           table_ui(id = "check_well_number", title = "Well", text = "<ul><li>The sample well must exist in the trip well plan</li></ul>"),
           table_ui(id = "check_little_big", title = "Ratio of small over big fish", text = "<ul><li>The percentages of small over big fish must be consistent within the sample</li></ul>"),
           table_ui(id = "check_weighting", title = "Weighting", text = "<ul><li>The weighting for each sample must be coherent</li></ul>"),
-          table_ui(id = "check_weight_sample", title = "Weight sample", text = "<ul><li>The count of total weight must equal 0 if there are values other than 0 for the count of small or big fish weight, and vice versa</li></ul>"),
+          table_ui(id = "check_weight_sample", title = "Weight sample", text = "<ul><li>Only one value must be entered between the total weight and the count of the weight of small or big fish</li></ul>"),
           table_ui(id = "check_activity_sample", title = "Sample activity", text = "<ul><li>Sample must be linked to an activity</li></ul>"),
           table_ui(id = "check_ldlf", title = "LDLF", text = "<ul><li>The type of measure must be compatible with species</li>
                  <li>The type of measurement must be compatible with total, small and big fish weights</li></ul>"),

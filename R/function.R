@@ -4531,7 +4531,10 @@ check_weight_sample_inspector <- function(dataframe1,
     comparison_type = "difference",
     output = "report"
   )
+  # Checks that a weight has been indicated
   dataframe1$logical <- !(comparison_weight_calculation$logical & comparison_totalweight$logical) & !(is.na(dataframe1$weight_calculation) & is.na(dataframe1$sample_totalweight))
+  # Checks that a weight is indicated either for the total weight or for one of the two weight categories
+  dataframe1$logical[!is.na(dataframe1$weight_calculation) & dataframe1$weight_calculation > 0 & !is.na(dataframe1$sample_totalweight) & dataframe1$sample_totalweight > 0] <- FALSE
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(weight_calculation))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_totalweight, sample_smallsweight, sample_bigsweight, .after = logical)
