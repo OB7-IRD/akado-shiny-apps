@@ -275,6 +275,9 @@ app_server <- function(input, output, session) {
   # Table of consistency test the small and large sample weights is consistent for the sum of the small and big weights of the associated well
   table_server(id = "check_distribution", data = calcul_check, number = 27, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
 
+  # Table of consistency test the presence of harbour of landing for sample
+  table_server(id = "check_sample_harbour", data = calcul_check, number = 32, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3))
+
   # Table of consistency test the activity position is consistent for VMS position
   table_server(id = "check_anapo", data = calcul_check, number = 28, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2, 3, 12, 13, 14))
 
@@ -394,6 +397,7 @@ app_server <- function(input, output, session) {
       insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_distribution", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_sample_harbour", anim = TRUE, animType = "fade")
       # Anapo
       shinyjs::show(id = "div_check_anapo", anim = TRUE, animType = "fade")
     }
@@ -428,6 +432,7 @@ app_server <- function(input, output, session) {
       shinyjs::hide(id = "div_check_distribution", anim = FALSE)
       shinyjs::hide(id = "div_check_time_route", anim = FALSE)
       shinyjs::hide(id = "div_check_eez", anim = FALSE)
+      shinyjs::hide(id = "div_check_sample_harbour", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
       # Anapo
@@ -462,6 +467,7 @@ app_server <- function(input, output, session) {
       shinyjs::hide(id = "div_check_ldlf", anim = FALSE)
       shinyjs::hide(id = "div_check_distribution", anim = FALSE)
       shinyjs::hide(id = "div_check_time_route", anim = FALSE)
+      shinyjs::hide(id = "div_check_sample_harbour", anim = FALSE)
       # Trip
       shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
       shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
@@ -527,6 +533,7 @@ app_server <- function(input, output, session) {
       insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
       shinyjs::show(id = "div_check_distribution", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_sample_harbour", anim = TRUE, animType = "fade")
       # Anapo
       shinyjs::show(id = "div_check_anapo", anim = TRUE, animType = "fade")
     }

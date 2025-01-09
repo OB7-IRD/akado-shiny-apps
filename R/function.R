@@ -5202,6 +5202,130 @@ check_distribution_inspector <- function(dataframe1,
   }
 }
 
+#' @name check_sample_harbour_inspector
+#' @title Gives inconsistencies between the presence of a sample and the absence of a harbour of landing
+#' @description The purpose of the check_sample_harbour_inspector function is to provide a table of data that contains an inconsistency between the presence of a sample and the absence of a harbour of landing
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_harbour_inspector function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_sample_harbour_inspector function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  sample_id}}
+#'  \item{\code{  trip_id}}
+#' Dataframe 2:
+#'  \item{\code{  trip_id}}
+#'  \item{\code{  harbour_id_landing}}
+#'  \item{\code{  harbour_label_landing}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @export
+check_sample_harbour_inspector <- function(dataframe1,
+                                           dataframe2,
+                                            output) {
+  # 0 - Global variables assignement ----
+  harbour_label_landing <- NULL
+  harbour_id_landing <- NULL
+  trip_id <- NULL
+  # 1 - Arguments verification ----
+  if (!codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("sample_id", "trip_id"),
+    column_type = c("character", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("sample_id", "trip_id"),
+      column_type = c("character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("sample_id", "trip_id")]
+  }
+  if (!codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("trip_id", "harbour_id_landing", "harbour_label_landing"),
+    column_type = c("character", "character", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("trip_id", "harbour_id_landing", "harbour_label_landing"),
+      column_type = c("character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("trip_id", "harbour_id_landing", "harbour_label_landing")]
+  }
+  # Checks the type and values of output
+  if (!codama::r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  select <- dataframe1$sample_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  dataframe1 <- merge(dataframe1, dataframe2, by = "trip_id", all.x = TRUE)
+  dataframe1$logical <- TRUE
+  # Check if missing harbour
+  dataframe1[is.na(dataframe1$harbour_id_landing), "logical"] <- FALSE
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_label_landing, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(harbour_id_landing, trip_id))
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+    all <- c(select, dataframe1$sample_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    if (sum(is.na(dataframe1$logical)) > 0) {
+      text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " sample without harbour of landing", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 #' @name check_anapo_inspector
 #' @title Gives the inconsistencies activity position and VMS position
 #' @description The purpose of the check_anapo_inspector function is to provide a table of data that contains an inconsistency between activity position and VMS position
@@ -5791,6 +5915,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     fishing_time <- NULL
     fpazone_code <- NULL
     fpazone_country_iso3 <- NULL
+    harbour_label_landing <- NULL
     # 1 - Data extraction ----
     reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
@@ -6365,6 +6490,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Small fish weight well` = weight_small_total,
             `Big fish weight well` = weight_big
           )
+          # Uses a function which indicates whether the small and large sample weights is consistent for the presence of a sample and the absence of a harbour of landing
+          message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sample harbour inspector", sep = "")
+          check_sample_harbour_inspector_data <- check_sample_harbour_inspector(dataframe1 = sample_select, dataframe2 = data_trip_unprecedented, output = "report")
+          # Uses a function to format the table
+          check_sample_harbour <- table_display_trip(check_sample_harbour_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+          check_sample_harbour <- dplyr::rename(
+            .data = check_sample_harbour,
+            `Harbour landing` = harbour_label_landing
+          )
           # Uses a function which indicates whether the activity position is consistent for VMS position
           if (exists("data_vms")) {
             message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check anapo inspector", sep = "")
@@ -6450,7 +6584,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo <- data.frame()
             check_anapo_inspector_dataplot <- data.frame()
           }
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez))
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez, check_sample_harbour))
         }
       }
     })

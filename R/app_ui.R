@@ -195,7 +195,8 @@ app_ui <- function(request) {
           table_ui(id = "check_activity_sample", title = "Sample activity", text = "<ul><li>Sample must be linked to an activity</li></ul>"),
           table_ui(id = "check_ldlf", title = "LDLF", text = "<ul><li>The type of measure must be compatible with species</li>
                  <li>The type of measurement must be compatible with total, small and big fish weights</li></ul>"),
-          table_ui(id = "check_distribution", title = "Distribution +10/-10", text = "<ul><li>Sample must have -10/+10 distribution values consistent with those of the reported well</li></ul>")
+          table_ui(id = "check_distribution", title = "Distribution +10/-10", text = "<ul><li>Sample must have -10/+10 distribution values consistent with those of the reported well</li></ul>"),
+          table_ui(id = "check_sample_harbour", title = "Sample harbour", text = "<ul><li>Samples must have a harbour of landing</li></ul>")
         )
       ),
       shinydashboard::tabItem(

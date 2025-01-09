@@ -17,6 +17,8 @@ SELECT
     trip.harbour_id_departure::text AS harbour_id_departure,
     trip.harbour_label_departure::text AS harbour_label_departure,
     trip.harbour_position_departure::text AS harbour_position_departure,
+    trip.harbour_id_landing::text AS harbour_id_landing,
+    trip.harbour_label_landing::text AS harbour_label_landing,
     trip.harbour_position_landing::text AS harbour_position_landing
 FROM (
 	SELECT 
@@ -35,6 +37,8 @@ FROM (
         hd.topiaid::text AS harbour_id_departure,
         hd.label1::text AS harbour_label_departure,
         st_asText(hd.the_geom)::text AS harbour_position_departure,
+        hl.topiaid::text AS harbour_id_landing,
+        hl.label1::text AS harbour_label_landing,
         st_asText(hl.the_geom)::text AS harbour_position_landing,
 		max(trip_previous_tmp.enddate) AS trip_previous_enddate
 	FROM 
