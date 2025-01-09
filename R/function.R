@@ -856,6 +856,7 @@ check_harbour_inspector <- function(dataframe1,
   harbour_label_landing_trip_previous <- NULL
   harbour_id_departure <- NULL
   harbour_id_landing_trip_previous <- NULL
+  trip_previous_id <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -2494,23 +2495,14 @@ check_weighting_sample_inspector <- function(dataframe1,
                                       speciesfate = "6",
                                       epsilon = 0.01) {
   # 0 - Global variables assignement ----
-  sample_id <- NULL
-  sample_smallsweight <- NULL
-  sample_bigsweight <- NULL
-  sample_totalweight <- NULL
-  weight_calculation <- NULL
   sampleactivity_weightedweight <- NULL
-  trip_id <- NULL
-  weightcategory_code <- NULL
-  landing_weight <- NULL
   weightedweight <- NULL
-  sum_landing_weight <- NULL
   weight <- NULL
-  vesseltype_code <- NULL
-  weightedweight_bis <- NULL
-  sum_landing_weight_bis <- NULL
-  sampletype_code <- NULL
-  vesseltype_label <- NULL
+  activity_id <- NULL
+  species_fao_code <- NULL
+  speciesfate_code <- NULL
+  catch_weight <- NULL
+  difference <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -3570,6 +3562,8 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   count_subsamplenumber_0_bis <- NULL
   count_subsamplenumber_1_bis <- NULL
   sample_supersample <- NULL
+  count_subsamplenumber <- NULL
+  count_subsamplenumber_bis <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -3718,6 +3712,8 @@ check_well_number_consistent_inspector <- function(dataframe1,
   # 0 - Global variables assignement ----
   trip_id <- NULL
   sample_well <- NULL
+  well_id <- NULL
+  vesseltype_code <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -5636,9 +5632,9 @@ check_anapo_inspector <- function(dataframe1,
       dplyr::filter(!logical & !is.na(activity_position)) %>%
       dplyr::select(vms_position, activity_position) %>%
       dplyr::distinct() %>%
-      dplyr::mutate(pair_position = paste0(activity_position,"_", vms_position))
-  pair_position <-merge(pair_position, dataframe_vms_geo, by ="vms_position", all.x = TRUE)
-  pair_position <-merge(pair_position, dataframe_activity_geo, by ="activity_position", all.x = TRUE)
+      dplyr::mutate(pair_position = paste0(activity_position, "_", vms_position))
+  pair_position <- merge(pair_position, dataframe_vms_geo, by = "vms_position", all.x = TRUE)
+  pair_position <- merge(pair_position, dataframe_activity_geo, by = "activity_position", all.x = TRUE)
   # Calculation of the minimum distance between the activity and the nearest day's VMS in nautical mile
   # Define nautical miles
   units::install_unit("NM", "1852 m", "Nautical mile")
@@ -5665,7 +5661,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe1[!is.na(dataframe1$min_distance) & dataframe1$min_distance < threshold, "logical"] <- TRUE
   dataframe_calcul <- dataframe3 %>%
     dplyr::filter(!logical & !is.na(activity_position)) %>%
-    subset(select=-c(logical)) %>%
+    subset(select = -c(logical)) %>%
     dplyr::filter(min_distance >= threshold)
   # Gives a temporary hour for activities that are missing an hour
   dataframe_calcul$activity_time_bis <- dataframe_calcul$activity_time
@@ -5693,7 +5689,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe1[dataframe1$nb_vms_bis < minimum_number_vms, "logical"] <- FALSE
   # Recovers all activity positions for the detailed table
   # Data with calcul VMS
-  dataframe_detail <- dplyr::bind_rows(dataframe_calcul, dplyr::anti_join(subset(dataframe3, select=-c(logical)), dataframe_calcul, by = c("activity_id", "activity_date", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position")))
+  dataframe_detail <- dplyr::bind_rows(dataframe_calcul, dplyr::anti_join(subset(dataframe3, select = -c(logical)), dataframe_calcul, by = c("activity_id", "activity_date", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position")))
   dataframe_detail <- dplyr::bind_rows(dataframe_detail, dplyr::anti_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position")], dataframe3, by = c("activity_date" = "activity_date", "vessel_code" = "vessel_code")))
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, harbour_position_departure, harbour_position_landing, logical_harbourdeparture, logical_harbourlanding, nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
@@ -5877,7 +5873,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     count_subsamplenumber_n0 <- NULL
     count_subsamplenumber_0 <- NULL
     count_subsamplenumber_1 <- NULL
-    count_samplespecies <- NULL
     sample_well <- NULL
     sample_smallsweight <- NULL
     sample_bigsweight <- NULL
@@ -5916,6 +5911,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     fpazone_code <- NULL
     fpazone_country_iso3 <- NULL
     harbour_label_landing <- NULL
+    wellcontentstatus_landing_label <- NULL
+    ocean_calculate <- NULL
+    weight <- NULL
+    count_subsamplenumber <- NULL
     # 1 - Data extraction ----
     reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
@@ -6243,7 +6242,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check raising factor inspector", sep = "")
           check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_full_trip, dataframe3 = data_landing_full_trip, dataframe4 = data_full_trip, output = "report")
           # Uses a function to format the table
-          check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select()[,], type_inconsistency = "info")
+          check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select()[, ], type_inconsistency = "info")
           check_raising_factor$rf1 <- trunc(check_raising_factor$rf1 * 100000) / 100000
           # Modify the table for display purposes: rename column
           check_raising_factor <- dplyr::rename(
@@ -6634,7 +6633,7 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
           data <- data[data$Check != as.character(icon("check")), ]
         }
         # If data is empty
-        if(ncol(data) == 0){
+        if (ncol(data) == 0) {
           column_no_wrap <- NULL
         }
         data <- DT::datatable(data,
@@ -6694,6 +6693,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   species_fao_code <- NULL
   sizemeasuretype_code <- NULL
   samplespeciesmeasure_sizeclass <- NULL
+  samplespecies_subsamplenumber <- NULL
   # Retrieves the name of the column containing the ID
   colname_id <- grep("_id$", colnames(data), value = TRUE)
   # Deletes duplicate columns
@@ -6773,7 +6773,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
 # Function to create a data.frame in character
 data_to_text <- function(name_data, name_col, name_button, colname_id, colname_plot, colname_info) {
   code_txt <- paste0(name_data, " <-", name_data, "%>%dplyr::group_by(", colname_id, ") %>%
-            dplyr::reframe(", name_col, " = paste0(", name_button, ",paste0(deparse(dplyr::across(.cols=c(", paste0(colname_plot, collapse = ","), '))), collapse = "")', ifelse(is.null(colname_info), "", paste0(',"&",', paste0("unique(", colname_info ,")", collapse = ', "&",'))), "))")
+            dplyr::reframe(", name_col, " = paste0(", name_button, ",paste0(deparse(dplyr::across(.cols=c(", paste0(colname_plot, collapse = ","), '))), collapse = "")', ifelse(is.null(colname_info), "", paste0(',"&",', paste0("unique(", colname_info, ")", collapse = ', "&",'))), "))")
   return(code_txt)
 }
 
@@ -6855,14 +6855,14 @@ plot_position <- function(data) {
   # Local binding global variables
   . <- NULL
   # Spatial formatting
-  if(!is.na(data$activity_position)){
+  if (!is.na(data$activity_position)) {
     data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
     # Plot
     plotly::plot_ly(
       data = data_geo, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>"
     ) %>%
       plotly::layout(showlegend = FALSE, mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
-  }else{
+  }else {
     # Plot
     plotly::plot_ly(type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>") %>%
       plotly::layout(showlegend = FALSE, mapbox = list(style = "carto-positron"))

@@ -131,10 +131,10 @@ app_server <- function(input, output, session) {
     activity_date <- split_id[6]
     # Spatial formatting
     data <- eval(parse(text = split_id[[2]]))
-    if(!is.na(data$activity_position)){
+    if (!is.na(data$activity_position)) {
       data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
-    }else{
-      data_geo <- data.frame(Y= c(), X = c())
+    }else {
+      data_geo <- data.frame(Y = c(), X = c())
     }
     # Non-breaking hyphen (-)
     enddate <- gsub("-", "&#8209;", enddate)
@@ -300,10 +300,10 @@ app_server <- function(input, output, session) {
     activity_data <- eval(parse(text = data_all_click[[5]]))
     activity_crs <- data_all_click[[3]]
     # Spatial formatting
-    if(!is.na(activity_data$activity_position)){
+    if (!is.na(activity_data$activity_position)) {
       data_geo <- sf::st_as_sf(activity_data, wkt = "activity_position", crs = activity_crs) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
-    }else{
-      data_geo <- data.frame(Y= c(), X = c())
+    }else {
+      data_geo <- data.frame(Y = c(), X = c())
     }
     # Non-breaking hyphen (-)
     enddate <- gsub("-", "&#8209;", activity_data[1, "trip_enddate", drop = TRUE])
