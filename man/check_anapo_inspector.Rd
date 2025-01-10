@@ -13,7 +13,8 @@ check_anapo_inspector(
   vms_crs = 4326,
   output,
   minimum_number_vms = 20,
-  threshold = 10,
+  threshold_geographical = 10,
+  threshold_time = 7200000,
   buffer_harbour = 11100
 )
 }
@@ -34,7 +35,9 @@ check_anapo_inspector(
 
 \item{minimum_number_vms}{{\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.}
 
-\item{threshold}{{\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.}
+\item{threshold_geographical}{{\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.}
+
+\item{threshold_time}{{\link[base]{numeric}} expected. Default values: 7200000. Maximum valid distance threshold (milliseconds) between position and nearest VMS point.}
 
 \item{buffer_harbour}{{\link[base]{numeric}} expected. Default values: 11100. Buffer to be used for harbour, in meter}
 }

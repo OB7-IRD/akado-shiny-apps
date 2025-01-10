@@ -5333,7 +5333,8 @@ check_sample_harbour_inspector <- function(dataframe1,
 #' @param vms_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position VMS
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param minimum_number_vms {\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.
-#' @param threshold {\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.
+#' @param threshold_geographical {\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.
+#' @param threshold_time {\link[base]{numeric}} expected. Default values: 7200000. Maximum valid distance threshold (milliseconds) between position and nearest VMS point.
 #' @param buffer_harbour {\link[base]{numeric}} expected. Default values: 11100. Buffer to be used for harbour, in meter
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -5365,7 +5366,8 @@ check_anapo_inspector <- function(dataframe1,
                                   vms_crs = 4326,
                                   output,
                                   minimum_number_vms = 20,
-                                  threshold = 10,
+                                  threshold_geographical = 10,
+                                  threshold_time = 7200000,
                                   buffer_harbour = 11100) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
@@ -5463,6 +5465,19 @@ check_anapo_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
+    r_object = harbour_crs,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = harbour_crs,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
     r_object = vms_crs,
     type = "numeric",
     length = 1L,
@@ -5503,13 +5518,26 @@ check_anapo_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = threshold,
+    r_object = threshold_geographical,
     type = "numeric",
     length = 1L,
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = threshold,
+      r_object = threshold_geographical,
+      type = "numeric",
+      length = 1L,
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = threshold_time,
+    type = "numeric",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = threshold_time,
       type = "numeric",
       length = 1L,
       output = "message"
@@ -5638,7 +5666,7 @@ check_anapo_inspector <- function(dataframe1,
   # Calculation of the minimum distance between the activity and the nearest day's VMS in nautical mile
   # Define nautical miles
   units::install_unit("NM", "1852 m", "Nautical mile")
-  threshold <- units::set_units(threshold, NM)
+  threshold_geographical <- units::set_units(threshold_geographical, NM)
   pair_position <- pair_position %>%
       dplyr::mutate(distance = sf::st_distance(x = activity_position_geometry, y = vms_position_geometry, by_element = TRUE))
   units(pair_position$distance) <- units::make_units(NM)
@@ -5658,11 +5686,11 @@ check_anapo_inspector <- function(dataframe1,
     dplyr::distinct()
   dataframe1 <- merge(dataframe1, dataframe_calcul_min, by = "activity_id", all.x = TRUE)
   # Check if distance between activity and nearest VMS point below threshold
-  dataframe1[!is.na(dataframe1$min_distance) & dataframe1$min_distance < threshold, "logical"] <- TRUE
+  dataframe1[!is.na(dataframe1$min_distance) & dataframe1$min_distance < threshold_geographical, "logical"] <- TRUE
   dataframe_calcul <- dataframe3 %>%
     dplyr::filter(!logical & !is.na(activity_position)) %>%
     subset(select = -c(logical)) %>%
-    dplyr::filter(min_distance >= threshold)
+    dplyr::filter(min_distance >= threshold_geographical)
   # Gives a temporary hour for activities that are missing an hour
   dataframe_calcul$activity_time_bis <- dataframe_calcul$activity_time
   dataframe_calcul[is.na(dataframe_calcul$activity_time), "activity_time_bis"] <- "00:00:00"
@@ -5676,9 +5704,9 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_calcul[is.na(dataframe_calcul$activity_time), "duration"] <- units::set_units(1, ms)
   # Score calculation
   dataframe_calcul <- dataframe_calcul %>%
-    dplyr::mutate(score = (2^(units::drop_units(-distance / threshold))) * (2^(-units::drop_units(duration) / (2 * 60 * 60 * 1000))))
-  dataframe_calcul[dataframe_calcul$distance > threshold * 2, "score"] <- 0
-  dataframe_calcul[as.numeric(dataframe_calcul$duration) > (4 * 60 * 60 * 1000), "score"] <- 0
+    dplyr::mutate(score = (2^(units::drop_units(-distance / threshold_geographical))) * (2^(-units::drop_units(duration) / threshold_time)))
+  dataframe_calcul[dataframe_calcul$distance > threshold_geographical * 2, "score"] <- 0
+  dataframe_calcul[as.numeric(dataframe_calcul$duration) > threshold_time * 2, "score"] <- 0
   dataframe_score_max <- dataframe_calcul %>%
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(max_score = ifelse(length(score) > 0, max(score), -Inf))
