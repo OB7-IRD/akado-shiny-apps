@@ -204,7 +204,7 @@ check_fishing_time_inspector <- function(dataframe1,
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_route_fishingtime = ifelse(all(is.na(route_fishingtime)), route_fishingtime[NA_integer_], sum(route_fishingtime, na.rm = TRUE)))
   # Group the pair to compare
-  dataframe1 <- merge(dataframe1, dataframe2, by = "trip_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   # Compare fishing time of the trip or the sum of the route
   comparison <- codama::vector_comparison(
     first_vector = dataframe1$trip_fishingtime,
@@ -338,7 +338,7 @@ check_sea_time_inspector <- function(dataframe1,
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_route_seatime = ifelse(all(is.na(route_seatime)), route_seatime[NA_integer_], sum(route_seatime, na.rm = TRUE)))
   # Group the pair to compare
-  dataframe1 <- merge(dataframe1, dataframe2, by = "trip_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   # Compare trip IDs and sea time of the trip or the sum of the route
   comparison <- codama::vector_comparison(
     first_vector = dataframe1$trip_seatime,
@@ -603,7 +603,7 @@ check_landing_total_weight_inspector <- function(dataframe1,
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_weightlanding = ifelse(all(is.na(landing_weight)), landing_weight[NA_integer_], sum(landing_weight, na.rm = TRUE)))
   # Merge and calcul difference
-  dataframe1 <- merge(dataframe1, dataframe2, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   dataframe1$difference <- ifelse(is.na(dataframe1$trip_landingtotalweight), 0, dataframe1$trip_landingtotalweight) - ifelse(is.na(dataframe1$sum_weightlanding), 0, dataframe1$sum_weightlanding)
   dataframe1$difference <- abs(dataframe1$difference)
   dataframe1$epsilon <- epsilon
@@ -745,7 +745,7 @@ check_temporal_limit_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Merge date
-  dataframe1 <- merge(dataframe1, dataframe2, by = "trip_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   # Calculate the temporal indicator per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   trip_date_activity_data_detail <- dataframe1
   # Calculation if the date is in the interval of the beginning of the trip and the end of the trip
@@ -1147,7 +1147,7 @@ check_raising_factor_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Add country_fleetcountry for catch
-  dataframe2 <- merge(dataframe2, unique(dataframe4[, c("trip_id", "country_fleetcountry")]), by = "trip_id", all.x = TRUE)
+  dataframe2 <- dplyr::left_join(dataframe2, unique(dataframe4[, c("trip_id", "country_fleetcountry")]), by = dplyr::join_by(trip_id))
   # Catch filtration for RF1
   ## Selection species when the list is available for the country and selection species
   condition <- as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species))))))
@@ -1166,9 +1166,9 @@ check_raising_factor_inspector <- function(dataframe1,
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
   # Merge data
-  dataframe4 <- merge(dataframe4, dataframe2, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  dataframe4 <- dplyr::left_join(dataframe4, dataframe2, by = dplyr::join_by(trip_id))
   # Add country_fleetcountry for landing
-  dataframe3 <- merge(dataframe3, unique(dataframe4[, c("trip_id", "country_fleetcountry")]), by = "trip_id", all.x = TRUE)
+  dataframe3 <- dplyr::left_join(dataframe3, unique(dataframe4[, c("trip_id", "country_fleetcountry")]), by = dplyr::join_by(trip_id))
   # Landing filtration for RF1
   ## Selection species when the list is available for the country and selection species fate
   condition <- as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species))))))
@@ -1181,7 +1181,7 @@ check_raising_factor_inspector <- function(dataframe1,
     dplyr::group_by(trip_id) %>%
     dplyr::summarise(sum_landing_weight = ifelse(all(is.na(landing_weight)), landing_weight[NA_integer_], sum(landing_weight, na.rm = TRUE)))
   # Merge data
-  dataframe4 <- merge(dataframe4, dataframe3, by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  dataframe4 <- dplyr::left_join(dataframe4, dataframe3, by = dplyr::join_by(trip_id))
   # Add of a logic that indicates whether the full trip is finished or not
   dataframe4$logical_full_trip <- !is.na(dataframe4$trip_end_full_trip_id)
   # For unfinished full trips (no end-of-full-trip id) indicates the vessel id for the end-of-full-trip id (for each ship, allows you to group together all the trips of the non-finished full trip)
@@ -1193,9 +1193,9 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe4$lower_threshold <- threshold[1]
   dataframe4$upper_threshold <- threshold[2]
   # Selection of user-supplied trips
-  dataframe4 <- merge(data.frame(trip_id = dataframe1$trip_id), unique(dataframe4), by.x = "trip_id", by.y = "trip_id", all.x = TRUE)
+  dataframe4 <- dplyr::left_join(data.frame(trip_id = dataframe1$trip_id), unique(dataframe4), by = dplyr::join_by(trip_id))
   # Merge data
-  dataframe4 <- merge(dataframe4, full_trip_id_data_rf1, by.x = "trip_end_full_trip_id", by.y = "trip_end_full_trip_id", all.x = TRUE)
+  dataframe4 <- dplyr::left_join(dataframe4, full_trip_id_data_rf1, by = dplyr::join_by(trip_end_full_trip_id))
   # Compare RF1 to valid threshold
   comparison_less <- codama::vector_comparison(
     first_vector = dataframe4$rf1,
@@ -1353,7 +1353,7 @@ check_fishing_context_inspector <- function(dataframe1,
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(association_object_count = dplyr::n())
   # Merge
-  dataframe1 <- merge(dataframe1, dataframe2, all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(activity_id))
   dataframe1$threshold <- 0
   dataframe1$association_object_count[is.na(dataframe1$association_object_count)] <- 0
   # Indicates whether or not an object-type association exists
@@ -1605,6 +1605,7 @@ check_position_inspector <- function(dataframe1,
   logical_harbourlanding <- NULL
   ocean_calculate <- NULL
   trip_id <- NULL
+  activity_id <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -1735,7 +1736,7 @@ check_position_inspector <- function(dataframe1,
   select <- dataframe1$activity_id
   nrow_first <- length(select)
   # 2 - Data design ----
-  dataframe1 <- merge(dataframe1, dataframe2, by = "trip_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   # Indicates whether in land harbour
   dataframe1$logical_harbour <- FALSE
   # Formats spatial data activity
@@ -1764,7 +1765,7 @@ check_position_inspector <- function(dataframe1,
     data_geo_activity_harbourdeparture$nb_port_intersect[unlist(intersect_harbourdeparture_index)] <- unlist(intersect_harbourdeparture)
     data_geo_activity_harbourdeparture$logical_harbourdeparture <- data_geo_activity_harbourdeparture$nb_port_intersect != 0
     # Logical harbourdeparture
-    dataframe1 <- merge(dataframe1, data.frame(data_geo_activity_harbourdeparture)[, c("activity_id", "logical_harbourdeparture")], by = "activity_id", all.x = TRUE)
+    dataframe1 <- dplyr::left_join(dataframe1, data.frame(data_geo_activity_harbourdeparture)[, c("activity_id", "logical_harbourdeparture")], by = dplyr::join_by(activity_id))
     dataframe1$logical_harbourdeparture[is.na(dataframe1$logical_harbourdeparture)] <- FALSE
   }else {
     dataframe1$logical_harbourdeparture <- FALSE
@@ -1790,7 +1791,7 @@ check_position_inspector <- function(dataframe1,
     data_geo_activity_harbourlanding$nb_port_intersect[unlist(intersect_harbourlanding_index)] <- unlist(intersect_harbourlanding)
     data_geo_activity_harbourlanding$logical_harbourlanding <- data_geo_activity_harbourlanding$nb_port_intersect != 0
     # Logical in harbourlanding
-    dataframe1 <- merge(dataframe1, data.frame(data_geo_activity_harbourlanding)[, c("activity_id", "logical_harbourlanding")], by = "activity_id", all.x = TRUE)
+    dataframe1 <- dplyr::left_join(dataframe1, data.frame(data_geo_activity_harbourlanding)[, c("activity_id", "logical_harbourlanding")], by = dplyr::join_by(activity_id))
     dataframe1$logical_harbourlanding[is.na(dataframe1$logical_harbourlanding)] <- FALSE
   }else {
     dataframe1$logical_harbourlanding <- FALSE
@@ -1820,7 +1821,7 @@ check_position_inspector <- function(dataframe1,
   data_geo_activity$ocean_calculate <- NA
   data_geo_activity$ocean_calculate[lengths(intersect_atlantic) != 0] <- "Atlantic"
   data_geo_activity$ocean_calculate[lengths(intersect_indian) != 0] <- "Indian"
-  dataframe1 <- merge(dataframe1, data.frame(data_geo_activity)[, c("activity_id", "logical_ocean", "ocean_calculate")], by = "activity_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, data.frame(data_geo_activity)[, c("activity_id", "logical_ocean", "ocean_calculate")], by = dplyr::join_by(activity_id))
   dataframe1$logical_ocean[is.na(dataframe1$logical_ocean)] <- FALSE
   # Case where the position is exactly on the boundary of the two oceans
   data_geo_activity$ocean_calculate[lengths(intersect_atlantic) != 0 & lengths(intersect_indian) != 0] <- data_geo_activity$ocean_label[lengths(intersect_atlantic) != 0 & lengths(intersect_indian) != 0]
@@ -1976,7 +1977,7 @@ check_weight_inspector <- function(dataframe1,
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(sum_catch_weight = ifelse(all(is.na(catch_weight)), catch_weight[NA_integer_], sum(catch_weight, na.rm = TRUE)))
   # Merge and calcul difference
-  dataframe1 <- merge(dataframe1, dataframe2, by = "activity_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(activity_id))
   dataframe1$difference <- ifelse(is.na(dataframe1$activity_weight), 0, dataframe1$activity_weight) - ifelse(is.na(dataframe1$sum_catch_weight), 0, dataframe1$sum_catch_weight)
   dataframe1$difference <- abs(dataframe1$difference)
   dataframe1$epsilon <- epsilon
@@ -2293,7 +2294,7 @@ check_measure_inspector <- function(dataframe1,
     dplyr::group_by(sample_id) %>%
     dplyr::summarise(sum_count = ifelse(all(is.na(samplespeciesmeasure_count)), samplespeciesmeasure_count[NA_integer_], sum(samplespeciesmeasure_count, na.rm = TRUE)))
   # Merge
-  dataframe1 <- merge(dataframe1, dataframe2, by.x = "sample_id", by.y = "sample_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(sample_id))
   # Compare the two sums
   comparison <- codama::vector_comparison(
     first_vector = dataframe1$sum_measuredcount,
@@ -2603,8 +2604,8 @@ check_weighting_sample_inspector <- function(dataframe1,
   dataframe1 <- dataframe1 %>%
       dplyr::select(activity_id) %>%
       dplyr::distinct()
-  dataframe1 <- merge(dataframe1, dataframe_weight_calculation, by = "activity_id", all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe2, by = "activity_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe_weight_calculation, by = dplyr::join_by(activity_id))
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(activity_id))
   # Calcul difference
   dataframe1$difference <- ifelse(is.na(dataframe1$weight), 0, dataframe1$weight) - ifelse(is.na(dataframe1$weightedweight), 0, dataframe1$weightedweight)
   dataframe1$difference <- abs(dataframe1$difference)
@@ -2887,8 +2888,8 @@ check_time_route_inspector <- function(dataframe1,
   # Sea time must be equal to or greater than fishing time
   dataframe1[!is.na(dataframe1$route_fishingtime) & dataframe1$route_fishingtime > 0 & !is.na(dataframe1$route_seatime) & dataframe1$route_seatime < dataframe1$route_fishingtime, "logical"] <- FALSE
   # Merge
-  data_route_activity_objectoperation <- merge(dataframe1, dataframe2, by = "route_id", all.x = TRUE)
-  data_route_activity_objectoperation <- merge(data_route_activity_objectoperation, dataframe3, by = "activity_id", all.x = TRUE)
+  data_route_activity_objectoperation <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(route_id))
+  data_route_activity_objectoperation <- dplyr::left_join(data_route_activity_objectoperation, dataframe3, by = dplyr::join_by(activity_id))
   # Sea time category conditions
   condition_seatime <- as.list(as.data.frame(t(data.frame(vesselactivity_seatime, objectoperation_seatime))))
   # Selection of activities that must have sea time
@@ -2903,7 +2904,7 @@ check_time_route_inspector <- function(dataframe1,
   # Time at sea per route are correct
   activity_seatime[!is.na(activity_seatime$route_seatime) & activity_seatime$route_seatime > 0, "logical_activity_seatime"] <- TRUE
   # Merge
-  dataframe1 <- merge(dataframe1, activity_seatime, by = c("route_id", "route_seatime"), all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, activity_seatime, by = dplyr::join_by(route_id, route_seatime))
   dataframe1[is.na(dataframe1$nb_activity_must_seatime), "nb_activity_must_seatime"] <- 0
   dataframe1[is.na(dataframe1$logical_activity_seatime), "logical_activity_seatime"] <- TRUE
   # Fishing time time category conditions
@@ -2920,7 +2921,7 @@ check_time_route_inspector <- function(dataframe1,
   # Fishing time per route are correct
   activity_fishingtime[!is.na(activity_fishingtime$route_fishingtime) & activity_fishingtime$route_fishingtime > 0, "logical_activity_fishingtime"] <- TRUE
   # Merge
-  dataframe1 <- merge(dataframe1, activity_fishingtime, by = c("route_id", "route_fishingtime"), all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, activity_fishingtime, by = dplyr::join_by(route_id, route_fishingtime))
   dataframe1[is.na(dataframe1$nb_activity_must_fishingtime), "nb_activity_must_fishingtime"] <- 0
   dataframe1[is.na(dataframe1$logical_activity_fishingtime), "logical_activity_fishingtime"] <- TRUE
   dataframe1$logical <- dataframe1$logical & dataframe1$logical_activity_seatime & dataframe1$logical_activity_fishingtime
@@ -3111,7 +3112,7 @@ check_eez_inspector <- function(dataframe1,
       dplyr::group_by(activity_id) %>%
       dplyr::summarise(logical_eez = sum(c(fpazone_code, fpazone_country_iso3) %in% c(ISO_TER1, ISO_TER2, ISO_TER3)) > 0)
     # Merge
-    dataframe1 <- merge(dataframe1, intersect_eez, by = "activity_id", all.x = TRUE)
+    dataframe1 <- dplyr::left_join(dataframe1, intersect_eez, by = dplyr::join_by(activity_id))
   }else {
     dataframe1$logical_eez <- NA
   }
@@ -3622,7 +3623,7 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
     dplyr::summarise(count_subsamplenumber_n0 = sum(samplespecies_subsamplenumber != 0), count_subsamplenumber_0 = sum(samplespecies_subsamplenumber == 0), count_samplespecies = sum(!is.na(unique(samplespecies_id))), count_subsamplenumber = sum(!is.na(unique(samplespecies_subsamplenumber))), count_subsamplenumber_1 = sum(samplespecies_subsamplenumber == 1))
   # Merge
   dataframe1$logical <- TRUE
-  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(sample_id))
   # Case of NA count_subsamplenumber_n0, count_subsamplenumber_0, count_samplespecies or count_subsamplenumber_1
   dataframe1 <- dataframe1 %>%
     dplyr::mutate(
@@ -3714,6 +3715,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
   sample_well <- NULL
   well_id <- NULL
   vesseltype_code <- NULL
+  well_label <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -3796,8 +3798,8 @@ check_well_number_consistent_inspector <- function(dataframe1,
   # 2 - Data design ----
   # Merge
   dataframe2$logical <- TRUE
-  dataframe1 <- merge(dataframe1, dataframe2, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_label"), all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe3, by = c("trip_id"), all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id == trip_id, sample_well == well_label))
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe3, by = dplyr::join_by(trip_id))
   # Search well not link
   dataframe1[is.na(dataframe1$logical), "logical"] <- FALSE
   # Case the well number is empty
@@ -3903,6 +3905,7 @@ check_little_big_inspector <- function(dataframe1,
   big_percentage <- NULL
   measure1_percentage <- NULL
   measure2_percentage <- NULL
+  samplespecies_id <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -4040,8 +4043,8 @@ check_little_big_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Merge
-  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe3, by = "samplespecies_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(sample_id))
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe3, by = dplyr::join_by(samplespecies_id))
   # Calculate the number of the measure per sample (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   total_count <- dataframe1 %>%
     dplyr::group_by(sample_id, sample_smallsweight, sample_bigsweight, sample_totalweight) %>%
@@ -4078,10 +4081,10 @@ check_little_big_inspector <- function(dataframe1,
     dplyr::filter(sizemeasuretype_code == size_measure_type[2]) %>%
     dplyr::summarise(measure2 = ifelse(all(is.na(samplespeciesmeasure_count)), 0, sum(samplespeciesmeasure_count, na.rm = TRUE)))
   # Merge
-  total_count <- merge(total_count, little, by = "sample_id", all.x = TRUE)
-  total_count <- merge(total_count, big, by = "sample_id", all.x = TRUE)
-  total_count <- merge(total_count, measure1, by = "sample_id", all.x = TRUE)
-  total_count <- merge(total_count, measure2, by = "sample_id", all.x = TRUE)
+  total_count <- dplyr::left_join(total_count, little, by = dplyr::join_by(sample_id))
+  total_count <- dplyr::left_join(total_count, big, by = dplyr::join_by(sample_id))
+  total_count <- dplyr::left_join(total_count, measure1, by = dplyr::join_by(sample_id))
+  total_count <- dplyr::left_join(total_count, measure2, by = dplyr::join_by(sample_id))
   # Calculates percentages
   total_count <- total_count %>%
     dplyr::mutate(little_percentage = little / total_count, big_percentage = big / total_count, measure1_percentage = measure1 / total_count, measure2_percentage = measure2 / total_count)
@@ -4391,9 +4394,9 @@ check_weighting_inspector <- function(dataframe1,
     dplyr::summarise(sum_landing_weight = ifelse(all(is.na(landing_weight)), 0, sum(landing_weight, na.rm = TRUE)))
   # Merge
   dataframe1$logical <- TRUE
-  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe3, by = "trip_id", all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe4, by = "trip_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(sample_id))
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe3, by = dplyr::join_by(trip_id))
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe4, by = dplyr::join_by(trip_id))
   # Case of NA weightedweight or sum_landing_weight
   dataframe1 <- dataframe1 %>%
     dplyr::mutate(
@@ -4848,7 +4851,7 @@ check_ldlf_inspector <- function(dataframe1,
   )
   dataframe1$logical_species <- !(comparison_species$logical & comparison_size_measure_type_species$logical)
   # Merge
-  dataframe1 <- merge(dataframe1, dataframe2, by = "sample_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(sample_id))
   # Check bigs weight and measuretype
   comparison_size_measure_type_big <- codama::vector_comparison(
     first_vector = dataframe1$sizemeasuretype_code,
@@ -4974,6 +4977,7 @@ check_distribution_inspector <- function(dataframe1,
   weight_small_total_bis <- NULL
   weight_big_bis <- NULL
   sample_well <- NULL
+  wellactivity_id <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -5105,8 +5109,8 @@ check_distribution_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Merge
-  dataframe2 <- merge(dataframe2, dataframe3, by = "well_id", all.x = TRUE)
-  dataframe2 <- merge(dataframe2, dataframe4, by = "wellactivity_id", all.x = TRUE)
+  dataframe2 <- dplyr::left_join(dataframe2, dataframe3, by = dplyr::join_by(well_id))
+  dataframe2 <- dplyr::left_join(dataframe2, dataframe4, by = dplyr::join_by(wellactivity_id))
   # Calculation small weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2_small <- dataframe2 %>%
     dplyr::group_by(well_id, trip_id, well_label) %>%
@@ -5125,9 +5129,9 @@ check_distribution_inspector <- function(dataframe1,
     dplyr::reframe(weight_big = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   # Merge
-  dataframe1 <- merge(dataframe1, dataframe2_small, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_label"), all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe2_small_unknown, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_label"), all.x = TRUE)
-  dataframe1 <- merge(dataframe1, dataframe2_big, by.x = c("trip_id", "sample_well"), by.y = c("trip_id", "well_label"), all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2_small, by = dplyr::join_by(trip_id == trip_id, sample_well == well_label))
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2_small_unknown, by = dplyr::join_by(trip_id == trip_id, sample_well == well_label))
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2_big, by = dplyr::join_by(trip_id == trip_id, sample_well == well_label))
   # Calculation small weight total (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe1 <- dataframe1 %>%
     dplyr::group_by(sample_id) %>%
@@ -5276,7 +5280,7 @@ check_sample_harbour_inspector <- function(dataframe1,
   select <- dataframe1$sample_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
-  dataframe1 <- merge(dataframe1, dataframe2, by = "trip_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   dataframe1$logical <- TRUE
   # Check if missing harbour
   dataframe1[is.na(dataframe1$harbour_id_landing), "logical"] <- FALSE
@@ -5560,7 +5564,7 @@ check_anapo_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Indicates activity whether in harbour
-  dataframe1 <- merge(dataframe1, dataframe2, by = "trip_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   # Indicates whether in land harbour
   dataframe1$logical <- FALSE
   # Formats spatial data activity
@@ -5590,7 +5594,7 @@ check_anapo_inspector <- function(dataframe1,
     dataframe_activity_geo_harbourdeparture$nb_port_intersect[unlist(intersect_harbourdeparture_index)] <- unlist(intersect_harbourdeparture)
     dataframe_activity_geo_harbourdeparture$logical_harbourdeparture <- dataframe_activity_geo_harbourdeparture$nb_port_intersect != 0
     # Logical harbourdeparture
-    dataframe1 <- merge(dataframe1, data.frame(dataframe_activity_geo_harbourdeparture)[, c("activity_id", "logical_harbourdeparture")], by = "activity_id", all.x = TRUE)
+    dataframe1 <- dplyr::left_join(dataframe1, data.frame(dataframe_activity_geo_harbourdeparture)[, c("activity_id", "logical_harbourdeparture")], by = dplyr::join_by(activity_id))
     dataframe1$logical_harbourdeparture[is.na(dataframe1$logical_harbourdeparture)] <- FALSE
   }else {
     dataframe1$logical_harbourdeparture <- FALSE
@@ -5616,7 +5620,7 @@ check_anapo_inspector <- function(dataframe1,
     dataframe_activity_geo_harbourlanding$nb_port_intersect[unlist(intersect_harbourlanding_index)] <- unlist(intersect_harbourlanding)
     dataframe_activity_geo_harbourlanding$logical_harbourlanding <- dataframe_activity_geo_harbourlanding$nb_port_intersect != 0
     # Logical in harbourlanding
-    dataframe1 <- merge(dataframe1, data.frame(dataframe_activity_geo_harbourlanding)[, c("activity_id", "logical_harbourlanding")], by = "activity_id", all.x = TRUE)
+    dataframe1 <- dplyr::left_join(dataframe1, data.frame(dataframe_activity_geo_harbourlanding)[, c("activity_id", "logical_harbourlanding")], by = dplyr::join_by(activity_id))
     dataframe1$logical_harbourlanding[is.na(dataframe1$logical_harbourlanding)] <- FALSE
   }else {
     dataframe1$logical_harbourlanding <- FALSE
@@ -5630,7 +5634,7 @@ check_anapo_inspector <- function(dataframe1,
     dplyr::group_by(vms_date, vessel_code) %>%
     dplyr::summarise(nb_vms = dplyr::n(), .groups = "keep")
   # Merge
-  dataframe1 <- merge(dataframe1, dataframe3_nb_vms, by.x = c("activity_date", "vessel_code"), by.y = c("vms_date", "vessel_code"), all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe3_nb_vms, by = dplyr::join_by(activity_date == vms_date, vessel_code == vessel_code))
   # Case of NA nb_vms
   dataframe1 <- dataframe1 %>%
     dplyr::mutate(
@@ -5643,7 +5647,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe3 <- rbind(dataframe3, dataframe3_prior, dataframe3_post) %>%
     dplyr::group_by(date_group, vms_position) %>%
     dplyr::distinct()
-  dataframe3 <- merge(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position", "logical")], dataframe3, by.x = c("activity_date", "vessel_code"), by.y = c("date_group", "vessel_code"))
+  dataframe3 <- dplyr::inner_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position", "logical")], dataframe3, by = dplyr::join_by(activity_date == date_group, vessel_code == vessel_code))
   # Formats spatial data vms
    dataframe_vms_geo <- dataframe3 %>%
       dplyr::filter(!logical & !is.na(activity_position)) %>%
@@ -5661,8 +5665,8 @@ check_anapo_inspector <- function(dataframe1,
       dplyr::select(vms_position, activity_position) %>%
       dplyr::distinct() %>%
       dplyr::mutate(pair_position = paste0(activity_position, "_", vms_position))
-  pair_position <- merge(pair_position, dataframe_vms_geo, by = "vms_position", all.x = TRUE)
-  pair_position <- merge(pair_position, dataframe_activity_geo, by = "activity_position", all.x = TRUE)
+  pair_position <- dplyr::left_join(pair_position, dataframe_vms_geo, by = dplyr::join_by(vms_position))
+  pair_position <- dplyr::left_join(pair_position, dataframe_activity_geo, by = dplyr::join_by(activity_position))
   # Calculation of the minimum distance between the activity and the nearest day's VMS in nautical mile
   # Define nautical miles
   units::install_unit("NM", "1852 m", "Nautical mile")
@@ -5674,7 +5678,7 @@ check_anapo_inspector <- function(dataframe1,
   pair_position <- pair_position %>%
       sf::st_drop_geometry() %>%
       dplyr::select(-c(activity_position_geometry, vms_position_geometry))
-  dataframe3 <- merge(dataframe3, pair_position[, c("distance", "vms_position", "activity_position")], by = c("vms_position", "activity_position"), all.x = TRUE)
+  dataframe3 <- dplyr::left_join(dataframe3, pair_position[, c("distance", "vms_position", "activity_position")], by = dplyr::join_by(vms_position, activity_position))
   rm(pair_position)
   dataframe3 <- dataframe3 %>%
     dplyr::group_by(activity_id) %>%
@@ -5684,7 +5688,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_calcul_min <- dataframe3 %>%
     dplyr::select(activity_id, min_distance) %>%
     dplyr::distinct()
-  dataframe1 <- merge(dataframe1, dataframe_calcul_min, by = "activity_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe_calcul_min, by = dplyr::join_by(activity_id))
   # Check if distance between activity and nearest VMS point below threshold
   dataframe1[!is.na(dataframe1$min_distance) & dataframe1$min_distance < threshold_geographical, "logical"] <- TRUE
   dataframe_calcul <- dataframe3 %>%
@@ -5710,7 +5714,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_score_max <- dataframe_calcul %>%
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(max_score = ifelse(length(score) > 0, max(score), -Inf))
-  dataframe1 <- merge(dataframe1, dataframe_score_max, by = "activity_id", all.x = TRUE)
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe_score_max, by = dplyr::join_by(activity_id))
   # Check the maximum score between activity and VMS
   dataframe1[!is.na(dataframe1$max_score) & dataframe1$max_score >= 0.5, "logical"] <- TRUE
   # Check if the number of vms for the day exceeds the threshold
@@ -6531,10 +6535,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check anapo inspector", sep = "")
             # Recovers all trip positions
             check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_trip, dataframe3 = data_vms, activity_crs = ifelse(length(stats::na.omit(unique(activity_select$activity_crs))) == 0, 4326, stats::na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(data_vms$vms_crs))), output = "report")
-            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_data[[2]], activity_select[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = "activity_id")
+            check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_data[[2]], activity_select[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = dplyr::join_by(activity_id))
             # Add information on whether the activity is linked to a grounding (object or buoy) or not in data plot
             data_tmp_grounding <- column_grounding(data = check_anapo_inspector_dataplot, data_transmittingbuoy = data_transmittingbuoy)
-            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, data_tmp_grounding, by = "activity_id")
+            check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_dataplot, data_tmp_grounding, by = dplyr::join_by(activity_id))
             # Selecting useful data for the plot
             check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot %>%
               dplyr::select("trip_id", "activity_id", "activity_date", "activity_time", "activity_position", "activity_number", "vesselactivity_code", "activity_crs", "grounding") %>%
@@ -6543,7 +6547,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             # Add position information for activities n, n-1 and n+1 (not just related to grounding)
             check_anapo_inspector_data_table <- check_anapo_inspector_data[[1]]
             rm(check_anapo_inspector_data)
-            check_anapo_inspector_data_table <- merge(check_anapo_inspector_data_table, check_anapo_inspector_dataplot_trip[, c("trip_id", "activity_id", "activity_date", "activity_number", "grounding", "activity_position")], by = "activity_id")
+            check_anapo_inspector_data_table <- dplyr::inner_join(check_anapo_inspector_data_table, check_anapo_inspector_dataplot_trip[, c("trip_id", "activity_id", "activity_date", "activity_number", "grounding", "activity_position")], by = dplyr::join_by(activity_id))
             check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>% dplyr::mutate(activity_position_display = gsub("POINT\\(|\\)", "", activity_position))
             check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>%
               dplyr::mutate(activity_position_prior = replace(activity_position_display, grounding, NA)) %>%
@@ -6569,7 +6573,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo_inspector_dataplot_range_date <- rbind(check_anapo_inspector_dataplot_trip, check_anapo_inspector_dataplot_trip_prior, check_anapo_inspector_dataplot_trip_post) %>%
               dplyr::group_by(date_group, trip_id) %>%
               dplyr::distinct()
-            check_anapo_inspector_dataplot_range_date <- merge(check_anapo_inspector_dataplot_range_date, activity_select[, c("activity_date", "trip_id", "activity_id")], by.x = c("date_group", "trip_id"), by.y = c("activity_date", "trip_id"))
+            check_anapo_inspector_dataplot_range_date <- dplyr::inner_join(check_anapo_inspector_dataplot_range_date, activity_select[, c("activity_date", "trip_id", "activity_id")], by = dplyr::join_by(date_group == activity_date, trip_id == trip_id))
             check_anapo_inspector_dataplot_range_date <- check_anapo_inspector_dataplot_range_date %>%
               dplyr::group_by(date_group, trip_id, activity_id) %>%
               dplyr::distinct()
@@ -6582,8 +6586,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_activity", name_col = "activity_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
             eval(parse(text = code_txt))
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("vessel_code", "trip_enddate", "activity_number", "activity_time", "vesselactivity_code"))
-            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = "activity_id")
-            check_anapo_inspector_dataplot <- merge(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = "activity_id")
+            check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = dplyr::join_by(activity_id))
+            check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = dplyr::join_by(activity_id))
             check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
             code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot", name_col = "data_plot", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vms_position", "vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_data", "trip_data"))
             eval(parse(text = code_txt))
