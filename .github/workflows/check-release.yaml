@@ -26,4 +26,7 @@ jobs:
           extra-packages: any::rcmdcheck
           needs: check
 
+      - name: Create ~/.appconfig/akador directory
+        run: mkdir -p ~/.appconfig/akador
+        
       - uses: r-lib/actions/check-r-package@v2
