@@ -131,6 +131,10 @@ set_server_authentication <- function(path_file_configuration = file.path(path.e
     # Initialize variables to configure authentication
     names_argument <- c()
     value_argument <- list()
+    if (!is.null(file_configuration[["start_AkadoR_configuration"]][["secure_connection"]])) {
+      names_argument <- c(names_argument, "secure_connection")
+      value_argument <- append(value_argument, file_configuration[["start_AkadoR_configuration"]][["secure_connection"]])
+    }
     if (!is.null(file_configuration[["start_AkadoR_configuration"]][["path_database"]])) {
       names_argument <- c(names_argument, "path_database")
       value_argument <- append(value_argument, file_configuration[["start_AkadoR_configuration"]][["path_database"]])
@@ -151,11 +155,26 @@ set_server_authentication <- function(path_file_configuration = file.path(path.e
 #' @name server_authentication
 #' @title Authentication result for secure connection to AkadoR
 #' @description The purpose of the server_authentication function enables connection authentication
+#' @param secure_connection {\link[base]{logical}} expected. Default values: FALSE. If you wish to enable secure connection to the application, set TRUE
 #' @param path_database {\link[base]{character}} expected. Default values: file.path(path.expand("~"), ".appconfig", "akador", "database_connection.sqlite"). Path to file containing data base connection, default value adapts to different operating systems
 #' @param set_timeout {\link[base]{numeric}} expected. Default values: 60. Session expiry time (in minutes) before disconnection in standby mode if secure connection is enabled
 #' @export
-server_authentication <- function(path_database = file.path(path.expand("~"), ".appconfig", "akador", "database_connection.sqlite"), set_timeout = 60) {
+server_authentication <- function(secure_connection = FALSE, path_database = file.path(path.expand("~"), ".appconfig", "akador", "database_connection.sqlite"), set_timeout = 60) {
   # 1 - Arguments verification ----
+  # Checks the type of secure_connection
+  if (!codama::r_type_checking(
+    r_object = secure_connection,
+    type = "logical",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = secure_connection,
+      type = "logical",
+      length = 1L,
+      output = "message"
+    ))
+  }
   # Checks the type of path_database
   if (!codama::r_type_checking(
     r_object = path_database,
@@ -185,37 +204,39 @@ server_authentication <- function(path_database = file.path(path.expand("~"), ".
     ))
   }
   # 2 - main ----
-  if (!file.exists(path_database)) {
-    # Creation of a database by default, administrator must then modify password and user name
-    database_connection <- data.frame(
-      user = c("shiny", "shinymanager"),
-      password = c("azerty", "12345"),
-      admin = c(FALSE, TRUE)
-    )
-    # Path verification
-    if (file.exists(gsub(paste(basename(path_database), "$", sep = ""), "", path_database))) {
-      shinymanager::create_db(
-        credentials_data = database_connection,
-        sqlite_path = path_database
+  if(secure_connection){
+    if (!file.exists(path_database)) {
+      # Creation of a database by default, administrator must then modify password and user name
+      database_connection <- data.frame(
+        user = c("shiny", "shinymanager"),
+        password = c("azerty", "12345"),
+        admin = c(FALSE, TRUE)
       )
-    }else {
-      warning(
-        format(
-          x = Sys.time(),
-          format = "%Y-%m-%d %H:%M:%S"
-        ),
-        " cannot write data base ' ",
-        path_database, "' : No such directory",
-        sep = ""
-      )
+      # Path verification
+      if (file.exists(gsub(paste(basename(path_database), "$", sep = ""), "", path_database))) {
+        shinymanager::create_db(
+          credentials_data = database_connection,
+          sqlite_path = path_database
+        )
+      }else {
+        warning(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " cannot write data base ' ",
+          path_database, "' : No such directory",
+          sep = ""
+        )
+      }
     }
+   # Authentication result
+    call_check_credentials <- shinymanager::check_credentials(path_database)
+  # Server Authentication
+    call_secure_server <- shinymanager::secure_server(
+      check_credentials = call_check_credentials,
+      timeout = set_timeout
+    )
+    return(call_secure_server)
   }
- # Authentication result
-  call_check_credentials <- shinymanager::check_credentials(path_database)
-# Server Authentication
-  call_secure_server <- shinymanager::secure_server(
-    check_credentials = call_check_credentials,
-    timeout = set_timeout
-  )
-  return(call_secure_server)
 }

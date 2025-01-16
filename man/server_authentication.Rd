@@ -5,12 +5,15 @@
 \title{Authentication result for secure connection to AkadoR}
 \usage{
 server_authentication(
+  secure_connection = FALSE,
   path_database = file.path(path.expand("~"), ".appconfig", "akador",
     "database_connection.sqlite"),
   set_timeout = 60
 )
 }
 \arguments{
+\item{secure_connection}{{\link[base]{logical}} expected. Default values: FALSE. If you wish to enable secure connection to the application, set TRUE}
+
 \item{path_database}{{\link[base]{character}} expected. Default values: file.path(path.expand("~"), ".appconfig", "akador", "database_connection.sqlite"). Path to file containing data base connection, default value adapts to different operating systems}
 
 \item{set_timeout}{{\link[base]{numeric}} expected. Default values: 60. Session expiry time (in minutes) before disconnection in standby mode if secure connection is enabled}
