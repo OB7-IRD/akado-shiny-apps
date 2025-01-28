@@ -43,7 +43,7 @@ set_start_configuration <- function(path_file_configuration = file.path(path.exp
 }
 
 #' @name start_configuration
-#' @title AkadoR startup configuration
+#' @title Launch ui AkadoR
 #' @description The purpose of the start_configuration function is to configure startup, secure connection to the application, ...
 #' @param secure_connection {\link[base]{logical}} expected. Default values: FALSE. If you wish to enable secure connection to the application, set TRUE
 #' @export
@@ -204,7 +204,7 @@ server_authentication <- function(secure_connection = FALSE, path_database = fil
     ))
   }
   # 2 - main ----
-  if(secure_connection){
+  if (secure_connection) {
     if (!file.exists(path_database)) {
       # Creation of a database by default, administrator must then modify password and user name
       database_connection <- data.frame(

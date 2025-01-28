@@ -5974,7 +5974,7 @@ config_data_server <- function(id, parent_in) {
   })
 }
 
-# Shiny function : Retrieves the list of trips selected by the user
+# Shiny function : Retrieves the list of trips and VMS selected by the user
 trip_select_server <- function(id, parent_in, text_error_trip_select, config_data) {
   moduleServer(id, function(input, output, session) {
     eventReactive(input$start_button, {
@@ -6882,7 +6882,7 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
   })
 }
 
-# Shiny function : table display
+# Shiny function : format table display serveur
 table_server <- function(id, data, number, parent_in, text_error_trip_select, trip_select, calcul_check, column_no_wrap = NULL) {
   # Local binding global variables
   . <- NULL
@@ -6916,6 +6916,7 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
   })
 }
 
+# Shiny function : Selection window for choosing the type of file to download
 window_button_download <- function(number) {
   modalDialog(downloadButton(outputId = "download_csv", label = "CSV"),
               downloadButton(outputId = "download_excel", label = "Excel"),
@@ -6926,6 +6927,7 @@ window_button_download <- function(number) {
   )
 }
 
+# Shiny function : format table display ui
 table_ui <- function(id, title, size_box = "col-sm-12 col-md-6 col-lg-6", text = NULL) {
   div(
     id = paste0("div_", id),
@@ -6941,7 +6943,7 @@ table_ui <- function(id, title, size_box = "col-sm-12 col-md-6 col-lg-6", text =
   )
 }
 
-# Function which formats the trip data for display inconsistency
+# Shiny function : Function which formats the trip data for display inconsistency
 table_display_trip <- function(data, data_info, type_inconsistency) {
   # Global variables assignement
   vessel_code <- NULL
@@ -7052,7 +7054,7 @@ data_to_text <- function(name_data, name_col, name_button, colname_id, colname_p
   return(code_txt)
 }
 
-# Function to create the button in the table that will create the plot
+# Shiny function : Function to create the button in the table that will create the plot
 data_button_plot <- function(data_plot, data_display, data_id, colname_id, colname_plot, colname_info, name_button, choice_select_row = "error") {
   # Global variables assignement
   buttontmp <- NULL
@@ -7280,6 +7282,7 @@ plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
   return(plot)
 }
 
+# Function detects activity linked solely to grounding
 column_grounding <- function(data,
                              data_transmittingbuoy,
                              transmittingbuoyoperation_grounding_code = c("4", "5")) {

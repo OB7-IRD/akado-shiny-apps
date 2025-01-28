@@ -2,7 +2,7 @@
 % Please edit documentation in R/start_configuration.R
 \name{start_configuration}
 \alias{start_configuration}
-\title{AkadoR startup configuration}
+\title{Launch ui AkadoR}
 \usage{
 start_configuration(secure_connection = FALSE)
 }
