@@ -206,7 +206,11 @@ app_ui <- function(request) {
             id = "check_anapo", title = "Anapo", text = "<ul><li>There must be at least 20 VMS positions during the day</li>
                  <li>There must be at least one VMS position nearer than 10 miles away OR the score (resulting from geographical and temporal distance) must be greater than or equal to 0.5 OR the position must be in a harbour</li></ul>",
             size_box = "col-sm-12 col-md-12 col-lg-12"
-          )
+          ),
+          table_ui(
+            id = "check_anapo_activity", title = "Anapo activity", text = "<ul><li>Each VMS must have at least one existing activity, for vessel types seiner (large and without bait (5,6)), bait boat (freezer and ice (1,2)) and supply (10)</li></ul>
+            (Warning: in case of inconsistency all vessels (Vessel code) linked to the VMS vessel code are displayed inconsistently, select only active vessels (Vessel status 1) if you are not working on historical data)",
+            size_box = "col-sm-12 col-md-12 col-lg-12")
         )
       ),
       shinydashboard::tabItem(

@@ -336,6 +336,46 @@ app_server <- function(input, output, session) {
     ))
   })
 
+  # Table of consistency test the VMS is consistent for activity
+  table_server(id = "check_anapo_activity", data = calcul_check, number = 33, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = c(2))
+
+  # Anapo activity control plot, display in a window
+  output$plot_anapo_activity <- plotly::renderPlotly({
+    split_id <- strsplit(input$button_anapo_activity, "&")[[1]]
+    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]), "data_plot"][[1]], "&")[[1]]
+    vms_data <- eval(parse(text = data_all_click[[1]]))
+    vms_crs <- data_all_click[[3]]
+    plot_anapo_activity(data_vms = vms_data, crs_vms = vms_crs, vms_date = data_all_click[[2]])
+  })
+
+  # Anapo activity control window
+  observeEvent(input$button_anapo_activity, {
+    split_id <- strsplit(input$button_anapo_activity, "&")[[1]]
+    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]), "data_plot"][[1]], "&")[[1]]
+    # Non-breaking hyphen (-)
+    vms_date <- gsub("-", "&#8209;", data_all_click[[2]])
+    showModal(modalDialog(
+      fluidRow(
+        column(3,
+               style = "padding-left:5px;padding-right:0px;",
+               HTML(paste0("<b>Trip information : </b><br>
+                             <ul><li>Vessel code : ", data_all_click[[4]], "</li>
+                             <li>VMS date : ", vms_date, "</li>
+                             <li>Vessel type : ", data_all_click[[5]], "</li></ul>"))
+        ),
+        column(9,
+               style = "padding-left:0px;padding-right:5px;",
+               plotly::plotlyOutput("plot_anapo_activity")
+        )
+      ),
+      title = "Anapo activity",
+      size = "l",
+      fade = TRUE,
+      easyClose = TRUE,
+      footer = NULL
+    ))
+  })
+
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
     if (input$type_check_trip == "All") {
@@ -400,6 +440,7 @@ app_server <- function(input, output, session) {
       shinyjs::show(id = "div_check_sample_harbour", anim = TRUE, animType = "fade")
       # Anapo
       shinyjs::show(id = "div_check_anapo", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_anapo_activity", anim = TRUE, animType = "fade")
     }
     if (input$type_check_trip == "Info") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -437,6 +478,7 @@ app_server <- function(input, output, session) {
       shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
       # Anapo
       shinyjs::hide(id = "div_check_anapo", anim = FALSE)
+      shinyjs::hide(id = "div_check_anapo_activity", anim = FALSE)
     }
     if (input$type_check_trip == "Warning") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -475,6 +517,7 @@ app_server <- function(input, output, session) {
       shinyjs::show(id = "div_check_eez", anim = TRUE, animType = "fade")
       # Anapo
       shinyjs::hide(id = "div_check_anapo", anim = FALSE)
+      shinyjs::hide(id = "div_check_anapo_activity", anim = FALSE)
     }
     if (input$type_check_trip == "Error") {
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
@@ -536,6 +579,7 @@ app_server <- function(input, output, session) {
       shinyjs::show(id = "div_check_sample_harbour", anim = TRUE, animType = "fade")
       # Anapo
       shinyjs::show(id = "div_check_anapo", anim = TRUE, animType = "fade")
+      shinyjs::show(id = "div_check_anapo_activity", anim = TRUE, animType = "fade")
     }
   })
 

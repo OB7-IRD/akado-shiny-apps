@@ -5766,7 +5766,166 @@ check_anapo_inspector <- function(dataframe1,
   }
 }
 
-
+#' @name check_anapo_activity_consistent_inspector
+#' @title Gives the inconsistencies between the VMS and the presence of activity
+#' @description The purpose of the check_anapo_activity_consistent_inspector function is to provide a table of data that contains an inconsistency between the VMS and the presence of activit
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_activity_consistent_inspector function.
+#' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_anapo_activity_consistent_inspector function.
+#' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param vessel_type {\link[base]{character}} expected. Default values: c("1", "2", "5", "6", "10"). List of vessel type code to be inspected
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  vms_id}}
+#'  \item{\code{  vms_date}}
+#'  \item{\code{  vessel_code}}
+#'  \item{\code{  vms_codevessel}}
+#'  \item{\code{  vessel_type}}
+#' Dataframe 2:
+#'  \item{\code{  activity_id}}
+#'  \item{\code{  activity_date}}
+#'  \item{\code{  vessel_code}}
+#' }
+#' @export
+check_anapo_activity_consistent_inspector <- function(dataframe1,
+                                          dataframe2,
+                                          output,
+                                          vessel_type = c("1", "2", "5", "6", "10")) {
+  # 0 - Global variables assignement ----
+  activity_date <- NULL
+  vessel_code <- NULL
+  vms_date <- NULL
+  activity_date <- NULL
+  nb_activity <- NULL
+  vms_codevessel <- NULL
+  vms_date <- NULL
+  # 1 - Arguments verification ----
+  if (!codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("vms_id", "vms_date", "vessel_code", "vms_codevessel", "vessel_type"),
+    column_type = c("character", "Date", "character", "character", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("vms_id", "vms_date", "vessel_code", "vms_codevessel", "vessel_type"),
+      column_type = c("character", "Date", "character", "character", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("vms_id", "vms_date", "vessel_code", "vms_codevessel", "vessel_type")]
+  }
+  if (!codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
+    column_name = c("activity_id", "activity_date", "vessel_code"),
+    column_type = c("character", "Date", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe2,
+      type = "data.frame",
+      column_name = c("activity_id", "activity_date", "vessel_code"),
+      column_type = c("character", "Date", "character"),
+      output = "message"
+    )
+  } else {
+    dataframe2 <- dataframe2[, c("activity_id", "activity_date", "vessel_code")]
+  }
+  # Checks the type and values of output
+  if (!codama::r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "message"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = vessel_type,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = vessel_type,
+      type = "character",
+      output = "message"
+    ))
+  }
+  select <- dataframe1$vms_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Calculation number date
+  dataframe2_nb_activity <- dataframe2 %>%
+    dplyr::group_by(activity_date, vessel_code) %>%
+    dplyr::summarise(nb_activity = dplyr::n(), .groups = "keep")
+  # Merge
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2_nb_activity, by = dplyr::join_by(vms_date == activity_date, vessel_code == vessel_code))
+  # Case of NA nb_activity and indicates when there are VMS-related activities
+  dataframe1 <- dataframe1 %>%
+    dplyr::mutate(
+      nb_activity = dplyr::coalesce(nb_activity, 0),
+      logical = nb_activity > 0
+    )
+  # Case of vessel types not to be controlled
+  dataframe1[!(dataframe1$vessel_type %in% vessel_type), "logical"] <- TRUE
+  # Case of a VMS point assigned to several different vessels according to Observe/Turbobat (vessel_code) but originating from the same vessel according to VMS (vms_codevessel) (see link between Turbobat file and VMS)
+  # If the match is valid (logical TRUE) for one of the vessel, it is assigned to all the others
+  dataframe1 <- dataframe1 %>%
+    dplyr::group_by(vms_codevessel, vms_date) %>%
+    dplyr::mutate(
+      logical = ifelse(sum(logical) > 0, TRUE, logical)
+    )
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- dplyr::relocate(.data = dataframe1, nb_activity, .after = logical)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, vms_date, .after = vessel_code)
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+    all <- c(select, dataframe1$vms_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (sum(number_occurrences == 1) > 0) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (sum(number_occurrences > 2) > 0) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    if (sum(is.na(dataframe1$logical)) > 0) {
+      text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$vms_id[is.na(dataframe1$logical)], collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " VMS with no activity")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in) {
@@ -5842,6 +6001,11 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
               database_connection = data_connection,
               anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = as.character(parent_in$vessel_number), select_item_3 = parent_in$trip_end_date)
             )
+            # VMS selection parameter date range by user-selected trip duration
+            start_date_range <- min(trip_id_data$trip_startdate)
+            end_date_range <- max(trip_id_data$trip_enddate)
+            # VMS selection parameter vessel number by user-selected explicit
+            vessel_number <- as.character(parent_in$vessel_number)
           }
           # Selected trip with a date range
           if (isTruthy(parent_in$trip_start_date_range) && isTruthy(parent_in$trip_end_date_range)) {
@@ -5854,12 +6018,58 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
               database_connection = data_connection,
               anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = parent_in$trip_start_date_range, select_item_3 = parent_in$trip_end_date_range)
             )
+            # VMS selection parameter date range by user-selected period explicit
+            start_date_range <- parent_in$trip_start_date_range
+            end_date_range <- parent_in$trip_end_date_range
+            vessel_number <- ""
+          }
+          if (dim(trip_id_data)[1] > 0) {
+            # Uses a function to extract data from VMS
+            data_activity_vms <- furdeb::data_extraction(
+              type = "database",
+              file_path = system.file("sql",
+                                      "activity_vms.sql",
+                                      package = "AkadoR"
+              ),
+              database_connection = data_connection,
+              anchor = list(select_item_1 = start_date_range, select_item_2 = end_date_range, select_item_3 = vessel_number)
+            )
           }
           # Disconnection to the base
           DBI::dbDisconnect(data_connection[[2]])
+          if (dim(trip_id_data)[1] > 0) {
+            # If the database is "vms", read, transform and execute the SQL query that selects the trips according to the user parameters
+            if (!is.null(config_data()[["databases_configuration"]][["vms"]])) {
+              # Connection to the base VMS
+              data_connection_vms <- furdeb::postgresql_dbconnection(
+                db_user = config_data()[["databases_configuration"]][["vms"]][["login"]],
+                db_password = config_data()[["databases_configuration"]][["vms"]][["password"]],
+                db_dbname = config_data()[["databases_configuration"]][["vms"]][["dbname"]],
+                db_host = config_data()[["databases_configuration"]][["vms"]][["host"]],
+                db_port = config_data()[["databases_configuration"]][["vms"]][["port"]]
+              )
+              # Uses a function to extract data from VMS
+              data_vms <- furdeb::data_extraction(
+                type = "database",
+                file_path = system.file("sql",
+                                        "vms.sql",
+                                        package = "AkadoR"
+                ),
+                database_connection = data_connection_vms,
+                anchor = list(select_item_1 = start_date_range, select_item_2 = end_date_range, select_item_3 = vessel_number)
+              )
+              # Force date type, otherwise empty dataframe sets to charactere format
+              data_vms$vms_date <- as.Date(data_vms$vms_date)
+              # Disconnection to the bases
+              DBI::dbDisconnect(data_connection_vms[[2]])
+              list_return <- list(trip_id_data = trip_id_data, data_vms = data_vms, data_activity_vms = data_activity_vms)
+            }else {
+              list_return <- list(trip_id_data = trip_id_data)
+              }
+            }
           # If trips have been found return them otherwise return FALSE
           if (dim(trip_id_data)[1] > 0) {
-            return(trip_id_data)
+            return(list_return)
           } else {
             return(FALSE)
           }
@@ -5947,10 +6157,18 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     ocean_calculate <- NULL
     weight <- NULL
     count_subsamplenumber <- NULL
+    vessel_code <- NULL
+    vms_id <- NULL
+    vms_date <- NULL
+    vms_date_id <- NULL
+    vms_codevessel <- NULL
+    vessel_type <- NULL
+    vessel_statut <- NULL
+    nb_activity <- NULL
     # 1 - Data extraction ----
     reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
-      if (text_error_trip_select() == TRUE && is.data.frame(trip_select())) {
+      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()$trip_id_data)) {
         # Connection to the base
         data_connection <- furdeb::postgresql_dbconnection(
           db_user = config_data()[["databases_configuration"]][["observe_vmot6"]][["login"]],
@@ -5969,7 +6187,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
+            anchor = list(select_item = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from sample
           sample_select <- furdeb::data_extraction(
@@ -5979,7 +6197,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
+            anchor = list(select_item = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from sample species
           samplespecies_select <- furdeb::data_extraction(
@@ -5989,7 +6207,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
+            anchor = list(select_item = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from sample species measure
           samplespeciesmeasure_select <- furdeb::data_extraction(
@@ -5999,7 +6217,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
+            anchor = list(select_item = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from well
           data_well <- furdeb::data_extraction(
@@ -6009,7 +6227,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
+            anchor = list(select_item = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from landing
           data_landing <- furdeb::data_extraction(
@@ -6019,7 +6237,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
+            anchor = list(select_item = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from sample activity
           data_sampleactivity <- furdeb::data_extraction(
@@ -6039,7 +6257,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id)
+            anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from wellactivity
           wellactivity_select <- furdeb::data_extraction(
@@ -6049,7 +6267,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
+            anchor = list(select_item = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from wellactivityspecies
           data_wellactivityspecies <- furdeb::data_extraction(
@@ -6069,7 +6287,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item = trip_select()$trip_id)
+            anchor = list(select_item = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from full trip
           data_full_trip <- furdeb::data_extraction(
@@ -6079,7 +6297,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                     package = "AkadoR"
             ),
             database_connection = data_connection,
-            anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id)
+            anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id_data$trip_id)
           )
           # Uses a function to extract data from catch of the full trip
           data_catch_full_trip <- furdeb::data_extraction(
@@ -6143,32 +6361,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Disconnection to the bases
           DBI::dbDisconnect(data_connection[[2]])
-          if (!is.null(config_data()[["databases_configuration"]][["vms"]])) {
-            # Connection to the base VMS
-            data_connection_vms <- furdeb::postgresql_dbconnection(
-              db_user = config_data()[["databases_configuration"]][["vms"]][["login"]],
-              db_password = config_data()[["databases_configuration"]][["vms"]][["password"]],
-              db_dbname = config_data()[["databases_configuration"]][["vms"]][["dbname"]],
-              db_host = config_data()[["databases_configuration"]][["vms"]][["host"]],
-              db_port = config_data()[["databases_configuration"]][["vms"]][["port"]]
-            )
-            # Selection of unique activity dates and vessel numbers
-            activity_select_vms <- unique(data.frame(vessel_code = activity_select$vessel_code, activity_date = activity_select$activity_date))
-            # Uses a function to extract data from VMS
-            data_vms <- furdeb::data_extraction(
-              type = "database",
-              file_path = system.file("sql",
-                                      "vms.sql",
-                                      package = "AkadoR"
-              ),
-              database_connection = data_connection_vms,
-              anchor = list(select_item_1 = activity_select_vms$vessel_code, select_item_2 = activity_select_vms$activity_date)
-            )
-            # Force date type, otherwise empty dataframe sets to charactere format
-            data_vms$vms_date <- as.Date(data_vms$vms_date)
-            # Disconnection to the bases
-            DBI::dbDisconnect(data_connection_vms[[2]])
-          }
           # 2 - Data design ----
           # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
           data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_landing_trip_previous, harbour_label_landing_trip_previous)))
@@ -6185,19 +6377,19 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Retrieve trip sample species measure : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
           colnames_samplespeciesmeasure_id <- c("samplespeciesmeasure_id", "vessel_code", "trip_enddate", "sample_number", "samplespecies_subsamplenumber", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")
           # Checks data consistency
-          if (nrow(data_trip) != length(trip_select()$trip_id)) {
-            warning(text_object_more_or_less(id = trip_select()$trip_id, result_check = data_trip$trip_id))
+          if (nrow(data_trip) != length(trip_select()$trip_id_data$trip_id)) {
+            warning(text_object_more_or_less(id = trip_select()$trip_id_data$trip_id, result_check = data_trip$trip_id))
           }
           # Uses a function which indicates whether the selected trips contain activities or not
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check trip activity inspector", sep = "")
           check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = activity_select, output = "report")
           # Uses a function to format the table
-          check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "warning")
+          check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "warning")
           # Uses a function which indicates whether the selected trips contain fishing time inconsistent
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check fishing time inspector", sep = "")
           check_fishing_time_inspector_data <- check_fishing_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = route_select, output = "report")
           # Uses a function to format the table
-          check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
+          check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_fishing_time <- dplyr::rename(
             .data = check_fishing_time,
@@ -6208,7 +6400,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sea time inspector", sep = "")
           check_sea_time_inspector_data <- check_sea_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = route_select, output = "report")
           # Uses a function to format the table
-          check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
+          check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_sea_time <- dplyr::rename(
             .data = check_sea_time,
@@ -6219,7 +6411,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing consistent inspector", sep = "")
           check_landing_consistent_inspector_data <- check_landing_consistent_inspector(dataframe1 = data_trip_unprecedented, output = "report")
           # Uses a function to format the table
-          check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "warning")
+          check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "warning")
           # Modify the table for display purposes: rename column
           check_landing_consistent <- dplyr::rename(
             .data = check_landing_consistent,
@@ -6230,7 +6422,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing total weight inspector", sep = "")
           check_landing_total_weight_inspector_data <- check_landing_total_weight_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_landing, output = "report", epsilon = config_data()[["epsilon"]])
           # Uses a function to format the table
-          check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
+          check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_landing_total_weigh <- dplyr::rename(
             .data = check_landing_total_weigh,
@@ -6251,9 +6443,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date = TRUE, exter_activity_date = FALSE, count_freq = 0, logical = FALSE))
           check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
           # Add button and data for plot in table
-          check_temporal_limit <- data_button_plot(data_plot = check_temporal_limit_data_plot, data_display = check_temporal_limit, data_id = trip_select(), colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("trip_id", "vessel_code", "trip_startdate", "trip_enddate"), name_button = "button_temporal_limit")
+          check_temporal_limit <- data_button_plot(data_plot = check_temporal_limit_data_plot, data_display = check_temporal_limit, data_id = trip_select()$trip_id_data[, colnames_trip_id], colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("trip_id", "vessel_code", "trip_startdate", "trip_enddate"), name_button = "button_temporal_limit")
           # Uses a function to format the table
-          check_temporal_limit <- table_display_trip(check_temporal_limit, trip_select()[, colnames_trip_id], type_inconsistency = "error")
+          check_temporal_limit <- table_display_trip(check_temporal_limit, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_temporal_limit <- dplyr::rename(
             .data = check_temporal_limit,
@@ -6263,7 +6455,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check harbour inspector", sep = "")
           check_harbour_inspector_data <- check_harbour_inspector(dataframe1 = data_trip, output = "report")
           # Uses a function to format the table
-          check_harbour <- table_display_trip(check_harbour_inspector_data, trip_select()[, colnames_trip_id], type_inconsistency = "error")
+          check_harbour <- table_display_trip(check_harbour_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_harbour <- dplyr::rename(
             .data = check_harbour,
@@ -6274,7 +6466,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check raising factor inspector", sep = "")
           check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_full_trip, dataframe3 = data_landing_full_trip, dataframe4 = data_full_trip, output = "report")
           # Uses a function to format the table
-          check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select()[, ], type_inconsistency = "info")
+          check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select()$trip_id_data[, c(colnames_trip_id, "wellcontentstatus_landing_label")], type_inconsistency = "info")
           check_raising_factor$rf1 <- trunc(check_raising_factor$rf1 * 100000) / 100000
           # Modify the table for display purposes: rename column
           check_raising_factor <- dplyr::rename(
@@ -6530,11 +6722,11 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             .data = check_sample_harbour,
             `Harbour landing` = harbour_label_landing
           )
-          # Uses a function which indicates whether the activity position is consistent for VMS position
-          if (exists("data_vms")) {
+          # Uses a function which indicates whether the activity position is consistent for VMS position and vice versa
+          if ("data_vms" %in% names(trip_select())) {
             message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check anapo inspector", sep = "")
             # Recovers all trip positions
-            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_trip, dataframe3 = data_vms, activity_crs = ifelse(length(stats::na.omit(unique(activity_select$activity_crs))) == 0, 4326, stats::na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(data_vms$vms_crs))), output = "report")
+            check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_trip, dataframe3 = trip_select()$data_vms, activity_crs = ifelse(length(stats::na.omit(unique(activity_select$activity_crs))) == 0, 4326, stats::na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(trip_select()$data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(trip_select()$data_vms$vms_crs))), output = "report")
             check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_data[[2]], activity_select[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = dplyr::join_by(activity_id))
             # Add information on whether the activity is linked to a grounding (object or buoy) or not in data plot
             data_tmp_grounding <- column_grounding(data = check_anapo_inspector_dataplot, data_transmittingbuoy = data_transmittingbuoy)
@@ -6611,12 +6803,48 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               `Position next activity (not grounding)` = activity_position_post,
               `Details problem` = button
             )
+            # Uses a function which indicates whether VMS is consistent for the presence of activity
+            message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start anapo activity consistent inspector", sep = "")
+            # Creation of an identifier for a vessel VMS at a given date
+            data_vms <- trip_select()$data_vms %>%
+              dplyr::mutate(vms_date_id = paste0(vessel_code, "_", vms_date))
+            # Removal of duplicate lines for date and vessel (id, time, position, ... not considered here)
+            data_vms_date <- data_vms  %>%
+              dplyr::select(vms_date_id, vms_date, vessel_code, vms_codevessel, vessel_type, vessel_statut) %>%
+              dplyr::mutate(vms_id = vms_date_id) %>%
+              dplyr::distinct() %>%
+              dplyr::relocate(vessel_code)
+            # Check that VMS can be associated with activities on the same date
+            check_anapo_activity_consistent_inspector_data <- check_anapo_activity_consistent_inspector(dataframe1 = data_vms_date, dataframe2 = trip_select()$data_activity_vms, output = "report") %>%
+              dplyr::rename(vms_date_id = vms_id)
+            # Retrieving information for the plot
+            check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity_consistent_inspector_data, data_vms[, c("vms_date_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_date_id))
+            code_txt <- data_to_text(name_data = "check_anapo_activity_dataplot", name_col = "data_plot", name_button = "NULL", colname_id = "vms_date_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"))
+            eval(parse(text = code_txt))
+            # Number of the table containing the Anapo plot information in calcul_check_server
+            check_anapo_activity_dataplot$num_table <- 34
+            check_anapo_activity_dataplot$num_row <- seq_len(nrow(check_anapo_activity_dataplot))
+            # Add button and data for plot in table
+            check_anapo_activity <- data_button_plot(data_plot = check_anapo_activity_dataplot, data_display = check_anapo_activity_consistent_inspector_data, data_id = data_vms_date[, "vms_date_id"], colname_id = "vms_date_id", colname_plot = NULL, colname_info = c("num_table", "num_row"), name_button = "button_anapo_activity")
+            # Uses a function to format the table
+            check_anapo_activity <- table_display_trip(check_anapo_activity, data_vms_date[, c("vessel_code", "vms_date_id", "vms_date", "vms_codevessel", "vessel_type", "vessel_statut")], type_inconsistency = "error")
+            # Modify the table for display purposes: rename column
+            check_anapo_activity <- dplyr::rename(
+              .data = check_anapo_activity,
+              `Number activities` = nb_activity,
+              `Vessel type` = vessel_type,
+              `Vessel statut` = vessel_statut,
+              `VMS vessel code` = vms_codevessel,
+              `Details problem` = button
+            )
           } else {
             check_anapo <- data.frame()
             check_anapo_inspector_dataplot <- data.frame()
+            check_anapo_activity <- data.frame()
+            check_anapo_activity_dataplot <- data.frame()
           }
-          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez, check_sample_harbour))
-        }
+          return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez, check_sample_harbour, check_anapo_activity, check_anapo_activity_dataplot))
+          }
       }
     })
   })
@@ -6638,7 +6866,7 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
         return(paste0("<span style=\"color:red\">", text, ", please either select one using the \"settings\" tab or put it in ", file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"), "</span>"))
       }
       # If the selected trip is not found in the database
-      if (text_error_trip_select() == TRUE && !is.data.frame(trip_select()) && trip_select() == FALSE) {
+      if (text_error_trip_select() == TRUE && !is.list(trip_select()) && trip_select() == FALSE) {
         text <- "Error: no trip was found for these parameters"
         showNotification(id = "notif_warning", ui = text, type = "error")
         return(paste0("<span style=\"color:red\">", text, "</span>"))
@@ -6656,17 +6884,15 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
 
 # Shiny function : table display
 table_server <- function(id, data, number, parent_in, text_error_trip_select, trip_select, calcul_check, column_no_wrap = NULL) {
+  # Local binding global variables
+  . <- NULL
   moduleServer(id, function(input, output, session) {
     output$table <- DT::renderDT({
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
-      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()) && isTruthy(calcul_check())) {
+       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()$trip_id_data) && isTruthy(calcul_check())) {
         data <- data()[[number]]
         if (parent_in$type_line_check_trip == "inconsistent") {
           data <- data[data$Check != as.character(icon("check")), ]
-        }
-        # If data is empty
-        if (ncol(data) == 0) {
-          column_no_wrap <- NULL
         }
         data <- DT::datatable(data,
                               escape = FALSE,
@@ -6680,7 +6906,10 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
                                     list(extend = "collection", text = "Download all data", action = DT::JS(paste0("function ( e, dt, node, config ) {Shiny.setInputValue('button_download', ", number, ", {priority: 'event'});}")))
                                   )
                               )
-        ) %>% DT::formatStyle(columns = column_no_wrap, "white-space" = "nowrap")
+        ) %>%
+          # If data is not empty
+          {if (ncol(data) > 0) DT::formatStyle(., columns = column_no_wrap, "white-space" = "nowrap") else .
+            }
         return(data)
       }
     })
@@ -6726,6 +6955,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   sizemeasuretype_code <- NULL
   samplespeciesmeasure_sizeclass <- NULL
   samplespecies_subsamplenumber <- NULL
+  vms_date <- NULL
   # Retrieves the name of the column containing the ID
   colname_id <- grep("_id$", colnames(data), value = TRUE)
   # Deletes duplicate columns
@@ -6735,8 +6965,6 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   data <- data[, !(colnames(data) %in% colname_double)]
   # Combines the consistency test on the data and data identification information
   data <- merge(data_info, data, by = colname_id)
-  # Sort rows by date
-  data <- data[order(data$trip_enddate), ]
   # Add icons according to the success of the test
   data$logical[data$logical == TRUE] <- as.character(icon("check"))
   if (type_inconsistency == "error") {
@@ -6749,12 +6977,27 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
     data$logical[data$logical == FALSE] <- as.character(icon("info"))
   }
   # Modify the table for display purposes: rename column
-  data <- dplyr::rename(
-    .data = data,
-    `Vessel code` = vessel_code,
-    `Trip enddate` = trip_enddate,
-    Check = logical
-  )
+  if (length(grep("^vms_", colnames(data), value = TRUE)) != 0) {
+    # Sort rows by vessel
+    data <- data[order(data$vessel_code), ]
+    # Rename column
+    data <- dplyr::rename(
+      .data = data,
+      `Vessel code` = vessel_code,
+      `VMS date` = vms_date,
+      Check = logical
+    )
+  }else {
+    # Sort rows by date
+    data <- data[order(data$trip_enddate), ]
+    # Rename column
+    data <- dplyr::rename(
+      .data = data,
+      `Vessel code` = vessel_code,
+      `Trip enddate` = trip_enddate,
+      Check = logical
+    )
+  }
   # Modify the table for display purposes specifically for routes : rename column
   if (length(grep("^route_", colnames(data), value = TRUE)) != 0) {
     data <- dplyr::rename(
@@ -6828,7 +7071,7 @@ data_button_plot <- function(data_plot, data_display, data_id, colname_id, colna
     ))
   }
   # Add line identification
-  data_plot <- merge(data_id, data_plot, by.x = colname_id, by.y = colname_id, all.x = TRUE)
+  data_plot <- merge(data_id, data_plot, by = colname_id, all.x = TRUE)
   # Add button and data for plot in table
   code_txt <- data_to_text(name_data = "data_plot", name_col = "buttontmp", name_button = '"button&"', colname_id = colname_id, colname_plot = colname_plot, colname_info = colname_info)
   eval(parse(text = code_txt))
@@ -7000,6 +7243,39 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
     plot <- plot %>%
       plotly::add_trace(name = "Suspicious activity", data = data_geo_activity, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", hovertemplate = ~text, marker = list(color = "rgb(255, 0, 0)", size = 10)) %>%
       plotly::layout(mapbox = list(center = list(lon = data_geo_activity$X, lat = data_geo_activity$Y)))
+  }
+  return(plot)
+}
+
+# Function to create the plot of the consistency of the position for VMS
+plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
+  # Local binding global variables
+  . <- NULL
+  vms_time <- NULL
+  # Remove missing position in vms
+  data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
+  # Format date time and order
+  if (!all(is.na(data_vms$vms_position))) {
+    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time)))
+    data_vms <- data_vms[order(data_vms$date_time), ]
+  }
+  # Spatial formatting
+  if (!all(is.na(data_vms$vms_position))) {
+    data_geo_vms <- data_vms[!is.na(data_vms$vms_position), ] %>%
+      sf::st_as_sf(wkt = "vms_position", crs = as.numeric(crs_vms)) %>%
+      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+  }
+  # text hovertemplate
+  if (!all(is.na(data_vms$vms_position))) {
+    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", vms_date, "<br>Time:", vms_time))
+  }
+  # Plot
+  plot <- plotly::plot_ly() %>%
+    plotly::layout(mapbox = list(style = "carto-positron", pitch = 0, zoom = 6))
+  if (!all(is.na(data_vms$vms_position))) {
+    plot <- plot %>%
+      plotly::add_trace(name = "VMS", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF")) %>%
+      plotly::layout(showlegend = TRUE, mapbox = list(center = list(lon = data_geo_vms$X[1], lat = data_geo_vms$Y[1])))
   }
   return(plot)
 }

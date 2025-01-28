@@ -2,6 +2,7 @@
 
 export("%>%")
 export(check_activity_sample_inspector)
+export(check_anapo_activity_consistent_inspector)
 export(check_anapo_inspector)
 export(check_distribution_inspector)
 export(check_eez_inspector)
