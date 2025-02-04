@@ -1606,6 +1606,9 @@ check_position_inspector <- function(dataframe1,
   ocean_calculate <- NULL
   trip_id <- NULL
   activity_id <- NULL
+  X <- NULL
+  Y <- NULL
+  logical_bounding <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -1744,6 +1747,14 @@ check_position_inspector <- function(dataframe1,
     dplyr::filter(!is.na(activity_position)) %>%
     sf::st_as_sf(., wkt = "activity_position", crs = activity_crs) %>%
     sf::st_transform(activity_position, crs = 4326)
+  # Retrieves point coordinates
+  data_geo_activity <- data_geo_activity %>%
+    dplyr::mutate(dplyr::as_tibble(sf::st_coordinates(.)))
+  # Checks whether the point is within the bounds of CRS 4326
+  data_geo_activity <- data_geo_activity %>%
+    dplyr::mutate(logical_bounding = (X >= -180 & X <= 180 & Y >= -90 & Y <= 90))
+  data_geo_activity <- data_geo_activity %>%
+    dplyr::filter(logical_bounding)
   # If harbour departure position exists
   if (sum(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_departure)) > 0) {
     # Formats spatial data harbourdeparture, add buffer in meter
@@ -1796,9 +1807,9 @@ check_position_inspector <- function(dataframe1,
   }else {
     dataframe1$logical_harbourlanding <- FALSE
   }
-    # Logical in harbour
-    dataframe1$logical_harbour <- dataframe1$logical_harbour | dataframe1$logical_harbourdeparture | dataframe1$logical_harbourlanding
-   # Reading the file with sea shapes
+  # Logical in harbour
+  dataframe1$logical_harbour <- dataframe1$logical_harbour | dataframe1$logical_harbourdeparture | dataframe1$logical_harbourlanding
+  # Reading the file with sea shapes
   shape_sea <- sf::read_sf(dsn =  path_shp_sea, layer = layer_shp_sea)
   # Grouping of sea pieces
   id_atlantic <- c("15", "15A", "21", "21A", "22", "23", "26", "27", "32", "34")
@@ -5374,6 +5385,7 @@ check_anapo_inspector <- function(dataframe1,
                                   threshold_time = 7200000,
                                   buffer_harbour = 11100) {
   # 0 - Global variables assignement ----
+  . <- NULL
   trip_id <- NULL
   harbour_position_departure <- NULL
   harbour_buffer_departure <- NULL
@@ -5403,6 +5415,9 @@ check_anapo_inspector <- function(dataframe1,
   vms_position <- NULL
   NM <- NULL
   ms <- NULL
+  X <- NULL
+  Y <- NULL
+  logical_bounding <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -5573,6 +5588,14 @@ check_anapo_inspector <- function(dataframe1,
     sf::st_as_sf(wkt = "activity_position", crs = activity_crs, remove = FALSE) %>%
     sf::st_transform(activity_position, crs = 4326)
   sf::st_geometry(dataframe_activity_geo) <- "activity_position_geometry"
+  # Retrieves point coordinates
+  dataframe_activity_geo <- dataframe_activity_geo %>%
+    dplyr::mutate(dplyr::as_tibble(sf::st_coordinates(.)))
+  # Checks whether the point is within the bounds of CRS 4326
+  dataframe_activity_geo <- dataframe_activity_geo %>%
+    dplyr::mutate(logical_bounding = (X >= -180 & X <= 180 & Y >= -90 & Y <= 90))
+  dataframe_activity_geo <- dataframe_activity_geo %>%
+    dplyr::filter(logical_bounding)
   # If harbour departure position exists
   if (sum(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_departure)) > 0) {
     # Formats spatial data harbourdeparture, add buffer in meter
