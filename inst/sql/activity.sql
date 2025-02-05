@@ -5,7 +5,7 @@ SELECT
     t.enddate::date AS trip_enddate,
     r."date"::date AS activity_date,
     a.number::integer AS activity_number,
-    a.time::time AS activity_time,
+    a.time::text AS activity_time,
     t.topiaid::text AS trip_id,
     st_asText(a.the_geom)::text AS activity_position,
     ST_SRID(a.the_geom)::numeric AS activity_crs,

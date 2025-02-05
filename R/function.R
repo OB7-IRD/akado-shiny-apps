@@ -6004,15 +6004,17 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
       # If the connection data exists and there was no error in the trip selection, makes the connection
       req(config_data())
       if (text_error_trip_select() == TRUE) {
-        data_connection <- furdeb::postgresql_dbconnection(
-          db_user = config_data()[["databases_configuration"]][["observe_vmot6"]][["login"]],
-          db_password = config_data()[["databases_configuration"]][["observe_vmot6"]][["password"]],
-          db_dbname = config_data()[["databases_configuration"]][["observe_vmot6"]][["dbname"]],
-          db_host = config_data()[["databases_configuration"]][["observe_vmot6"]][["host"]],
-          db_port = config_data()[["databases_configuration"]][["observe_vmot6"]][["port"]]
-        )
-        # If the database is "observe", read, transform and execute the SQL query that selects the trips according to the user parameters
-        if (any(grep("observe", data_connection[1]))) {
+        config_observe_database <- config_data()[["databases_configuration"]]
+        data_connection <- list()
+        for (observe_database in config_observe_database){
+          data_connection <- append(data_connection, list(furdeb::postgresql_dbconnection(
+            db_user = observe_database[["login"]],
+            db_password = observe_database[["password"]],
+            db_dbname = observe_database[["dbname"]],
+            db_host = observe_database[["host"]],
+            db_port = observe_database[["port"]]
+          )))
+        }
           # Selected trip with the vessel code and the end date of the trip
           if (isTruthy(parent_in$vessel_number) && isTruthy(parent_in$trip_end_date)) {
             trip_id_data <- furdeb::data_extraction(
@@ -6059,17 +6061,19 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
             )
           }
           # Disconnection to the base
-          DBI::dbDisconnect(data_connection[[2]])
+        for (i in seq(from = 1, to = length(config_observe_database))) {
+          DBI::dbDisconnect(data_connection[[i]][[2]])
+        }
           if (dim(trip_id_data)[1] > 0) {
             # If the database is "vms", read, transform and execute the SQL query that selects the trips according to the user parameters
-            if (!is.null(config_data()[["databases_configuration"]][["vms"]])) {
+            if (!is.null(config_data()[["vms_databases_configuration"]][["vms"]])) {
               # Connection to the base VMS
               data_connection_vms <- furdeb::postgresql_dbconnection(
-                db_user = config_data()[["databases_configuration"]][["vms"]][["login"]],
-                db_password = config_data()[["databases_configuration"]][["vms"]][["password"]],
-                db_dbname = config_data()[["databases_configuration"]][["vms"]][["dbname"]],
-                db_host = config_data()[["databases_configuration"]][["vms"]][["host"]],
-                db_port = config_data()[["databases_configuration"]][["vms"]][["port"]]
+                db_user = config_data()[["vms_databases_configuration"]][["vms"]][["login"]],
+                db_password = config_data()[["vms_databases_configuration"]][["vms"]][["password"]],
+                db_dbname = config_data()[["vms_databases_configuration"]][["vms"]][["dbname"]],
+                db_host = config_data()[["vms_databases_configuration"]][["vms"]][["host"]],
+                db_port = config_data()[["vms_databases_configuration"]][["vms"]][["port"]]
               )
               # Uses a function to extract data from VMS
               data_vms <- furdeb::data_extraction(
@@ -6096,9 +6100,6 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
           } else {
             return(FALSE)
           }
-        } else {
-          return(FALSE)
-        }
       }
     })
   })
@@ -6193,15 +6194,17 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()$trip_id_data)) {
         # Connection to the base
-        data_connection <- furdeb::postgresql_dbconnection(
-          db_user = config_data()[["databases_configuration"]][["observe_vmot6"]][["login"]],
-          db_password = config_data()[["databases_configuration"]][["observe_vmot6"]][["password"]],
-          db_dbname = config_data()[["databases_configuration"]][["observe_vmot6"]][["dbname"]],
-          db_host = config_data()[["databases_configuration"]][["observe_vmot6"]][["host"]],
-          db_port = config_data()[["databases_configuration"]][["observe_vmot6"]][["port"]]
-        )
-        # If the database is "observe", read, transform and execute the SQL query that selects the trips according to the user parameters
-        if (any(grep("observe", data_connection[1]))) {
+        config_observe_database <- config_data()[["databases_configuration"]]
+        data_connection <- list()
+        for (observe_database in config_observe_database){
+          data_connection <- append(data_connection, list(furdeb::postgresql_dbconnection(
+            db_user = observe_database[["login"]],
+            db_password = observe_database[["password"]],
+            db_dbname = observe_database[["dbname"]],
+            db_host = observe_database[["host"]],
+            db_port = observe_database[["port"]]
+          )))
+        }
           # Uses a function to extract data from activity
           activity_select <- furdeb::data_extraction(
             type = "database",
@@ -6383,7 +6386,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             anchor = list(select_item = activity_select$activity_id)
           )
           # Disconnection to the bases
-          DBI::dbDisconnect(data_connection[[2]])
+          for (i in seq(from = 1, to = length(config_observe_database))){
+            DBI::dbDisconnect(data_connection[[i]][[2]])
+          }
           # 2 - Data design ----
           # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
           data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_landing_trip_previous, harbour_label_landing_trip_previous)))
@@ -6402,6 +6407,31 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Checks data consistency
           if (nrow(data_trip) != length(trip_select()$trip_id_data$trip_id)) {
             warning(text_object_more_or_less(id = trip_select()$trip_id_data$trip_id, result_check = data_trip$trip_id))
+          }
+         # Reconstructs info from previous trips in different databases
+          for (i in data_trip[is.na(data_trip$trip_previous_id), "trip_id", drop = TRUE]) {
+            # Recovers info from trip that has no previous trip
+            current_data <- data_trip[data_trip$trip_id %in% i, ]
+            # Search for trips from the same vessel and with a date lower than the current trip
+            date_previous_trip <- data_trip[data_trip$vessel_code %in% current_data$vessel_code & current_data$trip_enddate > data_trip$trip_enddate, "trip_enddate", drop = TRUE]
+            if (length(date_previous_trip) > 0) {
+              date_min_full_trip <- max(date_previous_trip, na.rm = TRUE)
+              previous_trip <- data_trip[data_trip$vessel_code %in% current_data$vessel_code & data_trip$trip_enddate == date_min_full_trip, ]
+              # Assigns information from previous trip
+              data_trip[data_trip$trip_id %in% i, c("trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous")] <- previous_trip[, c("trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous"), drop = TRUE]
+            }
+          }
+          # Reconstructs full trips from different databases
+          for (i in data_full_trip[is.na(data_full_trip$trip_end_full_trip_id), "trip_id", drop = TRUE]) {
+            # Recover trip info that doesn't belong to a finished full trip
+            current_data <- data_full_trip[data_full_trip$trip_id %in% i, ]
+            # Search for trips on the same vessel, in a finished full trip and with a date later than the current trip
+            date_full_trip <- data_full_trip[data_full_trip$vessel_id %in% current_data$vessel_id & !is.na(data_full_trip$trip_end_full_trip_id) & current_data$trip_enddate <= data_full_trip$trip_enddate, "trip_enddate", drop = TRUE]
+            if (length(date_full_trip) > 0) {
+              date_min_full_trip <- min(date_full_trip, na.rm = TRUE)
+              # Assigns the identifier of the finished full trip
+              data_full_trip[data_full_trip$trip_id %in% i, "trip_end_full_trip_id"] <- data_full_trip[data_full_trip$vessel_id %in% current_data$vessel_id & !is.na(data_full_trip$trip_end_full_trip_id) & data_full_trip$trip_enddate == date_min_full_trip, "trip_end_full_trip_id", drop = TRUE]
+            }
           }
           # Uses a function which indicates whether the selected trips contain activities or not
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check trip activity inspector", sep = "")
@@ -6867,7 +6897,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             check_anapo_activity_dataplot <- data.frame()
           }
           return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez, check_sample_harbour, check_anapo_activity, check_anapo_activity_dataplot))
-          }
       }
     })
   })

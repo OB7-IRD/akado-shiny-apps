@@ -2,7 +2,7 @@
 SELECT 
     n.id::text AS vms_id, 
     n."date"::date AS vms_date, 
-    n."time"::time AS vms_time,
+    n."time"::text AS vms_time,
     st_asText(n.the_geom)::text AS vms_position,
     ST_SRID(n.the_geom)::numeric AS vms_crs, 
     n.internalreferencenumber::text AS vms_codevessel,

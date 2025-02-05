@@ -3,7 +3,8 @@ SELECT
 	trip_full_trip.topiaid::text AS trip_id, 
 	trip_end_full_trip.trip_current_end_full_trip_id::text AS trip_end_full_trip_id,
 	trip_full_trip.vessel::text AS vessel_id,
-	c.code::text AS country_fleetcountry
+	c.code::text AS country_fleetcountry,
+	trip_full_trip.enddate::date AS trip_enddate
 FROM 
  	(
 	-- Search for information on the end trip of the current full_trip and the end trip of the previous full trip
