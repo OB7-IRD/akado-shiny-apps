@@ -10,3 +10,6 @@ $run_dev.*
 ^LICENSE\.md$
 ^deploy$
 ^.lintr
+^\.github$
+^README.Rmd
+^CITATION\.cff$

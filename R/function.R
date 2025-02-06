@@ -1366,7 +1366,7 @@ check_fishing_context_inspector <- function(dataframe1,
   dataframe1$logical <- comparison$logical
   # Case of free school : must not have any object-type association (inverse of the result obtained)
   dataframe1$logical[!is.na(dataframe1$schooltype_code) & dataframe1$schooltype_code == "2"] <- !dataframe1$logical[!is.na(dataframe1$schooltype_code) & dataframe1$schooltype_code == "2"]
-  # Unknown benches and NA: no constraint
+  # Unknown school and NA: no constraint
   dataframe1$logical[is.na(dataframe1$schooltype_code) | dataframe1$schooltype_code == "0"] <- TRUE
   dataframe1 <- dplyr::relocate(.data = dataframe1, schooltype_code, association_object_count, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(threshold))

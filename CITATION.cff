@@ -1,0 +1,26 @@
+# --------------------------------------------
+# CITATION file created with {cffr} R package
+# See also: https://docs.ropensci.org/cffr/
+# --------------------------------------------
+ 
+cff-version: 1.2.0
+message: 'To cite package "AkadoR" in publications use:'
+type: software
+license: CC-BY-4.0
+title: 'AkadoR: AkadoR'
+version: 0.0.0.9000
+abstract: The AKADO application performs a series of tests on the data to check its
+  consistency. The aim is to determine the quality of the data according to specific
+  business rules defined by experts.
+authors:
+- family-names: Bouhineau
+  given-names: Oceane
+  email: oceane.bouhineau@ird.fr
+  orcid: https://orcid.org/0000-0001-7418-2925
+url: https://forge.ird.fr/marbec/ob7/quality/akador
+contact:
+- family-names: Bouhineau
+  given-names: Oceane
+  email: oceane.bouhineau@ird.fr
+  orcid: https://orcid.org/0000-0001-7418-2925
+

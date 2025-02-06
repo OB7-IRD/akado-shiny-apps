@@ -1,0 +1,142 @@
+
+<!-- README.md is generated from README.Rmd. Please edit that file and click on Knit button at the end. -->
+
+# AkadoR package <img src='inst/app/www/favicon.png' align="right" /></a>
+
+<!-- badges: start -->
+
+[![CRAN_Status_Badge](https://www.r-pkg.org/badges/version/AkadoR)](https://cran.r-project.org/package=AkadoR)
+[![Lifecycle:
+experimental](https://img.shields.io/badge/lifecycle-experimental-orange.svg)](https://www.tidyverse.org/lifecycle/#experimental)
+[![R-CMD-check](https://github.com/OB7-IRD/akado-shiny-apps/workflows/R-CMD-check/badge.svg)](https://github.com/OB7-IRD/akado-shiny-apps/actions)
+<!-- badges: end -->
+
+***AkadoR: data quality analysis for fisheries***
+
+## Overview
+
+The AkadoR package is a Shiny application designed to facilitate data
+validation and correction in the field of fishing and marine science. It
+conducts a series of automated tests to assess data consistency. The
+main objective is to determine the quality of the data according to
+specific business rules defined by experts. AkadoR is designed to be
+connected to an Observe database, but its core control functions are
+also accessible independently through the Codama package
+(<https://github.com/OB7-IRD/codama>). This allows users to perform data
+checks without requiring a connection to an Observe database.
+
+## Installation
+
+You can install the AkadoR package directly from GitHub using the
+devtools package:
+
+``` r
+devtools::install_github("https://github.com/OB7-IRD/akado-shiny-apps",
+                         INSTALL_opts=c("--no-multiarch"))
+```
+
+### Development version
+
+To access bug fixes or new features from the development version, you
+can install it directly from GitHub.
+
+``` r
+devtools::install_github("https://github.com/OB7-IRD/akado-shiny-apps",
+                         ref = "development",
+                         INSTALL_opts=c("--no-multiarch"))
+```
+
+## Start Application
+
+When launching the application for the first time, you may need to
+install additional packages. A second launch may be necessary, after
+all, packages are installed.
+
+``` r
+AkadoR::run_app()
+```
+
+To connect to your database, you need to provide the
+`configuration_file.yml` file in the Setting tab.  
+You can use the furdeb package function to help you create the file.
+
+``` r
+furdeb::configuration_file()
+```
+
+Otherwise, the structure must be as follows:
+
+You can connect one or more databases with logbook data.
+
+``` yml
+databases_configuration:
+  your_database_name_1:
+    login: your_username_1
+    password: your_password_1
+    dbname: your_database_name_1
+    host: your_host_1
+    port: your_port_1
+  your_database_name_2:
+    login: your_username_2
+    password: your_password_2
+    dbname: your_database_name_2
+    host: your_host_2
+    port: your_port_2
+```
+
+The structure used for adding a VMS base remains the same.
+
+``` yml
+vms_databases_configuration:
+  vms:
+    login: your_username
+    password: your_password
+    dbname: your_database_name
+    host: your_host
+    port: your_port
+```
+
+Several optional elements are available to configure the application in
+the `configuration_file.yml` file.  
+Numerical value of the difference deemed acceptable between two numbers
+
+``` yml
+epsilon : 0.01
+```
+
+String vector allowing the selection of logbook programs
+
+``` yml
+logbook_program : ["your_first_programs","your_second_program", 
+```
+
+String vector allowing the selection of species used to calculate
+weights captured in RF1
+
+``` yml
+species_RF1 : ["your_first_species","your_second_species", 
+```
+
+Configuring the secure connection to AkadoR.  
+A default database is created when the secure connection is activated
+for the first time. The database includes a user `shiny` with the
+password `azerty` and an administrator `shinymanager` with the password
+`12345`. These credentials must be changed immediately ! Which can be
+done directly within the application by logging in as the administrator.
+
+``` yml
+start_AkadoR_configuration :
+  # If you wish to enable secure connection to the application, set TRUE, otherwise set FALSE
+  secure_connection : FALSE
+  # Session expiry time (in minutes) before disconnection in standby mode if secure connection is enabled
+  set_timeout : 120.0
+  # Path to file containing data base connection
+  path_database : your_path
+```
+
+## Getting help
+
+If you encounter a clear bug, please file an issue with a minimal
+reproducible example on [GitHub issues
+page](https://github.com/OB7-IRD/akado-shiny-apps/issues). This link is
+also available if you have any questions and improvement propositions.

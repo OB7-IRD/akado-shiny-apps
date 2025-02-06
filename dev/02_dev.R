@@ -92,6 +92,7 @@ usethis::use_jenkins()
 usethis::use_gitlab_ci()
 
 # You're now set! ----
+## Dependencies CRAN
 usethis::use_package("DBI")
 usethis::use_package("dplyr")
 usethis::use_package("DT")
@@ -108,9 +109,12 @@ usethis::use_package("tibble")
 usethis::use_package("tidyr")
 usethis::use_package("shinymanager")
 usethis::use_package("terra")
-
+## Dependencies GIT
 usethis::use_dev_package("codama", remote = "OB7-IRD/codama")
 usethis::use_dev_package("furdeb", remote = "OB7-IRD/furdeb")
+
+## Citation
+cffr::cff_write(dependencies = FALSE)
 
 # go to dev/03_deploy.R
 rstudioapi::navigateToFile("dev/03_deploy.R")
