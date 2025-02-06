@@ -1,4 +1,13 @@
-# AkadoR 1.0.0
+# AkadoR 1.0.1- 2025.02.06
+
+## Added
+* Add Readme
+* Ability connect multiple Observe databases
+
+## Changed
+* Patch position & anapo : point out bounds crs
+
+# AkadoR 1.0.0- 2025.01.28
 
 For check (Added 32 functions):  
 * Added a `check_trip_activity_inspector` function to check inconsistencies between the trip and the presence of associated activity  
