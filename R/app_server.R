@@ -81,14 +81,14 @@ app_server <- function(input, output, session) {
     showModal(modalDialog(
       fluidRow(
         column(3,
-               style = "padding-left:5px;padding-right:0px;",
-               HTML(paste0("<b>Trip information : </b><br>
+          style = "padding-left:5px;padding-right:0px;",
+          HTML(paste0("<b>Trip information : </b><br>
                              <ul><li>Vessel code : ", vessel_code, "</li>
                              <li>Trip end date : ", enddate, "</li></ul>"))
         ),
         column(9,
-               style = "padding-left:0px;padding-right:5px;",
-               plotly::plotlyOutput("plot_temporal_limit")
+          style = "padding-left:0px;padding-right:5px;",
+          plotly::plotlyOutput("plot_temporal_limit")
         )
       ),
       title = "Time coverage detail",
@@ -142,8 +142,8 @@ app_server <- function(input, output, session) {
     showModal(modalDialog(
       fluidRow(
         column(3,
-               style = "padding-left:5px;padding-right:0px;",
-               HTML(paste0("<b>Trip information : </b><br>
+          style = "padding-left:5px;padding-right:0px;",
+          HTML(paste0("<b>Trip information : </b><br>
                              <ul><li>Vessel code : ", split_id[4], "</li>
                              <li>Trip end date : ", enddate, "</li>
                              <li>Activity date : ", activity_date, "</li>
@@ -156,8 +156,8 @@ app_server <- function(input, output, session) {
                              <li>Ocean activity : ", split_id[10], "</li></ul>"))
         ),
         column(9,
-               style = "padding-left:0px;padding-right:5px;",
-               plotly::plotlyOutput("plot_position")
+          style = "padding-left:0px;padding-right:5px;",
+          plotly::plotlyOutput("plot_position")
         )
       ),
       title = "Position",
@@ -211,8 +211,8 @@ app_server <- function(input, output, session) {
     showModal(modalDialog(
       fluidRow(
         column(3,
-               style = "padding-left:5px;padding-right:0px;",
-               HTML(paste0("<b>Trip information : </b><br>
+          style = "padding-left:5px;padding-right:0px;",
+          HTML(paste0("<b>Trip information : </b><br>
                              <ul><li>Vessel code : ", split_id[4], "</li>
                              <li>Trip end date : ", enddate, "</li>
                              <li>Activity date : ", activity_date, "</li>
@@ -224,8 +224,8 @@ app_server <- function(input, output, session) {
                             <li>Declared country eez : ", split_id[9], "</li></ul>"))
         ),
         column(9,
-               style = "padding-left:0px;padding-right:5px;",
-               plotly::plotlyOutput("plot_eez")
+          style = "padding-left:0px;padding-right:5px;",
+          plotly::plotlyOutput("plot_eez")
         )
       ),
       title = "EEZ",
@@ -311,8 +311,8 @@ app_server <- function(input, output, session) {
     showModal(modalDialog(
       fluidRow(
         column(3,
-               style = "padding-left:5px;padding-right:0px;",
-               HTML(paste0("<b>Trip information : </b><br>
+          style = "padding-left:5px;padding-right:0px;",
+          HTML(paste0("<b>Trip information : </b><br>
                              <ul><li>Vessel code : ", activity_data[1, "vessel_code", drop = TRUE], "</li>
                              <li>Trip end date : ", enddate, "</li>
                              <li>Activity date : ", activity_date, "</li>
@@ -324,8 +324,8 @@ app_server <- function(input, output, session) {
                              <li>Grounding : ", activity_data[1, "grounding", drop = TRUE], "</li></ul>"))
         ),
         column(9,
-               style = "padding-left:0px;padding-right:5px;",
-               plotly::plotlyOutput("plot_anapo")
+          style = "padding-left:0px;padding-right:5px;",
+          plotly::plotlyOutput("plot_anapo")
         )
       ),
       title = "Anapo",
@@ -357,15 +357,15 @@ app_server <- function(input, output, session) {
     showModal(modalDialog(
       fluidRow(
         column(3,
-               style = "padding-left:5px;padding-right:0px;",
-               HTML(paste0("<b>Trip information : </b><br>
+          style = "padding-left:5px;padding-right:0px;",
+          HTML(paste0("<b>Trip information : </b><br>
                              <ul><li>Vessel code : ", data_all_click[[4]], "</li>
                              <li>VMS date : ", vms_date, "</li>
                              <li>Vessel type : ", data_all_click[[5]], "</li></ul>"))
         ),
         column(9,
-               style = "padding-left:0px;padding-right:5px;",
-               plotly::plotlyOutput("plot_anapo_activity")
+          style = "padding-left:0px;padding-right:5px;",
+          plotly::plotlyOutput("plot_anapo_activity")
         )
       ),
       title = "Anapo activity",

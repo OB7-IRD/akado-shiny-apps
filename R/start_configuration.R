@@ -230,9 +230,9 @@ server_authentication <- function(secure_connection = FALSE, path_database = fil
         )
       }
     }
-   # Authentication result
+    # Authentication result
     call_check_credentials <- shinymanager::check_credentials(path_database)
-  # Server Authentication
+    # Server Authentication
     call_secure_server <- shinymanager::secure_server(
       check_credentials = call_check_credentials,
       timeout = set_timeout
