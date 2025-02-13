@@ -2,6 +2,7 @@
 SELECT 
     t.topiaid::text AS trip_id,
     v.code::text AS vessel_code,
+    v.topiaid::text AS vessel_id,
     t.enddate::date AS trip_enddate,
     t.startdate::date AS trip_startdate,
     w.label1::text AS wellcontentstatus_landing_label

@@ -6271,7 +6271,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                   "trip.sql",
                                   package = "AkadoR"),
           database_connection = data_connection,
-          anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id_data$trip_id)
+          anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id_data$trip_id, select_item_3 = trip_select()$trip_id_data$vessel_id)
         )
         # Uses a function to extract data from wellactivity
         wellactivity_select <- furdeb::data_extraction(
@@ -6307,7 +6307,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                   "full_trip_id.sql",
                                   package = "AkadoR"),
           database_connection = data_connection,
-          anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id_data$trip_id)
+          anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = trip_select()$trip_id_data$trip_id, select_item_3 = trip_select()$trip_id_data$vessel_id)
         )
         # Uses a function to extract data from catch of the full trip
         data_catch_full_trip <- furdeb::data_extraction(
@@ -6382,10 +6382,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         colnames_samplespecies_id <- c("samplespecies_id", "vessel_code", "trip_enddate", "sample_number", "samplespecies_subsamplenumber", "species_fao_code", "sizemeasuretype_code")
         # Retrieve trip sample species measure : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
         colnames_samplespeciesmeasure_id <- c("samplespeciesmeasure_id", "vessel_code", "trip_enddate", "sample_number", "samplespecies_subsamplenumber", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")
-        # Checks data consistency
-        if (nrow(data_trip) != length(trip_select()$trip_id_data$trip_id)) {
-          warning(text_object_more_or_less(id = trip_select()$trip_id_data$trip_id, result_check = data_trip$trip_id))
-        }
         # Reconstructs info from previous trips in different databases
         for (i in data_trip[is.na(data_trip$trip_previous_id), "trip_id", drop = TRUE]) {
           # Recovers info from trip that has no previous trip
@@ -6396,11 +6392,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             date_min_full_trip <- max(date_previous_trip, na.rm = TRUE)
             previous_trip <- data_trip[data_trip$vessel_code %in% current_data$vessel_code & data_trip$trip_enddate == date_min_full_trip, ]
             # Assigns information from previous trip
-            data_trip[data_trip$trip_id %in% i, c("trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous")] <- previous_trip[, c("trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous"), drop = TRUE]
+            data_trip[data_trip$trip_id %in% i, c("trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous")] <- previous_trip[, c("trip_id", "harbour_id_landing", "harbour_label_landing"), drop = TRUE]
           }
         }
+        # Remove trips not selected by the user but which have been useful for finding previous trips located in another database
+        data_trip <- data_trip %>%
+          dplyr::filter(trip_id %in% trip_select()$trip_id_data$trip_id)
         # Reconstructs full trips from different databases
-        for (i in data_full_trip[is.na(data_full_trip$trip_end_full_trip_id), "trip_id", drop = TRUE]) {
+        for (i in data_full_trip[is.na(data_full_trip$trip_end_full_trip_id) & !is.na(data_full_trip$trip_id), "trip_id", drop = TRUE]) {
           # Recover trip info that doesn't belong to a finished full trip
           current_data <- data_full_trip[data_full_trip$trip_id %in% i, ]
           # Search for trips on the same vessel, in a finished full trip and with a date later than the current trip
@@ -6410,6 +6409,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             # Assigns the identifier of the finished full trip
             data_full_trip[data_full_trip$trip_id %in% i, "trip_end_full_trip_id"] <- data_full_trip[data_full_trip$vessel_id %in% current_data$vessel_id & !is.na(data_full_trip$trip_end_full_trip_id) & data_full_trip$trip_enddate == date_min_full_trip, "trip_end_full_trip_id", drop = TRUE]
           }
+        }
+        # Checks data consistency
+        if (nrow(data_trip) != length(trip_select()$trip_id_data$trip_id)) {
+          warning(text_object_more_or_less(id = trip_select()$trip_id_data$trip_id, result_check = data_trip$trip_id))
         }
         # Uses a function which indicates whether the selected trips contain activities or not
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check trip activity inspector", sep = "")
