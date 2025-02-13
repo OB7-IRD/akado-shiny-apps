@@ -5732,7 +5732,7 @@ check_anapo_inspector <- function(dataframe1,
   # Score calculation
   dataframe_calcul <- dataframe_calcul %>%
     dplyr::mutate(score = (2^(units::drop_units(-distance / threshold_geographical))) * (2^(-units::drop_units(duration) / threshold_time)))
-  dataframe_calcul[dataframe_calcul$distance > threshold_geographical * 2, "score"] <- 0
+  dataframe_calcul[units::drop_units(dataframe_calcul$distance) > units::drop_units(threshold_geographical * 2), "score"] <- 0
   dataframe_calcul[as.numeric(dataframe_calcul$duration) > threshold_time * 2, "score"] <- 0
   dataframe_score_max <- dataframe_calcul %>%
     dplyr::group_by(activity_id) %>%
