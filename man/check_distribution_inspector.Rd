@@ -11,9 +11,9 @@ check_distribution_inspector(
   dataframe4,
   output,
   species = c("SKJ"),
-  weightcategory_small = c("W-1"),
-  weightcategory_big = c("W-2"),
-  weightcategory_unknown = c("W-9")
+  weight_category_small = c("W-1"),
+  weight_category_big = c("W-2"),
+  weight_category_unknown = c("W-9")
 )
 }
 \arguments{
@@ -29,11 +29,11 @@ check_distribution_inspector(
 
 \item{species}{{\link[base]{character}} expected. Default values: c("SKJ"). Vector of species categorized as small if weight category information is missing}
 
-\item{weightcategory_small}{{\link[base]{character}} expected. Default values: c("W-1"). Vector of small weight category codes}
+\item{weight_category_small}{{\link[base]{character}} expected. Default values: c("W-1"). Vector of small weight category codes}
 
-\item{weightcategory_big}{{\link[base]{character}} expected. Default values: c("W-2"). Vector of big weight category codes}
+\item{weight_category_big}{{\link[base]{character}} expected. Default values: c("W-2"). Vector of big weight category codes}
 
-\item{weightcategory_unknown}{{\link[base]{character}} expected. Default values: c("W-9"). Vector of unknown weight category codes}
+\item{weight_category_unknown}{{\link[base]{character}} expected. Default values: c("W-9"). Vector of unknown weight category codes}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -50,13 +50,19 @@ Dataframe 1:
  \item{\code{  trip_id}}
  \item{\code{  sample_smallsweight}}
  \item{\code{  sample_bigsweight}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  well_id}}
  \item{\code{  well_well}}
  \item{\code{  trip_id}}
+}
+\itemize{
 Dataframe 3:
  \item{\code{  wellactivity_id}}
  \item{\code{  well_id}}
+}
+\itemize{
 Dataframe 4:
  \item{\code{  wellactivityspecies_id}}
  \item{\code{  wellactivity_id}}

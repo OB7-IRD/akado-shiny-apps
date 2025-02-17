@@ -24,6 +24,8 @@ The input dataframe must contain all these columns for the function to work :
 \itemize{
 Dataframe 1:
  \item{\code{  samplespecies_id}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  samplespecies_id}}
  \item{\code{  samplespeciesmeasure_id}}

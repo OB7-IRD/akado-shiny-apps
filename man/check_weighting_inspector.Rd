@@ -13,8 +13,8 @@ check_weighting_inspector(
   vessel_type = c("6", "2"),
   threshold_weight = 100,
   threshold_ratio = 0.95,
-  sampletype_code_landing_baitboat = c("11"),
-  landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10"),
+  sample_type_code_landing_baitboat = c("11"),
+  landing_type_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10"),
   threshold_baitboat = 1
 )
 }
@@ -35,9 +35,9 @@ check_weighting_inspector(
 
 \item{threshold_ratio}{{\link[base]{numeric}} expected. Default values: 0.95. Percentage threshold between weight and weighted weight for seiners}
 
-\item{sampletype_code_landing_baitboat}{{\link[base]{character}} expected. Default values: c("11"). List of sample type codes for baitboat fresh landings}
+\item{sample_type_code_landing_baitboat}{{\link[base]{character}} expected. Default values: c("11"). List of sample type codes for baitboat fresh landings}
 
-\item{landingtype_baitboat}{{\link[base]{character}} expected. Default values: c("L-YFT-10", "L-BET-10", "L-TUN-10"). List of codes for fresh baitboat landings}
+\item{landing_type_baitboat}{{\link[base]{character}} expected. Default values: c("L-YFT-10", "L-BET-10", "L-TUN-10"). List of codes for fresh baitboat landings}
 
 \item{threshold_baitboat}{{\link[base]{numeric}} expected. Default values: 1. Threshold for baitboats with respect to the difference between the weighted weight and the landed fresh weight and the difference between the weight and the weighted weight}
 }
@@ -57,13 +57,19 @@ Dataframe 1:
  \item{\code{  sample_totalweight}}
  \item{\code{  trip_id}}
  \item{\code{  sampletype_code}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  sample_id}}
  \item{\code{  sampleactivity_weightedweight}}
+}
+\itemize{
 Dataframe 3:
  \item{\code{  trip_id}}
  \item{\code{  vesseltype_code}}
  \item{\code{  vesseltype_label1}}
+}
+\itemize{
 Dataframe 4:
  \item{\code{  trip_id}}
  \item{\code{  landing_weight}}

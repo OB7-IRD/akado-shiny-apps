@@ -35,6 +35,8 @@ Dataframe 1:
  \item{\code{  vessel_code}}
  \item{\code{  vms_codevessel}}
  \item{\code{  vessel_type}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  activity_id}}
  \item{\code{  activity_date}}

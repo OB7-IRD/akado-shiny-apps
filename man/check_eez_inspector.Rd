@@ -9,8 +9,8 @@ check_eez_inspector(
   dataframe2,
   output,
   activity_crs = 4326,
-  internationalwaters_code = "XIN",
-  vesselactivity = c("6")
+  international_waters_code = "XIN",
+  vessel_activity = c("6")
 )
 }
 \arguments{
@@ -22,9 +22,9 @@ check_eez_inspector(
 
 \item{activity_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity}
 
-\item{internationalwaters_code}{{\link[base]{character}} expected. Default values: "XIN". iso3 code corresponding to international waters}
+\item{international_waters_code}{{\link[base]{character}} expected. Default values: "XIN". iso3 code corresponding to international waters}
 
-\item{vesselactivity}{{\link[base]{character}} expected. Default values: c("6"). Vector of inventory of codes for activities that must have a zee zone}
+\item{vessel_activity}{{\link[base]{character}} expected. Default values: c("6"). Vector of inventory of codes for activities that must have a zee zone}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
@@ -41,6 +41,8 @@ Dataframe 1:
  \item{\code{  fpazone_code}}
  \item{\code{  fpazone_country_iso3}}
  \item{\code{  activity_position}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  ISO_TER1}}
  \item{\code{  ISO_TER2}}

@@ -9,20 +9,20 @@ check_time_route_inspector(
   dataframe2,
   dataframe3,
   output,
-  max_seatime = 24,
-  max_fishingtime = 13,
-  vesselactivity_seatime = c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12",
+  threshold_sea_time = 24,
+  threshold_fishing_time = 13,
+  vessel_activity_sea_time = c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12",
     "13", "13", "13", "13", "13", "13", "14", "15", "17", "18", "19", "20", "22", "23",
     "24", "25", "26", "27", "29", "30", "31", "32", "36", "37", "38", "39", "50", "99",
     "101", "101", "102", "102", "103"),
-  objectoperation_seatime = c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2",
+  object_operation_sea_time = c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2",
     "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
     NA, NA, NA, NA, NA, NA, "99", NA, "99", NA, NA),
-  vesselactivity_fishingtime = c("2", "3", "4", "6", "6", "8", "12", "13", "13", "13",
+  vessel_activity_fishing_time = c("2", "3", "4", "6", "6", "8", "12", "13", "13", "13",
     "13", "13", "13", "14", "15", "17", "19", "20", "23", "25", "26", "27", "29", "30",
     "31", "102", "102"),
-  objectoperation_fishingtime = c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6", "8",
-    "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA)
+  object_operation_fishing_time = c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6",
+    "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA)
 )
 }
 \arguments{
@@ -34,17 +34,17 @@ check_time_route_inspector(
 
 \item{output}{{\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{max_seatime}{{\link[base]{numeric}} expected. Default values: 24. Maximum valid time for sea time}
+\item{threshold_sea_time}{{\link[base]{numeric}} expected. Default values: 24. Maximum valid time for sea time}
 
-\item{max_fishingtime}{{\link[base]{numeric}} expected. Default values: 13. Maximum valid time for fishing time}
+\item{threshold_fishing_time}{{\link[base]{numeric}} expected. Default values: 13. Maximum valid time for fishing time}
 
-\item{vesselactivity_seatime}{{\link[base]{character}} expected. Default values: c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "18", "19", "20", "22", "23", "24", "25", "26", "27", "29", "30", "31", "32", "36", "37", "38", "39", "50", "99", "101", "101", "102", "102", "103"). Code activities. First criterion for identifying activities that must have sea time}
+\item{vessel_activity_sea_time}{{\link[base]{character}} expected. Default values: c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "18", "19", "20", "22", "23", "24", "25", "26", "27", "29", "30", "31", "32", "36", "37", "38", "39", "50", "99", "101", "101", "102", "102", "103"). Code activities. First criterion for identifying activities that must have sea time}
 
-\item{objectoperation_seatime}{{\link[base]{character}} expected. Default values: c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA, "99", NA, NA). Code object operation. Second criterion for identifying activities that must have sea time (Indicate NA if you want the code object operation to be missing)}
+\item{object_operation_sea_time}{{\link[base]{character}} expected. Default values: c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA, "99", NA, NA). Code object operation. Second criterion for identifying activities that must have sea time (Indicate NA if you want the code object operation to be missing)}
 
-\item{vesselactivity_fishingtime}{{\link[base]{character}} expected. Default values: c("2", "3", "4", "6", '6', "8", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "19", "20", "23", "25", "26", "27", "29", "30", "31", "102", "102"). Code activities. First criterion for identifying activities that must have fishing time}
+\item{vessel_activity_fishing_time}{{\link[base]{character}} expected. Default values: c("2", "3", "4", "6", '6', "8", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "19", "20", "23", "25", "26", "27", "29", "30", "31", "102", "102"). Code activities. First criterion for identifying activities that must have fishing time}
 
-\item{objectoperation_fishingtime}{{\link[base]{character}} expected. Default values: c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA). Code object operation. Second criterion for identifying activities that must have fishing time (Indicate NA if you want the code object operation to be missing)}
+\item{object_operation_fishing_time}{{\link[base]{character}} expected. Default values: c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA). Code object operation. Second criterion for identifying activities that must have fishing time (Indicate NA if you want the code object operation to be missing)}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -59,10 +59,14 @@ Dataframe 1:
  \item{\code{  route_id}}
  \item{\code{  route_seatime}}
  \item{\code{  route_fishingtime}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  activity_id}}
  \item{\code{  vesselactivity_code}}
  \item{\code{  route_id}}
+}
+\itemize{
 Dataframe 3:
  \item{\code{  floatingobject_id}}
  \item{\code{  objectoperation_code}}

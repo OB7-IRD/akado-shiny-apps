@@ -43,6 +43,8 @@ Dataframe 1:
  \item{\code{  species_fao_code}}
  \item{\code{  sizemeasuretype_code}}
  \item{\code{  sample_id}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  sample_id}}
  \item{\code{  sample_smallsweight}}

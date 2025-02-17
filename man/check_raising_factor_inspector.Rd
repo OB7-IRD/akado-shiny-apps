@@ -12,8 +12,8 @@ check_raising_factor_inspector(
   output,
   country_species = list(`1` = c("TUN", "ALB", "YFT", "BET", "SKJ"), `4` = c("LOT",
     "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*", "KAW", "FRZ", "BLT")),
-  speciesfate = "6",
-  vesselactivity = c("23", "25", "27", "29"),
+  species_fate = "6",
+  vessel_activity = c("23", "25", "27", "29"),
   threshold = c(0.9, 1.1)
 )
 }
@@ -30,9 +30,9 @@ check_raising_factor_inspector(
 
 \item{country_species}{{\link[base]{character}} expected. Default values: list("1" = c("TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*", "KAW", "FRZ", "BLT")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).}
 
-\item{speciesfate}{{\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.}
+\item{species_fate}{{\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.}
 
-\item{vesselactivity}{{\link[base]{character}} expected. Default values: c("23", "25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.}
+\item{vessel_activity}{{\link[base]{character}} expected. Default values: c("23", "25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.}
 
 \item{threshold}{{\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable threshold for RF1.}
 }
@@ -47,6 +47,8 @@ The input dataframe must contain all these columns for the function to work :
 \itemize{
 Dataframe 1:
  \item{\code{  trip_id}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  catch_id}}
  \item{\code{  catch_weight}}
@@ -54,11 +56,15 @@ Dataframe 2:
  \item{\code{  species_fao_code}}
  \item{\code{  vesselactivity_code}}
  \item{\code{  trip_id}}
+}
+\itemize{
 Dataframe 3:
  \item{\code{  landing_id}}
  \item{\code{  landing_weight}}
  \item{\code{  species_fao_code}}
  \item{\code{  trip_id}}
+}
+\itemize{
 Dataframe 4:
  \item{\code{  trip_id}}
  \item{\code{  trip_end_full_trip_id}}

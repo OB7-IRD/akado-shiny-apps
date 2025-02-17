@@ -10,6 +10,8 @@
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  trip_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  activity_id}}
@@ -133,6 +135,8 @@ check_trip_activity_inspector <- function(dataframe1,
 #' Dataframe 1:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  trip_fishingtime}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  route_id}}
 #'  \item{\code{  trip_id}}
@@ -267,6 +271,8 @@ check_fishing_time_inspector <- function(dataframe1,
 #' Dataframe 1:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  trip_seatime}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  route_id}}
 #'  \item{\code{  trip_id}}
@@ -516,6 +522,8 @@ check_landing_consistent_inspector <- function(dataframe1,
 #' Dataframe 1:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  trip_landingtotalweight}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  landing_id}}
 #'  \item{\code{  landing_weight}}
@@ -674,6 +682,8 @@ check_landing_total_weight_inspector <- function(dataframe1,
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  trip_startdate}}
 #'  \item{\code{  trip_enddate}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  route_id}}
 #'  \item{\code{  activity_date}}
@@ -956,8 +966,8 @@ check_harbour_inspector <- function(dataframe1,
 #' @param dataframe4 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_raising_factor_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param country_species {\link[base]{character}} expected. Default values: list("1" = c("TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*", "KAW", "FRZ", "BLT")). list of the inventory of species (FAO code) used to calculate catch weight in RF1 by country (country code).
-#' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.
-#' @param vesselactivity {\link[base]{character}} expected. Default values: c("23", "25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.
+#' @param species_fate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to calculate catch weight in RF1.
+#' @param vessel_activity {\link[base]{character}} expected. Default values: c("23", "25", "27", "29"). Vector of inventory of vessel activity NOT used to calculate catch weight in RF1.
 #' @param threshold {\link[base]{numeric}} expected. Default values: 0.9 and 1.1. Vector containing the lower and upper acceptable threshold for RF1.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -965,6 +975,8 @@ check_harbour_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  trip_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  catch_id}}
 #'  \item{\code{  catch_weight}}
@@ -972,11 +984,15 @@ check_harbour_inspector <- function(dataframe1,
 #'  \item{\code{  species_fao_code}}
 #'  \item{\code{  vesselactivity_code}}
 #'  \item{\code{  trip_id}}
+#' }
+#' \itemize{
 #' Dataframe 3:
 #'  \item{\code{  landing_id}}
 #'  \item{\code{  landing_weight}}
 #'  \item{\code{  species_fao_code}}
 #'  \item{\code{  trip_id}}
+#' }
+#' \itemize{
 #' Dataframe 4:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  trip_end_full_trip_id}}
@@ -990,8 +1006,8 @@ check_raising_factor_inspector <- function(dataframe1,
                                            dataframe4,
                                            output,
                                            country_species = list("1" = c("TUN", "ALB", "YFT", "BET", "SKJ"), "4" = c("LOT", "TUN", "ALB", "YFT", "BET", "SKJ", "LTA", "FRI", "BLF", "RAV*", "KAW", "FRZ", "BLT")),
-                                           speciesfate = "6",
-                                           vesselactivity = c("23", "25", "27", "29"),
+                                           species_fate = "6",
+                                           vessel_activity = c("23", "25", "27", "29"),
                                            threshold = c(0.9, 1.1)) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
@@ -1105,26 +1121,26 @@ check_raising_factor_inspector <- function(dataframe1,
       output = "message"
     ))
   }
-  # Checks the type of speciesfate
+  # Checks the type of species_fate
   if (!codama::r_type_checking(
-    r_object = speciesfate,
+    r_object = species_fate,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = speciesfate,
+      r_object = species_fate,
       type = "character",
       output = "message"
     ))
   }
-  # Checks the type of vesselactivity
+  # Checks the type of vessel_activity
   if (!codama::r_type_checking(
-    r_object = vesselactivity,
+    r_object = vessel_activity,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = vesselactivity,
+      r_object = vessel_activity,
       type = "character",
       output = "message"
     ))
@@ -1157,10 +1173,10 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe2 <- dplyr::bind_rows(dataframe2_select_species, dataframe2 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
   ## Selection species fate
   dataframe2 <- dataframe2 %>%
-    dplyr::filter((speciesfate_code %in% speciesfate))
+    dplyr::filter((speciesfate_code %in% species_fate))
   ## Selection vessel activity
   dataframe2 <- dataframe2 %>%
-    dplyr::filter(!(vesselactivity_code %in% vesselactivity))
+    dplyr::filter(!(vesselactivity_code %in% vessel_activity))
   # Calculation of the sum of weights caught per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(trip_id) %>%
@@ -1260,7 +1276,7 @@ check_raising_factor_inspector <- function(dataframe1,
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_context_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_context_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param schooltype_object {\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.
+#' @param school_type_object {\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -1268,6 +1284,8 @@ check_raising_factor_inspector <- function(dataframe1,
 #' Dataframe 1:
 #'  \item{\code{  activity_id}}
 #'  \item{\code{  schooltype_code}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  observedsystem_id}}
 #'  \item{\code{  activity_id}}
@@ -1277,7 +1295,7 @@ check_raising_factor_inspector <- function(dataframe1,
 check_fishing_context_inspector <- function(dataframe1,
                                             dataframe2,
                                             output,
-                                            schooltype_object = c("1")) {
+                                            school_type_object = c("1")) {
   # 0 - Global variables assignement ----
   activity_id <- NULL
   schooltype_code <- NULL
@@ -1333,12 +1351,12 @@ check_fishing_context_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = schooltype_object,
+    r_object = school_type_object,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = schooltype_object,
+      r_object = school_type_object,
       type = "character",
       output = "message"
     ))
@@ -1347,7 +1365,7 @@ check_fishing_context_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Filters out object-school associations
-  dataframe2 <- dataframe2 %>% dplyr::filter(schooltype_code %in% schooltype_object)
+  dataframe2 <- dataframe2 %>% dplyr::filter(schooltype_code %in% school_type_object)
   # Calculates the number of object-type associations
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(activity_id) %>%
@@ -1409,10 +1427,10 @@ check_fishing_context_inspector <- function(dataframe1,
   }
 }
 
-#' @name check_operationt_inspector
+#' @name check_operation_inspector
 #' @title Gives the inconsistencies between fishing success status, vessel activity, type of school or weight caught
-#' @description The purpose of the check_operationt_inspector function is to provide a table of data that contains an inconsistency with succes status and vessel activity, the type of school or the weight caught
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_operationt_inspector () function.
+#' @description The purpose of the check_operation_inspector function is to provide a table of data that contains an inconsistency with succes status and vessel activity, the type of school or the weight caught
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_operation_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
@@ -1426,8 +1444,8 @@ check_fishing_context_inspector <- function(dataframe1,
 #'  \item{\code{  vesselactivity_code}}
 #' }
 #' @export
-check_operationt_inspector <- function(dataframe1,
-                                       output) {
+check_operation_inspector <- function(dataframe1,
+                                      output) {
   # 0 - Global variables assignement ----
   vesselactivity_code <- NULL
   successstatus_code <- NULL
@@ -1575,6 +1593,8 @@ check_operationt_inspector <- function(dataframe1,
 #'  \item{\code{  ocean_label}}
 #'  \item{\code{  activity_position}}
 #'  \item{\code{  trip_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  harbour_position_departure}}
@@ -1901,6 +1921,8 @@ check_position_inspector <- function(dataframe1,
 #' Dataframe 1:
 #'  \item{\code{  activity_id}}
 #'  \item{\code{  activity_weight}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  catch_id}}
 #'  \item{\code{  catch_weight}}
@@ -2230,6 +2252,8 @@ check_length_class_inspector <- function(dataframe1,
 #'  \item{\code{  samplespecies_id}}
 #'  \item{\code{  samplespecies_measuredcount}}
 #'  \item{\code{  sample_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  samplespeciesmeasure_id}}
 #'  \item{\code{  samplespeciesmeasure_count}}
@@ -2412,6 +2436,19 @@ check_temperature_inspector <- function(dataframe1,
       output = "message"
     ))
   }
+  if (!codama::r_type_checking(
+    r_object = threshold,
+    type = "numeric",
+    length = 2L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = threshold,
+      type = "numeric",
+      length = 2L,
+      output = "message"
+    ))
+  }
   select <- dataframe1$activity_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
@@ -2482,7 +2519,7 @@ check_temperature_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_sample_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values: c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"). list of the inventory of species (FAO code) used to compare to sample weighting.
-#' @param speciesfate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to compare to sample weighting.
+#' @param species_fate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to compare to sample weighting.
 #' @param epsilon {\link[base]{numeric}} expected, default : 0.01. Gives the threshold at which the difference is considered too large.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -2493,6 +2530,8 @@ check_temperature_inspector <- function(dataframe1,
 #'  \item{\code{  speciesfate_code}}
 #'  \item{\code{  species_fao_code}}
 #'  \item{\code{  activity_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  sample_id}}
 #'  \item{\code{  sampleactivity_weightedweight}}
@@ -2504,7 +2543,7 @@ check_weighting_sample_inspector <- function(dataframe1,
                                              dataframe2,
                                              output,
                                              species = c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"),
-                                             speciesfate = "6",
+                                             species_fate = "6",
                                              epsilon = 0.01) {
   # 0 - Global variables assignement ----
   sampleactivity_weightedweight <- NULL
@@ -2576,12 +2615,12 @@ check_weighting_sample_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = speciesfate,
+    r_object = species_fate,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = speciesfate,
+      r_object = species_fate,
       type = "character",
       output = "message"
     ))
@@ -2605,7 +2644,7 @@ check_weighting_sample_inspector <- function(dataframe1,
   # Calculation weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   dataframe_weight_calculation <- dataframe1 %>%
     dplyr::group_by(activity_id) %>%
-    dplyr::filter(species_fao_code %in% species & speciesfate_code %in% speciesfate) %>%
+    dplyr::filter(species_fao_code %in% species & speciesfate_code %in% species_fate) %>%
     dplyr::summarise(weight = ifelse(all(is.na(catch_weight)), 0, sum(catch_weight, na.rm = TRUE)))
   # Calculation weightedweight for sample (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   dataframe2 <- dataframe2 %>%
@@ -2680,12 +2719,12 @@ check_weighting_sample_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_time_route_inspector () function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_time_route_inspector () function.
 #' @param output {\link[base]{character}} expected.Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param max_seatime {\link[base]{numeric}} expected. Default values: 24. Maximum valid time for sea time
-#' @param max_fishingtime {\link[base]{numeric}} expected. Default values: 13. Maximum valid time for fishing time
-#' @param vesselactivity_seatime {\link[base]{character}} expected. Default values: c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "18", "19", "20", "22", "23", "24", "25", "26", "27", "29", "30", "31", "32", "36", "37", "38", "39", "50", "99", "101", "101", "102", "102", "103"). Code activities. First criterion for identifying activities that must have sea time
-#' @param objectoperation_seatime {\link[base]{character}} expected. Default values: c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA, "99", NA, NA). Code object operation. Second criterion for identifying activities that must have sea time (Indicate NA if you want the code object operation to be missing)
-#' @param vesselactivity_fishingtime {\link[base]{character}} expected. Default values: c("2", "3", "4", "6", '6', "8", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "19", "20", "23", "25", "26", "27", "29", "30", "31", "102", "102"). Code activities. First criterion for identifying activities that must have fishing time
-#' @param objectoperation_fishingtime {\link[base]{character}} expected. Default values: c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA). Code object operation. Second criterion for identifying activities that must have fishing time (Indicate NA if you want the code object operation to be missing)
+#' @param threshold_sea_time {\link[base]{numeric}} expected. Default values: 24. Maximum valid time for sea time
+#' @param threshold_fishing_time {\link[base]{numeric}} expected. Default values: 13. Maximum valid time for fishing time
+#' @param vessel_activity_sea_time {\link[base]{character}} expected. Default values: c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "18", "19", "20", "22", "23", "24", "25", "26", "27", "29", "30", "31", "32", "36", "37", "38", "39", "50", "99", "101", "101", "102", "102", "103"). Code activities. First criterion for identifying activities that must have sea time
+#' @param object_operation_sea_time {\link[base]{character}} expected. Default values: c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA, "99", NA, NA). Code object operation. Second criterion for identifying activities that must have sea time (Indicate NA if you want the code object operation to be missing)
+#' @param vessel_activity_fishing_time {\link[base]{character}} expected. Default values: c("2", "3", "4", "6", '6', "8", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "19", "20", "23", "25", "26", "27", "29", "30", "31", "102", "102"). Code activities. First criterion for identifying activities that must have fishing time
+#' @param object_operation_fishing_time {\link[base]{character}} expected. Default values: c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA). Code object operation. Second criterion for identifying activities that must have fishing time (Indicate NA if you want the code object operation to be missing)
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -2694,10 +2733,14 @@ check_weighting_sample_inspector <- function(dataframe1,
 #'  \item{\code{  route_id}}
 #'  \item{\code{  route_seatime}}
 #'  \item{\code{  route_fishingtime}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  activity_id}}
 #'  \item{\code{  vesselactivity_code}}
 #'  \item{\code{  route_id}}
+#' }
+#' \itemize{
 #' Dataframe 3:
 #'  \item{\code{  floatingobject_id}}
 #'  \item{\code{  objectoperation_code}}
@@ -2708,12 +2751,12 @@ check_time_route_inspector <- function(dataframe1,
                                        dataframe2,
                                        dataframe3,
                                        output,
-                                       max_seatime = 24,
-                                       max_fishingtime = 13,
-                                       vesselactivity_seatime = c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "18", "19", "20", "22", "23", "24", "25", "26", "27", "29", "30", "31", "32", "36", "37", "38", "39", "50", "99", "101", "101", "102", "102", "103"),
-                                       objectoperation_seatime = c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA, "99", NA, NA),
-                                       vesselactivity_fishingtime = c("2", "3", "4", "6", "6", "8", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "19", "20", "23", "25", "26", "27", "29", "30", "31", "102", "102"),
-                                       objectoperation_fishingtime = c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA)) {
+                                       threshold_sea_time = 24,
+                                       threshold_fishing_time = 13,
+                                       vessel_activity_sea_time = c("1", "2", "3", "4", "6", "6", "8", "9", "10", "11", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "18", "19", "20", "22", "23", "24", "25", "26", "27", "29", "30", "31", "32", "36", "37", "38", "39", "50", "99", "101", "101", "102", "102", "103"),
+                                       object_operation_sea_time = c(NA, NA, NA, NA, "99", NA, NA, NA, NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA, "99", NA, NA),
+                                       vessel_activity_fishing_time = c("2", "3", "4", "6", "6", "8", "12", "13", "13", "13", "13", "13", "13", "14", "15", "17", "19", "20", "23", "25", "26", "27", "29", "30", "31", "102", "102"),
+                                       object_operation_fishing_time = c(NA, NA, NA, "99", NA, NA, NA, "1", "2", "4", "6", "8", "9", NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, "99", NA)) {
   # 0 - Global variables assignement ----
   route_id <- NULL
   route_seatime <- NULL
@@ -2789,89 +2832,89 @@ check_time_route_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = max_seatime,
+    r_object = threshold_sea_time,
     type = "numeric",
     length = 1L,
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = max_seatime,
+      r_object = threshold_sea_time,
       type = "numeric",
       length = 1L,
       output = "message"
     ))
   }
   if (!codama::r_type_checking(
-    r_object = max_fishingtime,
+    r_object = threshold_fishing_time,
     type = "numeric",
     length = 1L,
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = max_fishingtime,
+      r_object = threshold_fishing_time,
       type = "numeric",
       length = 1L,
       output = "message"
     ))
   }
-  if (length(vesselactivity_seatime) != length(objectoperation_seatime)) {
+  if (length(vessel_activity_sea_time) != length(object_operation_sea_time)) {
     stop(
       format(
         x = Sys.time(),
         "%Y-%m-%d %H:%M:%S"
       ),
-      " - Error, the following arguments must be of the same size : \"vesselactivity_seatime\", \"objectoperation_seatime\"\n"
+      " - Error, the following arguments must be of the same size : \"vessel_activity_sea_time\", \"object_operation_sea_time\"\n"
     )
   }
   if (!codama::r_type_checking(
-    r_object = vesselactivity_seatime,
+    r_object = vessel_activity_sea_time,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = vesselactivity_seatime,
+      r_object = vessel_activity_sea_time,
       type = "character",
       output = "message"
     ))
   }
   if (!codama::r_type_checking(
-    r_object = objectoperation_seatime,
+    r_object = object_operation_sea_time,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = objectoperation_seatime,
+      r_object = object_operation_sea_time,
       type = "character",
       output = "message"
     ))
   }
-  if (length(vesselactivity_fishingtime) != length(objectoperation_fishingtime)) {
+  if (length(vessel_activity_fishing_time) != length(object_operation_fishing_time)) {
     stop(
       format(
         x = Sys.time(),
         "%Y-%m-%d %H:%M:%S"
       ),
-      " - Error, the following arguments must be of the same size : \"vesselactivity_fishingtime\", \"objectoperation_fishingtime\"\n"
+      " - Error, the following arguments must be of the same size : \"vessel_activity_fishing_time\", \"object_operation_fishing_time\"\n"
     )
   }
   if (!codama::r_type_checking(
-    r_object = vesselactivity_fishingtime,
+    r_object = vessel_activity_fishing_time,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = vesselactivity_fishingtime,
+      r_object = vessel_activity_fishing_time,
       type = "character",
       output = "message"
     ))
   }
   if (!codama::r_type_checking(
-    r_object = objectoperation_fishingtime,
+    r_object = object_operation_fishing_time,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = objectoperation_fishingtime,
+      r_object = object_operation_fishing_time,
       type = "character",
       output = "message"
     ))
@@ -2880,7 +2923,7 @@ check_time_route_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Compare sea time and the threshold
-  dataframe1$threshold <- max_seatime
+  dataframe1$threshold <- threshold_sea_time
   comparison_sea_threshold <- codama::vector_comparison(
     first_vector = dataframe1$route_seatime,
     second_vector = dataframe1$threshold,
@@ -2888,7 +2931,7 @@ check_time_route_inspector <- function(dataframe1,
     output = "report"
   )
   # Compare fishing time and the threshold
-  dataframe1$threshold <- max_fishingtime
+  dataframe1$threshold <- threshold_fishing_time
   comparison_fishing_threshold <- codama::vector_comparison(
     first_vector = dataframe1$route_fishingtime,
     second_vector = dataframe1$threshold,
@@ -2902,7 +2945,7 @@ check_time_route_inspector <- function(dataframe1,
   data_route_activity_objectoperation <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(route_id))
   data_route_activity_objectoperation <- dplyr::left_join(data_route_activity_objectoperation, dataframe3, by = dplyr::join_by(activity_id))
   # Sea time category conditions
-  condition_seatime <- as.list(as.data.frame(t(data.frame(vesselactivity_seatime, objectoperation_seatime))))
+  condition_seatime <- as.list(as.data.frame(t(data.frame(vessel_activity_sea_time, object_operation_sea_time))))
   # Selection of activities that must have sea time
   activity_seatime <- purrr::map(condition_seatime, ~ data_route_activity_objectoperation %>%
                                    dplyr::filter(vesselactivity_code == .x[1] & objectoperation_code == .x[2]))
@@ -2919,7 +2962,7 @@ check_time_route_inspector <- function(dataframe1,
   dataframe1[is.na(dataframe1$nb_activity_must_seatime), "nb_activity_must_seatime"] <- 0
   dataframe1[is.na(dataframe1$logical_activity_seatime), "logical_activity_seatime"] <- TRUE
   # Fishing time time category conditions
-  condition_fishingtime <- as.list(as.data.frame(t(data.frame(vesselactivity_fishingtime, objectoperation_fishingtime))))
+  condition_fishingtime <- as.list(as.data.frame(t(data.frame(vessel_activity_fishing_time, object_operation_fishing_time))))
   # Selection of activities that must have fishing time
   activity_fishingtime <- purrr::map(condition_fishingtime, ~ data_route_activity_objectoperation %>%
                                        dplyr::filter(vesselactivity_code == .x[1] & objectoperation_code == .x[2]))
@@ -2985,8 +3028,8 @@ check_time_route_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Layer to containing the eez shapefile (example cf : Flanders Marine Institute (2023). Maritime Boundaries Geodatabase: Maritime Boundaries and Exclusive Economic Zones (200NM), version 12. Available online at https://www.marineregions.org/. https://doi.org/10.14284/632)
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param activity_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity
-#' @param internationalwaters_code {\link[base]{character}} expected. Default values: "XIN". iso3 code corresponding to international waters
-#' @param vesselactivity {\link[base]{character}} expected. Default values: c("6"). Vector of inventory of codes for activities that must have a zee zone
+#' @param international_waters_code {\link[base]{character}} expected. Default values: "XIN". iso3 code corresponding to international waters
+#' @param vessel_activity {\link[base]{character}} expected. Default values: c("6"). Vector of inventory of codes for activities that must have a zee zone
 #' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -2997,6 +3040,8 @@ check_time_route_inspector <- function(dataframe1,
 #'  \item{\code{  fpazone_code}}
 #'  \item{\code{  fpazone_country_iso3}}
 #'  \item{\code{  activity_position}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  ISO_TER1}}
 #'  \item{\code{  ISO_TER2}}
@@ -3008,8 +3053,8 @@ check_eez_inspector <- function(dataframe1,
                                 dataframe2,
                                 output,
                                 activity_crs = 4326,
-                                internationalwaters_code = "XIN",
-                                vesselactivity = c("6")) {
+                                international_waters_code = "XIN",
+                                vessel_activity = c("6")) {
   # 0 - Global variables assignement ----
   activity_position <- NULL
   activity_id <- NULL
@@ -3080,23 +3125,23 @@ check_eez_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = internationalwaters_code,
+    r_object = international_waters_code,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = internationalwaters_code,
+      r_object = international_waters_code,
       type = "character",
       output = "message"
     ))
   }
   if (!codama::r_type_checking(
-    r_object = vesselactivity,
+    r_object = vessel_activity,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = vesselactivity,
+      r_object = vessel_activity,
       type = "character",
       output = "message"
     ))
@@ -3128,12 +3173,12 @@ check_eez_inspector <- function(dataframe1,
     dataframe1$logical_eez <- NA
   }
   # Case of international waters : the calculated country must be missing
-  dataframe1[is.na(dataframe1$logical_eez) & ((dataframe1$fpazone_code %in% internationalwaters_code & dataframe1$fpazone_country_iso3 %in% internationalwaters_code) | (is.na(dataframe1$fpazone_code) & dataframe1$fpazone_country_iso3 %in% internationalwaters_code) | (dataframe1$fpazone_code %in% internationalwaters_code & is.na(dataframe1$fpazone_country_iso3))), "logical_eez"] <- TRUE
+  dataframe1[is.na(dataframe1$logical_eez) & ((dataframe1$fpazone_code %in% international_waters_code & dataframe1$fpazone_country_iso3 %in% international_waters_code) | (is.na(dataframe1$fpazone_code) & dataframe1$fpazone_country_iso3 %in% international_waters_code) | (dataframe1$fpazone_code %in% international_waters_code & is.na(dataframe1$fpazone_country_iso3))), "logical_eez"] <- TRUE
   # Case of no calculated country
   dataframe1[is.na(dataframe1$logical_eez), "logical_eez"] <- FALSE
   dataframe1$logical <- dataframe1$logical & dataframe1$logical_eez
-  # Case of vesselactivity with no constraints if missing declared fishing zone
-  dataframe1$logical[!(dataframe1$vesselactivity_code %in% vesselactivity) & is.na(dataframe1$fpazone_code) & is.na(dataframe1$fpazone_country_iso3)] <- TRUE
+  # Case of vessel_activity with no constraints if missing declared fishing zone
+  dataframe1$logical[!(dataframe1$vesselactivity_code %in% vessel_activity) & is.na(dataframe1$fpazone_code) & is.na(dataframe1$fpazone_country_iso3)] <- TRUE
   dataframe1 <- subset(dataframe1, select = -c(logical_eez))
   activity_data_detail <- dataframe1
   activity_data_detail <- activity_data_detail %>%
@@ -3304,6 +3349,8 @@ check_species_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  samplespecies_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  samplespecies_id}}
 #'  \item{\code{  samplespeciesmeasure_id}}
@@ -3426,7 +3473,9 @@ check_sample_without_measure_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  sample_id}}
-#' Dataframe 1:
+#' }
+#' \itemize{
+#' Dataframe 2:
 #'  \item{\code{  sample_id}}
 #'  \item{\code{  samplespecies_id}}
 #' }
@@ -3549,6 +3598,8 @@ check_sample_without_species_inspector <- function(dataframe1,
 #' Dataframe 1:
 #'  \item{\code{  sample_id}}
 #'  \item{\code{  sample_supersample}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  samplespecies_id}}
 #'  \item{\code{  samplespecies_subsamplenumber}}
@@ -3698,7 +3749,7 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_well_number_consistent_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param vesseltype {\link[base]{character}} expected. Default values: c("5", "6", "10"). Vector of codes for vessel types with a well plan.
+#' @param vessel_type {\link[base]{character}} expected. Default values: c("5", "6", "10"). Vector of codes for vessel types with a well plan.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
@@ -3706,10 +3757,14 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
 #'  \item{\code{  sample_id}}
 #'  \item{\code{  sample_well}}
 #'  \item{\code{  trip_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  well_id}}
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  well_label}}
+#' }
+#' \itemize{
 #' Dataframe 3:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  vesseltype_code}}
@@ -3720,7 +3775,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
                                                    dataframe2,
                                                    dataframe3,
                                                    output,
-                                                   vesseltype = c("5", "6", "10")) {
+                                                   vessel_type = c("5", "6", "10")) {
   # 0 - Global variables assignement ----
   trip_id <- NULL
   sample_well <- NULL
@@ -3794,12 +3849,12 @@ check_well_number_consistent_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = vesseltype,
+    r_object = vessel_type,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = vesseltype,
+      r_object = vessel_type,
       type = "character",
       output = "message"
     ))
@@ -3816,7 +3871,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
   # Case the well number is empty
   dataframe1[is.na(dataframe1$sample_well), "logical"] <- FALSE
   # Vessel types without a well plan
-  dataframe1[!(dataframe1$vesseltype_code %in% vesseltype), "logical"] <- TRUE
+  dataframe1[!(dataframe1$vesseltype_code %in% vessel_type), "logical"] <- TRUE
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, well_id, vesseltype_code))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_well, .after = logical)
@@ -3879,11 +3934,15 @@ check_well_number_consistent_inspector <- function(dataframe1,
 #'  \item{\code{  sample_smallsweight}}
 #'  \item{\code{  sample_bigsweight}}
 #'  \item{\code{  sample_totalweight}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  samplespecies_id}}
 #'  \item{\code{  species_fao_code}}
 #'  \item{\code{  sizemeasuretype_code}}
 #'  \item{\code{  sample_id}}
+#' }
+#' \itemize{
 #' Dataframe 3:
 #'  \item{\code{  samplespeciesmeasure_id}}
 #'  \item{\code{  samplespeciesmeasure_sizeclass}}
@@ -4171,8 +4230,8 @@ check_little_big_inspector <- function(dataframe1,
 #' @param vessel_type {\link[base]{character}} expected. Default values: c("6", "2"). List of two elements, the first is the seine vessel type code, and the second is the baitboat type code.
 #' @param threshold_weight {\link[base]{numeric}} expected. Default values: 100. Seiner threshold weight
 #' @param threshold_ratio {\link[base]{numeric}} expected. Default values: 0.95. Percentage threshold between weight and weighted weight for seiners
-#' @param sampletype_code_landing_baitboat {\link[base]{character}} expected. Default values: c("11"). List of sample type codes for baitboat fresh landings
-#' @param landingtype_baitboat {\link[base]{character}} expected. Default values: c("L-YFT-10", "L-BET-10", "L-TUN-10"). List of codes for fresh baitboat landings
+#' @param sample_type_code_landing_baitboat {\link[base]{character}} expected. Default values: c("11"). List of sample type codes for baitboat fresh landings
+#' @param landing_type_baitboat {\link[base]{character}} expected. Default values: c("L-YFT-10", "L-BET-10", "L-TUN-10"). List of codes for fresh baitboat landings
 #' @param threshold_baitboat {\link[base]{numeric}} expected. Default values: 1. Threshold for baitboats with respect to the difference between the weighted weight and the landed fresh weight and the difference between the weight and the weighted weight
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -4184,13 +4243,19 @@ check_little_big_inspector <- function(dataframe1,
 #'  \item{\code{  sample_totalweight}}
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  sampletype_code}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  sample_id}}
 #'  \item{\code{  sampleactivity_weightedweight}}
+#' }
+#' \itemize{
 #' Dataframe 3:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  vesseltype_code}}
 #'  \item{\code{  vesseltype_label1}}
+#' }
+#' \itemize{
 #' Dataframe 4:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  landing_weight}}
@@ -4206,8 +4271,8 @@ check_weighting_inspector <- function(dataframe1,
                                       vessel_type = c("6", "2"),
                                       threshold_weight = 100,
                                       threshold_ratio = 0.95,
-                                      sampletype_code_landing_baitboat = c("11"),
-                                      landingtype_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10"),
+                                      sample_type_code_landing_baitboat = c("11"),
+                                      landing_type_baitboat = c("L-YFT-10", "L-BET-10", "L-TUN-10"),
                                       threshold_baitboat = 1) {
   # 0 - Global variables assignement ----
   sample_id <- NULL
@@ -4350,23 +4415,23 @@ check_weighting_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = landingtype_baitboat,
+    r_object = landing_type_baitboat,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = landingtype_baitboat,
+      r_object = landing_type_baitboat,
       type = "character",
       output = "message"
     ))
   }
   if (!codama::r_type_checking(
-    r_object = sampletype_code_landing_baitboat,
+    r_object = sample_type_code_landing_baitboat,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = sampletype_code_landing_baitboat,
+      r_object = sample_type_code_landing_baitboat,
       type = "character",
       output = "message"
     ))
@@ -4401,7 +4466,7 @@ check_weighting_inspector <- function(dataframe1,
   # Calculation fresh landing baitboat (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   dataframe4 <- dataframe4 %>%
     dplyr::group_by(trip_id) %>%
-    dplyr::filter(weightcategory_code %in% landingtype_baitboat) %>%
+    dplyr::filter(weightcategory_code %in% landing_type_baitboat) %>%
     dplyr::summarise(sum_landing_weight = ifelse(all(is.na(landing_weight)), 0, sum(landing_weight, na.rm = TRUE)))
   # Merge
   dataframe1$logical <- TRUE
@@ -4417,8 +4482,8 @@ check_weighting_inspector <- function(dataframe1,
   # Check
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weight > threshold_weight, "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold_ratio), "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sampletype_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > threshold_baitboat, "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sampletype_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$weight) > threshold_baitboat, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sample_type_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > threshold_baitboat, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sample_type_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$weight) > threshold_baitboat, "logical"] <- FALSE
   # Case NA vesseltype_code sampletype_code
   dataframe1[is.na(dataframe1$vesseltype_code), "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
@@ -4598,6 +4663,8 @@ check_weight_sample_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 1:
 #'  \item{\code{  sample_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  sample_id}}
 #'  \item{\code{  activity_id}}
@@ -4726,6 +4793,8 @@ check_activity_sample_inspector <- function(dataframe1,
 #'  \item{\code{  species_fao_code}}
 #'  \item{\code{  sizemeasuretype_code}}
 #'  \item{\code{  sample_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  sample_id}}
 #'  \item{\code{  sample_smallsweight}}
@@ -4932,9 +5001,9 @@ check_ldlf_inspector <- function(dataframe1,
 #' @param dataframe4 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values: c("SKJ"). Vector of species categorized as small if weight category information is missing
-#' @param weightcategory_small {\link[base]{character}} expected. Default values: c("W-1"). Vector of small weight category codes
-#' @param weightcategory_big {\link[base]{character}} expected. Default values: c("W-2"). Vector of big weight category codes
-#' @param weightcategory_unknown {\link[base]{character}} expected. Default values: c("W-9"). Vector of unknown weight category codes
+#' @param weight_category_small {\link[base]{character}} expected. Default values: c("W-1"). Vector of small weight category codes
+#' @param weight_category_big {\link[base]{character}} expected. Default values: c("W-2"). Vector of big weight category codes
+#' @param weight_category_unknown {\link[base]{character}} expected. Default values: c("W-9"). Vector of unknown weight category codes
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
@@ -4944,13 +5013,19 @@ check_ldlf_inspector <- function(dataframe1,
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  sample_smallsweight}}
 #'  \item{\code{  sample_bigsweight}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  well_id}}
 #'  \item{\code{  well_well}}
 #'  \item{\code{  trip_id}}
+#' }
+#' \itemize{
 #' Dataframe 3:
 #'  \item{\code{  wellactivity_id}}
 #'  \item{\code{  well_id}}
+#' }
+#' \itemize{
 #' Dataframe 4:
 #'  \item{\code{  wellactivityspecies_id}}
 #'  \item{\code{  wellactivity_id}}
@@ -4966,9 +5041,9 @@ check_distribution_inspector <- function(dataframe1,
                                          dataframe4,
                                          output,
                                          species = c("SKJ"),
-                                         weightcategory_small = c("W-1"),
-                                         weightcategory_big = c("W-2"),
-                                         weightcategory_unknown = c("W-9")) {
+                                         weight_category_small = c("W-1"),
+                                         weight_category_big = c("W-2"),
+                                         weight_category_unknown = c("W-9")) {
   # 0 - Global variables assignement ----
   well_id <- NULL
   trip_id <- NULL
@@ -5084,34 +5159,34 @@ check_distribution_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = weightcategory_small,
+    r_object = weight_category_small,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = weightcategory_small,
+      r_object = weight_category_small,
       type = "character",
       output = "message"
     ))
   }
   if (!codama::r_type_checking(
-    r_object = weightcategory_big,
+    r_object = weight_category_big,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = weightcategory_big,
+      r_object = weight_category_big,
       type = "character",
       output = "message"
     ))
   }
   if (!codama::r_type_checking(
-    r_object = weightcategory_unknown,
+    r_object = weight_category_unknown,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = weightcategory_unknown,
+      r_object = weight_category_unknown,
       type = "character",
       output = "message"
     ))
@@ -5125,18 +5200,18 @@ check_distribution_inspector <- function(dataframe1,
   # Calculation small weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2_small <- dataframe2 %>%
     dplyr::group_by(well_id, trip_id, well_label) %>%
-    dplyr::filter(weightcategory_code %in% weightcategory_small) %>%
+    dplyr::filter(weightcategory_code %in% weight_category_small) %>%
     dplyr::reframe(weight_small = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   dataframe2_small_unknown <- dataframe2 %>%
     dplyr::group_by(well_id, trip_id, well_label) %>%
-    dplyr::filter(weightcategory_code %in% weightcategory_unknown & species_fao_code %in% species) %>%
+    dplyr::filter(weightcategory_code %in% weight_category_unknown & species_fao_code %in% species) %>%
     dplyr::reframe(weight_small_unknown = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   # Calculation big weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe2_big <- dataframe2 %>%
     dplyr::group_by(well_id, trip_id, well_label) %>%
-    dplyr::filter(weightcategory_code %in% weightcategory_big) %>%
+    dplyr::filter(weightcategory_code %in% weight_category_big) %>%
     dplyr::reframe(weight_big = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE))) %>%
     dplyr::select(-well_id)
   # Merge
@@ -5225,6 +5300,8 @@ check_distribution_inspector <- function(dataframe1,
 #' Dataframe 1:
 #'  \item{\code{  sample_id}}
 #'  \item{\code{  trip_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  harbour_id_landing}}
@@ -5347,7 +5424,7 @@ check_sample_harbour_inspector <- function(dataframe1,
 #' @param harbour_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position harbour
 #' @param vms_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position VMS
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param minimum_number_vms {\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.
+#' @param threshold_number_vms {\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.
 #' @param threshold_geographical {\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.
 #' @param threshold_time {\link[base]{numeric}} expected. Default values: 7200000. Maximum valid distance threshold (milliseconds) between position and nearest VMS point.
 #' @param buffer_harbour {\link[base]{numeric}} expected. Default values: 11100. Buffer to be used for harbour, in meter
@@ -5360,11 +5437,15 @@ check_sample_harbour_inspector <- function(dataframe1,
 #'  \item{\code{  activity_time}}
 #'  \item{\code{  activity_position}}
 #'  \item{\code{  trip_id}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  vessel_code}}
 #'  \item{\code{  harbour_position_departure}}
 #'  \item{\code{  harbour_position_landing}}
+#' }
+#' \itemize{
 #' Dataframe 3:
 #'  \item{\code{  vms_date}}
 #'  \item{\code{  vms_time}}
@@ -5380,7 +5461,7 @@ check_anapo_inspector <- function(dataframe1,
                                   harbour_crs = 4326,
                                   vms_crs = 4326,
                                   output,
-                                  minimum_number_vms = 20,
+                                  threshold_number_vms = 20,
                                   threshold_geographical = 10,
                                   threshold_time = 7200000,
                                   buffer_harbour = 11100) {
@@ -5524,13 +5605,13 @@ check_anapo_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = minimum_number_vms,
+    r_object = threshold_number_vms,
     type = "numeric",
     length = 1L,
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = minimum_number_vms,
+      r_object = threshold_number_vms,
       type = "numeric",
       length = 1L,
       output = "message"
@@ -5741,7 +5822,7 @@ check_anapo_inspector <- function(dataframe1,
   # Check the maximum score between activity and VMS
   dataframe1[!is.na(dataframe1$max_score) & dataframe1$max_score >= 0.5, "logical"] <- TRUE
   # Check if the number of vms for the day exceeds the threshold
-  dataframe1[dataframe1$nb_vms_bis < minimum_number_vms, "logical"] <- FALSE
+  dataframe1[dataframe1$nb_vms_bis < threshold_number_vms, "logical"] <- FALSE
   # Recovers all activity positions for the detailed table
   # Data with calcul VMS
   dataframe_detail <- dplyr::bind_rows(dataframe_calcul, dplyr::anti_join(subset(dataframe3, select = -c(logical)), dataframe_calcul, by = c("activity_id", "activity_date", "vms_date", "vessel_code", "vms_time", "vms_position", "activity_time", "activity_position")))
@@ -5806,6 +5887,8 @@ check_anapo_inspector <- function(dataframe1,
 #'  \item{\code{  vessel_code}}
 #'  \item{\code{  vms_codevessel}}
 #'  \item{\code{  vessel_type}}
+#' }
+#' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  activity_id}}
 #'  \item{\code{  activity_date}}
@@ -6521,12 +6604,12 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the succes status is consistent with the vessel activity, the type of school or the weight caught
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check operation inspector", sep = "")
-        check_operationt_inspector_data <- check_operationt_inspector(dataframe1 = activity_select, output = "report")
+        check_operation_inspector_data <- check_operation_inspector(dataframe1 = activity_select, output = "report")
         # Uses a function to format the table
-        check_operationt <- table_display_trip(check_operationt_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
+        check_operation <- table_display_trip(check_operation_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
-        check_operationt <- dplyr::rename(
-          .data = check_operationt,
+        check_operation <- dplyr::rename(
+          .data = check_operation,
           `Vessel activity` = vesselactivity_code,
           `School type` = schooltype_code,
           `Success status` = successstatus_code,
@@ -6596,23 +6679,23 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         # Uses a function which indicates whether that time for route is consistent with the activity
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check time route inspector", sep = "")
         # Recovery time allocation references by activity
-        vesselactivity_seatime <- referential_file()[["time_allocation_activity_code_ref"]] %>%
+        vessel_activity_sea_time <- referential_file()[["time_allocation_activity_code_ref"]] %>%
           dplyr:: filter(time_at_sea == 1) %>%
           dplyr::mutate(activity_code_observe = as.character(activity_code_observe)) %>%
           dplyr::pull(activity_code_observe)
-        objectoperation_seatime <- referential_file()[["time_allocation_activity_code_ref"]] %>%
+        object_operation_sea_time <- referential_file()[["time_allocation_activity_code_ref"]] %>%
           dplyr:: filter(time_at_sea == 1) %>%
           dplyr::mutate(objectoperation_code_observe = as.character(objectoperation_code_observe)) %>%
           dplyr::pull(objectoperation_code_observe)
-        vesselactivity_fishingtime <- referential_file()[["time_allocation_activity_code_ref"]] %>%
+        vessel_activity_fishing_time <- referential_file()[["time_allocation_activity_code_ref"]] %>%
           dplyr:: filter(fishing_time == 1) %>%
           dplyr::mutate(activity_code_observe = as.character(activity_code_observe)) %>%
           dplyr::pull(activity_code_observe)
-        objectoperation_fishingtime <- referential_file()[["time_allocation_activity_code_ref"]] %>%
+        object_operation_fishing_time <- referential_file()[["time_allocation_activity_code_ref"]] %>%
           dplyr:: filter(fishing_time == 1) %>%
           dplyr::mutate(objectoperation_code_observe = as.character(objectoperation_code_observe)) %>%
           dplyr::pull(objectoperation_code_observe)
-        check_time_route_inspector_data <- check_time_route_inspector(dataframe1 = route_select, dataframe2 = activity_select, dataframe3 = data_floatingobject, vesselactivity_seatime = vesselactivity_seatime, objectoperation_seatime = objectoperation_seatime, vesselactivity_fishingtime = vesselactivity_fishingtime, objectoperation_fishingtime = objectoperation_fishingtime, output = "report")
+        check_time_route_inspector_data <- check_time_route_inspector(dataframe1 = route_select, dataframe2 = activity_select, dataframe3 = data_floatingobject, vessel_activity_sea_time = vessel_activity_sea_time, object_operation_sea_time = object_operation_sea_time, vessel_activity_fishing_time = vessel_activity_fishing_time, object_operation_fishing_time = object_operation_fishing_time, output = "report")
         # Uses a function to format the table
         check_time_route <- table_display_trip(check_time_route_inspector_data, route_select[, colnames_route_id], type_inconsistency = "error")
         check_time_route <- dplyr::rename(
@@ -6877,7 +6960,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_activity <- data.frame()
           check_anapo_activity_dataplot <- data.frame()
         }
-        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operationt, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez, check_sample_harbour, check_anapo_activity, check_anapo_activity_dataplot))
+        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operation, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez, check_sample_harbour, check_anapo_activity, check_anapo_activity_dataplot))
       }
     })
   })
@@ -7221,14 +7304,17 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   vms_date <- NULL
   vesselactivity_code <- NULL
   grounding <- NULL
+  date_time <- NULL
   # Remove missing position in vms
   data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
   if (!all(is.na(data_vms$vms_position))) {
-    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time))) %>%
+    data_vms <- data_vms %>%
+      dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time))) %>%
       dplyr::arrange(date_time)
   }
-  data_trip <- data_trip %>% dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time))) %>%
+  data_trip <- data_trip %>%
+    dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time))) %>%
     dplyr::arrange(date_time)
   # Spatial formatting
   if (!all(is.na(data_vms$vms_position))) {
@@ -7285,11 +7371,13 @@ plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
   # Local binding global variables
   . <- NULL
   vms_time <- NULL
+  date_time <- NULL
   # Remove missing position in vms
   data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
   if (!all(is.na(data_vms$vms_position))) {
-    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time))) %>%
+    data_vms <- data_vms %>%
+      dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time))) %>%
       dplyr::arrange(date_time)
   }
   # Spatial formatting

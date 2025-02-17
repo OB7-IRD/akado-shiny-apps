@@ -26,6 +26,8 @@ Dataframe 1:
  \item{\code{  samplespecies_id}}
  \item{\code{  samplespecies_measuredcount}}
  \item{\code{  sample_id}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  samplespeciesmeasure_id}}
  \item{\code{  samplespeciesmeasure_count}}

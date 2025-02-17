@@ -49,11 +49,15 @@ Dataframe 1:
  \item{\code{  sample_smallsweight}}
  \item{\code{  sample_bigsweight}}
  \item{\code{  sample_totalweight}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  samplespecies_id}}
  \item{\code{  species_fao_code}}
  \item{\code{  sizemeasuretype_code}}
  \item{\code{  sample_id}}
+}
+\itemize{
 Dataframe 3:
  \item{\code{  samplespeciesmeasure_id}}
  \item{\code{  samplespeciesmeasure_sizeclass}}

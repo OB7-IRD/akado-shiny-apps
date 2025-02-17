@@ -27,6 +27,8 @@ The input dataframe must contain all these columns for the function to work :
 Dataframe 1:
  \item{\code{  activity_id}}
  \item{\code{  activity_weight}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  catch_id}}
  \item{\code{  catch_weight}}

@@ -8,7 +8,7 @@ check_fishing_context_inspector(
   dataframe1,
   dataframe2,
   output,
-  schooltype_object = c("1")
+  school_type_object = c("1")
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ check_fishing_context_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{schooltype_object}{{\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.}
+\item{school_type_object}{{\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -32,6 +32,8 @@ The input dataframe must contain all these columns for the function to work :
 Dataframe 1:
  \item{\code{  activity_id}}
  \item{\code{  schooltype_code}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  observedsystem_id}}
  \item{\code{  activity_id}}

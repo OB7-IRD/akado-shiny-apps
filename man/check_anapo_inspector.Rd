@@ -12,7 +12,7 @@ check_anapo_inspector(
   harbour_crs = 4326,
   vms_crs = 4326,
   output,
-  minimum_number_vms = 20,
+  threshold_number_vms = 20,
   threshold_geographical = 10,
   threshold_time = 7200000,
   buffer_harbour = 11100
@@ -33,7 +33,7 @@ check_anapo_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{minimum_number_vms}{{\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.}
+\item{threshold_number_vms}{{\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.}
 
 \item{threshold_geographical}{{\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.}
 
@@ -56,11 +56,15 @@ Dataframe 1:
  \item{\code{  activity_time}}
  \item{\code{  activity_position}}
  \item{\code{  trip_id}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  trip_id}}
  \item{\code{  vessel_code}}
  \item{\code{  harbour_position_departure}}
  \item{\code{  harbour_position_landing}}
+}
+\itemize{
 Dataframe 3:
  \item{\code{  vms_date}}
  \item{\code{  vms_time}}

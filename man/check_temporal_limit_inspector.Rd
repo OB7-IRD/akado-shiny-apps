@@ -26,6 +26,8 @@ Dataframe 1:
  \item{\code{  trip_id}}
  \item{\code{  trip_startdate}}
  \item{\code{  trip_enddate}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  route_id}}
  \item{\code{  activity_date}}

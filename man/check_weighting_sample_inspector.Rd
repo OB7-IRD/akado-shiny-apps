@@ -9,7 +9,7 @@ check_weighting_sample_inspector(
   dataframe2,
   output,
   species = c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"),
-  speciesfate = "6",
+  species_fate = "6",
   epsilon = 0.01
 )
 }
@@ -22,7 +22,7 @@ check_weighting_sample_inspector(
 
 \item{species}{{\link[base]{character}} expected. Default values: c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"). list of the inventory of species (FAO code) used to compare to sample weighting.}
 
-\item{speciesfate}{{\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to compare to sample weighting.}
+\item{species_fate}{{\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to compare to sample weighting.}
 
 \item{epsilon}{{\link[base]{numeric}} expected, default : 0.01. Gives the threshold at which the difference is considered too large.}
 }
@@ -41,6 +41,8 @@ Dataframe 1:
  \item{\code{  speciesfate_code}}
  \item{\code{  species_fao_code}}
  \item{\code{  activity_id}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  sample_id}}
  \item{\code{  sampleactivity_weightedweight}}

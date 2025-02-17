@@ -49,6 +49,8 @@ Dataframe 1:
  \item{\code{  ocean_label}}
  \item{\code{  activity_position}}
  \item{\code{  trip_id}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  trip_id}}
  \item{\code{  harbour_position_departure}}

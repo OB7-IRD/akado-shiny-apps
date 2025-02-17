@@ -25,6 +25,8 @@ The input dataframe must contain all these columns for the function to work :
 Dataframe 1:
  \item{\code{  sample_id}}
  \item{\code{  sample_supersample}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  samplespecies_id}}
  \item{\code{  samplespecies_subsamplenumber}}

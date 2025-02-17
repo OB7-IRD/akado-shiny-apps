@@ -9,7 +9,7 @@ check_well_number_consistent_inspector(
   dataframe2,
   dataframe3,
   output,
-  vesseltype = c("5", "6", "10")
+  vessel_type = c("5", "6", "10")
 )
 }
 \arguments{
@@ -21,7 +21,7 @@ check_well_number_consistent_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{vesseltype}{{\link[base]{character}} expected. Default values: c("5", "6", "10"). Vector of codes for vessel types with a well plan.}
+\item{vessel_type}{{\link[base]{character}} expected. Default values: c("5", "6", "10"). Vector of codes for vessel types with a well plan.}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -36,10 +36,14 @@ Dataframe 1:
  \item{\code{  sample_id}}
  \item{\code{  sample_well}}
  \item{\code{  trip_id}}
+}
+\itemize{
 Dataframe 2:
  \item{\code{  well_id}}
  \item{\code{  trip_id}}
  \item{\code{  well_label}}
+}
+\itemize{
 Dataframe 3:
  \item{\code{  trip_id}}
  \item{\code{  vesseltype_code}}
