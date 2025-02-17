@@ -1152,9 +1152,9 @@ check_raising_factor_inspector <- function(dataframe1,
   ## Selection species when the list is available for the country and selection species
   condition <- as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species))))))
   dataframe2_select_species <- purrr::map(condition, ~ dataframe2 %>% dplyr::filter((country_fleetcountry %in% .x[[1]] & species_fao_code %in% .x[[2]])))
-  dataframe2_select_species <- do.call(rbind.data.frame, dataframe2_select_species)
+  dataframe2_select_species <- dplyr::bind_rows(dataframe2_select_species)
   ## Selection all species when the list is not available for the country
-  dataframe2 <- rbind(dataframe2_select_species, dataframe2 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
+  dataframe2 <- dplyr::bind_rows(dataframe2_select_species, dataframe2 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
   ## Selection species fate
   dataframe2 <- dataframe2 %>%
     dplyr::filter((speciesfate_code %in% speciesfate))
@@ -1173,9 +1173,9 @@ check_raising_factor_inspector <- function(dataframe1,
   ## Selection species when the list is available for the country and selection species fate
   condition <- as.list(as.data.frame(t(data.frame(country = names(country_species), species = I(unname(country_species))))))
   dataframe3_select_species <- purrr::map(condition, ~ dataframe3 %>% dplyr::filter((country_fleetcountry %in% .x[[1]] & species_fao_code %in% .x[[2]])))
-  dataframe3_select_species <- do.call(rbind.data.frame, dataframe3_select_species)
+  dataframe3_select_species <- dplyr::bind_rows(dataframe3_select_species)
   ## Selection all species when the list is not available for the country
-  dataframe3 <- rbind(dataframe3_select_species, dataframe3 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
+  dataframe3 <- dplyr::bind_rows(dataframe3_select_species, dataframe3 %>% dplyr::filter(!(country_fleetcountry %in% names(country_species))))
   # Calculation of the sum of weights caught per trip (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
   dataframe3 <- dataframe3 %>%
     dplyr::group_by(trip_id) %>%
@@ -2906,7 +2906,7 @@ check_time_route_inspector <- function(dataframe1,
   # Selection of activities that must have sea time
   activity_seatime <- purrr::map(condition_seatime, ~ data_route_activity_objectoperation %>%
                                    dplyr::filter(vesselactivity_code == .x[1] & objectoperation_code == .x[2]))
-  activity_seatime <- do.call(rbind.data.frame, activity_seatime)
+  activity_seatime <- dplyr::bind_rows(activity_seatime)
   # Count the number of activities requiring time at sea per route
   activity_seatime <- activity_seatime %>%
     dplyr::group_by(route_id, route_seatime) %>%
@@ -2923,7 +2923,7 @@ check_time_route_inspector <- function(dataframe1,
   # Selection of activities that must have fishing time
   activity_fishingtime <- purrr::map(condition_fishingtime, ~ data_route_activity_objectoperation %>%
                                        dplyr::filter(vesselactivity_code == .x[1] & objectoperation_code == .x[2]))
-  activity_fishingtime <- do.call(rbind.data.frame, activity_fishingtime)
+  activity_fishingtime <- dplyr::bind_rows(activity_fishingtime)
   # Count the number of activities requiring time at sea per route
   activity_fishingtime <- activity_fishingtime %>%
     dplyr::group_by(route_id, route_fishingtime) %>%
@@ -4065,7 +4065,7 @@ check_little_big_inspector <- function(dataframe1,
   # Measurement selection of small individuals
   little <- purrr::map(condition, ~ dataframe1 %>%
                          dplyr::filter(species_fao_code == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass < as.numeric(.x[3])))
-  little <- do.call(rbind.data.frame, little)
+  little <- dplyr::bind_rows(little)
   little <- dataframe1 %>%
     dplyr::filter(!(species_fao_code %in% species_big)) %>%
     dplyr::bind_rows(little)
@@ -4076,7 +4076,7 @@ check_little_big_inspector <- function(dataframe1,
   # Measurement selection of big individuals
   big <- purrr::map(condition, ~ dataframe1 %>%
                       dplyr::filter(species_fao_code == .x[1] & sizemeasuretype_code == .x[2] & samplespeciesmeasure_sizeclass >= as.numeric(.x[3])))
-  big <- do.call(rbind.data.frame, big)
+  big <- dplyr::bind_rows(big)
   # Calculation of the number of measurements of big individuals (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
   big <- big %>%
     dplyr::group_by(sample_id) %>%
@@ -5667,7 +5667,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe3$date_group <- dataframe3$vms_date
   dataframe3_prior <- dataframe3 %>% dplyr::mutate(date_group = vms_date - 1)
   dataframe3_post <- dataframe3 %>% dplyr::mutate(date_group = vms_date + 1)
-  dataframe3 <- rbind(dataframe3, dataframe3_prior, dataframe3_post) %>%
+  dataframe3 <- dplyr::bind_rows(dataframe3, dataframe3_prior, dataframe3_post) %>%
     dplyr::group_by(date_group, vms_position) %>%
     dplyr::distinct()
   dataframe3 <- dplyr::inner_join(dataframe1[, c("activity_id", "activity_date", "activity_time", "vessel_code", "activity_position", "logical")], dataframe3, by = dplyr::join_by(activity_date == date_group, vessel_code == vessel_code))
@@ -6796,7 +6796,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             dplyr::mutate(date_group = activity_date)
           check_anapo_inspector_dataplot_trip_prior <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group = activity_date - 1)
           check_anapo_inspector_dataplot_trip_post <- check_anapo_inspector_dataplot_trip %>% dplyr::mutate(date_group = activity_date + 1)
-          check_anapo_inspector_dataplot_range_date <- rbind(check_anapo_inspector_dataplot_trip, check_anapo_inspector_dataplot_trip_prior, check_anapo_inspector_dataplot_trip_post) %>%
+          check_anapo_inspector_dataplot_range_date <- dplyr::bind_rows(check_anapo_inspector_dataplot_trip, check_anapo_inspector_dataplot_trip_prior, check_anapo_inspector_dataplot_trip_post) %>%
             dplyr::group_by(date_group, trip_id) %>%
             dplyr::distinct()
           check_anapo_inspector_dataplot_range_date <- dplyr::inner_join(check_anapo_inspector_dataplot_range_date, activity_select[, c("activity_date", "trip_id", "activity_id")], by = dplyr::join_by(date_group == activity_date, trip_id == trip_id))
@@ -7013,7 +7013,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   # Modify the table for display purposes: rename column
   if (length(grep("^vms_", colnames(data), value = TRUE)) != 0) {
     # Sort rows by vessel
-    data <- data[order(data$vessel_code), ]
+    data <- data %>% dplyr::arrange(vessel_code)
     # Rename column
     data <- dplyr::rename(
       .data = data,
@@ -7023,7 +7023,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
     )
   }else {
     # Sort rows by date
-    data <- data[order(data$trip_enddate), ]
+    data <- data %>% dplyr::arrange(trip_enddate)
     # Rename column
     data <- dplyr::rename(
       .data = data,
@@ -7225,11 +7225,11 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
   if (!all(is.na(data_vms$vms_position))) {
-    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time)))
-    data_vms <- data_vms[order(data_vms$date_time), ]
+    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time))) %>%
+      dplyr::arrange(date_time)
   }
-  data_trip <- data_trip %>% dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time)))
-  data_trip <- data_trip[order(data_trip$date_time), ]
+  data_trip <- data_trip %>% dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time))) %>%
+    dplyr::arrange(date_time)
   # Spatial formatting
   if (!all(is.na(data_vms$vms_position))) {
     data_geo_vms <- data_vms[!is.na(data_vms$vms_position), ] %>%
@@ -7289,8 +7289,8 @@ plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
   data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
   if (!all(is.na(data_vms$vms_position))) {
-    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time)))
-    data_vms <- data_vms[order(data_vms$date_time), ]
+    data_vms <- data_vms %>% dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time))) %>%
+      dplyr::arrange(date_time)
   }
   # Spatial formatting
   if (!all(is.na(data_vms$vms_position))) {
