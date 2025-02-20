@@ -4,12 +4,27 @@
 \alias{check_operation_inspector}
 \title{Gives the inconsistencies between fishing success status, vessel activity, type of school or weight caught}
 \usage{
-check_operation_inspector(dataframe1, output)
+check_operation_inspector(
+  dataframe1,
+  output,
+  vessel_activity = c("6"),
+  school_type = c("0"),
+  success_status_school_type = c("0", "1"),
+  success_status_weight = c("0")
+)
 }
 \arguments{
 \item{dataframe1}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_operation_inspector () function.}
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
+
+\item{vessel_activity}{{\link[base]{character}} expected. Default values: c("6"). Vector of inventory of codes for activities that must have a success status}
+
+\item{school_type}{{\link[base]{character}} expected, default : c("0"). Vector of inventory of code of the school type must not have specific success status (defined success_status_school_type)}
+
+\item{success_status_school_type}{{\link[base]{character}} expected, default : c("0", "1"). Vector of inventory of code of the success status must not have specific school type (defined school_type)}
+
+\item{success_status_weight}{{\link[base]{character}} expected, default : c("0"). Vector of inventory of code of the success status must not have weigth}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
