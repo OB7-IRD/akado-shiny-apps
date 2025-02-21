@@ -27,6 +27,9 @@ app_server <- function(input, output, session) {
 
   # Read the referential file
   referential_file <- reactive({
+    # 0 - Global variables assignement ----
+    ID <- NULL
+    geometry <- NULL
     # Reading the file with time allocation references by activity
     time_allocation_activity_code_ref <- utils::read.csv(file = system.file("time_allocation_activity_code_ref.csv", package = "furdeb"), header = TRUE, sep = ";")
     # Reading the file with eez shapes
@@ -35,7 +38,18 @@ app_server <- function(input, output, session) {
     shape_eez[shape_eez$MRGID == 48964, ]$ISO_TER3 <- "XSG"
     shape_eez[shape_eez$MRGID == 48964, ]$TERRITORY3 <- "Joint regime area: Senegal / Guinea-Bissau"
     shape_eez[shape_eez$MRGID == 48964, ]$SOVEREIGN3 <- "Joint regime area: Senegal / Guinea-Bissau"
-    return(list(time_allocation_activity_code_ref = time_allocation_activity_code_ref, shape_eez = shape_eez))
+    # Reading the file with sea shapes
+    shape_sea <- sf::read_sf(dsn =  system.file("shp", "World_Seas", package = "AkadoR"), layer = "World_Seas")
+    # Grouping of sea pieces
+    id_atlantic <- c("15", "15A", "21", "21A", "22", "23", "26", "27", "32", "34")
+    id_indian <- c("45", "45A", "44", "46A", "62", "42", "43", "38", "39")
+    shape_sea <- dplyr::bind_rows(shape_sea %>%
+                                    dplyr::filter(ID %in% id_indian) %>%
+                                    dplyr::summarize(geometry = sf::st_union(geometry), ID = "Indian"),
+                                  shape_sea %>%
+                                    dplyr::filter(ID %in% id_atlantic) %>%
+                                    dplyr::summarize(geometry = sf::st_union(geometry), ID = "Atlantic"))
+    return(list(time_allocation_activity_code_ref = time_allocation_activity_code_ref, shape_eez = shape_eez, shape_sea = shape_sea))
   })
 
   # Performs all calculations to test for inconsistencies

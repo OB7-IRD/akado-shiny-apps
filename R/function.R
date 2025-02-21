@@ -1627,11 +1627,10 @@ check_operation_inspector <- function(dataframe1,
 #' @description The purpose of the check_position_inspector function is to provide a table of data that contains an inconsistency with ocean declaration and activity position
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_position_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_position_inspector () function.
-#' @param path_shp_sea {\link[base]{character}} expected. Path to the folder containing the seas shapefile
+#' @param dataframe3 {\link[base]{data.frame}} expected. Layer to containing the seas shapefile (example cf : cf : Flanders Marine Institute. IHO Sea Areas, version 1. Available online at https://www.marineregions.org/)
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param activity_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity
 #' @param harbour_crs {\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position harbour
-#' @param layer_shp_sea {\link[base]{character}} expected. Default values: World_Seas. Layer to containing the seas shapefile (cf : Flanders Marine Institute. IHO Sea Areas, version 1. Available online at https://www.marineregions.org/)
 #' @param buffer_harbour {\link[base]{numeric}} expected. Default values: 11100. Buffer to be used for harbour, in meter
 #' @param buffer_sea {\link[base]{numeric}} expected. Default values: 925. Buffer to be used for seas, in meter
 #' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
@@ -1650,14 +1649,18 @@ check_operation_inspector <- function(dataframe1,
 #'  \item{\code{  harbour_position_departure}}
 #'  \item{\code{  harbour_position_landing}}
 #' }
+#' \itemize{
+#' Dataframe 3:
+#'  \item{\code{  ID}}
+#'  \item{\code{  geometry}}
+#' }
 #' @export
 check_position_inspector <- function(dataframe1,
                                      dataframe2,
-                                     path_shp_sea,
+                                     dataframe3,
                                      output,
                                      activity_crs = 4326,
                                      harbour_crs = 4326,
-                                     layer_shp_sea = "World_Seas",
                                      buffer_harbour = 11100,
                                      buffer_sea = 925) {
   # 0 - Global variables assignement ----
@@ -1679,23 +1682,24 @@ check_position_inspector <- function(dataframe1,
   X <- NULL
   Y <- NULL
   logical_bounding <- NULL
+  intersect_indice <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("activity_id", "ocean_label", "activity_position", "activity_crs", "trip_id"),
-    column_type = c("character", "character", "character", "numeric", "character"),
+    column_name = c("activity_id", "ocean_label", "activity_position", "trip_id"),
+    column_type = c("character", "character", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("activity_id", "ocean_label", "activity_position", "activity_crs", "trip_id"),
-      column_type = c("character", "character", "character", "numeric", "character"),
+      column_name = c("activity_id", "ocean_label", "activity_position", "trip_id"),
+      column_type = c("character", "character", "character", "character"),
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("activity_id", "ocean_label", "activity_position", "activity_crs", "trip_id")]
+    dataframe1 <- dataframe1[, c("activity_id", "ocean_label", "activity_position", "trip_id")]
   }
   if (!codama::r_table_checking(
     r_table = dataframe2,
@@ -1713,6 +1717,21 @@ check_position_inspector <- function(dataframe1,
     )
   } else {
     dataframe2 <- dataframe2[, c("trip_id", "harbour_position_departure", "harbour_position_landing")]
+  }
+  if (!codama::r_table_checking(
+    r_table = dataframe3,
+    type = "data.frame",
+    column_name = c("ID", "geometry"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe3,
+      type = "data.frame",
+      column_name = c("ID", "geometry"),
+      output = "message"
+    )
+  } else {
+    dataframe3 <- dataframe3[, c("ID", "geometry")]
   }
   # Checks the type and values of output
   if (!codama::r_type_checking(
@@ -1750,32 +1769,6 @@ check_position_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = harbour_crs,
       type = "numeric",
-      length = 1L,
-      output = "message"
-    ))
-  }
-  if (!codama::r_type_checking(
-    r_object = path_shp_sea,
-    type = "character",
-    length = 1L,
-    output = "logical"
-  )) {
-    return(codama::r_type_checking(
-      r_object = path_shp_sea,
-      type = "character",
-      length = 1L,
-      output = "message"
-    ))
-  }
-  if (!codama::r_type_checking(
-    r_object = layer_shp_sea,
-    type = "character",
-    length = 1L,
-    output = "logical"
-  )) {
-    return(codama::r_type_checking(
-      r_object = layer_shp_sea,
-      type = "character",
       length = 1L,
       output = "message"
     ))
@@ -1879,45 +1872,33 @@ check_position_inspector <- function(dataframe1,
   }
   # Logical in harbour
   dataframe1$logical_harbour <- dataframe1$logical_harbour | dataframe1$logical_harbourdeparture | dataframe1$logical_harbourlanding
-  # Reading the file with sea shapes
-  shape_sea <- sf::read_sf(dsn =  path_shp_sea, layer = layer_shp_sea)
-  # Grouping of sea pieces
-  id_atlantic <- c("15", "15A", "21", "21A", "22", "23", "26", "27", "32", "34")
-  id_indian <- c("45", "45A", "44", "46A", "62", "42", "43", "38", "39")
-  # Buffer in degrees
-  shape_sea_atlantic <- shape_sea[shape_sea$ID %in% id_atlantic, ] %>%
+  # Buffer sea in degrees
+  shape_sea_buffer <- dataframe3 %>%
     terra::vect() %>%
     terra::buffer(width = buffer_sea) %>%
     sf::st_as_sf()
-  shape_sea_indian <- shape_sea[shape_sea$ID %in% id_indian, ] %>%
-    terra::vect() %>%
-    terra::buffer(width = buffer_sea) %>%
-    sf::st_as_sf()
-  # Calculates the intersection between activity and sea
-  intersect_atlantic <- sf::st_intersects(data_geo_activity, shape_sea_atlantic)
-  intersect_indian <- sf::st_intersects(data_geo_activity, shape_sea_indian)
-  # Logical in sea, indicates whether the ocean is the same
-  data_geo_activity$logical_ocean <- FALSE
-  data_geo_activity$logical_ocean <- (lengths(intersect_atlantic) != 0 & data_geo_activity$ocean_label == "Atlantic") | (lengths(intersect_indian) != 0 & data_geo_activity$ocean_label == "Indian")
-  data_geo_activity$ocean_calculate <- NA
-  data_geo_activity$ocean_calculate[lengths(intersect_atlantic) != 0] <- "Atlantic"
-  data_geo_activity$ocean_calculate[lengths(intersect_indian) != 0] <- "Indian"
-  dataframe1 <- dplyr::left_join(dataframe1, data.frame(data_geo_activity)[, c("activity_id", "logical_ocean", "ocean_calculate")], by = dplyr::join_by(activity_id))
+  # Calculates the intersection between activity and sea and logical in sea, indicates whether the ocean is the same
+  intersect <- data_geo_activity %>%
+    dplyr::mutate(intersect_indice = sf::st_intersects(data_geo_activity, shape_sea_buffer)) %>%
+    dplyr::rowwise() %>%
+    dplyr::mutate(logical_ocean = ocean_label %in% shape_sea_buffer$ID[unlist(intersect_indice)],
+                  ocean_calculate = ifelse(length(shape_sea_buffer$ID[unlist(intersect_indice)]) > 0, paste0(shape_sea_buffer$ID[unlist(intersect_indice)], collapse = " "), NA)) %>%
+    dplyr::ungroup()
+  dataframe1 <- dplyr::left_join(dataframe1, data.frame(intersect)[, c("activity_id", "logical_ocean", "ocean_calculate")], by = dplyr::join_by(activity_id))
   dataframe1$logical_ocean[is.na(dataframe1$logical_ocean)] <- FALSE
-  # Case where the position is exactly on the boundary of the two oceans
-  data_geo_activity$ocean_calculate[lengths(intersect_atlantic) != 0 & lengths(intersect_indian) != 0] <- data_geo_activity$ocean_label[lengths(intersect_atlantic) != 0 & lengths(intersect_indian) != 0]
   # Case of harbour in sea : not in harbour
   dataframe1$logical_harbour[!is.na(dataframe1$ocean_calculate)] <- FALSE
   dataframe1$logical <- dataframe1$logical_ocean | dataframe1$logical_harbour
   # Gives the type of location
   dataframe1$type <- "Sea"
-  dataframe1$type[is.na(dataframe1$ocean_calculate)] <- "Excluding Atlantic Indian oceans"
+  dataframe1$type[is.na(dataframe1$ocean_calculate)] <- "Excluding shapes oceans"
   dataframe1$type[is.na(dataframe1$activity_position)] <- "No position"
   dataframe1$type[dataframe1$logical_harbour] <- "Harbour"
   dataframe1 <- dplyr::relocate(.data = dataframe1, type, ocean_label, ocean_calculate, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(trip_id, harbour_position_departure, harbour_position_landing, logical_harbourdeparture, logical_harbourlanding))
-  activity_sea_land_data_detail <- dataframe1
-  dataframe1 <- subset(dataframe1, select = -c(activity_position, activity_crs, logical_ocean, logical_harbour))
+  activity_sea_land_data_detail <- dataframe1 %>%
+    dplyr::mutate(activity_crs = activity_crs)
+  dataframe1 <- subset(dataframe1, select = -c(activity_position, logical_ocean, logical_harbour))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
@@ -6667,7 +6648,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the ocean declaration is consistent with activity position
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check position inspector", sep = "")
-        check_position_inspector_data <- check_position_inspector(dataframe1 = activity_select, dataframe2 = data_trip, path_shp_sea = system.file("shp", "World_Seas", package = "AkadoR"), output = "report")
+        check_position_inspector_data <- check_position_inspector(dataframe1 = activity_select, dataframe2 = data_trip, dataframe3 = referential_file()[["shape_sea"]], output = "report")
         # Add button and data for plot in table
         check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate"), name_button = "button_position")
         # Uses a function to format the table

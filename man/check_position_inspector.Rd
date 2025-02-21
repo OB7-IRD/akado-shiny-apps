@@ -7,11 +7,10 @@
 check_position_inspector(
   dataframe1,
   dataframe2,
-  path_shp_sea,
+  dataframe3,
   output,
   activity_crs = 4326,
   harbour_crs = 4326,
-  layer_shp_sea = "World_Seas",
   buffer_harbour = 11100,
   buffer_sea = 925
 )
@@ -21,15 +20,13 @@ check_position_inspector(
 
 \item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_position_inspector () function.}
 
-\item{path_shp_sea}{{\link[base]{character}} expected. Path to the folder containing the seas shapefile}
+\item{dataframe3}{{\link[base]{data.frame}} expected. Layer to containing the seas shapefile (example cf : cf : Flanders Marine Institute. IHO Sea Areas, version 1. Available online at https://www.marineregions.org/)}
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
 \item{activity_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position activity}
 
 \item{harbour_crs}{{\link[base]{numeric}} expected. Default values: 4326. Coordinate Reference Systems for the position harbour}
-
-\item{layer_shp_sea}{{\link[base]{character}} expected. Default values: World_Seas. Layer to containing the seas shapefile (cf : Flanders Marine Institute. IHO Sea Areas, version 1. Available online at https://www.marineregions.org/)}
 
 \item{buffer_harbour}{{\link[base]{numeric}} expected. Default values: 11100. Buffer to be used for harbour, in meter}
 
@@ -55,5 +52,10 @@ Dataframe 2:
  \item{\code{  trip_id}}
  \item{\code{  harbour_position_departure}}
  \item{\code{  harbour_position_landing}}
+}
+\itemize{
+Dataframe 3:
+ \item{\code{  ID}}
+ \item{\code{  geometry}}
 }
 }
