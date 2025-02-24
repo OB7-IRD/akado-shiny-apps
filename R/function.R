@@ -2979,7 +2979,7 @@ check_time_route_inspector <- function(dataframe1,
   condition_seatime <- as.list(as.data.frame(t(data.frame(vessel_activity_sea_time, object_operation_sea_time))))
   # Selection of activities that must have sea time
   activity_seatime <- purrr::map(condition_seatime, ~ data_route_activity_objectoperation %>%
-                                   dplyr::filter(vesselactivity_code == .x[1] & objectoperation_code == .x[2]))
+                                   dplyr::filter((vesselactivity_code == .x[1] | (is.na(vesselactivity_code) & is.na(.x[1]))) & (objectoperation_code == .x[2] | (is.na(objectoperation_code) & is.na(.x[2])))))
   activity_seatime <- dplyr::bind_rows(activity_seatime)
   # Count the number of activities requiring time at sea per route
   activity_seatime <- activity_seatime %>%
@@ -2996,7 +2996,7 @@ check_time_route_inspector <- function(dataframe1,
   condition_fishingtime <- as.list(as.data.frame(t(data.frame(vessel_activity_fishing_time, object_operation_fishing_time))))
   # Selection of activities that must have fishing time
   activity_fishingtime <- purrr::map(condition_fishingtime, ~ data_route_activity_objectoperation %>%
-                                       dplyr::filter(vesselactivity_code == .x[1] & objectoperation_code == .x[2]))
+                                       dplyr::filter((vesselactivity_code == .x[1] | (is.na(vesselactivity_code) & is.na(.x[1]))) & (objectoperation_code == .x[2] | (is.na(objectoperation_code) & is.na(.x[2])))))
   activity_fishingtime <- dplyr::bind_rows(activity_fishingtime)
   # Count the number of activities requiring time at sea per route
   activity_fishingtime <- activity_fishingtime %>%
