@@ -52,7 +52,7 @@
 <span>  <span class="va">dataframe2</span>,</span>
 <span>  <span class="va">dataframe3</span>,</span>
 <span>  <span class="va">output</span>,</span>
-<span>  vesseltype <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"5"</span>, <span class="st">"6"</span>, <span class="st">"10"</span><span class="op">)</span></span>
+<span>  vessel_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"5"</span>, <span class="st">"6"</span>, <span class="st">"10"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -76,7 +76,7 @@
 <dd><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> expected. Kind of expected output. You can choose between "message", "report" or "logical".</p></dd>
 
 
-<dt id="arg-vesseltype">vesseltype<a class="anchor" aria-label="anchor" href="#arg-vesseltype"></a></dt>
+<dt id="arg-vessel-type">vessel_type<a class="anchor" aria-label="anchor" href="#arg-vessel-type"></a></dt>
 <dd><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> expected. Default values: c("5", "6", "10"). Vector of codes for vessel types with a well plan.</p></dd>
 
 </dl></div>
@@ -88,13 +88,11 @@
     <h2>Details</h2>
     <p>The input dataframe must contain all these columns for the function to work :</p><ul><li><p><code>  sample_id</code></p></li>
 <li><p><code>  sample_well</code></p></li>
-<li><p><code>  trip_id</code>
-Dataframe 2:</p></li>
-<li><p><code>  well_id</code></p></li>
 <li><p><code>  trip_id</code></p></li>
-<li><p><code>  well_label</code>
-Dataframe 3:</p></li>
+</ul><ul><li><p><code>  well_id</code></p></li>
 <li><p><code>  trip_id</code></p></li>
+<li><p><code>  well_label</code></p></li>
+</ul><ul><li><p><code>  trip_id</code></p></li>
 <li><p><code>  vesseltype_code</code></p></li>
 </ul></div>
 

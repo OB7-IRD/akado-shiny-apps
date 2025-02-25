@@ -55,7 +55,7 @@
 <span>  harbour_crs <span class="op">=</span> <span class="fl">4326</span>,</span>
 <span>  vms_crs <span class="op">=</span> <span class="fl">4326</span>,</span>
 <span>  <span class="va">output</span>,</span>
-<span>  minimum_number_vms <span class="op">=</span> <span class="fl">20</span>,</span>
+<span>  threshold_number_vms <span class="op">=</span> <span class="fl">20</span>,</span>
 <span>  threshold_geographical <span class="op">=</span> <span class="fl">10</span>,</span>
 <span>  threshold_time <span class="op">=</span> <span class="fl">7200000</span>,</span>
 <span>  buffer_harbour <span class="op">=</span> <span class="fl">11100</span></span>
@@ -94,7 +94,7 @@
 <dd><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> expected. Kind of expected output. You can choose between "message", "report" or "logical".</p></dd>
 
 
-<dt id="arg-minimum-number-vms">minimum_number_vms<a class="anchor" aria-label="anchor" href="#arg-minimum-number-vms"></a></dt>
+<dt id="arg-threshold-number-vms">threshold_number_vms<a class="anchor" aria-label="anchor" href="#arg-threshold-number-vms"></a></dt>
 <dd><p><a href="https://rdrr.io/r/base/numeric.html" class="external-link">numeric</a> expected. Default values: 20. Minimum number of VMS positions required.</p></dd>
 
 
@@ -120,14 +120,12 @@
 <li><p><code>  activity_date</code></p></li>
 <li><p><code>  activity_time</code></p></li>
 <li><p><code>  activity_position</code></p></li>
-<li><p><code>  trip_id</code>
-Dataframe 2:</p></li>
 <li><p><code>  trip_id</code></p></li>
+</ul><ul><li><p><code>  trip_id</code></p></li>
 <li><p><code>  vessel_code</code></p></li>
 <li><p><code>  harbour_position_departure</code></p></li>
-<li><p><code>  harbour_position_landing</code>
-Dataframe 3:</p></li>
-<li><p><code>  vms_date</code></p></li>
+<li><p><code>  harbour_position_landing</code></p></li>
+</ul><ul><li><p><code>  vms_date</code></p></li>
 <li><p><code>  vms_time</code></p></li>
 <li><p><code>  vms_position</code></p></li>
 <li><p><code>  vessel_code</code></p></li>
