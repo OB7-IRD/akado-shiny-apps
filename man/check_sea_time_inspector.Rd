@@ -33,3 +33,11 @@ Dataframe 2:
  \item{\code{  route_seatime}}
 }
 }
+\examples{
+dataframe1 <- data.frame(trip_id = c("1", "2"),
+                         trip_seatime = c(10, 15))
+dataframe2 <- data.frame(route_id = c("1", "2", "3", "4"),
+                         trip_id = c("1", "1", "2", "2"),
+                         route_seatime = c(4, 6, 10, 6))
+check_sea_time_inspector(dataframe1, dataframe2, output = "report")
+}

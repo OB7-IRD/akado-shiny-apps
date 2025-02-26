@@ -33,3 +33,11 @@ Dataframe 2:
  \item{\code{  harbour_label_landing}}
 }
 }
+\examples{
+dataframe1 <- data.frame(sample_id = c("1", "2"),
+                         trip_id = c("1", "2"))
+dataframe2 <- data.frame(trip_id = c("1"),
+                         harbour_id_landing = c("1"),
+                         harbour_label_landing = c("harbour_1"))
+check_sample_harbour_inspector(dataframe1, dataframe2, output = "report")
+}

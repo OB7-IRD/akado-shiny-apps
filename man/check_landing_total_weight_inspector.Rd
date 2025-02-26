@@ -40,3 +40,11 @@ Dataframe 2:
  \item{\code{  trip_id}}
 }
 }
+\examples{
+dataframe1 <- data.frame(trip_id = c("1", "2"),
+                         trip_landingtotalweight = c(10, 15))
+dataframe2 <- data.frame(landing_id = c("1", "2", "3", "4"),
+                         landing_weight = c(4, 6, 10, 6),
+                         trip_id = c("1", "1", "2", "2"))
+check_landing_total_weight_inspector(dataframe1, dataframe2, output = "report")
+}

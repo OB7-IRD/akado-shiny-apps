@@ -35,3 +35,11 @@ Dataframe 2:
  \item{\code{  activity_id}}
 }
 }
+\examples{
+dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
+                         activity_weight = c(10, 15.01, 6))
+dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5"),
+                         catch_weight = c(10, 10, 5, 3, 2),
+                         activity_id = c("1", "2", "2", "3", "3"))
+check_weight_inspector(dataframe1, dataframe2, output = "report")
+}

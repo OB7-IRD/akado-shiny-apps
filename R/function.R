@@ -16,6 +16,11 @@
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  activity_id}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(trip_id = c("1", "2"))
+#' dataframe2 <- data.frame(trip_id = c("1"),
+#'                          activity_id = c("1"))
+#' check_trip_activity_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_trip_activity_inspector <- function(dataframe1,
                                           dataframe2,
@@ -37,7 +42,7 @@ check_trip_activity_inspector <- function(dataframe1,
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("trip_id")]
+    dataframe1 <- dataframe1[, c("trip_id"), drop = FALSE]
   }
   if (!codama::r_table_checking(
     r_table = dataframe2,
@@ -142,6 +147,13 @@ check_trip_activity_inspector <- function(dataframe1,
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  route_fishingtime}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(trip_id = c("1", "2"),
+#'                          trip_fishingtime = c(10, 15))
+#' dataframe2 <- data.frame(route_id = c("1", "2", "3", "4"),
+#'                          trip_id = c("1", "1", "2", "2"),
+#'                          route_fishingtime = c(4, 6, 10, 6))
+#' check_fishing_time_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_fishing_time_inspector <- function(dataframe1,
                                          dataframe2,
@@ -278,6 +290,13 @@ check_fishing_time_inspector <- function(dataframe1,
 #'  \item{\code{  trip_id}}
 #'  \item{\code{  route_seatime}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(trip_id = c("1", "2"),
+#'                          trip_seatime = c(10, 15))
+#' dataframe2 <- data.frame(route_id = c("1", "2", "3", "4"),
+#'                          trip_id = c("1", "1", "2", "2"),
+#'                          route_seatime = c(4, 6, 10, 6))
+#' check_sea_time_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_sea_time_inspector <- function(dataframe1,
                                      dataframe2,
@@ -412,6 +431,12 @@ check_sea_time_inspector <- function(dataframe1,
 #'  \item{\code{  trip_localmarkettotalweight}}
 #'  \item{\code{  vessel_capacity}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(trip_id = c("1", "2"),
+#'                          trip_landingtotalweight = c(10, 15),
+#'                          trip_localmarkettotalweight = c(2, 0),
+#'                          vessel_capacity = c(20, 10))
+#' check_landing_consistent_inspector(dataframe1, output = "report")
 #' @export
 check_landing_consistent_inspector <- function(dataframe1,
                                                output) {
@@ -529,6 +554,13 @@ check_landing_consistent_inspector <- function(dataframe1,
 #'  \item{\code{  landing_weight}}
 #'  \item{\code{  trip_id}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(trip_id = c("1", "2"),
+#'                          trip_landingtotalweight = c(10, 15))
+#' dataframe2 <- data.frame(landing_id = c("1", "2", "3", "4"),
+#'                          landing_weight = c(4, 6, 10, 6),
+#'                          trip_id = c("1", "1", "2", "2"))
+#' check_landing_total_weight_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_landing_total_weight_inspector <- function(dataframe1,
                                                  dataframe2,
@@ -689,6 +721,14 @@ check_landing_total_weight_inspector <- function(dataframe1,
 #'  \item{\code{  activity_date}}
 #'  \item{\code{  trip_id}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(trip_id = c("1", "2"),
+#'                          trip_startdate = as.Date(c("2020/01/01", "2020/01/01")),
+#'                          trip_enddate = as.Date(c("2020/01/02", "2020/01/02")))
+#' dataframe2 <- data.frame(route_id = c("1", "2", "3", "4", "5"),
+#'    activity_date = as.Date(c("2020/01/01", "2020/01/02", "2020/01/01", "2020/01/02", "2020/01/03")),
+#'    trip_id = c("1", "1", "2", "2", "2"))
+#' check_temporal_limit_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_temporal_limit_inspector <- function(dataframe1,
                                            dataframe2,
@@ -858,6 +898,14 @@ check_temporal_limit_inspector <- function(dataframe1,
 #'  \item{\code{  harbour_id_landing_trip_previous}}
 #'  \item{\code{  harbour_label_landing_trip_previous}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(trip_id = c("1", "2", "3"),
+#'                          harbour_id_departure = c("1", "2", "3"),
+#'                          harbour_label_departure = c("Harbour_1", "Harbour_2", "Harbour_3"),
+#'                          trip_previous_id = c(NA, "1", "2"),
+#'                          harbour_id_landing_trip_previous = c(NA, "2", "2"),
+#'                          harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2"))
+#' check_harbour_inspector(dataframe1, output = "report")
 #' @export
 check_harbour_inspector <- function(dataframe1,
                                     output) {
@@ -999,6 +1047,23 @@ check_harbour_inspector <- function(dataframe1,
 #'  \item{\code{  vessel_id}}
 #'  \item{\code{  country_fleetcountry}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4"))
+#' dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5", "6"),
+#'                          catch_weight = c(10, 2, 15, 8, 5, 25),
+#'                          speciesfate_code = c("6", "6", "1", "6", "6", "6"),
+#'                          species_fao_code = c("TUN", "TUN", "TUN", "TUN", "TUN", "TUN"),
+#'                          vesselactivity_code = c("1", "1", "1", "1", "1", "1"),
+#'                          trip_id = c("1", "1", "1", "2", "2", "3"))
+#' dataframe3 <- data.frame(landing_id = c("1" , "2", "3", "4"),
+#'                          landing_weight = c(9, 2, 8, 25),
+#'                          species_fao_code = c("TUN", "TUN", "TUN", "TUN"),
+#'                          trip_id = c("1", "1", "2", "4"))
+#' dataframe4 <- data.frame(trip_id = c("1", "2", "3", "4"),
+#'                          trip_end_full_trip_id = c("1", "2", "4", "4"),
+#'                          vessel_id = c("1", "1", "1", "1"),
+#'                          country_fleetcountry = c("1", "1", "1", "1"))
+#' check_raising_factor_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
 #' @export
 check_raising_factor_inspector <- function(dataframe1,
                                            dataframe2,
@@ -1042,7 +1107,7 @@ check_raising_factor_inspector <- function(dataframe1,
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("trip_id")]
+    dataframe1 <- dataframe1[, c("trip_id"), drop = FALSE]
   }
   if (!codama::r_table_checking(
     r_table = dataframe2,
@@ -1276,7 +1341,7 @@ check_raising_factor_inspector <- function(dataframe1,
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_context_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_context_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param school_type_object {\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.
+#' @param school_type {\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -1291,11 +1356,18 @@ check_raising_factor_inspector <- function(dataframe1,
 #'  \item{\code{  activity_id}}
 #'  \item{\code{  schooltype_code}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
+#'                          schooltype_code = c("2", "1", "2"))
+#' dataframe2 <- data.frame(observedsystem_id = c("1", "2", "3", "4"),
+#'                          activity_id = c("1", "2", "2", "3"),
+#'                          schooltype_code = c("2", "2", "1", "1"))
+#' check_fishing_context_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_fishing_context_inspector <- function(dataframe1,
                                             dataframe2,
                                             output,
-                                            school_type_object = c("1")) {
+                                            school_type = c("1")) {
   # 0 - Global variables assignement ----
   activity_id <- NULL
   schooltype_code <- NULL
@@ -1351,12 +1423,12 @@ check_fishing_context_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = school_type_object,
+    r_object = school_type,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = school_type_object,
+      r_object = school_type,
       type = "character",
       output = "message"
     ))
@@ -1365,7 +1437,7 @@ check_fishing_context_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Filters out object-school associations
-  dataframe2 <- dataframe2 %>% dplyr::filter(schooltype_code %in% school_type_object)
+  dataframe2 <- dataframe2 %>% dplyr::filter(schooltype_code %in% school_type)
   # Calculates the number of object-type associations
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(activity_id) %>%
@@ -1447,6 +1519,13 @@ check_fishing_context_inspector <- function(dataframe1,
 #'  \item{\code{  activity_weight}}
 #'  \item{\code{  vesselactivity_code}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
+#'                          schooltype_code = c("2", "1", "2"),
+#'                          successstatus_code = c("1", "0", "2"),
+#'                          activity_weight = c(10, 0, 0),
+#'                          vesselactivity_code = c("6", "6", "6"))
+#' check_operation_inspector(dataframe1, output = "report")
 #' @export
 check_operation_inspector <- function(dataframe1,
                                       output,
@@ -1654,6 +1733,19 @@ check_operation_inspector <- function(dataframe1,
 #'  \item{\code{  ID}}
 #'  \item{\code{  geometry}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5"),
+#'  ocean_label = c("ocean_1", "ocean_2", "ocean_2", "ocean_2", "ocean_2"),
+#'  activity_position = c("POINT (0 0)", "POINT (0 0)", "POINT (-1 -1)", "POINT (1 1)", "POINT (3 3)"),
+#'  trip_id = c("1", "2", "2", "2", "2"))
+#' dataframe2 <- data.frame(trip_id = c("1", "2"),
+#'                          harbour_position_departure = c("POINT (20 20)", "POINT (-1.05 -1)"),
+#'                          harbour_position_landing = c("POINT (20 20)", "POINT (20 20)"))
+#' dataframe3 <- sf::st_sf(data.frame(ID = c("ocean_1", "ocean_2"),
+#'           geometry = sf::st_sfc(sf::st_polygon(list(rbind(c(0,0), c(2,0), c(2,2), c(0,2), c(0,0)))),
+#'                                 sf::st_polygon(list(rbind(c(0,1), c(3,1), c(3,2), c(0,2), c(0,1)))),
+#'                                 crs = 4326)))
+#' check_position_inspector(dataframe1, dataframe2, dataframe3, output = "report")
 #' @export
 check_position_inspector <- function(dataframe1,
                                      dataframe2,
@@ -1959,6 +2051,13 @@ check_position_inspector <- function(dataframe1,
 #'  \item{\code{  catch_weight}}
 #'  \item{\code{  activity_id}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
+#'                          activity_weight = c(10, 15.01, 6))
+#' dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5"),
+#'                          catch_weight = c(10, 10, 5, 3, 2),
+#'                          activity_id = c("1", "2", "2", "3", "3"))
+#' check_weight_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_weight_inspector <- function(dataframe1,
                                    dataframe2,
@@ -2107,7 +2206,7 @@ check_weight_inspector <- function(dataframe1,
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values: c("YFT", "BET", "ALB"). Vector of the species inventory controlled.
 #' @param size_measure_type {\link[base]{character}} expected. Default values: "FL". Vector of the size measure type controlled.
-#' @param threshold {\link[base]{numeric}} expected. Default values: 80. Threshold of the size measure
+#' @param threshold {\link[base]{numeric}} expected. Default values: 80. Maximum size threshold measured
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -2118,6 +2217,12 @@ check_weight_inspector <- function(dataframe1,
 #'  \item{\code{  sizemeasuretype_code}}
 #'  \item{\code{  samplespeciesmeasure_sizeclass}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4"),
+#'                          species_fao_code = c("YFT", "YFT", "LTA", "YFT"),
+#'                          sizemeasuretype_code = c("FL", "PD1", "FL", "FL"),
+#'                          samplespeciesmeasure_sizeclass = c(10, 90, 85, 83))
+#' check_length_class_inspector(dataframe1, output = "report")
 #' @export
 check_length_class_inspector <- function(dataframe1,
                                          output,
@@ -2290,6 +2395,14 @@ check_length_class_inspector <- function(dataframe1,
 #'  \item{\code{  samplespeciesmeasure_count}}
 #'  \item{\code{  sample_id}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(samplespecies_id = c("1", "2", "3", "4"),
+#'                          samplespecies_measuredcount = c(4, 6, 15, 6),
+#'                          sample_id = c("1", "1", "2", "3"))
+#' dataframe2 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4", "5"),
+#'                          samplespeciesmeasure_count = c(10, 10, 5, 3, 2),
+#'                          sample_id = c("1", "2", "2", "3", "3"))
+#' check_measure_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_measure_inspector <- function(dataframe1,
                                     dataframe2,
@@ -2427,6 +2540,10 @@ check_measure_inspector <- function(dataframe1,
 #'  \item{\code{  activity_id}}
 #'  \item{\code{  activity_seasurfacetemperature}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
+#'                          activity_seasurfacetemperature = c(20, 4, 35))
+#' check_temperature_inspector(dataframe1, output = "report")
 #' @export
 check_temperature_inspector <- function(dataframe1,
                                         output,
@@ -2569,6 +2686,16 @@ check_temperature_inspector <- function(dataframe1,
 #'  \item{\code{  activity_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(catch_id = c("1", "2", "3", "4", "5"),
+#'                          catch_weight = c(4, 2, 5, 10, 3),
+#'                          speciesfate_code = c("6", "6", "6", "6", "6"),
+#'                          species_fao_code = c("YFT", "JOS", "ALB", "YFT", "YFT"),
+#'                          activity_id = c("1", "1", "1", "2", "2"))
+#' dataframe2 <- data.frame(sample_id = c("1", "1", "2"),
+#'                          sampleactivity_weightedweight = c(3, 6, 12.5),
+#'                          activity_id = c("1", "1", "2"))
+#' check_weighting_sample_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_weighting_sample_inspector <- function(dataframe1,
                                              dataframe2,
@@ -2777,6 +2904,17 @@ check_weighting_sample_inspector <- function(dataframe1,
 #'  \item{\code{  objectoperation_code}}
 #'  \item{\code{  activity_id}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(route_id = c("1", "2"),
+#'                          route_seatime = c(6, 2),
+#'                          route_fishingtime = c(5,0))
+#' dataframe2 <- data.frame(activity_id = c("1", "2", "3", "4"),
+#'                          vesselactivity_code = c("2","13", "103","15"),
+#'                          route_id = c("1", "1", "2", "2"))
+#' dataframe3 <- data.frame(floatingobject_id = c("1"),
+#'                          objectoperation_code = c("1"),
+#'                          activity_id = c("2"))
+#' check_time_route_inspector(dataframe1, dataframe2, dataframe3, output = "report")
 #' @export
 check_time_route_inspector <- function(dataframe1,
                                        dataframe2,
@@ -3079,6 +3217,19 @@ check_time_route_inspector <- function(dataframe1,
 #'  \item{\code{  ISO_TER3}}
 #'  \item{\code{  geometry}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4"),
+#'               vesselactivity_code = c("6", "6", "6", "6"),
+#'               fpazone_code = c("SYC", "XSG", "XIN", "SYC"),
+#'               fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC"),
+#'               activity_position = c("POINT (1 1)", "POINT (4 3)", "POINT (-1 -1)", "POINT (-1 -1)"))
+#' dataframe2 <- sf::st_sf(data.frame(ISO_TER1 = c("SYC", "XSG"),
+#'           ISO_TER2 = c(NA, NA),
+#'           ISO_TER3 = c(NA, NA),
+#'           geometry = sf::st_sfc(sf::st_polygon(list(rbind(c(0,0), c(2,0), c(2,2), c(0,2), c(0,0)))),
+#'                                 sf::st_polygon(list(rbind(c(3,3), c(3,5), c(5,5), c(5,3), c(3,3)))),
+#'                                 crs = 4326)))
+#' check_eez_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_eez_inspector <- function(dataframe1,
                                 dataframe2,
@@ -3268,6 +3419,10 @@ check_eez_inspector <- function(dataframe1,
 #'  \item{\code{  samplespecies_id}}
 #'  \item{\code{  species_fao_code}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(samplespecies_id = c("1", "2"),
+#'                          species_fao_code = c("YFT", "JOS"))
+#' check_species_inspector(dataframe1, output = "report")
 #' @export
 check_species_inspector <- function(dataframe1,
                                     output,
@@ -3383,10 +3538,15 @@ check_species_inspector <- function(dataframe1,
 #' }
 #' \itemize{
 #' Dataframe 2:
-#'  \item{\code{  samplespecies_id}}
 #'  \item{\code{  samplespeciesmeasure_id}}
+#'  \item{\code{  samplespecies_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(samplespecies_id = c("1", "2"))
+#' dataframe2 <- data.frame(samplespeciesmeasure_id = c("1", "2"),
+#'                          samplespecies_id = c("1", "1"))
+#' check_sample_without_measure_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_sample_without_measure_inspector <- function(dataframe1,
                                                    dataframe2,
@@ -3408,7 +3568,7 @@ check_sample_without_measure_inspector <- function(dataframe1,
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("samplespecies_id")]
+    dataframe1 <- dataframe1[, c("samplespecies_id"), drop = FALSE]
   }
   if (!codama::r_table_checking(
     r_table = dataframe2,
@@ -3507,10 +3667,15 @@ check_sample_without_measure_inspector <- function(dataframe1,
 #' }
 #' \itemize{
 #' Dataframe 2:
-#'  \item{\code{  sample_id}}
 #'  \item{\code{  samplespecies_id}}
+#'  \item{\code{  sample_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(sample_id = c("1", "2"))
+#' dataframe2 <- data.frame(samplespecies_id = c("1", "2"),
+#'                          sample_id = c("1", "1"))
+#' check_sample_without_species_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_sample_without_species_inspector <- function(dataframe1,
                                                    dataframe2,
@@ -3532,7 +3697,7 @@ check_sample_without_species_inspector <- function(dataframe1,
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("sample_id")]
+    dataframe1 <- dataframe1[, c("sample_id"), drop = FALSE]
   }
   if (!codama::r_table_checking(
     r_table = dataframe2,
@@ -3637,6 +3802,13 @@ check_sample_without_species_inspector <- function(dataframe1,
 #'  \item{\code{  sample_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"),
+#'                          sample_supersample = c(FALSE, TRUE, FALSE, TRUE))
+#' dataframe2 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5", "6"),
+#'                          samplespecies_subsamplenumber = c(0, 1, 2, 1, 1, 1),
+#'                          sample_id = c("1", "2", "2", "3", "4", "4"))
+#' check_super_sample_number_consistent_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_super_sample_number_consistent_inspector <- function(dataframe1,
                                                            dataframe2,
@@ -3801,6 +3973,16 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
 #'  \item{\code{  vesseltype_code}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"),
+#'                          sample_well = c("well_1", "well_2", "well_2", "well_2"),
+#'                          trip_id = c("1", "1", "2", "3"))
+#' dataframe2 <- data.frame(well_id = c("1", "2", "3"),
+#'                          trip_id = c("1", "1", "3"),
+#'                          well_label = c("well_1", "well_2", "well_1"))
+#' dataframe3 <- data.frame(trip_id = c("1", "2", "3"),
+#'                          vesseltype_code = c("6", "1", "6"))
+#' check_well_number_consistent_inspector(dataframe1, dataframe2, dataframe3, output = "report")
 #' @export
 check_well_number_consistent_inspector <- function(dataframe1,
                                                    dataframe2,
@@ -3981,6 +4163,20 @@ check_well_number_consistent_inspector <- function(dataframe1,
 #'  \item{\code{  samplespecies_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"),
+#'                          sample_smallsweight = c(10, 20, 1, 30),
+#'                          sample_bigsweight = c(NA, 2, 9, 3),
+#'                          sample_totalweight = c(NA, NA, NA, 33))
+#' dataframe2 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5"),
+#'                          species_fao_code = c("YFT", "BET", "BET", "YFT", "ALB"),
+#'                          sizemeasuretype_code = c("PD1", "PD1", "FL","PD1", "FL"),
+#'                          sample_id = c("1", "2", "2", "3", "4"))
+#' dataframe3 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4", "5"),
+#'                          samplespeciesmeasure_sizeclass = c(20, 26, 70, 20, 10),
+#'                          samplespeciesmeasure_count = c(5, 1, 9, 8, 10),
+#'                          samplespecies_id = c("1", "2", "3", "4", "5"))
+#' check_little_big_inspector(dataframe1, dataframe2, dataframe3, output = "report")
 #' @export
 check_little_big_inspector <- function(dataframe1,
                                        dataframe2,
@@ -4288,11 +4484,29 @@ check_little_big_inspector <- function(dataframe1,
 #' }
 #' \itemize{
 #' Dataframe 4:
-#'  \item{\code{  trip_id}}
+#'  \item{\code{  landing_id}}
 #'  \item{\code{  landing_weight}}
 #'  \item{\code{  weightcategory_code}}
+#'  \item{\code{  trip_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5"),
+#'                          sample_smallsweight = c(10, 32, 2.5, 30, 12),
+#'                          sample_bigsweight = c(50, 2, 9, 3, 6),
+#'                          sample_totalweight = c(NA, NA, NA, 33, 8),
+#'                          trip_id =  c("1", "1", "2", "3", "4"),
+#'                          sampletype_code = c("1", "1", "1", "11", "11"))
+#' dataframe2 <- data.frame(sample_id = c("1", "1", "2", "3", "4", "5"),
+#'                          sampleactivity_weightedweight = c(70, 5, 18, 12, 33, 5))
+#' dataframe3 <- data.frame(trip_id = c("1", "2", "3", "4"),
+#'           vesseltype_code = c("6", "6", "2", "2"),
+#'           vesseltype_label1 = c("vessel_type_1", "vessel_type_1", "vessel_type_2", "vessel_type_2"))
+#' dataframe4 <- data.frame(landing_id = c("1", "2", "3", "4", "5"),
+#'                          landing_weight = c(85, 26, 30, 2.6, 20),
+#'                          weightcategory_code = c("W-1", "W-1", "L-YFT-10", "L-YFT-10", "L-YFT-10"),
+#'                          trip_id = c("1", "2", "3", "3", "4"))
+#' check_weighting_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
 #' @export
 check_weighting_inspector <- function(dataframe1,
                                       dataframe2,
@@ -4316,11 +4530,11 @@ check_weighting_inspector <- function(dataframe1,
   weightcategory_code <- NULL
   landing_weight <- NULL
   weightedweight <- NULL
-  sum_landing_weight <- NULL
+  sum_landing_weight_baitboat <- NULL
   weight <- NULL
   vesseltype_code <- NULL
   weightedweight_bis <- NULL
-  sum_landing_weight_bis <- NULL
+  sum_landing_weight_baitboat_bis <- NULL
   sampletype_code <- NULL
   vesseltype_label <- NULL
   # 1 - Arguments verification ----
@@ -4378,19 +4592,19 @@ check_weighting_inspector <- function(dataframe1,
   if (!codama::r_table_checking(
     r_table = dataframe4,
     type = "data.frame",
-    column_name = c("trip_id", "landing_weight", "weightcategory_code"),
-    column_type = c("character", "numeric", "character"),
+    column_name = c("landing_id", "trip_id", "landing_weight", "weightcategory_code"),
+    column_type = c("character", "character", "numeric", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe4,
       type = "data.frame",
-      column_name = c("trip_id", "landing_weight", "weightcategory_code"),
-      column_type = c("character", "numeric", "character"),
+      column_name = c("landing_id", "trip_id", "landing_weight", "weightcategory_code"),
+      column_type = c("character", "character", "numeric", "character"),
       output = "message"
     )
   } else {
-    dataframe4 <- dataframe4[, c("trip_id", "landing_weight", "weightcategory_code")]
+    dataframe4 <- dataframe4[, c("landing_id", "trip_id", "landing_weight", "weightcategory_code")]
   }
   # Checks the type and values of output
   if (!codama::r_type_checking(
@@ -4498,29 +4712,29 @@ check_weighting_inspector <- function(dataframe1,
   dataframe4 <- dataframe4 %>%
     dplyr::group_by(trip_id) %>%
     dplyr::filter(weightcategory_code %in% landing_type_baitboat) %>%
-    dplyr::summarise(sum_landing_weight = ifelse(all(is.na(landing_weight)), 0, sum(landing_weight, na.rm = TRUE)))
+    dplyr::summarise(sum_landing_weight_baitboat = ifelse(all(is.na(landing_weight)), 0, sum(landing_weight, na.rm = TRUE)))
   # Merge
   dataframe1$logical <- TRUE
   dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(sample_id))
   dataframe1 <- dplyr::left_join(dataframe1, dataframe3, by = dplyr::join_by(trip_id))
   dataframe1 <- dplyr::left_join(dataframe1, dataframe4, by = dplyr::join_by(trip_id))
-  # Case of NA weightedweight or sum_landing_weight
+  # Case of NA weightedweight or sum_landing_weight_baitboat
   dataframe1 <- dataframe1 %>%
     dplyr::mutate(
       weightedweight_bis = dplyr::coalesce(weightedweight, 0),
-      sum_landing_weight_bis = dplyr::coalesce(sum_landing_weight, 0)
+      sum_landing_weight_baitboat_bis = dplyr::coalesce(sum_landing_weight_baitboat, 0)
     )
   # Check
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weight > threshold_weight, "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[1] & dataframe1$weightedweight_bis < dataframe1$weight & !((dataframe1$weightedweight_bis / dataframe1$weight) >= threshold_ratio), "logical"] <- FALSE
-  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sample_type_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_bis) > threshold_baitboat, "logical"] <- FALSE
+  dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & dataframe1$sampletype_code %in% sample_type_code_landing_baitboat & abs(dataframe1$weightedweight_bis - dataframe1$sum_landing_weight_baitboat_bis) > threshold_baitboat, "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & !is.na(dataframe1$sampletype_code) & !(dataframe1$sampletype_code %in% sample_type_code_landing_baitboat) & abs(dataframe1$weightedweight_bis - dataframe1$weight) > threshold_baitboat, "logical"] <- FALSE
   # Case NA vesseltype_code sampletype_code
   dataframe1[is.na(dataframe1$vesseltype_code), "logical"] <- FALSE
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vesseltype_code, weightedweight_bis, sum_landing_weight_bis))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_label, sum_landing_weight, .after = logical)
+  dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vesseltype_code, weightedweight_bis, sum_landing_weight_baitboat_bis))
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_label, sum_landing_weight_baitboat, .after = logical)
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -4576,6 +4790,12 @@ check_weighting_inspector <- function(dataframe1,
 #'  \item{\code{  sample_totalweight}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(sample_id = c("1", "2", "3"),
+#'                          sample_smallsweight = c(10, NA, 12),
+#'                          sample_bigsweight = c(50, NA, NA),
+#'                          sample_totalweight = c(NA, 9, 5))
+#' check_weight_sample_inspector(dataframe1, output = "report")
 #' @export
 check_weight_sample_inspector <- function(dataframe1,
                                           output) {
@@ -4701,6 +4921,11 @@ check_weight_sample_inspector <- function(dataframe1,
 #'  \item{\code{  activity_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(sample_id = c("1", "2"))
+#' dataframe2 <- data.frame(sample_id = c("1"),
+#'                          activity_id = c("1"))
+#' check_activity_sample_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_activity_sample_inspector <- function(dataframe1,
                                             dataframe2,
@@ -4722,7 +4947,7 @@ check_activity_sample_inspector <- function(dataframe1,
       output = "message"
     )
   } else {
-    dataframe1 <- dataframe1[, c("sample_id")]
+    dataframe1 <- dataframe1[, c("sample_id"), drop = FALSE]
   }
   if (!codama::r_table_checking(
     r_table = dataframe2,
@@ -4833,6 +5058,16 @@ check_activity_sample_inspector <- function(dataframe1,
 #'  \item{\code{  sample_totalweight}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5"),
+#'                          species_fao_code = c("SKJ", "SKJ", "JOS", "SKJ", "SKJ"),
+#'                          sizemeasuretype_code = c("FL", "PD1", "PD1", "FL", "FL"),
+#'                          sample_id = c("1", "1", "1", "2", "3"))
+#' dataframe2 <- data.frame(sample_id = c("1", "2", "3"),
+#'                          sample_smallsweight = c(5, 0, 0),
+#'                          sample_bigsweight = c(12, NA, 6),
+#'                          sample_totalweight = c(0, 23, NA))
+#' check_ldlf_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_ldlf_inspector <- function(dataframe1,
                                  dataframe2,
@@ -5048,7 +5283,7 @@ check_ldlf_inspector <- function(dataframe1,
 #' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  well_id}}
-#'  \item{\code{  well_well}}
+#'  \item{\code{  well_label}}
 #'  \item{\code{  trip_id}}
 #' }
 #' \itemize{
@@ -5065,6 +5300,23 @@ check_ldlf_inspector <- function(dataframe1,
 #'  \item{\code{  wellactivityspecies_weight}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(sample_id = c("1", "2", "3"),
+#'                          sample_well = c("well_1", "well_2", "well_3"),
+#'                          trip_id = c("1", "1", "1"),
+#'                          sample_smallsweight = c(6, 25, 14),
+#'                          sample_bigsweight = c(12, 0, 9))
+#' dataframe2 <- data.frame(well_id = c("1", "2", "3"),
+#'                          well_label = c("well_1", "well_2", "well_3"),
+#'                          trip_id = c("1", "1", "1"))
+#' dataframe3 <- data.frame(wellactivity_id = c("1", "2", "3", "4"),
+#'                          well_id = c("1", "1", "2", "3"))
+#' dataframe4 <- data.frame(wellactivityspecies_id = c("1", "2", "3", "4", "5", "6", "7"),
+#'                          wellactivity_id = c("1", "1", "1", "2", "3", "4", "4"),
+#'                          weightcategory_code = c("W-1", "W-9", "W-2", "W-2", "W-1", "W-2", "W-9"),
+#'                          species_fao_code = c("BET", "SKJ", "SKJ", "ALB", "SKJ", "BET", "BET"),
+#'                          wellactivityspecies_weight = c(4, 2, 7, 5, 25, 9, 14))
+#' check_distribution_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
 #' @export
 check_distribution_inspector <- function(dataframe1,
                                          dataframe2,
@@ -5339,6 +5591,13 @@ check_distribution_inspector <- function(dataframe1,
 #'  \item{\code{  harbour_label_landing}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(sample_id = c("1", "2"),
+#'                          trip_id = c("1", "2"))
+#' dataframe2 <- data.frame(trip_id = c("1"),
+#'                          harbour_id_landing = c("1"),
+#'                          harbour_label_landing = c("harbour_1"))
+#' check_sample_harbour_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_sample_harbour_inspector <- function(dataframe1,
                                            dataframe2,
@@ -5484,6 +5743,21 @@ check_sample_harbour_inspector <- function(dataframe1,
 #'  \item{\code{  vessel_code}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", two {\link[base]{data.frame}} with output is "report" (the first without geographical location and the second with geographical location), a {\link[base]{logical}} with output is "logical"
+#' @examples
+#' dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4"),
+#'                  activity_date = as.Date(c("2020/01/01", "2020/01/12", "2020/01/12", "2020/01/13")),
+#'                  activity_time = c("05:26:01", "10:41:15", "16:41:15", "03:12:34"),
+#'                  activity_position = c("POINT (1 1)", "POINT (0 0)", "POINT (3 0)", "POINT (4 4)"),
+#'                  trip_id = c("1", "2", "2", "2"))
+#' dataframe2 <- data.frame(trip_id = c("1", "2"),
+#'                          vessel_code = c("1", "1"),
+#'                          harbour_position_departure = c("POINT (1 1.1)", "POINT (3 3)"),
+#'                          harbour_position_landing = c("POINT (3 3)", "POINT (3 3)"))
+#' dataframe3 <- data.frame(vms_date = as.Date(c("2020/01/01", "2020/01/12", "2020/01/12")),
+#'                          vms_time = c("15:26:01", "10:55:15", "22:32:17"),
+#'                          vms_position = c("POINT (4 4)", "POINT (0 0.1)", "POINT (3 0.3)"),
+#'                          vessel_code = c("1", "1", "1"))
+#' check_anapo_inspector(dataframe1,dataframe2, dataframe3, output = "report",threshold_number_vms = 1)
 #' @export
 check_anapo_inspector <- function(dataframe1,
                                   dataframe2,
@@ -5925,6 +6199,16 @@ check_anapo_inspector <- function(dataframe1,
 #'  \item{\code{  activity_date}}
 #'  \item{\code{  vessel_code}}
 #' }
+#' @examples
+#' dataframe1 <- data.frame(vms_id = c("1", "2", "3", "4"),
+#'                       vms_date = as.Date(c("2020/01/01", "2020/01/02", "2020/02/02", "2020/02/02")),
+#'                       vessel_code = c("1", "1", "2", "3"),
+#'                       vms_codevessel = c("vessel_1", "vessel_1", "vessel_2", "vessel_2"),
+#'                       vessel_type = c("1", "1", "1", "1"))
+#' dataframe2 <- data.frame(activity_id = c("1", "2"),
+#'                          activity_date = as.Date(c("2020/01/01", "2020/02/02")),
+#'                          vessel_code = c("1", "2"))
+#' check_anapo_activity_consistent_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_anapo_activity_consistent_inspector <- function(dataframe1,
                                                       dataframe2,
@@ -6260,7 +6544,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     sampletype_code <- NULL
     weightedweight <- NULL
     vesseltype_label <- NULL
-    sum_landing_weight <- NULL
+    sum_landing_weight_baitboat <- NULL
     weight_small_total <- NULL
     weight_big <- NULL
     activity_date <- NULL
@@ -6819,7 +7103,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           `Sample type` = sampletype_code,
           `Sum weighted weights` = weightedweight,
           `Vessel type` = vesseltype_label,
-          `Sum weight fresh landings baitboats` = sum_landing_weight
+          `Sum weight fresh landings baitboats` = sum_landing_weight_baitboat
         )
         # Uses a function which indicates whether the sample weight (m10 and p10) is consistent for the global weight
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weight sample inspector", sep = "")

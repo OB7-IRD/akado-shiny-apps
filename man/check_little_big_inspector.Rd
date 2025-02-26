@@ -65,3 +65,18 @@ Dataframe 3:
  \item{\code{  samplespecies_id}}
 }
 }
+\examples{
+dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"),
+                         sample_smallsweight = c(10, 20, 1, 30),
+                         sample_bigsweight = c(NA, 2, 9, 3),
+                         sample_totalweight = c(NA, NA, NA, 33))
+dataframe2 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5"),
+                         species_fao_code = c("YFT", "BET", "BET", "YFT", "ALB"),
+                         sizemeasuretype_code = c("PD1", "PD1", "FL","PD1", "FL"),
+                         sample_id = c("1", "2", "2", "3", "4"))
+dataframe3 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4", "5"),
+                         samplespeciesmeasure_sizeclass = c(20, 26, 70, 20, 10),
+                         samplespeciesmeasure_count = c(5, 1, 9, 8, 10),
+                         samplespecies_id = c("1", "2", "3", "4", "5"))
+check_little_big_inspector(dataframe1, dataframe2, dataframe3, output = "report")
+}

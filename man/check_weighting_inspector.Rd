@@ -71,8 +71,27 @@ Dataframe 3:
 }
 \itemize{
 Dataframe 4:
- \item{\code{  trip_id}}
+ \item{\code{  landing_id}}
  \item{\code{  landing_weight}}
  \item{\code{  weightcategory_code}}
+ \item{\code{  trip_id}}
 }
+}
+\examples{
+dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5"),
+                         sample_smallsweight = c(10, 32, 2.5, 30, 12),
+                         sample_bigsweight = c(50, 2, 9, 3, 6),
+                         sample_totalweight = c(NA, NA, NA, 33, 8),
+                         trip_id =  c("1", "1", "2", "3", "4"),
+                         sampletype_code = c("1", "1", "1", "11", "11"))
+dataframe2 <- data.frame(sample_id = c("1", "1", "2", "3", "4", "5"),
+                         sampleactivity_weightedweight = c(70, 5, 18, 12, 33, 5))
+dataframe3 <- data.frame(trip_id = c("1", "2", "3", "4"),
+          vesseltype_code = c("6", "6", "2", "2"),
+          vesseltype_label1 = c("vessel_type_1", "vessel_type_1", "vessel_type_2", "vessel_type_2"))
+dataframe4 <- data.frame(landing_id = c("1", "2", "3", "4", "5"),
+                         landing_weight = c(85, 26, 30, 2.6, 20),
+                         weightcategory_code = c("W-1", "W-1", "L-YFT-10", "L-YFT-10", "L-YFT-10"),
+                         trip_id = c("1", "2", "3", "3", "4"))
+check_weighting_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
 }

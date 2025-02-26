@@ -27,7 +27,13 @@ Dataframe 1:
 }
 \itemize{
 Dataframe 2:
- \item{\code{  sample_id}}
  \item{\code{  samplespecies_id}}
+ \item{\code{  sample_id}}
 }
+}
+\examples{
+dataframe1 <- data.frame(sample_id = c("1", "2"))
+dataframe2 <- data.frame(samplespecies_id = c("1", "2"),
+                         sample_id = c("1", "1"))
+check_sample_without_species_inspector(dataframe1, dataframe2, output = "report")
 }

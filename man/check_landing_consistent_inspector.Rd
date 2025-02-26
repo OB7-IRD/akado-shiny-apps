@@ -27,3 +27,10 @@ Dataframe 1:
  \item{\code{  vessel_capacity}}
 }
 }
+\examples{
+dataframe1 <- data.frame(trip_id = c("1", "2"),
+                         trip_landingtotalweight = c(10, 15),
+                         trip_localmarkettotalweight = c(2, 0),
+                         vessel_capacity = c(20, 10))
+check_landing_consistent_inspector(dataframe1, output = "report")
+}

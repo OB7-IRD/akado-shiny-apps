@@ -72,3 +72,19 @@ Dataframe 3:
  \item{\code{  vessel_code}}
 }
 }
+\examples{
+dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4"),
+                 activity_date = as.Date(c("2020/01/01", "2020/01/12", "2020/01/12", "2020/01/13")),
+                 activity_time = c("05:26:01", "10:41:15", "16:41:15", "03:12:34"),
+                 activity_position = c("POINT (1 1)", "POINT (0 0)", "POINT (3 0)", "POINT (4 4)"),
+                 trip_id = c("1", "2", "2", "2"))
+dataframe2 <- data.frame(trip_id = c("1", "2"),
+                         vessel_code = c("1", "1"),
+                         harbour_position_departure = c("POINT (1 1.1)", "POINT (3 3)"),
+                         harbour_position_landing = c("POINT (3 3)", "POINT (3 3)"))
+dataframe3 <- data.frame(vms_date = as.Date(c("2020/01/01", "2020/01/12", "2020/01/12")),
+                         vms_time = c("15:26:01", "10:55:15", "22:32:17"),
+                         vms_position = c("POINT (4 4)", "POINT (0 0.1)", "POINT (3 0.3)"),
+                         vessel_code = c("1", "1", "1"))
+check_anapo_inspector(dataframe1,dataframe2, dataframe3, output = "report",threshold_number_vms = 1)
+}

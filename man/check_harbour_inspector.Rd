@@ -29,3 +29,12 @@ Dataframe 1:
  \item{\code{  harbour_label_landing_trip_previous}}
 }
 }
+\examples{
+dataframe1 <- data.frame(trip_id = c("1", "2", "3"),
+                         harbour_id_departure = c("1", "2", "3"),
+                         harbour_label_departure = c("Harbour_1", "Harbour_2", "Harbour_3"),
+                         trip_previous_id = c(NA, "1", "2"),
+                         harbour_id_landing_trip_previous = c(NA, "2", "2"),
+                         harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2"))
+check_harbour_inspector(dataframe1, output = "report")
+}

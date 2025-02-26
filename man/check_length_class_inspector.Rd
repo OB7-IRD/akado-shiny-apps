@@ -21,7 +21,7 @@ check_length_class_inspector(
 
 \item{size_measure_type}{{\link[base]{character}} expected. Default values: "FL". Vector of the size measure type controlled.}
 
-\item{threshold}{{\link[base]{numeric}} expected. Default values: 80. Threshold of the size measure}
+\item{threshold}{{\link[base]{numeric}} expected. Default values: 80. Maximum size threshold measured}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -38,4 +38,11 @@ Dataframe 1:
  \item{\code{  sizemeasuretype_code}}
  \item{\code{  samplespeciesmeasure_sizeclass}}
 }
+}
+\examples{
+dataframe1 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4"),
+                         species_fao_code = c("YFT", "YFT", "LTA", "YFT"),
+                         sizemeasuretype_code = c("FL", "PD1", "FL", "FL"),
+                         samplespeciesmeasure_sizeclass = c(10, 90, 85, 83))
+check_length_class_inspector(dataframe1, output = "report")
 }

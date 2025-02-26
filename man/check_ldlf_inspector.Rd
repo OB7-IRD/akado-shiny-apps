@@ -52,3 +52,14 @@ Dataframe 2:
  \item{\code{  sample_totalweight}}
 }
 }
+\examples{
+dataframe1 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5"),
+                         species_fao_code = c("SKJ", "SKJ", "JOS", "SKJ", "SKJ"),
+                         sizemeasuretype_code = c("FL", "PD1", "PD1", "FL", "FL"),
+                         sample_id = c("1", "1", "1", "2", "3"))
+dataframe2 <- data.frame(sample_id = c("1", "2", "3"),
+                         sample_smallsweight = c(5, 0, 0),
+                         sample_bigsweight = c(12, NA, 6),
+                         sample_totalweight = c(0, 23, NA))
+check_ldlf_inspector(dataframe1, dataframe2, output = "report")
+}

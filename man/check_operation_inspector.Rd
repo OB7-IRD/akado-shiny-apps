@@ -43,3 +43,11 @@ Dataframe 1:
  \item{\code{  vesselactivity_code}}
 }
 }
+\examples{
+dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
+                         schooltype_code = c("2", "1", "2"),
+                         successstatus_code = c("1", "0", "2"),
+                         activity_weight = c(10, 0, 0),
+                         vesselactivity_code = c("6", "6", "6"))
+check_operation_inspector(dataframe1, output = "report")
+}

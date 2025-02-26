@@ -34,3 +34,12 @@ Dataframe 2:
  \item{\code{  sample_id}}
 }
 }
+\examples{
+dataframe1 <- data.frame(samplespecies_id = c("1", "2", "3", "4"),
+                         samplespecies_measuredcount = c(4, 6, 15, 6),
+                         sample_id = c("1", "1", "2", "3"))
+dataframe2 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4", "5"),
+                         samplespeciesmeasure_count = c(10, 10, 5, 3, 2),
+                         sample_id = c("1", "2", "2", "3", "3"))
+check_measure_inspector(dataframe1, dataframe2, output = "report")
+}

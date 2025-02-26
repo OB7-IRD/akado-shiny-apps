@@ -59,3 +59,17 @@ Dataframe 3:
  \item{\code{  geometry}}
 }
 }
+\examples{
+dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5"),
+ ocean_label = c("ocean_1", "ocean_2", "ocean_2", "ocean_2", "ocean_2"),
+ activity_position = c("POINT (0 0)", "POINT (0 0)", "POINT (-1 -1)", "POINT (1 1)", "POINT (3 3)"),
+ trip_id = c("1", "2", "2", "2", "2"))
+dataframe2 <- data.frame(trip_id = c("1", "2"),
+                         harbour_position_departure = c("POINT (20 20)", "POINT (-1.05 -1)"),
+                         harbour_position_landing = c("POINT (20 20)", "POINT (20 20)"))
+dataframe3 <- sf::st_sf(data.frame(ID = c("ocean_1", "ocean_2"),
+          geometry = sf::st_sfc(sf::st_polygon(list(rbind(c(0,0), c(2,0), c(2,2), c(0,2), c(0,0)))),
+                                sf::st_polygon(list(rbind(c(0,1), c(3,1), c(3,2), c(0,2), c(0,1)))),
+                                crs = 4326)))
+check_position_inspector(dataframe1, dataframe2, dataframe3, output = "report")
+}

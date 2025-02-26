@@ -72,3 +72,21 @@ Dataframe 4:
  \item{\code{  country_fleetcountry}}
 }
 }
+\examples{
+dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4"))
+dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5", "6"),
+                         catch_weight = c(10, 2, 15, 8, 5, 25),
+                         speciesfate_code = c("6", "6", "1", "6", "6", "6"),
+                         species_fao_code = c("TUN", "TUN", "TUN", "TUN", "TUN", "TUN"),
+                         vesselactivity_code = c("1", "1", "1", "1", "1", "1"),
+                         trip_id = c("1", "1", "1", "2", "2", "3"))
+dataframe3 <- data.frame(landing_id = c("1" , "2", "3", "4"),
+                         landing_weight = c(9, 2, 8, 25),
+                         species_fao_code = c("TUN", "TUN", "TUN", "TUN"),
+                         trip_id = c("1", "1", "2", "4"))
+dataframe4 <- data.frame(trip_id = c("1", "2", "3", "4"),
+                         trip_end_full_trip_id = c("1", "2", "4", "4"),
+                         vessel_id = c("1", "1", "1", "1"),
+                         country_fleetcountry = c("1", "1", "1", "1"))
+check_raising_factor_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
+}

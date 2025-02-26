@@ -49,3 +49,14 @@ Dataframe 2:
  \item{\code{  activity_id}}
 }
 }
+\examples{
+dataframe1 <- data.frame(catch_id = c("1", "2", "3", "4", "5"),
+                         catch_weight = c(4, 2, 5, 10, 3),
+                         speciesfate_code = c("6", "6", "6", "6", "6"),
+                         species_fao_code = c("YFT", "JOS", "ALB", "YFT", "YFT"),
+                         activity_id = c("1", "1", "1", "2", "2"))
+dataframe2 <- data.frame(sample_id = c("1", "1", "2"),
+                         sampleactivity_weightedweight = c(3, 6, 12.5),
+                         activity_id = c("1", "1", "2"))
+check_weighting_sample_inspector(dataframe1, dataframe2, output = "report")
+}

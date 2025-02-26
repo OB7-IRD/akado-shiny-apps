@@ -8,7 +8,7 @@ check_fishing_context_inspector(
   dataframe1,
   dataframe2,
   output,
-  school_type_object = c("1")
+  school_type = c("1")
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ check_fishing_context_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{school_type_object}{{\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.}
+\item{school_type}{{\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.}
 }
 \value{
 The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
@@ -39,4 +39,12 @@ Dataframe 2:
  \item{\code{  activity_id}}
  \item{\code{  schooltype_code}}
 }
+}
+\examples{
+dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
+                         schooltype_code = c("2", "1", "2"))
+dataframe2 <- data.frame(observedsystem_id = c("1", "2", "3", "4"),
+                         activity_id = c("1", "2", "2", "3"),
+                         schooltype_code = c("2", "2", "1", "1"))
+check_fishing_context_inspector(dataframe1, dataframe2, output = "report")
 }

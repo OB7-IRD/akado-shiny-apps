@@ -43,3 +43,14 @@ Dataframe 2:
  \item{\code{  vessel_code}}
 }
 }
+\examples{
+dataframe1 <- data.frame(vms_id = c("1", "2", "3", "4"),
+                      vms_date = as.Date(c("2020/01/01", "2020/01/02", "2020/02/02", "2020/02/02")),
+                      vessel_code = c("1", "1", "2", "3"),
+                      vms_codevessel = c("vessel_1", "vessel_1", "vessel_2", "vessel_2"),
+                      vessel_type = c("1", "1", "1", "1"))
+dataframe2 <- data.frame(activity_id = c("1", "2"),
+                         activity_date = as.Date(c("2020/01/01", "2020/02/02")),
+                         vessel_code = c("1", "2"))
+check_anapo_activity_consistent_inspector(dataframe1, dataframe2, output = "report")
+}

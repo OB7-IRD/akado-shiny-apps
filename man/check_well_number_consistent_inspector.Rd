@@ -49,3 +49,14 @@ Dataframe 3:
  \item{\code{  vesseltype_code}}
 }
 }
+\examples{
+dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"),
+                         sample_well = c("well_1", "well_2", "well_2", "well_2"),
+                         trip_id = c("1", "1", "2", "3"))
+dataframe2 <- data.frame(well_id = c("1", "2", "3"),
+                         trip_id = c("1", "1", "3"),
+                         well_label = c("well_1", "well_2", "well_1"))
+dataframe3 <- data.frame(trip_id = c("1", "2", "3"),
+                         vesseltype_code = c("6", "1", "6"))
+check_well_number_consistent_inspector(dataframe1, dataframe2, dataframe3, output = "report")
+}

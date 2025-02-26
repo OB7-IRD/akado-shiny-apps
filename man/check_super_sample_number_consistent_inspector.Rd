@@ -33,3 +33,11 @@ Dataframe 2:
  \item{\code{  sample_id}}
 }
 }
+\examples{
+dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"),
+                         sample_supersample = c(FALSE, TRUE, FALSE, TRUE))
+dataframe2 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5", "6"),
+                         samplespecies_subsamplenumber = c(0, 1, 2, 1, 1, 1),
+                         sample_id = c("1", "2", "2", "3", "4", "4"))
+check_super_sample_number_consistent_inspector(dataframe1, dataframe2, output = "report")
+}

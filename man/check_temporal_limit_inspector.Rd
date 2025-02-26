@@ -34,3 +34,12 @@ Dataframe 2:
  \item{\code{  trip_id}}
 }
 }
+\examples{
+dataframe1 <- data.frame(trip_id = c("1", "2"),
+                         trip_startdate = as.Date(c("2020/01/01", "2020/01/01")),
+                         trip_enddate = as.Date(c("2020/01/02", "2020/01/02")))
+dataframe2 <- data.frame(route_id = c("1", "2", "3", "4", "5"),
+   activity_date = as.Date(c("2020/01/01", "2020/01/02", "2020/01/01", "2020/01/02", "2020/01/03")),
+   trip_id = c("1", "1", "2", "2", "2"))
+check_temporal_limit_inspector(dataframe1, dataframe2, output = "report")
+}

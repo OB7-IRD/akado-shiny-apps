@@ -27,3 +27,10 @@ Dataframe 1:
  \item{\code{  sample_totalweight}}
 }
 }
+\examples{
+dataframe1 <- data.frame(sample_id = c("1", "2", "3"),
+                         sample_smallsweight = c(10, NA, 12),
+                         sample_bigsweight = c(50, NA, NA),
+                         sample_totalweight = c(NA, 9, 5))
+check_weight_sample_inspector(dataframe1, output = "report")
+}

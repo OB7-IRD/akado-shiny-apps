@@ -31,3 +31,9 @@ Dataframe 2:
  \item{\code{  activity_id}}
 }
 }
+\examples{
+dataframe1 <- data.frame(trip_id = c("1", "2"))
+dataframe2 <- data.frame(trip_id = c("1"),
+                         activity_id = c("1"))
+check_trip_activity_inspector(dataframe1, dataframe2, output = "report")
+}

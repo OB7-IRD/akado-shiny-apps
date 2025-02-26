@@ -31,3 +31,8 @@ Dataframe 1:
  \item{\code{  species_fao_code}}
 }
 }
+\examples{
+dataframe1 <- data.frame(samplespecies_id = c("1", "2"),
+                         species_fao_code = c("YFT", "JOS"))
+check_species_inspector(dataframe1, output = "report")
+}

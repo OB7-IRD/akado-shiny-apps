@@ -27,3 +27,8 @@ Dataframe 1:
  \item{\code{  activity_seasurfacetemperature}}
 }
 }
+\examples{
+dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
+                         activity_seasurfacetemperature = c(20, 4, 35))
+check_temperature_inspector(dataframe1, output = "report")
+}
