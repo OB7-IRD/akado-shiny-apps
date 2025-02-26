@@ -39,7 +39,7 @@ check_trip_activity_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id"),
       column_type = c("character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("trip_id"), drop = FALSE]
@@ -56,7 +56,7 @@ check_trip_activity_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "activity_id"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("trip_id", "activity_id")]
@@ -72,7 +72,7 @@ check_trip_activity_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$trip_id
@@ -176,7 +176,7 @@ check_fishing_time_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "trip_fishingtime"),
       column_type = c("character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "trip_fishingtime")]
@@ -193,7 +193,7 @@ check_fishing_time_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("route_id", "trip_id", "route_fishingtime"),
       column_type = c("character", "character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("route_id", "trip_id", "route_fishingtime")]
@@ -209,7 +209,7 @@ check_fishing_time_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$trip_id
@@ -319,7 +319,7 @@ check_sea_time_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "trip_seatime"),
       column_type = c("character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "trip_seatime")]
@@ -336,7 +336,7 @@ check_sea_time_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("route_id", "trip_id", "route_seatime"),
       column_type = c("character", "character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("route_id", "trip_id", "route_seatime")]
@@ -352,7 +352,7 @@ check_sea_time_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$trip_id
@@ -458,7 +458,7 @@ check_landing_consistent_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight", "vessel_capacity"),
       column_type = c("character", "numeric", "numeric", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "trip_landingtotalweight", "trip_localmarkettotalweight", "vessel_capacity")]
@@ -474,7 +474,7 @@ check_landing_consistent_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$trip_id
@@ -585,7 +585,7 @@ check_landing_total_weight_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "trip_landingtotalweight"),
       column_type = c("character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "trip_landingtotalweight")]
@@ -602,7 +602,7 @@ check_landing_total_weight_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("landing_id", "landing_weight", "trip_id"),
       column_type = c("character", "numeric", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("landing_id", "landing_weight", "trip_id")]
@@ -618,7 +618,7 @@ check_landing_total_weight_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   # Checks the type of epsilon
@@ -632,7 +632,7 @@ check_landing_total_weight_inspector <- function(dataframe1,
       r_object = epsilon,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$trip_id
@@ -755,7 +755,7 @@ check_temporal_limit_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "trip_startdate", "trip_enddate"),
       column_type = c("character", "Date", "Date"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "trip_startdate", "trip_enddate")]
@@ -772,7 +772,7 @@ check_temporal_limit_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("route_id", "activity_date", "trip_id"),
       column_type = c("character", "Date", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("route_id", "activity_date", "trip_id")]
@@ -788,7 +788,7 @@ check_temporal_limit_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$trip_id
@@ -928,7 +928,7 @@ check_harbour_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "harbour_id_departure", "harbour_label_departure", "trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous"),
       column_type = c("character", "character", "character", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("trip_id", "harbour_id_departure", "harbour_label_departure", "trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous")]
@@ -944,7 +944,7 @@ check_harbour_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$trip_id
@@ -1104,7 +1104,7 @@ check_raising_factor_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id"),
       column_type = c("character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("trip_id"), drop = FALSE]
@@ -1121,7 +1121,7 @@ check_raising_factor_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id"),
       column_type = c("character", "numeric", "character", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "vesselactivity_code", "trip_id")]
@@ -1138,7 +1138,7 @@ check_raising_factor_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("landing_id", "landing_weight", "species_fao_code", "trip_id"),
       column_type = c("character", "numeric", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe3 <- dataframe3[, c("landing_id", "landing_weight", "species_fao_code", "trip_id")]
@@ -1155,7 +1155,7 @@ check_raising_factor_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "trip_end_full_trip_id", "vessel_id", "country_fleetcountry"),
       column_type = c("character", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe4 <- dataframe4[, c("trip_id", "trip_end_full_trip_id", "vessel_id", "country_fleetcountry")]
@@ -1171,7 +1171,7 @@ check_raising_factor_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   # Checks the type of country_species
@@ -1183,7 +1183,7 @@ check_raising_factor_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = country_species,
       type = "list",
-      output = "message"
+      output = "error"
     ))
   }
   # Checks the type of species_fate
@@ -1195,7 +1195,7 @@ check_raising_factor_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = species_fate,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   # Checks the type of vessel_activity
@@ -1207,7 +1207,7 @@ check_raising_factor_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = vessel_activity,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   # Checks the type of threshold
@@ -1221,7 +1221,7 @@ check_raising_factor_inspector <- function(dataframe1,
       r_object = threshold,
       type = "numeric",
       length = 2L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$trip_id
@@ -1386,7 +1386,7 @@ check_fishing_context_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "schooltype_code"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "schooltype_code")]
@@ -1403,7 +1403,7 @@ check_fishing_context_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("observedsystem_id", "activity_id", "schooltype_code"),
       column_type = c("character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("observedsystem_id", "activity_id", "schooltype_code")]
@@ -1419,7 +1419,7 @@ check_fishing_context_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -1430,7 +1430,7 @@ check_fishing_context_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = school_type,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$activity_id
@@ -1555,7 +1555,7 @@ check_operation_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "schooltype_code", "successstatus_code", "activity_weight", "vesselactivity_code"),
       column_type = c("character", "character", "character", "numeric", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "schooltype_code", "successstatus_code", "activity_weight", "vesselactivity_code")]
@@ -1571,7 +1571,7 @@ check_operation_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -1582,7 +1582,7 @@ check_operation_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = vessel_activity,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -1593,7 +1593,7 @@ check_operation_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = school_type,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -1604,7 +1604,7 @@ check_operation_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = success_status_school_type,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -1615,7 +1615,7 @@ check_operation_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = success_status_weight,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$activity_id
@@ -1788,7 +1788,7 @@ check_position_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "ocean_label", "activity_position", "trip_id"),
       column_type = c("character", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "ocean_label", "activity_position", "trip_id")]
@@ -1805,7 +1805,7 @@ check_position_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "harbour_position_departure", "harbour_position_landing"),
       column_type = c("character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("trip_id", "harbour_position_departure", "harbour_position_landing")]
@@ -1820,7 +1820,7 @@ check_position_inspector <- function(dataframe1,
       r_table = dataframe3,
       type = "data.frame",
       column_name = c("ID", "geometry"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe3 <- dataframe3[, c("ID", "geometry")]
@@ -1836,7 +1836,7 @@ check_position_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -1849,7 +1849,7 @@ check_position_inspector <- function(dataframe1,
       r_object = activity_crs,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -1862,7 +1862,7 @@ check_position_inspector <- function(dataframe1,
       r_object = harbour_crs,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -1875,7 +1875,7 @@ check_position_inspector <- function(dataframe1,
       r_object = buffer_harbour,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -1888,7 +1888,7 @@ check_position_inspector <- function(dataframe1,
       r_object = buffer_sea,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$activity_id
@@ -2082,7 +2082,7 @@ check_weight_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "activity_weight"),
       column_type = c("character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "activity_weight")]
@@ -2099,7 +2099,7 @@ check_weight_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("catch_id", "catch_weight", "activity_id"),
       column_type = c("character", "numeric", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "activity_id")]
@@ -2115,7 +2115,7 @@ check_weight_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   # Checks the type of epsilon
@@ -2129,7 +2129,7 @@ check_weight_inspector <- function(dataframe1,
       r_object = epsilon,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$activity_id
@@ -2249,7 +2249,7 @@ check_length_class_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespeciesmeasure_id", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass"),
       column_type = c("character", "character", "character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("samplespeciesmeasure_id", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")]
@@ -2265,7 +2265,7 @@ check_length_class_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -2276,7 +2276,7 @@ check_length_class_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -2287,7 +2287,7 @@ check_length_class_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = size_measure_type,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -2300,7 +2300,7 @@ check_length_class_inspector <- function(dataframe1,
       r_object = threshold,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$samplespeciesmeasure_id
@@ -2426,7 +2426,7 @@ check_measure_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespecies_id", "samplespecies_measuredcount", "sample_id"),
       column_type = c("character", "numeric", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("samplespecies_id", "samplespecies_measuredcount", "sample_id")]
@@ -2443,7 +2443,7 @@ check_measure_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_count", "sample_id"),
       column_type = c("character", "numeric", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("samplespeciesmeasure_id", "samplespeciesmeasure_count", "sample_id")]
@@ -2459,7 +2459,7 @@ check_measure_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -2565,7 +2565,7 @@ check_temperature_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "activity_seasurfacetemperature"),
       column_type = c("character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "activity_seasurfacetemperature")]
@@ -2581,7 +2581,7 @@ check_temperature_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -2594,7 +2594,7 @@ check_temperature_inspector <- function(dataframe1,
       r_object = threshold,
       type = "numeric",
       length = 2L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$activity_id
@@ -2725,7 +2725,7 @@ check_weighting_sample_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "activity_id"),
       column_type = c("character", "numeric", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "activity_id")]
@@ -2742,7 +2742,7 @@ check_weighting_sample_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sampleactivity_weightedweight", "activity_id"),
       column_type = c("character", "numeric", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("sample_id", "sampleactivity_weightedweight", "activity_id")]
@@ -2758,7 +2758,7 @@ check_weighting_sample_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -2769,7 +2769,7 @@ check_weighting_sample_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -2780,7 +2780,7 @@ check_weighting_sample_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = species_fate,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -2793,7 +2793,7 @@ check_weighting_sample_inspector <- function(dataframe1,
       r_object = epsilon,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$activity_id
@@ -2947,7 +2947,7 @@ check_time_route_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("route_id", "route_seatime", "route_fishingtime"),
       column_type = c("character", "numeric", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("route_id", "route_seatime", "route_fishingtime")]
@@ -2964,7 +2964,7 @@ check_time_route_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "vesselactivity_code", "route_id"),
       column_type = c("character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("activity_id", "vesselactivity_code", "route_id")]
@@ -2981,7 +2981,7 @@ check_time_route_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("floatingobject_id", "objectoperation_code", "activity_id"),
       column_type = c("character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe3 <- dataframe3[, c("floatingobject_id", "objectoperation_code", "activity_id")]
@@ -2997,7 +2997,7 @@ check_time_route_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -3010,7 +3010,7 @@ check_time_route_inspector <- function(dataframe1,
       r_object = threshold_sea_time,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -3023,7 +3023,7 @@ check_time_route_inspector <- function(dataframe1,
       r_object = threshold_fishing_time,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (length(vessel_activity_sea_time) != length(object_operation_sea_time)) {
@@ -3043,7 +3043,7 @@ check_time_route_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = vessel_activity_sea_time,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -3054,7 +3054,7 @@ check_time_route_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = object_operation_sea_time,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (length(vessel_activity_fishing_time) != length(object_operation_fishing_time)) {
@@ -3074,7 +3074,7 @@ check_time_route_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = vessel_activity_fishing_time,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -3085,7 +3085,7 @@ check_time_route_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = object_operation_fishing_time,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$route_id
@@ -3259,7 +3259,7 @@ check_eez_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "vesselactivity_code", "fpazone_code", "fpazone_country_iso3", "activity_position"),
       column_type = c("character", "character", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "vesselactivity_code", "fpazone_code", "fpazone_country_iso3", "activity_position")]
@@ -3274,7 +3274,7 @@ check_eez_inspector <- function(dataframe1,
       r_table = dataframe2,
       type = "data.frame",
       column_name = c("ISO_TER1", "ISO_TER2", "ISO_TER3", "geometry"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("ISO_TER1", "ISO_TER2", "ISO_TER3", "geometry")]
@@ -3290,7 +3290,7 @@ check_eez_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -3303,7 +3303,7 @@ check_eez_inspector <- function(dataframe1,
       r_object = activity_crs,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -3314,7 +3314,7 @@ check_eez_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = international_waters_code,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -3325,7 +3325,7 @@ check_eez_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = vessel_activity,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$activity_id
@@ -3442,7 +3442,7 @@ check_species_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespecies_id", "species_fao_code"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("samplespecies_id", "species_fao_code")]
@@ -3458,7 +3458,7 @@ check_species_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -3469,7 +3469,7 @@ check_species_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$samplespecies_id
@@ -3565,7 +3565,7 @@ check_sample_without_measure_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespecies_id"),
       column_type = c("character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("samplespecies_id"), drop = FALSE]
@@ -3582,7 +3582,7 @@ check_sample_without_measure_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespecies_id", "samplespeciesmeasure_id"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("samplespecies_id", "samplespeciesmeasure_id")]
@@ -3598,7 +3598,7 @@ check_sample_without_measure_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$samplespecies_id
@@ -3694,7 +3694,7 @@ check_sample_without_species_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id"),
       column_type = c("character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("sample_id"), drop = FALSE]
@@ -3711,7 +3711,7 @@ check_sample_without_species_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "samplespecies_id"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("sample_id", "samplespecies_id")]
@@ -3727,7 +3727,7 @@ check_sample_without_species_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -3843,7 +3843,7 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_supersample"),
       column_type = c("character", "logical"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_supersample")]
@@ -3860,7 +3860,7 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id"),
       column_type = c("character", "numeric", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("samplespecies_id", "samplespecies_subsamplenumber", "sample_id")]
@@ -3876,7 +3876,7 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -4008,7 +4008,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_well", "trip_id"),
       column_type = c("character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_well", "trip_id")]
@@ -4025,7 +4025,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("well_id", "trip_id", "well_label"),
       column_type = c("character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("well_id", "trip_id", "well_label")]
@@ -4042,7 +4042,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "vesseltype_code"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe3 <- dataframe3[, c("trip_id", "vesseltype_code")]
@@ -4058,7 +4058,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4069,7 +4069,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = vessel_type,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -4215,7 +4215,8 @@ check_little_big_inspector <- function(dataframe1,
       r_table = dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
-      column_type = c("character", "numeric", "numeric", "numeric"), output = "message"
+      column_type = c("character", "numeric", "numeric", "numeric"),
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
@@ -4232,7 +4233,7 @@ check_little_big_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id"),
       column_type = c("character", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id")]
@@ -4249,7 +4250,7 @@ check_little_big_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id"),
       column_type = c("character", "numeric", "numeric", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe3 <- dataframe3[, c("samplespeciesmeasure_id", "samplespeciesmeasure_sizeclass", "samplespeciesmeasure_count", "samplespecies_id")]
@@ -4265,7 +4266,7 @@ check_little_big_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4276,7 +4277,7 @@ check_little_big_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = species_big,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4287,7 +4288,7 @@ check_little_big_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = size_measure_type_big,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4298,7 +4299,7 @@ check_little_big_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = threshold_size_big,
       type = "numeric",
-      output = "message"
+      output = "error"
     ))
   }
   if (length(species_big) != length(size_measure_type_big) || length(species_big) != length(threshold_size_big)) {
@@ -4320,7 +4321,7 @@ check_little_big_inspector <- function(dataframe1,
       r_object = size_measure_type,
       type = "character",
       length = 2L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4333,7 +4334,7 @@ check_little_big_inspector <- function(dataframe1,
       r_object = threshold,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -4501,7 +4502,7 @@ check_little_big_inspector <- function(dataframe1,
 #'                          sampleactivity_weightedweight = c(70, 5, 18, 12, 33, 5))
 #' dataframe3 <- data.frame(trip_id = c("1", "2", "3", "4"),
 #'           vesseltype_code = c("6", "6", "2", "2"),
-#'           vesseltype_label1 = c("vessel_type_1", "vessel_type_1", "vessel_type_2", "vessel_type_2"))
+#'           vesseltype_label = c("vessel_type_1", "vessel_type_1", "vessel_type_2", "vessel_type_2"))
 #' dataframe4 <- data.frame(landing_id = c("1", "2", "3", "4", "5"),
 #'                          landing_weight = c(85, 26, 30, 2.6, 20),
 #'                          weightcategory_code = c("W-1", "W-1", "L-YFT-10", "L-YFT-10", "L-YFT-10"),
@@ -4550,7 +4551,7 @@ check_weighting_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code"),
       column_type = c("character", "numeric", "numeric", "numeric", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight", "trip_id", "sampletype_code")]
@@ -4567,7 +4568,7 @@ check_weighting_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sampleactivity_weightedweight"),
       column_type = c("character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("sample_id", "sampleactivity_weightedweight")]
@@ -4584,7 +4585,7 @@ check_weighting_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "vesseltype_code", "vesseltype_label"),
       column_type = c("character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe3 <- dataframe3[, c("trip_id", "vesseltype_code", "vesseltype_label")]
@@ -4601,7 +4602,7 @@ check_weighting_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("landing_id", "trip_id", "landing_weight", "weightcategory_code"),
       column_type = c("character", "character", "numeric", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe4 <- dataframe4[, c("landing_id", "trip_id", "landing_weight", "weightcategory_code")]
@@ -4617,7 +4618,7 @@ check_weighting_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4630,7 +4631,7 @@ check_weighting_inspector <- function(dataframe1,
       r_object = vessel_type,
       type = "character",
       length = 2L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4643,7 +4644,7 @@ check_weighting_inspector <- function(dataframe1,
       r_object = threshold_weight,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4656,7 +4657,7 @@ check_weighting_inspector <- function(dataframe1,
       r_object = threshold_ratio,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4667,7 +4668,7 @@ check_weighting_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = landing_type_baitboat,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4678,7 +4679,7 @@ check_weighting_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = sample_type_code_landing_baitboat,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -4691,7 +4692,7 @@ check_weighting_inspector <- function(dataframe1,
       r_object = threshold_baitboat,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -4818,7 +4819,7 @@ check_weight_sample_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
       column_type = c("character", "numeric", "numeric", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
@@ -4834,7 +4835,7 @@ check_weight_sample_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -4944,7 +4945,7 @@ check_activity_sample_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id"),
       column_type = c("character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("sample_id"), drop = FALSE]
@@ -4961,7 +4962,7 @@ check_activity_sample_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "activity_id"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("sample_id", "activity_id")]
@@ -4977,7 +4978,7 @@ check_activity_sample_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -5099,7 +5100,7 @@ check_ldlf_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id"),
       column_type = c("character", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("samplespecies_id", "species_fao_code", "sizemeasuretype_code", "sample_id")]
@@ -5116,7 +5117,7 @@ check_ldlf_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight"),
       column_type = c("character", "numeric", "numeric", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("sample_id", "sample_smallsweight", "sample_bigsweight", "sample_totalweight")]
@@ -5132,7 +5133,7 @@ check_ldlf_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5143,7 +5144,7 @@ check_ldlf_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5154,7 +5155,7 @@ check_ldlf_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = size_measure_type_species,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5165,7 +5166,7 @@ check_ldlf_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = size_measure_type_big,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5176,7 +5177,7 @@ check_ldlf_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = size_measure_type_small,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$samplespecies_id
@@ -5360,7 +5361,7 @@ check_distribution_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight"),
       column_type = c("character", "character", "character", "numeric", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "sample_well", "trip_id", "sample_smallsweight", "sample_bigsweight")]
@@ -5377,7 +5378,7 @@ check_distribution_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("well_id", "well_label", "trip_id"),
       column_type = c("character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("well_id", "well_label", "trip_id")]
@@ -5394,7 +5395,7 @@ check_distribution_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("wellactivity_id", "well_id"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe3 <- dataframe3[, c("wellactivity_id", "well_id")]
@@ -5411,7 +5412,7 @@ check_distribution_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "species_fao_code", "wellactivityspecies_weight"),
       column_type = c("character", "character", "character", "character", "numeric"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe4 <- dataframe4[, c("wellactivityspecies_id", "wellactivity_id", "weightcategory_code", "species_fao_code", "wellactivityspecies_weight")]
@@ -5427,7 +5428,7 @@ check_distribution_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5438,7 +5439,7 @@ check_distribution_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = species,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5449,7 +5450,7 @@ check_distribution_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = weight_category_small,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5460,7 +5461,7 @@ check_distribution_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = weight_category_big,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5471,7 +5472,7 @@ check_distribution_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = weight_category_unknown,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -5619,7 +5620,7 @@ check_sample_harbour_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("sample_id", "trip_id"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("sample_id", "trip_id")]
@@ -5636,7 +5637,7 @@ check_sample_harbour_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "harbour_id_landing", "harbour_label_landing"),
       column_type = c("character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("trip_id", "harbour_id_landing", "harbour_label_landing")]
@@ -5652,7 +5653,7 @@ check_sample_harbour_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$sample_id
@@ -5817,7 +5818,7 @@ check_anapo_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "trip_id"),
       column_type = c("character", "Date", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("activity_id", "activity_date", "activity_time", "activity_position", "trip_id")]
@@ -5834,7 +5835,7 @@ check_anapo_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("trip_id", "vessel_code", "harbour_position_departure", "harbour_position_landing"),
       column_type = c("character", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("trip_id", "vessel_code", "harbour_position_departure", "harbour_position_landing")]
@@ -5851,7 +5852,7 @@ check_anapo_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("vms_date", "vms_time", "vms_position", "vessel_code"),
       column_type = c("Date", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe3 <- dataframe3[, c("vms_date", "vms_time", "vms_position", "vessel_code")]
@@ -5866,7 +5867,7 @@ check_anapo_inspector <- function(dataframe1,
       r_object = activity_crs,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5879,7 +5880,7 @@ check_anapo_inspector <- function(dataframe1,
       r_object = harbour_crs,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5892,7 +5893,7 @@ check_anapo_inspector <- function(dataframe1,
       r_object = vms_crs,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   # Checks the type and values of output
@@ -5906,7 +5907,7 @@ check_anapo_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5919,7 +5920,7 @@ check_anapo_inspector <- function(dataframe1,
       r_object = threshold_number_vms,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5932,7 +5933,7 @@ check_anapo_inspector <- function(dataframe1,
       r_object = threshold_geographical,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5945,7 +5946,7 @@ check_anapo_inspector <- function(dataframe1,
       r_object = threshold_time,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -5958,7 +5959,7 @@ check_anapo_inspector <- function(dataframe1,
       r_object = buffer_harbour,
       type = "numeric",
       length = 1L,
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$activity_id
@@ -6235,7 +6236,7 @@ check_anapo_activity_consistent_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("vms_id", "vms_date", "vessel_code", "vms_codevessel", "vessel_type"),
       column_type = c("character", "Date", "character", "character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe1 <- dataframe1[, c("vms_id", "vms_date", "vessel_code", "vms_codevessel", "vessel_type")]
@@ -6252,7 +6253,7 @@ check_anapo_activity_consistent_inspector <- function(dataframe1,
       type = "data.frame",
       column_name = c("activity_id", "activity_date", "vessel_code"),
       column_type = c("character", "Date", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     dataframe2 <- dataframe2[, c("activity_id", "activity_date", "vessel_code")]
@@ -6268,7 +6269,7 @@ check_anapo_activity_consistent_inspector <- function(dataframe1,
       r_object = output,
       type = "character",
       allowed_value = c("message", "report", "logical"),
-      output = "message"
+      output = "error"
     ))
   }
   if (!codama::r_type_checking(
@@ -6279,7 +6280,7 @@ check_anapo_activity_consistent_inspector <- function(dataframe1,
     return(codama::r_type_checking(
       r_object = vessel_type,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   select <- dataframe1$vms_id
@@ -7499,7 +7500,7 @@ data_button_plot <- function(data_plot, data_display, data_id, colname_id, colna
       r_object = choice_select_row,
       type = "character",
       allowed_value = c("all", "error", "valid"),
-      output = "message"
+      output = "error"
     ))
   }
   # Add line identification
@@ -7737,7 +7738,7 @@ column_grounding <- function(data,
       type = "data.frame",
       column_name = c("activity_id"),
       column_type = c("character"),
-      output = "message"
+      output = "error"
     )
   } else {
     data <- data[, c("activity_id"), drop = FALSE]
@@ -7754,7 +7755,7 @@ column_grounding <- function(data,
       type = "data.frame",
       column_name = c("activity_id", "transmittingbuoyoperation_code"),
       column_type = c("character", "character"),
-      output = "message"
+      output = "error"
     )
   } else {
     data_transmittingbuoy <- data_transmittingbuoy[, c("activity_id", "transmittingbuoyoperation_code")]
@@ -7767,7 +7768,7 @@ column_grounding <- function(data,
     return(codama::r_type_checking(
       r_object = transmittingbuoyoperation_grounding_code,
       type = "character",
-      output = "message"
+      output = "error"
     ))
   }
   # 2 - Data design ----
