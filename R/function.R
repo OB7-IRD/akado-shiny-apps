@@ -1341,7 +1341,9 @@ check_raising_factor_inspector <- function(dataframe1,
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_context_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_fishing_context_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param school_type {\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.
+#' @param school_type_object {\link[base]{character}} expected, default : c("1"). Vector of inventory of code of the object school.
+#' @param school_type_free {\link[base]{character}} expected, default : c("2"). Vector of inventory of code of the free school.
+#' @param school_type_unknown {\link[base]{character}} expected, default : c("0"). Vector of inventory of code of the unknown school.
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -1367,7 +1369,9 @@ check_raising_factor_inspector <- function(dataframe1,
 check_fishing_context_inspector <- function(dataframe1,
                                             dataframe2,
                                             output,
-                                            school_type = c("1")) {
+                                            school_type_object = c("1"),
+                                            school_type_free = c("2"),
+                                            school_type_unknown = c("0")) {
   # 0 - Global variables assignement ----
   activity_id <- NULL
   schooltype_code <- NULL
@@ -1423,12 +1427,34 @@ check_fishing_context_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = school_type,
+    r_object = school_type_object,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = school_type,
+      r_object = school_type_object,
+      type = "character",
+      output = "error"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = school_type_free,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = school_type_free,
+      type = "character",
+      output = "error"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = school_type_unknown,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = school_type_unknown,
       type = "character",
       output = "error"
     ))
@@ -1437,7 +1463,7 @@ check_fishing_context_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Filters out object-school associations
-  dataframe2 <- dataframe2 %>% dplyr::filter(schooltype_code %in% school_type)
+  dataframe2 <- dataframe2 %>% dplyr::filter(schooltype_code %in% school_type_object)
   # Calculates the number of object-type associations
   dataframe2 <- dataframe2 %>%
     dplyr::group_by(activity_id) %>%
@@ -1455,9 +1481,9 @@ check_fishing_context_inspector <- function(dataframe1,
   )
   dataframe1$logical <- comparison$logical
   # Case of free school : must not have any object-type association (inverse of the result obtained)
-  dataframe1$logical[!is.na(dataframe1$schooltype_code) & dataframe1$schooltype_code == "2"] <- !dataframe1$logical[!is.na(dataframe1$schooltype_code) & dataframe1$schooltype_code == "2"]
+  dataframe1$logical[!is.na(dataframe1$schooltype_code) & dataframe1$schooltype_code %in% school_type_free] <- !dataframe1$logical[!is.na(dataframe1$schooltype_code) & dataframe1$schooltype_code %in% school_type_free]
   # Unknown school and NA: no constraint
-  dataframe1$logical[is.na(dataframe1$schooltype_code) | dataframe1$schooltype_code == "0"] <- TRUE
+  dataframe1$logical[is.na(dataframe1$schooltype_code) | dataframe1$schooltype_code %in% school_type_unknown] <- TRUE
   dataframe1 <- dplyr::relocate(.data = dataframe1, schooltype_code, association_object_count, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(threshold))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
