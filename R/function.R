@@ -2691,6 +2691,7 @@ check_temperature_inspector <- function(dataframe1,
 #' @description The purpose of the check_weighting_sample_inspector function is to provide a table of data that contains an inconsistency between the sample weighting and catch weight for activity
 #' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_sample_inspector () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_sample_inspector () function.
+#' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_sample_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
 #' @param species {\link[base]{character}} expected. Default values: c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"). list of the inventory of species (FAO code) used to compare to sample weighting.
 #' @param species_fate {\link[base]{character}} expected. Default values: "6". Vector of inventory of fate used to compare to sample weighting.
@@ -2699,6 +2700,10 @@ check_temperature_inspector <- function(dataframe1,
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
 #' Dataframe 1:
+#'  \item{\code{  activity_id}}
+#' }
+#' \itemize{
+#' Dataframe 2:
 #'  \item{\code{  catch_id}}
 #'  \item{\code{  catch_weight}}
 #'  \item{\code{  speciesfate_code}}
@@ -2706,25 +2711,27 @@ check_temperature_inspector <- function(dataframe1,
 #'  \item{\code{  activity_id}}
 #' }
 #' \itemize{
-#' Dataframe 2:
-#'  \item{\code{  sample_id}}
+#' Dataframe 3:
+#'  \item{\code{  sampleactivity_id}}
 #'  \item{\code{  sampleactivity_weightedweight}}
 #'  \item{\code{  activity_id}}
 #' }
 #' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
 #' @examples
-#' dataframe1 <- data.frame(catch_id = c("1", "2", "3", "4", "5"),
-#'                          catch_weight = c(4, 2, 5, 10, 3),
-#'                          speciesfate_code = c("6", "6", "6", "6", "6"),
-#'                          species_fao_code = c("YFT", "JOS", "ALB", "YFT", "YFT"),
-#'                          activity_id = c("1", "1", "1", "2", "2"))
-#' dataframe2 <- data.frame(sample_id = c("1", "1", "2"),
-#'                          sampleactivity_weightedweight = c(3, 6, 12.5),
-#'                          activity_id = c("1", "1", "2"))
-#' check_weighting_sample_inspector(dataframe1, dataframe2, output = "report")
+#' dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5"))
+#' dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5", "6"),
+#'                          catch_weight = c(4, 2, 5, 10, 3, 8),
+#'                          speciesfate_code = c("6", "6", "6", "6", "6", "6"),
+#'                          species_fao_code = c("YFT", "JOS", "ALB", "YFT", "YFT", "FRI"),
+#'                          activity_id = c("1", "1", "1", "2", "2", "5"))
+#' dataframe3 <- data.frame(sampleactivity_id = c("1", "2", "3", "4", "5"),
+#'                          sampleactivity_weightedweight = c(3, 6, 12.5, NA, 26),
+#'                          activity_id = c("1", "1", "2", "3", "4"))
+#' check_weighting_sample_inspector(dataframe1, dataframe2, dataframe3, output = "report")
 #' @export
 check_weighting_sample_inspector <- function(dataframe1,
                                              dataframe2,
+                                             dataframe3,
                                              output,
                                              species = c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"),
                                              species_fate = "6",
@@ -2742,36 +2749,53 @@ check_weighting_sample_inspector <- function(dataframe1,
   if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
+    column_name = c("activity_id"),
+    column_type = c("character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("activity_id"),
+      column_type = c("character"),
+      output = "error"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("activity_id"), drop = FALSE]
+  }
+  if (!codama::r_table_checking(
+    r_table = dataframe2,
+    type = "data.frame",
     column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "activity_id"),
     column_type = c("character", "numeric", "character", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
-      r_table = dataframe1,
+      r_table = dataframe2,
       type = "data.frame",
       column_name = c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "activity_id"),
       column_type = c("character", "numeric", "character", "character", "character"),
       output = "error"
     )
   } else {
-    dataframe1 <- dataframe1[, c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "activity_id")]
+    dataframe2 <- dataframe2[, c("catch_id", "catch_weight", "speciesfate_code", "species_fao_code", "activity_id")]
   }
   if (!codama::r_table_checking(
-    r_table = dataframe2,
+    r_table = dataframe3,
     type = "data.frame",
-    column_name = c("sample_id", "sampleactivity_weightedweight", "activity_id"),
+    column_name = c("sampleactivity_id", "sampleactivity_weightedweight", "activity_id"),
     column_type = c("character", "numeric", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
-      r_table = dataframe2,
+      r_table = dataframe3,
       type = "data.frame",
-      column_name = c("sample_id", "sampleactivity_weightedweight", "activity_id"),
+      column_name = c("sampleactivity_id", "sampleactivity_weightedweight", "activity_id"),
       column_type = c("character", "numeric", "character"),
       output = "error"
     )
   } else {
-    dataframe2 <- dataframe2[, c("sample_id", "sampleactivity_weightedweight", "activity_id")]
+    dataframe3 <- dataframe3[, c("sampleactivity_id", "sampleactivity_weightedweight", "activity_id")]
   }
   # Checks the type and values of output
   if (!codama::r_type_checking(
@@ -2826,20 +2850,20 @@ check_weighting_sample_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Calculation weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
-  dataframe_weight_calculation <- dataframe1 %>%
+  dataframe_weight_calculation <- dataframe2 %>%
     dplyr::group_by(activity_id) %>%
     dplyr::filter(species_fao_code %in% species & speciesfate_code %in% species_fate) %>%
     dplyr::summarise(weight = ifelse(all(is.na(catch_weight)), 0, sum(catch_weight, na.rm = TRUE)))
   # Calculation weightedweight for sample (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates 0)
-  dataframe2 <- dataframe2 %>%
+  dataframe_weightedweight_calculation <- dataframe3 %>%
     dplyr::group_by(activity_id) %>%
     dplyr::summarise(weightedweight = ifelse(all(is.na(sampleactivity_weightedweight)), 0, sum(sampleactivity_weightedweight, na.rm = TRUE)))
   # Merge
-  dataframe1 <- dataframe1 %>%
+  dataframe2 <- dataframe2 %>%
     dplyr::select(activity_id) %>%
     dplyr::distinct()
   dataframe1 <- dplyr::left_join(dataframe1, dataframe_weight_calculation, by = dplyr::join_by(activity_id))
-  dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(activity_id))
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe_weightedweight_calculation, by = dplyr::join_by(activity_id))
   # Calcul difference
   dataframe1$difference <- ifelse(is.na(dataframe1$weight), 0, dataframe1$weight) - ifelse(is.na(dataframe1$weightedweight), 0, dataframe1$weightedweight)
   dataframe1$difference <- abs(dataframe1$difference)
@@ -2868,7 +2892,7 @@ check_weighting_sample_inspector <- function(dataframe1,
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
     if (sum(is.na(dataframe1$logical)) > 0) {
-      text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
+      text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
       format(
@@ -7010,7 +7034,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether that catch weight for activity is consistent with the sample weighting
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weighting sample inspector", sep = "")
-        check_weighting_sample_inspector_data <- check_weighting_sample_inspector(dataframe1 = data_catch, dataframe2 = data_sampleactivity, output = "report")
+        check_weighting_sample_inspector_data <- check_weighting_sample_inspector(dataframe1 = activity_select, dataframe2 = data_catch, dataframe3 = data_sampleactivity, output = "report")
         # Uses a function to format the table
         check_weighting_sample <- table_display_trip(check_weighting_sample_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
         check_weighting_sample <- dplyr::rename(

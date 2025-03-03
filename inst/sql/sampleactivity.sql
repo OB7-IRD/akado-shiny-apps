@@ -1,5 +1,6 @@
 --- Recovers information about sampleactivity
 SELECT
+    saa.topiaid::text AS sampleactivity_id,
     saa.sample::text AS sample_id,
     saa.weightedweight::numeric AS sampleactivity_weightedweight,
     saa.activity::text AS activity_id

@@ -7,6 +7,7 @@
 check_weighting_sample_inspector(
   dataframe1,
   dataframe2,
+  dataframe3,
   output,
   species = c("YFT", "SKJ", "BET", "ALB", "LTA", "FRI", "TUN", "KAW", "LOT"),
   species_fate = "6",
@@ -17,6 +18,8 @@ check_weighting_sample_inspector(
 \item{dataframe1}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_sample_inspector () function.}
 
 \item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_sample_inspector () function.}
+
+\item{dataframe3}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_weighting_sample_inspector () function.}
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
@@ -36,6 +39,10 @@ The purpose of the check_weighting_sample_inspector function is to provide a tab
 The input dataframe must contain all these columns for the function to work :
 \itemize{
 Dataframe 1:
+ \item{\code{  activity_id}}
+}
+\itemize{
+Dataframe 2:
  \item{\code{  catch_id}}
  \item{\code{  catch_weight}}
  \item{\code{  speciesfate_code}}
@@ -43,20 +50,21 @@ Dataframe 1:
  \item{\code{  activity_id}}
 }
 \itemize{
-Dataframe 2:
- \item{\code{  sample_id}}
+Dataframe 3:
+ \item{\code{  sampleactivity_id}}
  \item{\code{  sampleactivity_weightedweight}}
  \item{\code{  activity_id}}
 }
 }
 \examples{
-dataframe1 <- data.frame(catch_id = c("1", "2", "3", "4", "5"),
-                         catch_weight = c(4, 2, 5, 10, 3),
-                         speciesfate_code = c("6", "6", "6", "6", "6"),
-                         species_fao_code = c("YFT", "JOS", "ALB", "YFT", "YFT"),
-                         activity_id = c("1", "1", "1", "2", "2"))
-dataframe2 <- data.frame(sample_id = c("1", "1", "2"),
-                         sampleactivity_weightedweight = c(3, 6, 12.5),
-                         activity_id = c("1", "1", "2"))
-check_weighting_sample_inspector(dataframe1, dataframe2, output = "report")
+dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5"))
+dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5", "6"),
+                         catch_weight = c(4, 2, 5, 10, 3, 8),
+                         speciesfate_code = c("6", "6", "6", "6", "6", "6"),
+                         species_fao_code = c("YFT", "JOS", "ALB", "YFT", "YFT", "FRI"),
+                         activity_id = c("1", "1", "1", "2", "2", "5"))
+dataframe3 <- data.frame(sampleactivity_id = c("1", "2", "3", "4", "5"),
+                         sampleactivity_weightedweight = c(3, 6, 12.5, NA, 26),
+                         activity_id = c("1", "1", "2", "3", "4"))
+check_weighting_sample_inspector(dataframe1, dataframe2, dataframe3, output = "report")
 }
