@@ -6133,7 +6133,12 @@ check_anapo_inspector <- function(dataframe1,
   threshold_geographical <- units::set_units(threshold_geographical, NM)
   pair_position <- pair_position %>%
     dplyr::mutate(distance = sf::st_distance(x = activity_position_geometry, y = vms_position_geometry, by_element = TRUE))
-  units(pair_position$distance) <- units::make_units(NM)
+  if(nrow(pair_position) > 0){
+    units(pair_position$distance) <- units::make_units(NM)
+  }else{
+    units(pair_position$distance) <- units::drop_units(pair_position$distance)
+    units(pair_position$distance) <- units::make_units(NM)
+  }
   # Remove formats spatial data
   pair_position <- pair_position %>%
     sf::st_drop_geometry() %>%
@@ -6154,7 +6159,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_calcul <- dataframe3 %>%
     dplyr::filter(!logical & !is.na(activity_position)) %>%
     subset(select = -c(logical)) %>%
-    dplyr::filter(min_distance >= threshold_geographical)
+    dplyr::filter(units::drop_units(min_distance) >= units::drop_units(threshold_geographical))
   # Gives a temporary hour for activities that are missing an hour
   dataframe_calcul$activity_time_bis <- dataframe_calcul$activity_time
   dataframe_calcul[is.na(dataframe_calcul$activity_time), "activity_time_bis"] <- "00:00:00"
@@ -7569,11 +7574,11 @@ data_button_plot <- function(data_plot, data_display, data_id, colname_id, colna
   if (choice_select_row == "valid") {
     select_row <- data_display$logical == TRUE
   }
-  data_display$button <- NA
+  data_display <- data_display %>% dplyr::mutate(button = NA)
   data_display$button[select_row] <- sapply(which(select_row), function(c) {
     as.character(shiny::actionButton(inputId = data_display$buttontmp[c], label = "Detail", onclick = paste0('Shiny.setInputValue(\"', name_button, '\", this.id, {priority: \"event\"})')))
   })
-  data_display <- subset(data_display, select = -c(buttontmp))
+  data_display <- data_display %>% dplyr::select(!buttontmp)
   return(data_display)
 }
 
