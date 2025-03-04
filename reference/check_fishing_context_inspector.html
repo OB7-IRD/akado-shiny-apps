@@ -51,7 +51,9 @@
 <span>  <span class="va">dataframe1</span>,</span>
 <span>  <span class="va">dataframe2</span>,</span>
 <span>  <span class="va">output</span>,</span>
-<span>  school_type_object <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span><span class="op">)</span></span>
+<span>  school_type_object <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span><span class="op">)</span>,</span>
+<span>  school_type_free <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span><span class="op">)</span>,</span>
+<span>  school_type_unknown <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"0"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -74,6 +76,14 @@
 <dt id="arg-school-type-object">school_type_object<a class="anchor" aria-label="anchor" href="#arg-school-type-object"></a></dt>
 <dd><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> expected, default : c("1"). Vector of inventory of code of the object school.</p></dd>
 
+
+<dt id="arg-school-type-free">school_type_free<a class="anchor" aria-label="anchor" href="#arg-school-type-free"></a></dt>
+<dd><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> expected, default : c("2"). Vector of inventory of code of the free school.</p></dd>
+
+
+<dt id="arg-school-type-unknown">school_type_unknown<a class="anchor" aria-label="anchor" href="#arg-school-type-unknown"></a></dt>
+<dd><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> expected, default : c("0"). Vector of inventory of code of the unknown school.</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -88,6 +98,20 @@
 <li><p><code>  schooltype_code</code></p></li>
 </ul></div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dataframe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>activity_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         schooltype_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>, <span class="st">"1"</span>, <span class="st">"2"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dataframe2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>observedsystem_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         activity_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         schooltype_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>, <span class="st">"2"</span>, <span class="st">"1"</span>, <span class="st">"1"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">check_fishing_context_inspector</span><span class="op">(</span><span class="va">dataframe1</span>, <span class="va">dataframe2</span>, output <span class="op">=</span> <span class="st">"report"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   activity_id logical schooltype_code association_object_count</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1           1    TRUE               2                        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2           2    TRUE               1                        1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3           3   FALSE               2                        1</span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

@@ -106,6 +106,31 @@
 <li><p><code>  sample_totalweight</code></p></li>
 </ul></div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dataframe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>samplespecies_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"5"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         species_fao_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SKJ"</span>, <span class="st">"SKJ"</span>, <span class="st">"JOS"</span>, <span class="st">"SKJ"</span>, <span class="st">"SKJ"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         sizemeasuretype_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"FL"</span>, <span class="st">"PD1"</span>, <span class="st">"PD1"</span>, <span class="st">"FL"</span>, <span class="st">"FL"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"1"</span>, <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dataframe2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         sample_smallsweight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">0</span>, <span class="fl">0</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         sample_bigsweight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">12</span>, <span class="cn">NA</span>, <span class="fl">6</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         sample_totalweight <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">0</span>, <span class="fl">23</span>, <span class="cn">NA</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">check_ldlf_inspector</span><span class="op">(</span><span class="va">dataframe1</span>, <span class="va">dataframe2</span>, output <span class="op">=</span> <span class="st">"report"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   samplespecies_id logical sizemeasuretype_code species_fao_code</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                1    TRUE                   FL              SKJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                2   FALSE                  PD1              SKJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                3    TRUE                  PD1              JOS</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                4    TRUE                   FL              SKJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                5   FALSE                   FL              SKJ</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   sample_bigsweight sample_smallsweight sample_totalweight</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                12                   5                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                12                   5                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                12                   5                  0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                NA                   0                 23</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                 6                   0                 NA</span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>

@@ -96,6 +96,24 @@
 <li><p><code>  vesseltype_code</code></p></li>
 </ul></div>
 
+    <div id="ref-examples">
+    <h2>Examples</h2>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dataframe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>sample_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         sample_well <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"well_1"</span>, <span class="st">"well_2"</span>, <span class="st">"well_2"</span>, <span class="st">"well_2"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         trip_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dataframe2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>well_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         trip_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"1"</span>, <span class="st">"3"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         well_label <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"well_1"</span>, <span class="st">"well_2"</span>, <span class="st">"well_1"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dataframe3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>trip_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         vesseltype_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"6"</span>, <span class="st">"1"</span>, <span class="st">"6"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">check_well_number_consistent_inspector</span><span class="op">(</span><span class="va">dataframe1</span>, <span class="va">dataframe2</span>, <span class="va">dataframe3</span>, output <span class="op">=</span> <span class="st">"report"</span><span class="op">)</span></span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   sample_id logical sample_well</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1         1    TRUE      well_1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2         2    TRUE      well_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3         3    TRUE      well_2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4         4   FALSE      well_2</span>
+</code></pre></div>
+    </div>
   </div>
   <div class="col-md-3 hidden-xs hidden-sm" id="pkgdown-sidebar">
     <nav id="toc" data-toggle="toc" class="sticky-top"><h2 data-toc-skip>Contents</h2>
