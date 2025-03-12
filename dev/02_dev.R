@@ -94,7 +94,7 @@ usethis::use_gitlab_ci()
 # You're now set! ----
 ## Dependencies CRAN
 usethis::use_package("DBI")
-usethis::use_package("dplyr")
+usethis::use_package("dplyr", min_version = "1.1.4")
 usethis::use_package("DT")
 usethis::use_package("magrittr")
 usethis::use_package("plotly")

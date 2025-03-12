@@ -139,6 +139,8 @@ app_server <- function(input, output, session) {
   observeEvent(input$button_position, {
     # Local binding global variables
     . <- NULL
+    X <- NULL
+    Y <- NULL
     # Split information
     split_id <- strsplit(input$button_position, "&")[[1]]
     enddate <- split_id[5]
@@ -146,7 +148,9 @@ app_server <- function(input, output, session) {
     # Spatial formatting
     data <- eval(parse(text = split_id[[2]]))
     if (!is.na(data$activity_position)) {
-      data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+      data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>%
+        dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+        dplyr::mutate(X = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), Y = coordinate_dd_to_dmd(coordinate =  Y, latitude = TRUE))
     }else {
       data_geo <- data.frame(Y = c(), X = c())
     }
@@ -162,8 +166,8 @@ app_server <- function(input, output, session) {
                              <li>Trip end date : ", enddate, "</li>
                              <li>Activity date : ", activity_date, "</li>
                              <li>Activity number : ", split_id[7], "</li>
-                             <li>Latitude : ", data_geo$Y, "\u00B0</li>
-                             <li>Longitude : ", data_geo$X, "\u00B0</li></ul>
+                             <li>Latitude : ", data_geo$Y, "</li>
+                             <li>Longitude : ", data_geo$X, "</li></ul>
                              <b>Problem information : </b><br>
                              <ul><li>Type : ", split_id[8], "</li>
                              <li>Ocean trip : ", split_id[9], "</li>
@@ -208,6 +212,8 @@ app_server <- function(input, output, session) {
   observeEvent(input$button_eez, {
     # Local binding global variables
     . <- NULL
+    X <- NULL
+    Y <- NULL
     # Split information
     split_id <- strsplit(input$button_eez, "&")[[1]]
     enddate <- split_id[5]
@@ -215,7 +221,9 @@ app_server <- function(input, output, session) {
     # Spatial formatting
     data <- eval(parse(text = split_id[[2]]))
     if (!is.na(data$activity_position)) {
-      data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+      data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>%
+        dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+        dplyr::mutate(X = coordinate_dd_to_dmd(coordinate =  X, latitude = FALSE), Y = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
     }else {
       data_geo <- data.frame(Y = c(), X = c())
     }
@@ -231,8 +239,8 @@ app_server <- function(input, output, session) {
                              <li>Trip end date : ", enddate, "</li>
                              <li>Activity date : ", activity_date, "</li>
                              <li>Activity number : ", split_id[7], "</li>
-                             <li>Latitude : ", data_geo$Y, "\u00B0</li>
-                             <li>Longitude : ", data_geo$X, "\u00B0</li></ul>
+                             <li>Latitude : ", data_geo$Y, "</li>
+                             <li>Longitude : ", data_geo$X, "</li></ul>
                              <b>Problem information : </b><br>
                             <ul><li>Declared eez : ", split_id[8], "</li>
                             <li>Declared country eez : ", split_id[9], "</li></ul>"))
@@ -309,13 +317,18 @@ app_server <- function(input, output, session) {
 
   # Anapo control window
   observeEvent(input$button_anapo, {
+    # Local binding global variables
+    X <- NULL
+    Y <- NULL
     split_id <- strsplit(input$button_anapo, "&")[[1]]
     data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]), "data_plot"][[1]], "&")[[1]]
     activity_data <- eval(parse(text = data_all_click[[5]]))
     activity_crs <- data_all_click[[3]]
     # Spatial formatting
     if (!is.na(activity_data$activity_position)) {
-      data_geo <- sf::st_as_sf(activity_data, wkt = "activity_position", crs = activity_crs) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+      data_geo <- sf::st_as_sf(activity_data, wkt = "activity_position", crs = activity_crs) %>%
+        dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+        dplyr::mutate(X = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), Y = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
     }else {
       data_geo <- data.frame(Y = c(), X = c())
     }
@@ -333,8 +346,8 @@ app_server <- function(input, output, session) {
                              <li>Activity time : ", activity_data[1, "activity_time", drop = TRUE], "</li>
                              <li>Activity number : ", activity_data[1, "activity_number", drop = TRUE], "</li>
                              <li>Vessel activity : ", activity_data[1, "vesselactivity_code", drop = TRUE], "</li>
-                             <li>Latitude : ", data_geo$Y, "\u00B0</li>
-                             <li>Longitude : ", data_geo$X, "\u00B0</li>
+                             <li>Latitude : ", data_geo$Y, "</li>
+                             <li>Longitude : ", data_geo$X, "</li>
                              <li>Grounding : ", activity_data[1, "grounding", drop = TRUE], "</li></ul>"))
         ),
         column(9,

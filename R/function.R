@@ -1933,8 +1933,7 @@ check_position_inspector <- function(dataframe1,
     dplyr::mutate(dplyr::as_tibble(sf::st_coordinates(.)))
   # Checks whether the point is within the bounds of CRS 4326
   data_geo_activity <- data_geo_activity %>%
-    dplyr::mutate(logical_bounding = (X >= -180 & X <= 180 & Y >= -90 & Y <= 90))
-  data_geo_activity <- data_geo_activity %>%
+    dplyr::mutate(logical_bounding = (X >= -180 & X <= 180 & Y >= -90 & Y <= 90)) %>%
     dplyr::filter(logical_bounding)
   # If harbour departure position exists
   if (sum(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_departure)) > 0) {
@@ -6133,9 +6132,9 @@ check_anapo_inspector <- function(dataframe1,
   threshold_geographical <- units::set_units(threshold_geographical, NM)
   pair_position <- pair_position %>%
     dplyr::mutate(distance = sf::st_distance(x = activity_position_geometry, y = vms_position_geometry, by_element = TRUE))
-  if(nrow(pair_position) > 0){
+  if (nrow(pair_position) > 0) {
     units(pair_position$distance) <- units::make_units(NM)
-  }else{
+  }else {
     units(pair_position$distance) <- units::drop_units(pair_position$distance)
     units(pair_position$distance) <- units::make_units(NM)
   }
@@ -6611,7 +6610,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     max_score <- NULL
     rf1 <- NULL
     activity_position <- NULL
-    activity_position_display <- NULL
+    activity_position_ddm <- NULL
+    activity_position_prior_ddm <- NULL
+    activity_position_post_ddm <- NULL
     grounding <- NULL
     activity_number <- NULL
     activity_position_prior <- NULL
@@ -6992,13 +6993,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         # Add button and data for plot in table
         check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate"), name_button = "button_position")
         # Uses a function to format the table
-        check_position <- table_display_trip(check_position, activity_select[, colnames_activity_id], type_inconsistency = "error")
+        check_position <- table_display_trip(check_position, activity_select[, c(colnames_activity_id, "activity_position")], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_position <- dplyr::rename(
           .data = check_position,
           `Type` = type,
           `Ocean trip` = ocean_label,
           `Ocean activity` = ocean_calculate,
+          `Position activity` = activity_position_ddm,
           `Details problem` = button
         )
         # Uses a function which indicates whether that sum of the weight indicated for the catch is consistent with activity weight
@@ -7082,12 +7084,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         # Add button and data for plot in table
         check_eez <- data_button_plot(data_plot = check_eez_inspector_data[[2]], data_display = check_eez_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3"), name_button = "button_eez", choice_select_row = "all")
         # Uses a function to format the table
-        check_eez <- table_display_trip(check_eez, activity_select[, colnames_activity_id], type_inconsistency = "warning")
+        check_eez <- table_display_trip(check_eez, activity_select[, c(colnames_activity_id, "activity_position")], type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
         check_eez <- dplyr::rename(
           .data = check_eez,
           `EEZ` = fpazone_code,
           `Country EEZ` = fpazone_country_iso3,
+          `Position activity` = activity_position_ddm,
           `Details problem` = button
         )
         # Uses a function which indicates whether that species sampled is consistent with species authorized
@@ -7228,22 +7231,21 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_inspector_data_table <- check_anapo_inspector_data[[1]]
           rm(check_anapo_inspector_data)
           check_anapo_inspector_data_table <- dplyr::inner_join(check_anapo_inspector_data_table, check_anapo_inspector_dataplot_trip[, c("trip_id", "activity_id", "activity_date", "activity_number", "grounding", "activity_position")], by = dplyr::join_by(activity_id))
-          check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>% dplyr::mutate(activity_position_display = gsub("POINT\\(|\\)", "", activity_position))
           check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>%
-            dplyr::mutate(activity_position_prior = replace(activity_position_display, grounding, NA)) %>%
+            dplyr::mutate(activity_position_prior = replace(activity_position, grounding, NA)) %>%
             dplyr::group_by(trip_id) %>%
             dplyr::arrange(activity_date, activity_number) %>%
             tidyr::fill(activity_position_prior, .direction = "down") %>%
             dplyr::mutate(activity_position_prior = dplyr::lag(activity_position_prior))
           check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>%
-            dplyr::mutate(activity_position_post = replace(activity_position_display, grounding, NA)) %>%
+            dplyr::mutate(activity_position_post = replace(activity_position, grounding, NA)) %>%
             dplyr::group_by(trip_id) %>%
             dplyr::arrange(activity_date, activity_number) %>%
             tidyr::fill(activity_position_post, .direction = "up") %>%
             dplyr::mutate(activity_position_post = dplyr::lead(activity_position_post))
           check_anapo_inspector_data_table <- check_anapo_inspector_data_table %>%
             dplyr::ungroup() %>%
-            dplyr::select(-c("trip_id", "activity_date", "activity_number", "activity_position"))
+            dplyr::select(-c("trip_id", "activity_date", "activity_number"))
           # Retrieves activity positions for the previous, current and next day
           check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot_trip %>%
             dplyr::select(-c("activity_id")) %>%
@@ -7286,9 +7288,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             `Minimale distance` = min_distance,
             `Maximum score` = max_score,
             `Grounding` = grounding,
-            `Position activity` = activity_position_display,
-            `Position previous activity (not grounding)` = activity_position_prior,
-            `Position next activity (not grounding)` = activity_position_post,
+            `Position activity` = activity_position_ddm,
+            `Position previous activity (not grounding)` = activity_position_prior_ddm,
+            `Position next activity (not grounding)` = activity_position_post_ddm,
             `Details problem` = button
           )
           # Uses a function which indicates whether VMS is consistent for the presence of activity
@@ -7432,6 +7434,8 @@ table_ui <- function(id, title, size_box = "col-sm-12 col-md-6 col-lg-6", text =
 # Shiny function : Function which formats the trip data for display inconsistency
 table_display_trip <- function(data, data_info, type_inconsistency) {
   # Global variables assignement
+  . <- NULL
+  `:=` <- NULL
   vessel_code <- NULL
   trip_enddate <- NULL
   activity_date <- NULL
@@ -7444,6 +7448,8 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   samplespeciesmeasure_sizeclass <- NULL
   samplespecies_subsamplenumber <- NULL
   vms_date <- NULL
+  X <- NULL
+  Y <- NULL
   # Retrieves the name of the column containing the ID
   colname_id <- grep("_id$", colnames(data), value = TRUE)
   # Deletes duplicate columns
@@ -7452,7 +7458,7 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   colname_double <- names(colname_double)[!(names(colname_double) %in% colname_id)]
   data <- data[, !(colnames(data) %in% colname_double)]
   # Combines the consistency test on the data and data identification information
-  data <- merge(data_info, data, by = colname_id)
+  data <- dplyr::inner_join(data_info, data, by = dplyr::join_by(!!colname_id))
   # Add icons according to the success of the test
   data$logical[data$logical == TRUE] <- as.character(icon("check"))
   if (type_inconsistency == "error") {
@@ -7463,6 +7469,25 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   }
   if (type_inconsistency == "info") {
     data$logical[data$logical == FALSE] <- as.character(icon("info"))
+  }
+  # Changes position display for all column position, converting DD (Decimal Degrees) coordinates in DDM (Degrees, Decimal Minutes)
+  column_name_position <- grep("_position", colnames(data), value = TRUE)
+  for (column in column_name_position){
+    # Formats spatial data position
+    data_geo <- data %>%
+      dplyr::filter(!is.na(!!as.name(column))) %>%
+      dplyr::select(column, colname_id) %>%
+      dplyr::distinct() %>%
+      sf::st_as_sf(wkt = column, crs = 4326, remove = FALSE) %>%
+      dplyr::mutate(dplyr::as_tibble(sf::st_coordinates(.)))
+    new_name_column <- paste0(column, "_ddm")
+    # Change position display format from decimal degrees to degrees, minutes, and decimal seconds
+    data_geo <- data_geo %>%
+      dplyr::mutate(!!new_name_column := paste0(coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE), "<br>", coordinate_dd_to_dmd(coordinate = X, latitude = FALSE)))
+    data <- dplyr::left_join(data, data.frame(data_geo)[, c(colname_id, new_name_column)], by = dplyr::join_by(!!colname_id))
+    data <- data %>%
+      dplyr::relocate(new_name_column, .after = column) %>%
+      dplyr::select(-column)
   }
   # Modify the table for display purposes: rename column
   if (length(grep("^vms_", colnames(data), value = TRUE)) != 0) {
@@ -7617,17 +7642,22 @@ plot_temporal_limit <- function(data, startdate, enddate) {
 plot_position <- function(data) {
   # Local binding global variables
   . <- NULL
+  X <- NULL
+  Y <- NULL
+  latitude <- NULL
+  longitude <- NULL
   # Spatial formatting
   if (!is.na(data$activity_position)) {
-    data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+    data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>%
+      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+      dplyr::mutate(longitude = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), latitude = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE)) %>%
+      dplyr::mutate(text = paste("Position:", latitude, ",", longitude, "<extra></extra>"))
     # Plot
-    plotly::plot_ly(
-      data = data_geo, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>"
-    ) %>%
+    plotly::plot_ly(data = data_geo, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = ~text) %>%
       plotly::layout(showlegend = FALSE, mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
   }else {
     # Plot
-    plotly::plot_ly(type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>") %>%
+    plotly::plot_ly(type = "scattermapbox", mode = "markers", marker = list(size = 10)) %>%
       plotly::layout(showlegend = FALSE, mapbox = list(style = "carto-positron"))
   }
 }
@@ -7639,17 +7669,24 @@ plot_eez <- function(data, referential_geographical_shape) {
   ISO_TER1 <- NULL
   ISO_TER2 <- NULL
   ISO_TER3 <- NULL
+  X <- NULL
+  Y <- NULL
+  latitude <- NULL
+  longitude <- NULL
   # Remove empty geometry
   referential_geographical_shape <- referential_geographical_shape[!sf::st_is_empty(referential_geographical_shape), ]
   # text hovertemplate
-  referential_geographical_shape <- referential_geographical_shape %>% dplyr::mutate(text = paste("Country 1:", ISO_TER1, "<br>Country 2:", ISO_TER2, "<br>Country 3:", ISO_TER3))
+  referential_geographical_shape <- referential_geographical_shape %>% dplyr::mutate(text = paste("Country 1:", ISO_TER1, "<br>Country 2:", ISO_TER2, "<br>Country 3:", ISO_TER3, "<extra></extra>"))
   # Spatial formatting
   plot <- plotly::plot_ly()
   if (!is.na(data$activity_position)) {
-    data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>% dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+    data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = unique(data$activity_crs)) %>%
+      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+      dplyr::mutate(longitude = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), latitude = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE)) %>%
+      dplyr::mutate(text = paste("Position:", latitude, ",", longitude, "<extra></extra>"))
     # Plot
     plot <- plot %>%
-      plotly::add_trace(name = "Activity", data = data_geo, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = "(%{lat}\u00B0,%{lon}\u00B0)<extra></extra>") %>%
+      plotly::add_trace(name = "Activity", data = data_geo, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", marker = list(size = 10), hovertemplate = ~text) %>%
       plotly::layout(mapbox = list(style = "carto-positron", center = list(lon = data_geo$X, lat = data_geo$Y)))
   }else {
     # Plot
@@ -7657,7 +7694,7 @@ plot_eez <- function(data, referential_geographical_shape) {
       plotly::layout(mapbox = list(style = "carto-positron"))
   }
   plot <- plot %>%
-    plotly::add_sf(name = "EEZ", data = referential_geographical_shape, type = "scattermapbox",  mode = "lines", text = ~text, hovertemplate = "%{text}<extra></extra>", fill = "none")
+    plotly::add_sf(name = "EEZ", data = referential_geographical_shape, type = "scattermapbox",  mode = "lines", hovertemplate = ~text, fill = "none")
   return(plot)
 }
 
@@ -7676,6 +7713,10 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   vesselactivity_code <- NULL
   grounding <- NULL
   date_time <- NULL
+  X <- NULL
+  Y <- NULL
+  latitude <- NULL
+  longitude <- NULL
   # Remove missing position in vms
   data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
@@ -7691,27 +7732,30 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   if (!all(is.na(data_vms$vms_position))) {
     data_geo_vms <- data_vms[!is.na(data_vms$vms_position), ] %>%
       sf::st_as_sf(wkt = "vms_position", crs = as.numeric(crs_vms)) %>%
-      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+      dplyr::mutate(longitude = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), latitude = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
   }
   if (!all(is.na(data_activity$activity_position))) {
     data_geo_activity <- data_activity[!is.na(data_activity$activity_position), ] %>%
       sf::st_as_sf(wkt = "activity_position", crs = as.numeric(crs_activity)) %>%
-      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+      dplyr::mutate(longitude = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), latitude = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
   }
   if (!all(is.na(data_trip$activity_position))) {
     data_geo_trip <- data_trip[!is.na(data_trip$activity_position), ] %>%
       sf::st_as_sf(wkt = "activity_position", crs = as.numeric(crs_activity)) %>%
-      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+      dplyr::mutate(longitude = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), latitude = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
   }
   # text hovertemplate
   if (!all(is.na(data_vms$vms_position))) {
-    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", vms_date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc((duration / 60000) * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000))
+    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", vms_date, "<br>Time:", vms_time, "<br>Distance:", trunc(distance * 1000) / 1000, "miles<br>Duration:", trunc((duration / 60000) * 1000) / 1000, "minutes<br>Score:", trunc(score * 1000) / 1000, "<br>Position:", latitude, ",", longitude, "<extra></extra>"))
   }
   if (!all(is.na(data_activity$activity_position))) {
-    data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Vessel activity:", vesselactivity_code, "<br>Position:%{lat}\u00B0,%{lon}\u00B0", "<br>Grounding:", grounding, "<extra></extra>"))
+    data_geo_activity <- data_geo_activity %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Vessel activity:", vesselactivity_code, "<br>Position:", latitude, ",", longitude, "<br>Grounding:", grounding, "<extra></extra>"))
   }
   if (!all(is.na(data_trip$activity_position))) {
-    data_geo_trip <- data_geo_trip %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Vessel activity:", vesselactivity_code, "<br>Grounding:", grounding))
+    data_geo_trip <- data_geo_trip %>% dplyr::mutate(text = paste("Date:", activity_date, "<br>Time:", activity_time, "<br>Activity number:", activity_number, "<br>Vessel activity:", vesselactivity_code, "<br>Grounding:", grounding, "<br>Position:", latitude, ",", longitude, "<extra></extra>"))
   }
   # Plot
   plot <- plotly::plot_ly() %>%
@@ -7720,13 +7764,13 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
     data_geo_trip_grounding <- data_geo_trip %>% dplyr::filter(grounding)
     data_geo_trip_nongrounding <- data_geo_trip %>% dplyr::filter(!grounding)
     plot <- plot %>%
-      plotly::add_trace(name = "Activity (solely grounding object)", data = data_geo_trip_grounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = "rgb(142, 52, 0)", size = 10))
+      plotly::add_trace(name = "Activity (solely grounding object)", data = data_geo_trip_grounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "markers", hovertemplate = ~text, marker = list(color = "rgb(142, 52, 0)", size = 10))
     plot <- plot %>%
-      plotly::add_trace(name = "Activity", data = data_geo_trip_nongrounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#B2FF00", "#006415"))(nrow(data_geo_trip_nongrounding)), size = 10), line = list(color = "#11BC00"))
+      plotly::add_trace(name = "Activity", data = data_geo_trip_nongrounding, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", hovertemplate = ~text, marker = list(color = grDevices::colorRampPalette(c("#B2FF00", "#006415"))(nrow(data_geo_trip_nongrounding)), size = 10), line = list(color = "#11BC00"))
   }
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
-      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF")) %>%
+      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", hovertemplate = ~text, marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF")) %>%
       plotly::layout(mapbox = list(center = list(lon = data_geo_vms$X[1], lat = data_geo_vms$Y[1])))
   }
   if (!all(is.na(data_activity$activity_position))) {
@@ -7743,6 +7787,10 @@ plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
   . <- NULL
   vms_time <- NULL
   date_time <- NULL
+  X <- NULL
+  Y <- NULL
+  latitude <- NULL
+  longitude <- NULL
   # Remove missing position in vms
   data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
@@ -7755,18 +7803,19 @@ plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
   if (!all(is.na(data_vms$vms_position))) {
     data_geo_vms <- data_vms[!is.na(data_vms$vms_position), ] %>%
       sf::st_as_sf(wkt = "vms_position", crs = as.numeric(crs_vms)) %>%
-      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.)))
+      dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+      dplyr::mutate(longitude = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), latitude = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
   }
   # text hovertemplate
   if (!all(is.na(data_vms$vms_position))) {
-    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", vms_date, "<br>Time:", vms_time))
+    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", vms_date, "<br>Time:", vms_time, "<br>Position:", latitude, ",", longitude, "<extra></extra>"))
   }
   # Plot
   plot <- plotly::plot_ly() %>%
     plotly::layout(mapbox = list(style = "carto-positron", pitch = 0, zoom = 6))
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
-      plotly::add_trace(name = "VMS", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", text = ~text, hovertemplate = "%{text}<br>Position:%{lat}\u00B0,%{lon}\u00B0<extra></extra>", marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF")) %>%
+      plotly::add_trace(name = "VMS", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", hovertemplate = ~text, marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF")) %>%
       plotly::layout(showlegend = TRUE, mapbox = list(center = list(lon = data_geo_vms$X[1], lat = data_geo_vms$Y[1])))
   }
   return(plot)
@@ -7884,4 +7933,22 @@ text_object_more_or_less <- function(id, result_check) {
     text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
   }
   return(text)
+}
+
+# Function for converting DD (Decimal Degrees) coordinates in DDM (Degrees, Decimal Minutes)
+coordinate_dd_to_dmd <- function(coordinate, latitude) {
+  # Integral part of degrees
+  degrees <- trunc(coordinate)
+  # Decimal Minutes
+  minutes_decimal <- round(abs(coordinate - degrees) * 60, 2)
+  # Adds direction (N/S for latitude, E/W for longitude)
+  direction <- rep(NA, length(coordinate))
+  if (latitude) {
+    direction[coordinate >= 0] <- "N"
+    direction[coordinate < 0] <- "S"
+  } else {
+    direction[coordinate >= 0] <- "E"
+    direction[coordinate < 0] <- "W"
+  }
+  paste0(direction, abs(degrees), "\u00B0", minutes_decimal, "'")
 }
