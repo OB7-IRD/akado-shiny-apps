@@ -6824,7 +6824,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         }
         # 2 - Data design ----
         # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
-        data_trip_unprecedented <- unique(subset(data_trip, select = -c(harbour_id_landing_trip_previous, harbour_label_landing_trip_previous)))
+        data_trip_unprecedented <- unique(subset(data_trip, select = -c(trip_previous_id, harbour_id_landing_trip_previous, harbour_label_landing_trip_previous)))
         # Retrieve trip : retrieve the vessel code, end of the trip of all the trip that have been selected
         colnames_trip_id <- c("trip_id", "vessel_code", "trip_enddate")
         # Retrieve trip route : retrieve the vessel code, end of the trip, date of route of all the route that have been selected
@@ -6989,7 +6989,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the ocean declaration is consistent with activity position
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check position inspector", sep = "")
-        check_position_inspector_data <- check_position_inspector(dataframe1 = activity_select, dataframe2 = data_trip, dataframe3 = referential_file()[["shape_sea"]], output = "report")
+        check_position_inspector_data <- check_position_inspector(dataframe1 = activity_select, dataframe2 = data_trip_unprecedented, dataframe3 = referential_file()[["shape_sea"]], output = "report")
         # Add button and data for plot in table
         check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate"), name_button = "button_position")
         # Uses a function to format the table
@@ -7123,7 +7123,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the sample well number is consistent with the associated trip well numbers
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check well number consistent inspector", sep = "")
-        check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = data_trip, output = "report")
+        check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = data_trip_unprecedented, output = "report")
         # Uses a function to format the table
         check_well_number_consistent <- table_display_trip(check_well_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_well_number_consistent <- dplyr::rename(
@@ -7217,7 +7217,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         if ("data_vms" %in% names(trip_select())) {
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check anapo inspector", sep = "")
           # Recovers all trip positions
-          check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_trip, dataframe3 = trip_select()$data_vms, activity_crs = ifelse(length(stats::na.omit(unique(activity_select$activity_crs))) == 0, 4326, stats::na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(trip_select()$data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(trip_select()$data_vms$vms_crs))), output = "report")
+          check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = activity_select, dataframe2 = data_trip_unprecedented, dataframe3 = trip_select()$data_vms, activity_crs = ifelse(length(stats::na.omit(unique(activity_select$activity_crs))) == 0, 4326, stats::na.omit(unique(activity_select$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(trip_select()$data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(trip_select()$data_vms$vms_crs))), output = "report")
           check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_data[[2]], activity_select[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = dplyr::join_by(activity_id))
           # Add information on whether the activity is linked to a grounding (object or buoy) or not in data plot
           data_tmp_grounding <- column_grounding(data = check_anapo_inspector_dataplot, data_transmittingbuoy = data_transmittingbuoy)
