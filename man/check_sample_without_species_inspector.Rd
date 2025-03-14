@@ -32,6 +32,8 @@ Dataframe 2:
 }
 }
 \examples{
+#Sample 1 is ok,
+#Sample 2 has no sample species
 dataframe1 <- data.frame(sample_id = c("1", "2"))
 dataframe2 <- data.frame(samplespecies_id = c("1", "2"),
                          sample_id = c("1", "1"))

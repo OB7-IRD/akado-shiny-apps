@@ -44,11 +44,15 @@ Dataframe 2:
 }
 }
 \examples{
-dataframe1 <- data.frame(vms_id = c("1", "2", "3", "4"),
-                      vms_date = as.Date(c("2020/01/01", "2020/01/02", "2020/02/02", "2020/02/02")),
-                      vessel_code = c("1", "1", "2", "3"),
-                      vms_codevessel = c("vessel_1", "vessel_1", "vessel_2", "vessel_2"),
-                      vessel_type = c("1", "1", "1", "1"))
+#VMS 1, 3, 4 and 5 are ok,
+#VMS 2 has not linked to an activity
+dataframe1 <- data.frame(vms_id = c("1", "2", "3", "4", "5"),
+                         vms_date = as.Date(c("2020/01/01", "2020/01/02", "2020/02/02",
+                                              "2020/02/02", "2020/02/03")),
+                         vessel_code = c("1", "1", "2", "3", "4"),
+                         vms_codevessel = c("vessel_1", "vessel_1", "vessel_2", "vessel_2",
+                                            "vessel_4"),
+                         vessel_type = c("1", "1", "1", "1", "3"))
 dataframe2 <- data.frame(activity_id = c("1", "2"),
                          activity_date = as.Date(c("2020/01/01", "2020/02/02")),
                          vessel_code = c("1", "2"))

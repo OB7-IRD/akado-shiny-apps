@@ -40,9 +40,12 @@ Dataframe 1:
 }
 }
 \examples{
-dataframe1 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4"),
-                         species_fao_code = c("YFT", "YFT", "LTA", "YFT"),
-                         sizemeasuretype_code = c("FL", "PD1", "FL", "FL"),
-                         samplespeciesmeasure_sizeclass = c(10, 90, 85, 83))
+#Activity 1, 2 and 3 are ok,
+#Activity 4 has size class is greater than threshold,
+#Activity 5 has size class is missing
+dataframe1 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4", "5"),
+                         species_fao_code = c("YFT", "YFT", "LTA", "YFT", "YFT"),
+                         sizemeasuretype_code = c("FL", "PD1", "FL", "FL", "FL"),
+                         samplespeciesmeasure_sizeclass = c(10, 90, 85, 83, NA))
 check_length_class_inspector(dataframe1, output = "report")
 }

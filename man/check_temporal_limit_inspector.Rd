@@ -35,11 +35,23 @@ Dataframe 2:
 }
 }
 \examples{
-dataframe1 <- data.frame(trip_id = c("1", "2"),
-                         trip_startdate = as.Date(c("2020/01/01", "2020/01/01")),
-                         trip_enddate = as.Date(c("2020/01/02", "2020/01/02")))
-dataframe2 <- data.frame(route_id = c("1", "2", "3", "4", "5"),
-   activity_date = as.Date(c("2020/01/01", "2020/01/02", "2020/01/01", "2020/01/02", "2020/01/03")),
-   trip_id = c("1", "1", "2", "2", "2"))
+#Trip 1 is ok,
+#Trip 2 has an extra day (2020/01/03),
+#Trip 3 has no trip_startdate,
+#Trip 4 has no trip_enddate,
+#Trip 5 has a missing day (2020/02/02),
+#Trip 6 has a double day (2020/02/13)
+dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4", "5", "6"),
+                         trip_startdate = as.Date(c("2020/01/01", "2020/01/01", NA, "2020/01/24",
+                                                    "2020/02/01", "2020/02/13")),
+                         trip_enddate = as.Date(c("2020/01/02", "2020/01/02", "2020/01/24", NA,
+                                                  "2020/02/03", "2020/02/14")))
+dataframe2 <- data.frame(route_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+                                      "12"),
+                         activity_date = as.Date(c("2020/01/01", "2020/01/02", "2020/01/01",
+                                                   "2020/01/02", "2020/01/03", "2020/01/24",
+                                                   "2020/01/24", "2020/02/01", "2020/02/03",
+                                                   "2020/02/13", "2020/02/13", "2020/02/14")),
+                         trip_id = c("1", "1", "2", "2", "2", "3", "4", "5", "5", "6", "6", "6"))
 check_temporal_limit_inspector(dataframe1, dataframe2, output = "report")
 }

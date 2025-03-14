@@ -60,8 +60,9 @@ Dataframe 1:
 }
 \itemize{
 Dataframe 2:
- \item{\code{  sample_id}}
+ \item{\code{  sampleactivity_id}}
  \item{\code{  sampleactivity_weightedweight}}
+ \item{\code{  sample_id}}
 }
 \itemize{
 Dataframe 3:
@@ -78,20 +79,50 @@ Dataframe 4:
 }
 }
 \examples{
-dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5"),
-                         sample_smallsweight = c(10, 32, 2.5, 30, 12),
-                         sample_bigsweight = c(50, 2, 9, 3, 6),
-                         sample_totalweight = c(NA, NA, NA, 33, 8),
-                         trip_id =  c("1", "1", "2", "3", "4"),
-                         sampletype_code = c("1", "1", "1", "11", "11"))
-dataframe2 <- data.frame(sample_id = c("1", "1", "2", "3", "4", "5"),
-                         sampleactivity_weightedweight = c(70, 5, 18, 12, 33, 5))
-dataframe3 <- data.frame(trip_id = c("1", "2", "3", "4"),
-          vesseltype_code = c("6", "6", "2", "2"),
-          vesseltype_label = c("vessel_type_1", "vessel_type_1", "vessel_type_2", "vessel_type_2"))
-dataframe4 <- data.frame(landing_id = c("1", "2", "3", "4", "5"),
-                         landing_weight = c(85, 26, 30, 2.6, 20),
-                         weightcategory_code = c("W-1", "W-1", "L-YFT-10", "L-YFT-10", "L-YFT-10"),
-                         trip_id = c("1", "2", "3", "3", "4"))
+#Sample 1, 3, 4, 7, 9, 12, 17 and 18 are ok,
+#Sample 2 has a weighted weight ratio over the sum of the weights of small and big individuals below
+#         the threshold (threshold_ratio),
+#Sample 5 has a difference between fresh landing and weighted weight above the
+#         threshold (threshold_baitboat),
+#Sample 6 has no vessel type,
+#Sample 8 has no sample type,
+#Sample 10 has no sample activity,
+#Sample 11 has a difference between total weight and weighted weight above the
+#          threshold (threshold_baitboat),
+#Sample 13 has no sample activity,
+#Sample 14 has a difference between sum of the weights of small and big individuals and weighted
+#          weight above the threshold (threshold_baitboat),
+#Sample 15 has the sum of the weights of small and big individuals above the
+#          threshold (threshold_weight),
+#Sample 16 has the sum of the total weight above the threshold (threshold_weight),
+#Sample 19 has a weighted weight ratio over the total weight below the threshold (threshold_ratio)
+dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+                                       "12", "13", "14", "15", "16", "17", "18", "19"),
+                         sample_smallsweight = c(10, 32, 2.5, 30, 12, 7, NA, 6, NA, 4, 8, 3, 7, 13,
+                                                 54, 3, 8, 2, 16),
+                         sample_bigsweight = c(50, 2, 9, 3, 6, 13, 0, 3, 7, 2, 0, 2, 8, 3, 62, 8,
+                                               15, 6, 1),
+                         sample_totalweight = c(NA, NA, NA, 33, 8, 9, 142, 2, 14, 10, 3, 0, NA, 0,
+                                                0, 104, 24, 36, 12),
+                         trip_id =  c("1", "1", "2", "3", "4", "5", "6", "7", "8", "8", "8", "8",
+                                      "8", "8", "1", "1", "1", "1", "1"),
+                         sampletype_code = c("1", "1", "1", "11", "11", "1", "1", NA, "1", "1", "1",
+                                             "1", "1", "1", "1", NA, NA, NA, NA))
+dataframe2 <- data.frame(sampleactivity_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                                              "11", "12", "13", "14", "15", "16", "17"),
+                         sampleactivity_weightedweight = c(70, 5, 18, 12, 33, 5, 9, 4, 13, 7, 4, 15,
+                                                           116, 104, 24, 35, 11),
+                         sample_id = c("1", "1", "2", "3", "4", "5", "6", "8", "9", "11", "12",
+                                       "14", "15", "16", "17", "18", "19"))
+dataframe3 <- data.frame(trip_id = c("1", "2", "3", "4", "6", "7", "8"),
+                         vesseltype_code = c("6", "6", "2", "2", "3", "2", "2"),
+                         vesseltype_label = c("vessel_type_1", "vessel_type_1", "vessel_type_2",
+                                              "vessel_type_2", "vessel_type_3", "vessel_type_2",
+                                              "vessel_type_2"))
+dataframe4 <- data.frame(landing_id = c("1", "2", "3", "4", "5", "6"),
+                         landing_weight = c(85, 26, 30, 2.6, 20, 3),
+                         weightcategory_code = c("W-1", "W-1", "L-YFT-10", "L-YFT-10", "L-YFT-10",
+                                                 "L-BET-10"),
+                         trip_id = c("1", "2", "3", "3", "4", "7"))
 check_weighting_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
 }

@@ -72,20 +72,30 @@ Dataframe 4:
 }
 }
 \examples{
-dataframe1 <- data.frame(sample_id = c("1", "2", "3"),
-                         sample_well = c("well_1", "well_2", "well_3"),
-                         trip_id = c("1", "1", "1"),
-                         sample_smallsweight = c(6, 25, 14),
-                         sample_bigsweight = c(12, 0, 9))
-dataframe2 <- data.frame(well_id = c("1", "2", "3"),
-                         well_label = c("well_1", "well_2", "well_3"),
-                         trip_id = c("1", "1", "1"))
-dataframe3 <- data.frame(wellactivity_id = c("1", "2", "3", "4"),
-                         well_id = c("1", "1", "2", "3"))
-dataframe4 <- data.frame(wellactivityspecies_id = c("1", "2", "3", "4", "5", "6", "7"),
-                         wellactivity_id = c("1", "1", "1", "2", "3", "4", "4"),
-                         weightcategory_code = c("W-1", "W-9", "W-2", "W-2", "W-1", "W-2", "W-9"),
-                         species_fao_code = c("BET", "SKJ", "SKJ", "ALB", "SKJ", "BET", "BET"),
-                         wellactivityspecies_weight = c(4, 2, 7, 5, 25, 9, 14))
+#Sample 1 and 2 are ok,
+#Sample 3 has not small weight in well,
+#Sample 4 has not bigs weight in sample,
+#Sample 5 has different bigs weight,
+#Sample 6 has different small weight
+dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5", "6"),
+                         sample_well = c("well_1", "well_2", "well_3", "well_4", "well_5",
+                                         "well_6"),
+                         trip_id = c("1", "1", "1", "1", "1", "1"),
+                         sample_smallsweight = c(6, 25, 14, 0, NA, 10),
+                         sample_bigsweight = c(12, 0, 9, NA, 6, 0))
+dataframe2 <- data.frame(well_id = c("1", "2", "3", "4", "5", "6"),
+                         well_label = c("well_1", "well_2", "well_3", "well_4", "well_5", "well_6"),
+                         trip_id = c("1", "1", "1", "1", "1", "1"))
+dataframe3 <- data.frame(wellactivity_id = c("1", "2", "3", "4", "5", "6", "7"),
+                         well_id = c("1", "1", "2", "3", "4", "5", "6"))
+dataframe4 <- data.frame(wellactivityspecies_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9",
+                                                    "10", "11", "12"),
+                         wellactivity_id = c("1", "1", "1", "2", "3", "4", "4", "5", "6", "7",
+                                             "7", "7"),
+                         weightcategory_code = c("W-1", "W-9", "W-2", "W-2", "W-1", "W-2", "W-9",
+                                                 "W-2", "W-2", "W-1", "W-9", "W-9"),
+                         species_fao_code = c("BET", "SKJ", "SKJ", "ALB", "SKJ", "BET", "BET",
+                                              "ALB", "SKJ", "SKJ", "SKJ", "BET"),
+                         wellactivityspecies_weight = c(4, 2, 7, 5, 25, 9, 14, 5, 17, 10, 5, 2))
 check_distribution_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
 }

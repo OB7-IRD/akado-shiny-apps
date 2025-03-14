@@ -33,6 +33,7 @@ Imports:
     units,
     writexl
 Suggests: 
+    doctest (>= 0.3.0),
     knitr,
     rmarkdown,
     spelling,
@@ -47,3 +48,5 @@ Encoding: UTF-8
 Language: en-US
 LazyData: true
 RoxygenNote: 7.3.2
+Roxygen: list(roclets = c("collate", "rd", "namespace", 
+              "doctest::dt_roclet"), packages = "doctest") 

@@ -34,10 +34,14 @@ Dataframe 2:
 }
 }
 \examples{
-dataframe1 <- data.frame(trip_id = c("1", "2"),
-                         trip_fishingtime = c(10, 15))
-dataframe2 <- data.frame(route_id = c("1", "2", "3", "4"),
-                         trip_id = c("1", "1", "2", "2"),
-                         route_fishingtime = c(4, 6, 10, 6))
+#Trip 1 and 5 are ok,
+#Trip 2 has different fishing times,
+#Trip 3 has no trip_fishingtime,
+#Trip 4 has no route_fishingtime
+dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4", "5"),
+                         trip_fishingtime = c(10, 15, NA, 8, 0))
+dataframe2 <- data.frame(route_id = c("1", "2", "3", "4", "5", '6'),
+                         trip_id = c("1", "1", "2", "2", "3", "5"),
+                         route_fishingtime = c(4, 6, 10, 6, 14, 0))
 check_fishing_time_inspector(dataframe1, dataframe2, output = "report")
 }

@@ -34,10 +34,15 @@ Dataframe 2:
 }
 }
 \examples{
-dataframe1 <- data.frame(trip_id = c("1", "2"),
-                         trip_seatime = c(10, 15))
-dataframe2 <- data.frame(route_id = c("1", "2", "3", "4"),
-                         trip_id = c("1", "1", "2", "2"),
-                         route_seatime = c(4, 6, 10, 6))
+#Trip 1 is ok,
+#Trip 2 has different sea times,
+#Trip 3 has no trip_seatime,
+#Trip 4 has no route_seatime,
+#Trip 5 has trip_seatime = 0
+dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4", "5"),
+                         trip_seatime = c(10, 15, NA, 8, 0))
+dataframe2 <- data.frame(route_id = c("1", "2", "3", "4", "5", "6"),
+                         trip_id = c("1", "1", "2", "2", "3", "5"),
+                         route_seatime = c(4, 6, 10, 6, 5, 0))
 check_sea_time_inspector(dataframe1, dataframe2, output = "report")
 }

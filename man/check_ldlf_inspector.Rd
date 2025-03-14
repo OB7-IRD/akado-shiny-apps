@@ -53,13 +53,17 @@ Dataframe 2:
 }
 }
 \examples{
-dataframe1 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5"),
-                         species_fao_code = c("SKJ", "SKJ", "JOS", "SKJ", "SKJ"),
-                         sizemeasuretype_code = c("FL", "PD1", "PD1", "FL", "FL"),
-                         sample_id = c("1", "1", "1", "2", "3"))
-dataframe2 <- data.frame(sample_id = c("1", "2", "3"),
-                         sample_smallsweight = c(5, 0, 0),
-                         sample_bigsweight = c(12, NA, 6),
-                         sample_totalweight = c(0, 23, NA))
+#Sample species 1, 3 and 4 are ok,
+#Sample species 2 has a species that is not compatible with the type of measure,
+#Sample species 5 has no smalls weight nor total weight,
+#Sample species 6 has no bigs weight nor total weight
+dataframe1 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5", "6"),
+                         species_fao_code = c("SKJ", "SKJ", "JOS", "SKJ", "SKJ", "JOS"),
+                         sizemeasuretype_code = c("FL", "PD1", "PD1", "FL", "FL", "PD1"),
+                         sample_id = c("1", "1", "1", "2", "3", "4"))
+dataframe2 <- data.frame(sample_id = c("1", "2", "3", "4"),
+                         sample_smallsweight = c(5, 0, 0, 7),
+                         sample_bigsweight = c(12, NA, 6, 0),
+                         sample_totalweight = c(0, 23, NA, NA))
 check_ldlf_inspector(dataframe1, dataframe2, output = "report")
 }

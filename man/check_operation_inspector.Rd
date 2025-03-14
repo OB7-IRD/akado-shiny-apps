@@ -44,10 +44,19 @@ Dataframe 1:
 }
 }
 \examples{
-dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
-                         schooltype_code = c("2", "1", "2"),
-                         successstatus_code = c("1", "0", "2"),
-                         activity_weight = c(10, 0, 0),
-                         vesselactivity_code = c("6", "6", "6"))
+#Activity 1, 2, 4 and 8 are ok,
+#Activity 3 has no weight,
+#Activity 5 has success status,
+#Activity 6 has no school type,
+#Activity 7 has no success status,
+#Activity 9 has success status in success_status_school_type,
+#Activity 10 has weight
+dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11"),
+                         schooltype_code = c("2", "1", "2", NA, NA, NA, "1", "0", "0", "0", "1"),
+                         successstatus_code = c("1", "0", "2", NA, "2", "2", NA, "2", "1", "2",
+                                                "0"),
+                         activity_weight = c(10, 0, 0, NA, NA, 6, 8, 2, 8, NA, 4),
+                         vesselactivity_code = c("6", "6", "6", "1", "1", "6", "6", "6", "6", "6",
+                                                 "6"))
 check_operation_inspector(dataframe1, output = "report")
 }

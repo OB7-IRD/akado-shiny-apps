@@ -57,6 +57,9 @@ Dataframe 3:
 }
 }
 \examples{
+#Activity 1, 3 and 5 are ok,
+#Activity 2 has different weight,
+#Activity 4 has weighted weight
 dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5"))
 dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5", "6"),
                          catch_weight = c(4, 2, 5, 10, 3, 8),

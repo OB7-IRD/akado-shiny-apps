@@ -32,6 +32,8 @@ Dataframe 1:
 }
 }
 \examples{
+#Sample species 1 is ok,
+#Sample species 2 has a species outside the list species
 dataframe1 <- data.frame(samplespecies_id = c("1", "2"),
                          species_fao_code = c("YFT", "JOS"))
 check_species_inspector(dataframe1, output = "report")

@@ -47,10 +47,13 @@ Dataframe 2:
 }
 }
 \examples{
-dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
-                         schooltype_code = c("2", "1", "2"))
-dataframe2 <- data.frame(observedsystem_id = c("1", "2", "3", "4"),
-                         activity_id = c("1", "2", "2", "3"),
-                         schooltype_code = c("2", "2", "1", "1"))
+#Activity 1, 2, 5, 6 and 7 are ok,
+#Activity 3 has school type object,
+#Activity 4 has no school type object
+dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7"),
+                         schooltype_code = c("2", "1", "2", "1", NA, "0", "2"))
+dataframe2 <- data.frame(observedsystem_id = c("1", "2", "3", "4", "5"),
+                         activity_id = c("1", "2", "2", "3", "4"),
+                         schooltype_code = c("2", "2", "1", "1", "2"))
 check_fishing_context_inspector(dataframe1, dataframe2, output = "report")
 }

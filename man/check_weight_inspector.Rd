@@ -36,8 +36,10 @@ Dataframe 2:
 }
 }
 \examples{
-dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
-                         activity_weight = c(10, 15.01, 6))
+#Activity 1, 2 and 4 are ok,
+#Activity 3 has different weight
+dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4"),
+                         activity_weight = c(10, 15.01, 6, NA))
 dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5"),
                          catch_weight = c(10, 10, 5, 3, 2),
                          activity_id = c("1", "2", "2", "3", "3"))

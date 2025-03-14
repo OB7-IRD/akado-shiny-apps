@@ -41,10 +41,14 @@ Dataframe 2:
 }
 }
 \examples{
-dataframe1 <- data.frame(trip_id = c("1", "2"),
-                         trip_landingtotalweight = c(10, 15))
-dataframe2 <- data.frame(landing_id = c("1", "2", "3", "4"),
-                         landing_weight = c(4, 6, 10, 6),
-                         trip_id = c("1", "1", "2", "2"))
+#Trip 1 and 4 are ok,
+#Trip 2 has different landing weight,
+#Trip 3 has no trip_landingtotalweight,
+#Trip 5 has no landing_weight
+dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4", "5"),
+                         trip_landingtotalweight = c(10, 15, NA, 0, 4))
+dataframe2 <- data.frame(landing_id = c("1", "2", "3", "4", "5", "6"),
+                         landing_weight = c(4, 6, 10, 6, 2, NA),
+                         trip_id = c("1", "1", "2", "2", "3", "4"))
 check_landing_total_weight_inspector(dataframe1, dataframe2, output = "report")
 }

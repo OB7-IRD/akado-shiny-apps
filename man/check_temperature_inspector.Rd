@@ -28,6 +28,8 @@ Dataframe 1:
 }
 }
 \examples{
+#Activity 1 is ok,
+#Activity 2 and 3 have temperatures outside the thresholds
 dataframe1 <- data.frame(activity_id = c("1", "2", "3"),
                          activity_seasurfacetemperature = c(20, 4, 35))
 check_temperature_inspector(dataframe1, output = "report")

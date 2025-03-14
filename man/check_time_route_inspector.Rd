@@ -74,12 +74,20 @@ Dataframe 3:
 }
 }
 \examples{
-dataframe1 <- data.frame(route_id = c("1", "2"),
-                         route_seatime = c(6, 2),
-                         route_fishingtime = c(5,0))
-dataframe2 <- data.frame(activity_id = c("1", "2", "3", "4"),
-                         vesselactivity_code = c("2","13", "103","15"),
-                         route_id = c("1", "1", "2", "2"))
+#Day 1 is ok,
+#Day 2 has a fishing time equal to 0 but includes 1 fishing activitie
+#Day 3 has a sea time equal to 0 but includes 1 activitie on the sea
+#Day 4 has a missing sea time,
+#Day 5 has a missing fishing time,
+#Day 6 has a sea time greater than threshold (threshold_sea_time),
+#Day 7 has a fishing time greater than threshold (threshold_fishing_time),
+#Day 8 has a fishing time greater than sea time
+dataframe1 <- data.frame(route_id = c("1", "2", "3", "4", "5", "6", "7", "8"),
+                         route_seatime = c(6, 2, 0, NA, 8, 26, 15, 8),
+                         route_fishingtime = c(5, 0, 2, 4, NA, 7, 14, 9))
+dataframe2 <- data.frame(activity_id = c("1", "2", "3", "4", "5"),
+                         vesselactivity_code = c("2","13", "103","15", "6"),
+                         route_id = c("1", "1", "2", "2", "3"))
 dataframe3 <- data.frame(floatingobject_id = c("1"),
                          objectoperation_code = c("1"),
                          activity_id = c("2"))

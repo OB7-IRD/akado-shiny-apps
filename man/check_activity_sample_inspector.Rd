@@ -32,6 +32,8 @@ Dataframe 2:
 }
 }
 \examples{
+#Sample 1 is ok,
+#Sample 2 is not linked to an activity
 dataframe1 <- data.frame(sample_id = c("1", "2"))
 dataframe2 <- data.frame(sample_id = c("1"),
                          activity_id = c("1"))

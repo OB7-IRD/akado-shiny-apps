@@ -28,9 +28,12 @@ Dataframe 1:
 }
 }
 \examples{
-dataframe1 <- data.frame(sample_id = c("1", "2", "3"),
-                         sample_smallsweight = c(10, NA, 12),
-                         sample_bigsweight = c(50, NA, NA),
-                         sample_totalweight = c(NA, 9, 5))
+#Sample 1, and 2 are ok,
+#Sample 3 has total weight and smalls weight,
+#Sample 4 has not total weight nor smalls weight nor bigs weight
+dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"),
+                         sample_smallsweight = c(10, NA, 12, NA),
+                         sample_bigsweight = c(50, NA, NA, 0),
+                         sample_totalweight = c(NA, 9, 5, 0))
 check_weight_sample_inspector(dataframe1, output = "report")
 }

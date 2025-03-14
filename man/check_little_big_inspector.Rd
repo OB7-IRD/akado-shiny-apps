@@ -66,17 +66,30 @@ Dataframe 3:
 }
 }
 \examples{
-dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"),
-                         sample_smallsweight = c(10, 20, 1, 30),
-                         sample_bigsweight = c(NA, 2, 9, 3),
-                         sample_totalweight = c(NA, NA, NA, 33))
-dataframe2 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5"),
-                         species_fao_code = c("YFT", "BET", "BET", "YFT", "ALB"),
-                         sizemeasuretype_code = c("PD1", "PD1", "FL","PD1", "FL"),
-                         sample_id = c("1", "2", "2", "3", "4"))
-dataframe3 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4", "5"),
-                         samplespeciesmeasure_sizeclass = c(20, 26, 70, 20, 10),
-                         samplespeciesmeasure_count = c(5, 1, 9, 8, 10),
-                         samplespecies_id = c("1", "2", "3", "4", "5"))
+#Sample 1, 2, 4, 5, 7, 8 and 9 are ok,
+#Sample 3 has a percentage of big below the threshold,
+#Sample 6 has a percentage of little below the threshold,
+#Sample 10 has a percentage of little below the threshold,
+#Sample 11 has a percentage of little below the threshold,
+#Sample 12 has a percentage of big below the threshold
+dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11",
+                                       "12"),
+                         sample_smallsweight = c(10, 20, 1, 30, 3, 7, 4, 12, 0, 0, 3, 0),
+                         sample_bigsweight = c(NA, 2, 9, 3, 5, 4, 13, 5, 0, NA, 0, 4),
+                         sample_totalweight = c(NA, NA, NA, 33, NA, NA, 7, 2, 0, 5, 0, 0))
+dataframe2 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                                              "11", "12"),
+                         species_fao_code = c("YFT", "BET", "BET", "YFT", "ALB", "YFT", "YFT",
+                                              "BET", "YFT", "ALB", "YFT", "YFT"),
+                         sizemeasuretype_code = c("PD1", "PD1", "FL","PD1", "FL", "FL", "PD1",
+                                                  "FL", "PD1", "PD1", "PD1", "PD1"),
+                         sample_id = c("1", "2", "2", "3", "4", "5", "5", "6", "6", "8", "9", "10"))
+dataframe3 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9",
+                                                     "10", "11", "12"),
+                         samplespeciesmeasure_sizeclass = c(20, 26, 70, 20, 10, 45, 36, 30, 32, 24,
+                                                            13, 13),
+                         samplespeciesmeasure_count = c(5, 1, 9, 8, 10, 25, 2, 16, 4, 3, 6, 6),
+                         samplespecies_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
+                                              "11", "12"))
 check_little_big_inspector(dataframe1, dataframe2, dataframe3, output = "report")
 }

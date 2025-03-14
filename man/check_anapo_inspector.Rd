@@ -15,6 +15,7 @@ check_anapo_inspector(
   threshold_number_vms = 20,
   threshold_geographical = 10,
   threshold_time = 7200000,
+  threshold_score = 0.5,
   buffer_harbour = 11100
 )
 }
@@ -33,11 +34,13 @@ check_anapo_inspector(
 
 \item{output}{{\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".}
 
-\item{threshold_number_vms}{{\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required.}
+\item{threshold_number_vms}{{\link[base]{numeric}} expected. Default values: 20. Minimum number of VMS positions required per day.}
 
 \item{threshold_geographical}{{\link[base]{numeric}} expected. Default values: 10. Maximum valid distance threshold (Nautical miles) between position and nearest VMS point.}
 
-\item{threshold_time}{{\link[base]{numeric}} expected. Default values: 7200000. Maximum valid distance threshold (milliseconds) between position and nearest VMS point.}
+\item{threshold_time}{{\link[base]{numeric}} expected. Default values: 7200000. Maximum valid distance threshold (milliseconds) between position and VMS point.}
+
+\item{threshold_score}{{\link[base]{numeric}} expected. Default values: 0.5. Minimum valid score between position and VMS point.}
 
 \item{buffer_harbour}{{\link[base]{numeric}} expected. Default values: 11100. Buffer to be used for harbour, in meter}
 }
@@ -73,11 +76,19 @@ Dataframe 3:
 }
 }
 \examples{
-dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4"),
-                 activity_date = as.Date(c("2020/01/01", "2020/01/12", "2020/01/12", "2020/01/13")),
-                 activity_time = c("05:26:01", "10:41:15", "16:41:15", "03:12:34"),
-                 activity_position = c("POINT (1 1)", "POINT (0 0)", "POINT (3 0)", "POINT (4 4)"),
-                 trip_id = c("1", "2", "2", "2"))
+#Activity 1, 2 and 3 are ok,
+#Activity 4 has a number of VMS below the threshold (threshold_number_vms),
+#Activity 5 has no position,
+#Activity 6 has has a geographical distance above the threshold (threshold_geographical) and
+#           a score below the threshold (threshold_score)
+dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6"),
+                         activity_date = as.Date(c("2020/01/01", "2020/01/12", "2020/01/12",
+                                                   "2020/01/13", "2020/01/12", "2020/01/12")),
+                         activity_time = c("05:26:01", "10:41:15", "16:41:15", "03:12:34",
+                                           "05:56:12", "23:26:47"),
+                         activity_position = c("POINT (1 1)", "POINT (0 0)", "POINT (3 0)",
+                                               "POINT (4 4)", NA, "POINT (3 0.6)"),
+                         trip_id = c("1", "2", "2", "2", "2", "2"))
 dataframe2 <- data.frame(trip_id = c("1", "2"),
                          vessel_code = c("1", "1"),
                          harbour_position_departure = c("POINT (1 1.1)", "POINT (3 3)"),

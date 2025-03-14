@@ -109,6 +109,7 @@ usethis::use_package("tibble")
 usethis::use_package("tidyr")
 usethis::use_package("shinymanager")
 usethis::use_package("terra")
+usethis::use_package("doctest", type = "Suggests", min_version = "0.3.0")
 ## Dependencies GIT
 usethis::use_dev_package("codama", remote = "OB7-IRD/codama")
 usethis::use_dev_package("furdeb", remote = "OB7-IRD/furdeb")

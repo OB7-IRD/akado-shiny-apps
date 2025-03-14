@@ -30,11 +30,17 @@ Dataframe 1:
 }
 }
 \examples{
-dataframe1 <- data.frame(trip_id = c("1", "2", "3"),
-                         harbour_id_departure = c("1", "2", "3"),
-                         harbour_label_departure = c("Harbour_1", "Harbour_2", "Harbour_3"),
-                         trip_previous_id = c(NA, "1", "2"),
-                         harbour_id_landing_trip_previous = c(NA, "2", "2"),
-                         harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2"))
+#Trip 1 and 2 are ok,
+#Trip 3 has different harbour,
+#Trip 4 has no harbour departure,
+#Trip 5 has no harbour landing for trip previous
+dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4", "5"),
+                         harbour_id_departure = c("1", "2", "3", NA, "1"),
+                         harbour_label_departure = c("Harbour_1", "Harbour_2", "Harbour_3", NA,
+                                                     "Harbour_1"),
+                         trip_previous_id = c(NA, "1", "2", NA, "6"),
+                         harbour_id_landing_trip_previous = c(NA, "2", "2", NA, NA),
+                         harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2", NA,
+                                                                 NA))
 check_harbour_inspector(dataframe1, output = "report")
 }

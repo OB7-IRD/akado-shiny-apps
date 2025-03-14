@@ -28,9 +28,12 @@ Dataframe 1:
 }
 }
 \examples{
-dataframe1 <- data.frame(trip_id = c("1", "2"),
-                         trip_landingtotalweight = c(10, 15),
-                         trip_localmarkettotalweight = c(2, 0),
-                         vessel_capacity = c(20, 10))
+#Trip 1 and 4 are ok,
+#Trip 2 has a total weight greater than the vessel's capacity,
+#Trip 3 has its vessel's capacity missing
+dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4"),
+                         trip_landingtotalweight = c(10, 15, 2, NA),
+                         trip_localmarkettotalweight = c(2, 1, 7, NA),
+                         vessel_capacity = c(20, 10, NA, 13))
 check_landing_consistent_inspector(dataframe1, output = "report")
 }
