@@ -306,7 +306,7 @@ app_server <- function(input, output, session) {
   # Anapo control plot, display in a window
   output$plot_anapo <- plotly::renderPlotly({
     split_id <- strsplit(input$button_anapo, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]), "data_plot"][[1]], "&")[[1]]
+    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[4])]][as.numeric(split_id[5]), "data_plot"][[1]], "&")[[1]]
     data <- eval(parse(text = data_all_click[[1]]))
     activity_crs <- data_all_click[[3]]
     vms_crs <- data_all_click[[4]]
@@ -321,7 +321,7 @@ app_server <- function(input, output, session) {
     X <- NULL
     Y <- NULL
     split_id <- strsplit(input$button_anapo, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]), "data_plot"][[1]], "&")[[1]]
+    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[4])]][as.numeric(split_id[5]), "data_plot"][[1]], "&")[[1]]
     activity_data <- eval(parse(text = data_all_click[[5]]))
     activity_crs <- data_all_click[[3]]
     # Spatial formatting
@@ -369,26 +369,26 @@ app_server <- function(input, output, session) {
   # Anapo activity control plot, display in a window
   output$plot_anapo_activity <- plotly::renderPlotly({
     split_id <- strsplit(input$button_anapo_activity, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]), "data_plot"][[1]], "&")[[1]]
+    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[4])]][as.numeric(split_id[5]), "data_plot"][[1]], "&")[[1]]
     vms_data <- eval(parse(text = data_all_click[[1]]))
-    vms_crs <- data_all_click[[3]]
-    plot_anapo_activity(data_vms = vms_data, crs_vms = vms_crs, vms_date = data_all_click[[2]])
+    vms_crs <- data_all_click[[4]]
+    plot_anapo_activity(data_vms = vms_data, crs_vms = vms_crs, vms_date = data_all_click[[3]])
   })
 
   # Anapo activity control window
   observeEvent(input$button_anapo_activity, {
     split_id <- strsplit(input$button_anapo_activity, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[3])]][as.numeric(split_id[4]), "data_plot"][[1]], "&")[[1]]
+    data_all_click <- strsplit(calcul_check()[[as.numeric(split_id[4])]][as.numeric(split_id[5]), "data_plot"][[1]], "&")[[1]]
     # Non-breaking hyphen (-)
-    vms_date <- gsub("-", "&#8209;", data_all_click[[2]])
+    vms_date <- gsub("-", "&#8209;", data_all_click[[3]])
     showModal(modalDialog(
       fluidRow(
         column(3,
           style = "padding-left:5px;padding-right:0px;",
           HTML(paste0("<b>Trip information : </b><br>
-                             <ul><li>Vessel code : ", data_all_click[[4]], "</li>
+                             <ul><li>Vessel code : ", data_all_click[[5]], "</li>
                              <li>VMS date : ", vms_date, "</li>
-                             <li>Vessel type : ", data_all_click[[5]], "</li></ul>"))
+                             <li>Vessel type : ", data_all_click[[6]], "</li></ul>"))
         ),
         column(9,
           style = "padding-left:0px;padding-right:5px;",

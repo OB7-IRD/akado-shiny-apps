@@ -4,7 +4,7 @@
 test_that("Doctest: check_anapo_activity_consistent_inspector", {
   # Created from @doctest for `check_anapo_activity_consistent_inspector`
   # Source file: R/function.R
-  # Source line: 6493
+  # Source line: 6491
   dataframe1 <- data.frame(vms_id = c("1", "2", "3", "4", "5"), vms_date = as.Date(c("2020/01/01", "2020/01/02", "2020/02/02", "2020/02/02", "2020/02/03")),
   vessel_code = c("1", "1", "2", "3", "4"), vms_codevessel = c("vessel_1", "vessel_1", "vessel_2", "vessel_2", "vessel_4"), vessel_type = c("1", "1", "1", "1",
     "3"))

@@ -3381,7 +3381,7 @@ check_time_route_inspector <- function(dataframe1,
 #'                          fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE"),
 #'                          fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE"),
 #'                          activity_position = c("POINT (1 1)", "POINT (4 3)", "POINT (-1 -1)",
-#'                                                "POINT (-1 -1)","POINT (1 1)","POINT (1 1)",
+#'                                                "POINT (-1 -1)", "POINT (1 1)", "POINT (1 1)",
 #'                                                "POINT (6 6)"))
 #' dataframe2 <- sf::st_sf(data.frame(ISO_TER1 = c("SYC", "XSG"),
 #'                                    ISO_TER2 = c(NA, NA),
@@ -7171,7 +7171,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date = TRUE, exter_activity_date = FALSE, count_freq = 0, logical = FALSE))
         check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
         # Add button and data for plot in table
-        check_temporal_limit <- data_button_plot(data_plot = check_temporal_limit_data_plot, data_display = check_temporal_limit, data_id = trip_select()$trip_id_data[, colnames_trip_id], colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("trip_id", "vessel_code", "trip_startdate", "trip_enddate"), name_button = "button_temporal_limit")
+        check_temporal_limit <- data_button_plot(data_plot = check_temporal_limit_data_plot, data_display = check_temporal_limit, data_id = trip_select()$trip_id_data[, colnames_trip_id], colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("vessel_code", "trip_startdate", "trip_enddate"), name_button = "button_temporal_limit")
         # Uses a function to format the table
         check_temporal_limit <- table_display_trip(check_temporal_limit, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
@@ -7230,7 +7230,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check position inspector", sep = "")
         check_position_inspector_data <- check_position_inspector(dataframe1 = activity_select, dataframe2 = data_trip_unprecedented, dataframe3 = referential_file()[["shape_sea"]], output = "report")
         # Add button and data for plot in table
-        check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate"), name_button = "button_position")
+        check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate"), name_button = "button_position")
         # Uses a function to format the table
         check_position <- table_display_trip(check_position, activity_select[, c(colnames_activity_id, "activity_position")], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
@@ -7321,7 +7321,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check eez inspector", sep = "")
         check_eez_inspector_data <- check_eez_inspector(dataframe1 = activity_select, dataframe2 = referential_file()[["shape_eez"]], output = "report")
         # Add button and data for plot in table
-        check_eez <- data_button_plot(data_plot = check_eez_inspector_data[[2]], data_display = check_eez_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3"), name_button = "button_eez", choice_select_row = "all")
+        check_eez <- data_button_plot(data_plot = check_eez_inspector_data[[2]], data_display = check_eez_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3"), name_button = "button_eez", choice_select_row = "all")
         # Uses a function to format the table
         check_eez <- table_display_trip(check_eez, activity_select[, c(colnames_activity_id, "activity_position")], type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
@@ -7498,20 +7498,17 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_inspector_dataplot_range_date <- check_anapo_inspector_dataplot_range_date %>%
             dplyr::group_by(date_group, trip_id, activity_id) %>%
             dplyr::distinct()
-          code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_range_date", name_col = "trip_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
-          eval(parse(text = code_txt))
+          check_anapo_inspector_dataplot_range_date <- data_to_text(data = check_anapo_inspector_dataplot_range_date, name_col = "trip_data", name_button = NULL, colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
           # Data formatting controlled activity
           check_anapo_inspector_dataplot_activity <- check_anapo_inspector_dataplot %>%
             dplyr::select(c("vessel_code", "trip_enddate", "activity_id", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code")) %>%
             dplyr::distinct()
-          code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot_activity", name_col = "activity_data", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
-          eval(parse(text = code_txt))
+          check_anapo_inspector_dataplot_activity <- data_to_text(data = check_anapo_inspector_dataplot_activity, name_col = "activity_data", name_button = NULL, colname_id = "activity_id", colname_plot = c("vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
           check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("vessel_code", "trip_enddate", "activity_number", "activity_time", "vesselactivity_code"))
           check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = dplyr::join_by(activity_id))
           check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = dplyr::join_by(activity_id))
           check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
-          code_txt <- data_to_text(name_data = "check_anapo_inspector_dataplot", name_col = "data_plot", name_button = "NULL", colname_id = "activity_id", colname_plot = c("vms_position", "vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_id", "activity_crs", "vms_crs", "activity_data", "trip_data"))
-          eval(parse(text = code_txt))
+          check_anapo_inspector_dataplot <- data_to_text(data = check_anapo_inspector_dataplot, name_col = "data_plot", name_button = NULL, colname_id = "activity_id", colname_plot = c("vms_position", "vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_crs", "vms_crs", "activity_data", "trip_data"))
           # Number of the table containing the Anapo plot information in calcul_check_server
           check_anapo_inspector_dataplot$num_table <- 29
           check_anapo_inspector_dataplot$num_row <- seq_len(nrow(check_anapo_inspector_dataplot))
@@ -7548,8 +7545,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             dplyr::rename(vms_date_id = vms_id)
           # Retrieving information for the plot
           check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity_consistent_inspector_data, data_vms[, c("vms_date_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_date_id))
-          code_txt <- data_to_text(name_data = "check_anapo_activity_dataplot", name_col = "data_plot", name_button = "NULL", colname_id = "vms_date_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"))
-          eval(parse(text = code_txt))
+          check_anapo_activity_dataplot <- data_to_text(data = check_anapo_activity_dataplot, name_col = "data_plot", name_button = NULL, colname_id = "vms_date_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"))
           # Number of the table containing the Anapo plot information in calcul_check_server
           check_anapo_activity_dataplot$num_table <- 34
           check_anapo_activity_dataplot$num_row <- seq_len(nrow(check_anapo_activity_dataplot))
@@ -7798,9 +7794,30 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
 }
 
 # Function to create a data.frame in character
-data_to_text <- function(name_data, name_col, name_button, colname_id, colname_plot, colname_info) {
-  code_txt <- paste0(name_data, " <-", name_data, "%>%dplyr::group_by(", colname_id, ") %>%
-            dplyr::reframe(", name_col, " = paste0(", name_button, ",paste0(deparse(dplyr::across(.cols=c(", paste0(colname_plot, collapse = ","), '))), collapse = "")', ifelse(is.null(colname_info), "", paste0(',"&",', paste0("unique(", colname_info, ")", collapse = ', "&",'))), "))")
+data_to_text <- function(data, name_col, name_button, colname_id, colname_plot, colname_info) {
+  # 0 - Global variables assignement ----
+  `:=` <- NULL
+  # Arguments verification
+  if (!codama::r_type_checking(
+    r_object = colname_id,
+    type = "character",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = colname_id,
+      type = "character",
+      length = 1L,
+      output = "error"
+    ))
+  }
+  code_txt <- data %>%
+    dplyr::group_by(!!as.name(colname_id)) %>%
+    dplyr::summarise(!!name_col := paste0(ifelse(is.null(name_button), "", paste0(name_button, "&")), paste0(deparse(dplyr::pick(colname_plot)), collapse = ""), ifelse(is.null(colname_info), "", paste0("&", unique(!!as.name(colname_id)), "&", paste0(sapply(unique(dplyr::pick(colname_info)), function(val) {
+                                                                                                                                                                                                                                                                                                                   if (inherits(val, "Date")) {
+                                                                                                                                                                                                                                                                                                                     format(val, "%Y-%m-%d")
+                                                                                                                                                                                                                                                                                                                   }else {
+                                                                                                                                                                                                                                                                                                                          as.character(val)}}), collapse = "&")))), .groups = "drop")
   return(code_txt)
 }
 
@@ -7825,8 +7842,7 @@ data_button_plot <- function(data_plot, data_display, data_id, colname_id, colna
   # Add line identification
   data_plot <- merge(data_id, data_plot, by = colname_id, all.x = TRUE)
   # Add button and data for plot in table
-  code_txt <- data_to_text(name_data = "data_plot", name_col = "buttontmp", name_button = '"button&"', colname_id = colname_id, colname_plot = colname_plot, colname_info = colname_info)
-  eval(parse(text = code_txt))
+  data_plot <- data_to_text(data = data_plot, name_col = "buttontmp", name_button = "button", colname_id = colname_id, colname_plot = colname_plot, colname_info = colname_info)
   data_display <- merge(data_display, data_plot, by = colname_id)
   # Select the lines that will display a plot
   if (choice_select_row == "all") {

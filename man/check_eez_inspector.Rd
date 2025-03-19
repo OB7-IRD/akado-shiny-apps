@@ -61,7 +61,7 @@ dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7"),
                          fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE"),
                          fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE"),
                          activity_position = c("POINT (1 1)", "POINT (4 3)", "POINT (-1 -1)",
-                                               "POINT (-1 -1)","POINT (1 1)","POINT (1 1)",
+                                               "POINT (-1 -1)", "POINT (1 1)", "POINT (1 1)",
                                                "POINT (6 6)"))
 dataframe2 <- sf::st_sf(data.frame(ISO_TER1 = c("SYC", "XSG"),
                                    ISO_TER2 = c(NA, NA),
