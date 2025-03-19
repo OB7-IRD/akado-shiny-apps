@@ -4,7 +4,7 @@
 test_that("Doctest: check_position_inspector", {
   # Created from @doctest for `check_position_inspector`
   # Source file: R/function.R
-  # Source line: 1829
+  # Source line: 1830
   dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7"), ocean_label = c("ocean_1", "ocean_2", "ocean_2", "ocean_2", "ocean_2", "ocean_1",
     NA), activity_position = c("POINT (0 0)", "POINT (0 0)", "POINT (-1 -1)", "POINT (1 1)", "POINT (3 3)", NA, "POINT (1 1)"), trip_id = c("1", "2", "2", "2",
     "2", "2", "2"))

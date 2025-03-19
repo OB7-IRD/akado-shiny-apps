@@ -1323,7 +1323,8 @@ check_raising_factor_inspector <- function(dataframe1,
   # RF1 calculation
   full_trip_id_data_rf1 <- dataframe4 %>%
     dplyr::group_by(trip_end_full_trip_id) %>%
-    dplyr::summarise(rf1 = ifelse(all(is.na(sum_landing_weight)), sum_landing_weight[NA_integer_], sum(sum_landing_weight, na.rm = TRUE)) / ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), full_trip_sum_landing_weight = ifelse(all(is.na(sum_landing_weight)), sum_landing_weight[NA_integer_], sum(sum_landing_weight, na.rm = TRUE)), full_trip_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)))
+    dplyr::summarise(full_trip_sum_landing_weight = ifelse(all(is.na(sum_landing_weight)), sum_landing_weight[NA_integer_], sum(sum_landing_weight, na.rm = TRUE)), full_trip_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), .groups = "drop") %>%
+    dplyr::mutate(rf1 = full_trip_sum_landing_weight / full_trip_sum_catch_weight)
   dataframe4$lower_threshold <- threshold[1]
   dataframe4$upper_threshold <- threshold[2]
   # Selection of user-supplied trips

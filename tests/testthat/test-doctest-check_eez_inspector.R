@@ -4,7 +4,7 @@
 test_that("Doctest: check_eez_inspector", {
   # Created from @doctest for `check_eez_inspector`
   # Source file: R/function.R
-  # Source line: 3375
+  # Source line: 3376
   dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7"), vesselactivity_code = c("6", "6", "6", "6", "1", "6", "6"), fpazone_code = c(
     "SYC", "XSG", "XIN", "SYC", NA, NA, "AZE"), fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE"), activity_position = c("POINT (1 1)",
     "POINT (4 3)", "POINT (-1 -1)", "POINT (-1 -1)", "POINT (1 1)", "POINT (1 1)", "POINT (6 6)"))
