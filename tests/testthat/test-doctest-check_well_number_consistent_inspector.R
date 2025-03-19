@@ -4,7 +4,7 @@
 test_that("Doctest: check_well_number_consistent_inspector", {
   # Created from @doctest for `check_well_number_consistent_inspector`
   # Source file: R/function.R
-  # Source line: 4157
+  # Source line: 4159
   dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5"), sample_well = c("well_1", "well_2", "well_2", "well_2", NA), trip_id = c("1", "1", "2", "3",
     "3"))
   dataframe2 <- data.frame(well_id = c("1", "2", "3"), trip_id = c("1", "1", "3"), well_label = c("well_1", "well_2", "well_1"))

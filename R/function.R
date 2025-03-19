@@ -777,6 +777,7 @@ check_temporal_limit_inspector <- function(dataframe1,
   inter_activity_date <- NULL
   exter_activity_date <- NULL
   nb_day <- NULL
+  logical_nb_day <- NULL
   logical_tmp <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
@@ -871,11 +872,12 @@ check_temporal_limit_inspector <- function(dataframe1,
   # Calculation if the number of days is consistent and if there are inconsistencies in the dates for the trips
   dataframe1 <- trip_date_activity_data_detail %>%
     dplyr::group_by(trip_id, trip_startdate, trip_enddate) %>%
-    dplyr::summarise(nb_day = length(activity_date), logical_tmp = sum(!logical) == 0, .groups = "drop")
+    dplyr::summarise(nb_day = length(activity_date), logical_tmp = all(logical), .groups = "drop")
   # Calculation if an inconsistency among the different tests on the trip has been found
   dataframe1 <- dataframe1 %>%
+    dplyr::mutate(logical_nb_day = (1 + trip_enddate - trip_startdate) == nb_day) %>%
     dplyr::group_by(trip_id, trip_startdate, trip_enddate) %>%
-    dplyr::summarise(logical = sum(c(!((1 + trip_enddate - trip_startdate) == nb_day), !logical_tmp)) == 0, .groups = "drop")
+    dplyr::summarise(logical = all(logical_nb_day, logical_tmp), .groups = "drop")
   # Management of missing trip start and end date
   dataframe1[is.na(dataframe1$trip_startdate) | is.na(dataframe1$trip_enddate), "logical"] <- FALSE
   dataframe1 <- subset(dataframe1, select = -c(trip_startdate, trip_enddate, logical_tmp, nb_day))

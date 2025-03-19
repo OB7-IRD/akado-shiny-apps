@@ -4,7 +4,7 @@
 test_that("Doctest: check_super_sample_number_consistent_inspector", {
   # Created from @doctest for `check_super_sample_number_consistent_inspector`
   # Source file: R/function.R
-  # Source line: 3979
+  # Source line: 3981
   dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5", "6", "7"), sample_supersample = c(FALSE, TRUE, FALSE, TRUE, FALSE, TRUE, TRUE))
   dataframe2 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9"), samplespecies_subsamplenumber = c(0, 1, 2, 1, 1, 1, 0, 1, 1),
   sample_id = c("1", "2", "2", "3", "4", "4", "6", "6", "7"))
