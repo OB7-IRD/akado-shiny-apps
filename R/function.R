@@ -91,17 +91,17 @@ check_trip_activity_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$trip_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -239,17 +239,17 @@ check_fishing_time_inspector <- function(dataframe1,
   dataframe1$logical <- comparison$logical
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, trip_fishingtime, sum_route_fishingtime, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$trip_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -390,17 +390,17 @@ check_sea_time_inspector <- function(dataframe1,
   dataframe1 <- dplyr::relocate(.data = dataframe1, trip_seatime, sum_route_seatime, .after = logical)
   # Management of the 0 value for the time at sea
   dataframe1[!is.na(dataframe1$trip_seatime) & dataframe1$trip_seatime == 0, "logical"] <- FALSE
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$trip_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -512,17 +512,17 @@ check_landing_consistent_inspector <- function(dataframe1,
   dataframe1$logical <- comparison$logical
   dataframe1 <- dplyr::relocate(.data = dataframe1, vessel_capacity, trip_weighttotal, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(trip_landingtotalweight, trip_localmarkettotalweight))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$trip_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -684,17 +684,17 @@ check_landing_total_weight_inspector <- function(dataframe1,
   dataframe1[is.na(dataframe1$trip_landingtotalweight), "logical"] <- FALSE
   # Management of missing sum of the landing
   dataframe1[is.na(dataframe1$sum_weightlanding) & !is.na(dataframe1$trip_landingtotalweight) & dataframe1$trip_landingtotalweight > 0, "logical"] <- FALSE
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$trip_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -879,17 +879,17 @@ check_temporal_limit_inspector <- function(dataframe1,
   # Management of missing trip start and end date
   dataframe1[is.na(dataframe1$trip_startdate) | is.na(dataframe1$trip_enddate), "logical"] <- FALSE
   dataframe1 <- subset(dataframe1, select = -c(trip_startdate, trip_enddate, logical_tmp, nb_day))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$trip_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -1011,17 +1011,17 @@ check_harbour_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_label_departure, harbour_label_landing_trip_previous, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(harbour_id_departure, harbour_id_landing_trip_previous, trip_previous_id))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$trip_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -1346,17 +1346,17 @@ check_raising_factor_inspector <- function(dataframe1,
   dataframe4[(is.na(dataframe4$full_trip_sum_landing_weight) | dataframe4$full_trip_sum_landing_weight == 0) & is.na(dataframe4$full_trip_sum_catch_weight), "logical"] <- TRUE
   dataframe4 <- dplyr::relocate(.data = dataframe4, rf1, .after = logical)
   dataframe4 <- subset(dataframe4, select = -c(trip_end_full_trip_id, logical_full_trip, sum_catch_weight, sum_landing_weight, full_trip_sum_landing_weight, full_trip_sum_catch_weight, lower_threshold, upper_threshold, vessel_id, country_fleetcountry))
-  if ((sum(dataframe4$logical, na.rm = TRUE) + sum(!dataframe4$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe4$logical)) > 0) {
+  if ((sum(dataframe4$logical, na.rm = TRUE) + sum(!dataframe4$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe4$logical))) {
     all <- c(select, dataframe4$trip_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe4$logical)) > 0) {
+    if (any(is.na(dataframe4$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe4$logical)), "):", paste0(dataframe4$trip_id[is.na(dataframe4$logical)], collapse = ", "))
     }
     warning(
@@ -1541,17 +1541,17 @@ check_fishing_context_inspector <- function(dataframe1,
   dataframe1$logical[is.na(dataframe1$schooltype_code) | dataframe1$schooltype_code %in% school_type_unknown] <- TRUE
   dataframe1 <- dplyr::relocate(.data = dataframe1, schooltype_code, association_object_count, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(threshold))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -1753,17 +1753,17 @@ check_operation_inspector <- function(dataframe1,
   dataframe1$logical <- dataframe1$logical_successstatus_vesselactivity & dataframe1$logical_successstatus_schooltype_indeterminate & dataframe1$logical_successstatus_schooltype & dataframe1$logical_successstatus_weight
   dataframe1 <- dplyr::relocate(.data = dataframe1, vesselactivity_code, successstatus_code, schooltype_code, activity_weight, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(threshold, logical_successstatus_vesselactivity, logical_successstatus_schooltype_indeterminate, logical_successstatus_schooltype, logical_successstatus_weight))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -2013,7 +2013,7 @@ check_position_inspector <- function(dataframe1,
     dplyr::mutate(logical_bounding = (X >= -180 & X <= 180 & Y >= -90 & Y <= 90)) %>%
     dplyr::filter(logical_bounding)
   # If harbour departure position exists
-  if (sum(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_departure)) > 0) {
+  if (any(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_departure))) {
     # Formats spatial data harbourdeparture, add buffer in meter
     data_geo_harbourdeparture <- dataframe1 %>%
       dplyr::filter(!is.na(activity_position) & !is.na(harbour_position_departure)) %>%
@@ -2039,7 +2039,7 @@ check_position_inspector <- function(dataframe1,
     dataframe1$logical_harbourdeparture <- FALSE
   }
   # If harbour landing position exists
-  if (sum(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_landing)) > 0) {
+  if (any(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_landing))) {
     # Formats spatial data harbourlanding, add buffer in meter
     data_geo_harbourlanding <- dataframe1 %>%
       dplyr::filter(!is.na(activity_position) & !is.na(harbour_position_landing)) %>%
@@ -2093,17 +2093,17 @@ check_position_inspector <- function(dataframe1,
   activity_sea_land_data_detail <- dataframe1 %>%
     dplyr::mutate(activity_crs = activity_crs)
   dataframe1 <- subset(dataframe1, select = -c(activity_position, logical_ocean, logical_harbour))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -2265,17 +2265,17 @@ check_weight_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, activity_weight, sum_catch_weight, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(difference, epsilon))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -2444,17 +2444,17 @@ check_length_class_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, species_fao_code, sizemeasuretype_code, samplespeciesmeasure_sizeclass, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(logical_sizeclass, logical_sizemeasuretype, logical_species, threshold, species_fao_code, sizemeasuretype_code))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$samplespeciesmeasure_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$samplespeciesmeasure_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -2602,17 +2602,17 @@ check_measure_inspector <- function(dataframe1,
   dataframe1[is.na(dataframe1$sum_measuredcount), "logical"] <- FALSE
   # Management of missing count measurements by sample and by species and by size class
   dataframe1[is.na(dataframe1$sum_count), "logical"] <- FALSE
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -2739,17 +2739,17 @@ check_temperature_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, activity_seasurfacetemperature, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(lower_threshold, upper_threshold))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -2977,17 +2977,17 @@ check_weighting_sample_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(epsilon, difference))
   dataframe1 <- dplyr::relocate(.data = dataframe1, weight, weightedweight, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -3304,17 +3304,17 @@ check_time_route_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(threshold, logical_activity_seatime, logical_activity_fishingtime))
   dataframe1 <- dplyr::relocate(.data = dataframe1, route_seatime, route_fishingtime, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$route_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$route_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -3513,7 +3513,7 @@ check_eez_inspector <- function(dataframe1,
     # Compares declared country with calculated country
     intersect_eez <- intersect_eez %>%
       dplyr::group_by(activity_id) %>%
-      dplyr::summarise(logical_eez = sum(c(fpazone_code, fpazone_country_iso3) %in% c(ISO_TER1, ISO_TER2, ISO_TER3)) > 0)
+      dplyr::summarise(logical_eez = any(c(fpazone_code, fpazone_country_iso3) %in% c(ISO_TER1, ISO_TER2, ISO_TER3)))
     # Merge
     dataframe1 <- dplyr::left_join(dataframe1, intersect_eez, by = dplyr::join_by(activity_id))
   }else {
@@ -3531,17 +3531,17 @@ check_eez_inspector <- function(dataframe1,
   activity_data_detail <- activity_data_detail %>%
     dplyr::mutate(activity_crs = activity_crs)
   dataframe1 <- subset(dataframe1, select = -c(activity_position))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -3653,17 +3653,17 @@ check_species_inspector <- function(dataframe1,
   dataframe1$logical <- comparison_species$logical
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, species_fao_code, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$samplespecies_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -3785,17 +3785,17 @@ check_sample_without_measure_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$samplespecies_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -3917,17 +3917,17 @@ check_sample_without_species_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -4087,17 +4087,17 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(only_one_subsampling, many_subsampling, count_samplespecies_bis, count_subsamplenumber_bis, count_subsamplenumber_n0_bis, count_subsamplenumber_0_bis, count_subsamplenumber_1_bis, count_samplespecies))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_supersample, count_subsamplenumber_n0, count_subsamplenumber_0, count_subsamplenumber_1, count_subsamplenumber, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -4273,17 +4273,17 @@ check_well_number_consistent_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, well_id, vesseltype_code))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_well, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -4606,17 +4606,17 @@ check_little_big_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   total_count <- subset(total_count, select = -c(total_count, little, big, measure1, measure2, sample_smallsweight_bis, sample_bigsweight_bis, sample_totalweight_bis))
   total_count <- dplyr::relocate(.data = total_count, sample_smallsweight, sample_bigsweight, sample_totalweight, little_percentage, big_percentage, measure1_percentage, measure2_percentage, .after = logical)
-  if ((sum(total_count$logical, na.rm = TRUE) + sum(!total_count$logical, na.rm = TRUE)) != nrow_first || sum(is.na(total_count$logical)) > 0) {
+  if ((sum(total_count$logical, na.rm = TRUE) + sum(!total_count$logical, na.rm = TRUE)) != nrow_first || any(is.na(total_count$logical))) {
     all <- c(select, total_count$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(total_count$logical)) > 0) {
+    if (any(is.na(total_count$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(total_count$logical)), "):", paste0(total_count$sample_id[is.na(total_count$logical)], collapse = ", "))
     }
     warning(
@@ -4967,17 +4967,17 @@ check_weighting_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vesseltype_code, weightedweight_bis, sum_landing_weight_baitboat_bis))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_label, sum_landing_weight_baitboat, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -5101,17 +5101,17 @@ check_weight_sample_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(weight_calculation))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_totalweight, sample_smallsweight, sample_bigsweight, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -5232,17 +5232,17 @@ check_activity_sample_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -5464,17 +5464,17 @@ check_ldlf_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(logical_species, logical_bigsweight, logical_smallsweight, sample_id))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sizemeasuretype_code, species_fao_code, sample_bigsweight, sample_smallsweight, sample_totalweight, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$samplespecies_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$samplespecies_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -5789,17 +5789,17 @@ check_distribution_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_small_unknown, weight_small, sample_smallsweight_bis, sample_bigsweight_bis, weight_small_total_bis, weight_big_bis))
   dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_well, weight_small_total, weight_big, .after = logical)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -5925,17 +5925,17 @@ check_sample_harbour_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_label_landing, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(harbour_id_landing, trip_id))
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$sample_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -6267,7 +6267,7 @@ check_anapo_inspector <- function(dataframe1,
   dataframe_activity_geo <- dataframe_activity_geo %>%
     dplyr::filter(logical_bounding)
   # If harbour departure position exists
-  if (sum(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_departure)) > 0) {
+  if (any(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_departure))) {
     # Formats spatial data harbourdeparture, add buffer in meter
     data_geo_harbourdeparture <- dataframe1 %>%
       dplyr::filter(!is.na(activity_position) & !is.na(harbour_position_departure)) %>%
@@ -6293,7 +6293,7 @@ check_anapo_inspector <- function(dataframe1,
     dataframe1$logical_harbourdeparture <- FALSE
   }
   # If harbour landing position exists
-  if (sum(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_landing)) > 0) {
+  if (any(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_landing))) {
     # Formats spatial data harbourlanding, add buffer in meter
     data_geo_harbourlanding <- dataframe1 %>%
       dplyr::filter(!is.na(activity_position) & !is.na(harbour_position_landing)) %>%
@@ -6425,17 +6425,17 @@ check_anapo_inspector <- function(dataframe1,
   dataframe1 <- subset(dataframe1, select = -c(trip_id, harbour_position_departure, harbour_position_landing, logical_harbourdeparture, logical_harbourlanding, nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
   dataframe_detail <- subset(dataframe_detail, select = -c(vessel_code, min_distance, activity_time_bis, activity_date_time, vms_date_time))
   dataframe_detail <- dataframe_detail %>% dplyr::mutate(vms_crs = vms_crs, activity_crs = activity_crs)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$activity_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -6597,22 +6597,22 @@ check_anapo_activity_consistent_inspector <- function(dataframe1,
   # If the match is valid (logical TRUE) for one of the vessel, it is assigned to all the others
   dataframe1 <- dataframe1 %>%
     dplyr::group_by(vms_codevessel, vms_date) %>%
-    dplyr::mutate(logical = ifelse(sum(logical) > 0, TRUE, logical)) %>%
+    dplyr::mutate(logical = ifelse(any(logical), TRUE, logical)) %>%
     dplyr::ungroup()
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, nb_activity, .after = logical)
   dataframe1 <- dplyr::relocate(.data = dataframe1, vms_date, .after = vessel_code)
-  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || sum(is.na(dataframe1$logical)) > 0) {
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$vms_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(dataframe1$logical)) > 0) {
+    if (any(is.na(dataframe1$logical))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$vms_id[is.na(dataframe1$logical)], collapse = ", "))
     }
     warning(
@@ -6650,7 +6650,7 @@ text_error_trip_select_server <- function(id, parent_in) {
         return("Error: please select a trip")
       }
       # if there are elements filled in for several types of selection
-      if (sum(isTruthy(parent_in$vessel_number), isTruthy(parent_in$trip_end_date)) > 0 && sum(isTruthy(parent_in$trip_start_date_range), isTruthy(parent_in$trip_end_date_range)) > 0) {
+      if (any(isTruthy(parent_in$vessel_number), isTruthy(parent_in$trip_end_date)) && any(isTruthy(parent_in$trip_start_date_range), isTruthy(parent_in$trip_end_date_range))) {
         return("Error: please choose only one type of trip selection")
       }
       # if there are missing selection elements for a selection type
@@ -8149,17 +8149,17 @@ column_grounding <- function(data,
     )
     data$grounding <- data$grounding | comparison_transmittingbuoy$logical
   }
-  if ((sum(data$grounding, na.rm = TRUE) + sum(!data$grounding, na.rm = TRUE)) != nrow_first || sum(is.na(data$grounding)) > 0) {
+  if ((sum(data$grounding, na.rm = TRUE) + sum(!data$grounding, na.rm = TRUE)) != nrow_first || any(is.na(data$grounding))) {
     all <- c(select, data$activity_id)
     number_occurrences <- table(all)
     text <- ""
-    if (sum(number_occurrences == 1) > 0) {
+    if (any(number_occurrences == 1)) {
       text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
     }
-    if (sum(number_occurrences > 2) > 0) {
+    if (any(number_occurrences > 2)) {
       text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
     }
-    if (sum(is.na(data$grounding)) > 0) {
+    if (any(is.na(data$grounding))) {
       text <- paste0(text, "Unknown control result", "(", sum(is.na(data$grounding)), "):", paste0(data$activity_id[is.na(data$grounding)], collapse = ", "))
     }
     warning(
@@ -8181,10 +8181,10 @@ text_object_more_or_less <- function(id, result_check) {
   all <- c(id, result_check)
   number_occurrences <- table(all)
   text <- ""
-  if (sum(number_occurrences == 1) > 0) {
+  if (any(number_occurrences == 1)) {
     text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
   }
-  if (sum(number_occurrences > 2) > 0) {
+  if (any(number_occurrences > 2)) {
     text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
   }
   return(text)
