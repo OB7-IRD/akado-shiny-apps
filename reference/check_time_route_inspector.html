@@ -132,12 +132,20 @@
 
     <div id="ref-examples">
     <h2>Examples</h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">dataframe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>route_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                         route_seatime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">2</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                         route_fishingtime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>,<span class="fl">0</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">dataframe2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>activity_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                         vesselactivity_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>,<span class="st">"13"</span>, <span class="st">"103"</span>,<span class="st">"15"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                         route_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"2"</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#Day 1 is ok,</span></span></span>
+<span class="r-in"><span><span class="co">#Day 2 has a fishing time equal to 0 but includes 1 fishing activitie</span></span></span>
+<span class="r-in"><span><span class="co">#Day 3 has a sea time equal to 0 but includes 1 activitie on the sea</span></span></span>
+<span class="r-in"><span><span class="co">#Day 4 has a missing sea time,</span></span></span>
+<span class="r-in"><span><span class="co">#Day 5 has a missing fishing time,</span></span></span>
+<span class="r-in"><span><span class="co">#Day 6 has a sea time greater than threshold (threshold_sea_time),</span></span></span>
+<span class="r-in"><span><span class="co">#Day 7 has a fishing time greater than threshold (threshold_fishing_time),</span></span></span>
+<span class="r-in"><span><span class="co">#Day 8 has a fishing time greater than sea time</span></span></span>
+<span class="r-in"><span><span class="va">dataframe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>route_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"5"</span>, <span class="st">"6"</span>, <span class="st">"7"</span>, <span class="st">"8"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         route_seatime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">6</span>, <span class="fl">2</span>, <span class="fl">0</span>, <span class="cn">NA</span>, <span class="fl">8</span>, <span class="fl">26</span>, <span class="fl">15</span>, <span class="fl">8</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         route_fishingtime <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">0</span>, <span class="fl">2</span>, <span class="fl">4</span>, <span class="cn">NA</span>, <span class="fl">7</span>, <span class="fl">14</span>, <span class="fl">9</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">dataframe2</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>activity_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"5"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         vesselactivity_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span>,<span class="st">"13"</span>, <span class="st">"103"</span>,<span class="st">"15"</span>, <span class="st">"6"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         route_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"2"</span>, <span class="st">"3"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">dataframe3</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>floatingobject_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                         objectoperation_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                         activity_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"2"</span><span class="op">)</span><span class="op">)</span></span></span>
@@ -145,9 +153,21 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span>   route_id logical route_seatime route_fishingtime nb_activity_must_seatime</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1        1    TRUE             6                 5                        2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2        2   FALSE             2                 0                        2</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3        3   FALSE             0                 2                        1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4        4   FALSE            NA                 4                        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5        5   FALSE             8                NA                        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6        6   FALSE            26                 7                        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7        7   FALSE            15                14                        0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8        8   FALSE             8                 9                        0</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   nb_activity_must_fishingtime</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 1                            2</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 2                            1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                            1</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4                            0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                            0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                            0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                            0</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8                            0</span>
 </code></pre></div>
     </div>
   </div>
