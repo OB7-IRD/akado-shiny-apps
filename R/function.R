@@ -763,7 +763,7 @@ check_landing_total_weight_inspector <- function(dataframe1,
 #'                                                    "2020/01/24", "2020/02/01", "2020/02/03",
 #'                                                    "2020/02/13", "2020/02/13", "2020/02/14")),
 #'                          trip_id = c("1", "1", "2", "2", "2", "3", "4", "5", "5", "6", "6", "6"))
-#' @expect equal(., list(structure(list(trip_id = c("1", "2", "3", "4", "5", "6"), logical = c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)), row.names = c(NA, -6L), class = c("tbl_df", "tbl", "data.frame")), structure(list(trip_id = c("1", "1", "2", "2", "2", "3", "4", "5", "5", "6", "6"), trip_startdate = structure(c(18262, 18262, 18262, 18262, 18262, NA, 18285, 18293, 18293, 18305, 18305), class = "Date"), trip_enddate = structure(c(18263, 18263, 18263, 18263, 18263, 18285, NA, 18295, 18295, 18306, 18306), class = "Date"), activity_date = structure(c(18262, 18263, 18262, 18263, 18264, 18285, 18285, 18293, 18295, 18305, 18306), class = "Date"), inter_activity_date = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE), exter_activity_date = c(FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE), count_freq = c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 1L), logical = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE)), row.names = c(NA, -11L), class = c("tbl_df", "tbl", "data.frame"))))
+#' @expect equal(., list(structure(list(trip_id = c("1", "2", "3", "4", "5", "6"), logical = c(TRUE, FALSE, FALSE, FALSE, FALSE, FALSE)), row.names = c(NA, -6L), class = "data.frame"), structure(list(trip_id = c("1", "1", "2", "2", "2", "3", "4", "5", "5", "6", "6"), trip_startdate = structure(c(18262, 18262, 18262, 18262, 18262, NA, 18285, 18293, 18293, 18305, 18305), class = "Date"), trip_enddate = structure(c(18263, 18263, 18263, 18263, 18263, 18285, NA, 18295, 18295, 18306, 18306), class = "Date"), activity_date = structure(c(18262, 18263, 18262, 18263, 18264, 18285, 18285, 18293, 18295, 18305, 18306), class = "Date"), inter_activity_date = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, TRUE, TRUE), exter_activity_date = c(FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, FALSE), count_freq = c(1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 1L, 2L, 1L), logical = c(TRUE, TRUE, TRUE, TRUE, FALSE, FALSE, FALSE, TRUE, TRUE, FALSE, TRUE)), row.names = c(NA, -11L), class = "data.frame")))
 #' check_temporal_limit_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_temporal_limit_inspector <- function(dataframe1,
@@ -869,6 +869,8 @@ check_temporal_limit_inspector <- function(dataframe1,
     dplyr::summarise(count_freq = length(activity_date), .groups = "drop")
   # Calculation if an inconsistency among the different tests on the date has been found
   trip_date_activity_data_detail$logical <- trip_date_activity_data_detail$inter_activity_date & !trip_date_activity_data_detail$exter_activity_date & trip_date_activity_data_detail$count_freq == 1
+  trip_date_activity_data_detail <- trip_date_activity_data_detail %>%
+    data.frame()
   # Calculation if the number of days is consistent and if there are inconsistencies in the dates for the trips
   dataframe1 <- trip_date_activity_data_detail %>%
     dplyr::group_by(trip_id, trip_startdate, trip_enddate) %>%
@@ -880,7 +882,8 @@ check_temporal_limit_inspector <- function(dataframe1,
     dplyr::summarise(logical = all(logical_nb_day, logical_tmp), .groups = "drop")
   # Management of missing trip start and end date
   dataframe1[is.na(dataframe1$trip_startdate) | is.na(dataframe1$trip_enddate), "logical"] <- FALSE
-  dataframe1 <- subset(dataframe1, select = -c(trip_startdate, trip_enddate, logical_tmp, nb_day))
+  dataframe1 <- subset(dataframe1, select = -c(trip_startdate, trip_enddate, logical_tmp, nb_day)) %>%
+    data.frame()
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$trip_id)
     number_occurrences <- table(all)
@@ -2518,7 +2521,7 @@ check_length_class_inspector <- function(dataframe1,
 #' dataframe2 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4", "5", "6"),
 #'                          samplespeciesmeasure_count = c(10, 10, 5, 3, 2, 8),
 #'                          samplespecies_id = c("1", "3", "3", "4", "4", "6"))
-#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4", "5"), logical = c(TRUE, TRUE, FALSE, FALSE, FALSE), sum_measuredcount = c(10, 15, 6, 7, NA), sum_count = c(10, 15, 5, NA, 8)), row.names = c(NA, -5L), class = c("tbl_df", "tbl", "data.frame")))
+#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4", "5"), logical = c(TRUE, TRUE, FALSE, FALSE, FALSE), sum_measuredcount = c(10, 15, 6, 7, NA), sum_count = c(10, 15, 5, NA, 8)), row.names = c(NA, -5L), class = "data.frame"))
 #' check_measure_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_measure_inspector <- function(dataframe1,
@@ -2600,7 +2603,8 @@ check_measure_inspector <- function(dataframe1,
     output = "report"
   )
   dataframe1$logical <- comparison$logical
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sum_measuredcount, sum_count, .after = logical)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sum_measuredcount, sum_count, .after = logical) %>%
+    data.frame()
   # Management of missing count measurements by sample and by species
   dataframe1[is.na(dataframe1$sum_measuredcount), "logical"] <- FALSE
   # Management of missing count measurements by sample and by species and by size class
@@ -4377,7 +4381,7 @@ check_well_number_consistent_inspector <- function(dataframe1,
 #'                          samplespeciesmeasure_count = c(5, 1, 9, 8, 10, 25, 2, 16, 4, 3, 6, 6),
 #'                          samplespecies_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
 #'                                               "11", "12"))
-#' @expect equal(., structure(list(sample_id = c("1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"), logical = c(TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE), sample_smallsweight = c(10, 0, 3, 0, 20, 1, 30, 3, 7, 4, 12, 0), sample_bigsweight = c(NA, NA, 0, 4, 2, 9, 3, 5, 4, 13, 5, 0), sample_totalweight = c(NA, 5, 0, 0, NA, NA, 33, NA, NA, 7, 2, 0), little_percentage = c(1, 1, 0, 0, 0.9, 1, 1, 0.925925925925926, 0.8, 0, 0, 1), big_percentage = c(0, 0, 0, 0, 0.1, 0, 0, 0.0740740740740741, 0.2, 0, 1, 0), measure1_percentage = c(0, 0, 0, 0, 0.9, 0, 1, 0.925925925925926, 0.8, 0, 0, 0), measure2_percentage = c(1, 1, 0, 0, 0.1, 1, 0, 0.0740740740740741, 0.2, 0, 1, 1)), row.names = c(NA, -12L), class = c("tbl_df", "tbl", "data.frame")))
+#' @expect equal(., structure(list(sample_id = c("1", "10", "11", "12", "2", "3", "4", "5", "6", "7", "8", "9"), logical = c(TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE), sample_smallsweight = c(10, 0, 3, 0, 20, 1, 30, 3, 7, 4, 12, 0), sample_bigsweight = c(NA, NA, 0, 4, 2, 9, 3, 5, 4, 13, 5, 0), sample_totalweight = c(NA, 5, 0, 0, NA, NA, 33, NA, NA, 7, 2, 0), little_percentage = c(1, 1, 0, 0, 0.9, 1, 1, 0.925925925925926, 0.8, 0, 0, 1), big_percentage = c(0, 0, 0, 0, 0.1, 0, 0, 0.0740740740740741, 0.2, 0, 1, 0), measure1_percentage = c(0, 0, 0, 0, 0.9, 0, 1, 0.925925925925926, 0.8, 0, 0, 0), measure2_percentage = c(1, 1, 0, 0, 0.1, 1, 0, 0.0740740740740741, 0.2, 0, 1, 1)), row.names = c(NA, -12L), class = "data.frame"))
 #' check_little_big_inspector(dataframe1, dataframe2, dataframe3, output = "report")
 #' @export
 check_little_big_inspector <- function(dataframe1,
@@ -4608,7 +4612,8 @@ check_little_big_inspector <- function(dataframe1,
   total_count[is.na(total_count$logical), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
   total_count <- subset(total_count, select = -c(total_count, little, big, measure1, measure2, sample_smallsweight_bis, sample_bigsweight_bis, sample_totalweight_bis))
-  total_count <- dplyr::relocate(.data = total_count, sample_smallsweight, sample_bigsweight, sample_totalweight, little_percentage, big_percentage, measure1_percentage, measure2_percentage, .after = logical)
+  total_count <- dplyr::relocate(.data = total_count, sample_smallsweight, sample_bigsweight, sample_totalweight, little_percentage, big_percentage, measure1_percentage, measure2_percentage, .after = logical) %>%
+    data.frame()
   if ((sum(total_count$logical, na.rm = TRUE) + sum(!total_count$logical, na.rm = TRUE)) != nrow_first || any(is.na(total_count$logical))) {
     all <- c(select, total_count$sample_id)
     number_occurrences <- table(all)
@@ -4739,7 +4744,7 @@ check_little_big_inspector <- function(dataframe1,
 #'                          weightcategory_code = c("W-1", "W-1", "L-YFT-10", "L-YFT-10", "L-YFT-10",
 #'                                                  "L-BET-10"),
 #'                          trip_id = c("1", "2", "3", "3", "4", "7"))
-#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"), logical = c(TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE), sample_smallsweight = c(10, 32, 2.5, 30, 12, 7, NA, 6, NA, 4, 8, 3, 7, 13, 54, 3, 8, 2, 16), sample_bigsweight = c(50, 2, 9, 3, 6, 13, 0, 3, 7, 2, 0, 2, 8, 3, 62, 8, 15, 6, 1), sample_totalweight = c(NA, NA, NA, 33, 8, 9, 142, 2, 14, 10, 3, 0, NA, 0, 0, 104, 24, 36, 12), sampletype_code = c("1", "1", "1", "11", "11", "1", "1", NA, "1", "1", "1", "1", "1", "1", "1", NA, NA, NA, NA), weightedweight = c(75, 18, 12, 33, 5, 9, NA, 4, 13, NA, 7, 4, NA, 15, 116, 104, 24, 35, 11), vesseltype_label = c("vessel_type_1", "vessel_type_1", "vessel_type_1", "vessel_type_2", "vessel_type_2", NA, "vessel_type_3", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_1", "vessel_type_1", "vessel_type_1", "vessel_type_1", "vessel_type_1"), sum_landing_weight_baitboat = c(NA, NA, NA, 32.6, 20, NA, NA, 3, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA)), row.names = c(NA, -19L), class = c("tbl_df", "tbl", "data.frame")))
+#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"), logical = c(TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, TRUE, FALSE, FALSE, TRUE, TRUE, FALSE), sample_smallsweight = c(10, 32, 2.5, 30, 12, 7, NA, 6, NA, 4, 8, 3, 7, 13, 54, 3, 8, 2, 16), sample_bigsweight = c(50, 2, 9, 3, 6, 13, 0, 3, 7, 2, 0, 2, 8, 3, 62, 8, 15, 6, 1), sample_totalweight = c(NA, NA, NA, 33, 8, 9, 142, 2, 14, 10, 3, 0, NA, 0, 0, 104, 24, 36, 12), sampletype_code = c("1", "1", "1", "11", "11", "1", "1", NA, "1", "1", "1", "1", "1", "1", "1", NA, NA, NA, NA), weightedweight = c(75, 18, 12, 33, 5, 9, NA, 4, 13, NA, 7, 4, NA, 15, 116, 104, 24, 35, 11), vesseltype_label = c("vessel_type_1", "vessel_type_1", "vessel_type_1", "vessel_type_2", "vessel_type_2", NA, "vessel_type_3", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_2", "vessel_type_1", "vessel_type_1", "vessel_type_1", "vessel_type_1", "vessel_type_1"), sum_landing_weight_baitboat = c(NA, NA, NA, 32.6, 20, NA, NA, 3, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA)), row.names = c(NA, -19L), class = "data.frame"))
 #' check_weighting_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
 #' @export
 check_weighting_inspector <- function(dataframe1,
@@ -4969,7 +4974,8 @@ check_weighting_inspector <- function(dataframe1,
   dataframe1[!is.na(dataframe1$vesseltype_code) & dataframe1$vesseltype_code == vessel_type[2] & is.na(dataframe1$sampletype_code), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_calculation, weight, vesseltype_code, weightedweight_bis, sum_landing_weight_baitboat_bis))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_label, sum_landing_weight_baitboat, .after = logical)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_totalweight, sampletype_code, weightedweight, vesseltype_label, sum_landing_weight_baitboat, .after = logical) %>%
+    data.frame()
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -5033,7 +5039,7 @@ check_weighting_inspector <- function(dataframe1,
 #'                          sample_smallsweight = c(10, NA, 12, NA),
 #'                          sample_bigsweight = c(50, NA, NA, 0),
 #'                          sample_totalweight = c(NA, 9, 5, 0))
-#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4"), logical = c(TRUE, TRUE, FALSE, FALSE), sample_totalweight = c(NA, 9, 5, 0), sample_smallsweight = c(10, NA, 12, NA), sample_bigsweight = c(50, NA, NA, 0)), row.names = c(NA, -4L), class = c("tbl_df", "tbl", "data.frame")))
+#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4"), logical = c(TRUE, TRUE, FALSE, FALSE), sample_totalweight = c(NA, 9, 5, 0), sample_smallsweight = c(10, NA, 12, NA), sample_bigsweight = c(50, NA, NA, 0)), row.names = c(NA, -4L), class = "data.frame"))
 #' check_weight_sample_inspector(dataframe1, output = "report")
 #' @export
 check_weight_sample_inspector <- function(dataframe1,
@@ -5103,7 +5109,8 @@ check_weight_sample_inspector <- function(dataframe1,
   dataframe1$logical[!is.na(dataframe1$weight_calculation) & dataframe1$weight_calculation > 0 & !is.na(dataframe1$sample_totalweight) & dataframe1$sample_totalweight > 0] <- FALSE
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(weight_calculation))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_totalweight, sample_smallsweight, sample_bigsweight, .after = logical)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_totalweight, sample_smallsweight, sample_bigsweight, .after = logical) %>%
+    data.frame()
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -5574,7 +5581,7 @@ check_ldlf_inspector <- function(dataframe1,
 #'                          species_fao_code = c("BET", "SKJ", "SKJ", "ALB", "SKJ", "BET", "BET",
 #'                                               "ALB", "SKJ", "SKJ", "SKJ", "BET"),
 #'                          wellactivityspecies_weight = c(4, 2, 7, 5, 25, 9, 14, 5, 17, 10, 5, 2))
-#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4", "5", "6"), logical = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE), sample_smallsweight = c(6, 25, 14, 0, NA, 10), sample_bigsweight = c(12, 0, 9, NA, 6, 0), sample_well = c("well_1", "well_2", "well_3", "well_4", "well_5", "well_6"), weight_small_total = c(6, 25, NaN, NaN, NaN, 15), weight_big = c(12, NA, 9, 5, 17, NA)), row.names = c(NA, -6L), class = c("tbl_df", "tbl", "data.frame")))
+#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4", "5", "6"), logical = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE), sample_smallsweight = c(6, 25, 14, 0, NA, 10), sample_bigsweight = c(12, 0, 9, NA, 6, 0), sample_well = c("well_1", "well_2", "well_3", "well_4", "well_5", "well_6"), weight_small_total = c(6, 25, NaN, NaN, NaN, 15), weight_big = c(12, NA, 9, 5, 17, NA)), row.names = c(NA, -6L), class = "data.frame"))
 #' check_distribution_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
 #' @export
 check_distribution_inspector <- function(dataframe1,
@@ -5791,7 +5798,8 @@ check_distribution_inspector <- function(dataframe1,
   dataframe1$logical <- comparison_smallsweight$logical & comparison_bigsweight$logical
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_small_unknown, weight_small, sample_smallsweight_bis, sample_bigsweight_bis, weight_small_total_bis, weight_big_bis))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_well, weight_small_total, weight_big, .after = logical)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_well, weight_small_total, weight_big, .after = logical) %>%
+    data.frame()
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
     number_occurrences <- table(all)
@@ -6029,7 +6037,7 @@ check_sample_harbour_inspector <- function(dataframe1,
 #'                          vms_time = c("15:26:01", "10:55:15", "22:32:17"),
 #'                          vms_position = c("POINT (4 4)", "POINT (0 0.1)", "POINT (3 0.3)"),
 #'                          vessel_code = c("1", "1", "1"))
-#' @expect equal(., list(structure(list(activity_id = c("1", "2", "3", "4", "5", "6"), logical = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE), nb_vms = c(1L, 2L, 2L, NA, 2L, 2L), min_distance = structure(c(NA, 6.004055139173, 18.012165417519, 230.106883933216, NA, 18.012165417519), units = structure(list(numerator = "NM", denominator = character(0)), class = "symbolic_units"), class = "units"), max_score = c(NA, NA, 2.17959673670807, 0, NA, 0.209441144555651)), row.names = c(NA, 6L), class = "data.frame"), structure(list(activity_id = c("3", "3", "4", "4", "6", "6", "1", "2", "2", "5", "5"), activity_date = structure(c(18273, 18273, 18274, 18274, 18273, 18273, 18262, 18273, 18273, 18273, 18273), class = "Date"), activity_time = c("16:41:15", "16:41:15", "03:12:34", "03:12:34", "23:26:47", "23:26:47", "05:26:01", "10:41:15", "10:41:15", "05:56:12", "05:56:12"), activity_position = c("POINT (3 0)", "POINT (3 0)", "POINT (4 4)", "POINT (4 4)", "POINT (3 0.6)", "POINT (3 0.6)", "POINT (1 1)", "POINT (0 0)", "POINT (0 0)", NA, NA), vms_date = structure(c(18273, 18273, 18273, 18273, 18273, 18273, 18262, 18273, 18273, 18273, 18273), class = "Date"), vms_time = c("10:55:15", "22:32:17", "10:55:15", "22:32:17", "10:55:15", "22:32:17", "15:26:01", "10:55:15", "22:32:17", "10:55:15", "22:32:17"), vms_position = c("POINT (0 0.1)", "POINT (3 0.3)", "POINT (0 0.1)", "POINT (3 0.3)", "POINT (0 0.1)", "POINT (3 0.3)", "POINT (4 4)", "POINT (0 0.1)", "POINT (3 0.3)", "POINT (0 0.1)", "POINT (3 0.3)"), distance = structure(c(180.221602566745, 18.012165417519, 335.278629168604, 230.106883933216, 182.602328607533, 18.012165417519, NA, 6.004055139173, 181.019203021658, NA, NA), units = structure(list(numerator = "NM", denominator = character(0)), class = "symbolic_units"), class = "units"), duration = structure(c(20760000, -21062000, -27761000, -69583000, 45092000, 3270000, NA, NA, NA, NA, NA), units = structure(list(numerator = "ms", denominator = character(0)), class = "symbolic_units"), class = "units"), score = c(0, 2.17959673670807, 0, 0, 0, 0.209441144555651, NA, NA, NA, NA, NA), vms_crs = c(4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326), activity_crs = c(4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326)), row.names = c(NA, -11L), class = c("tbl_df", "tbl", "data.frame"))))
+#' @expect equal(., list(structure(list(activity_id = c("1", "2", "3", "4", "5", "6"), logical = c(TRUE, TRUE, TRUE, FALSE, FALSE, FALSE), nb_vms = c(1L, 2L, 2L, NA, 2L, 2L), min_distance = structure(c(NA, 6.004055139173, 18.012165417519, 230.106883933216, NA, 18.012165417519), units = structure(list(numerator = "NM", denominator = character(0)), class = "symbolic_units"), class = "units"), max_score = c(NA, NA, 2.17959673670807, 0, NA, 0.209441144555651)), row.names = c(NA, 6L), class = "data.frame"), structure(list(activity_id = c("3", "3", "4", "4", "6", "6", "1", "2", "2", "5", "5"), activity_date = structure(c(18273, 18273, 18274, 18274, 18273, 18273, 18262, 18273, 18273, 18273, 18273), class = "Date"), activity_time = c("16:41:15", "16:41:15", "03:12:34", "03:12:34", "23:26:47", "23:26:47", "05:26:01", "10:41:15", "10:41:15", "05:56:12", "05:56:12"), activity_position = c("POINT (3 0)", "POINT (3 0)", "POINT (4 4)", "POINT (4 4)", "POINT (3 0.6)", "POINT (3 0.6)", "POINT (1 1)", "POINT (0 0)", "POINT (0 0)", NA, NA), vms_date = structure(c(18273, 18273, 18273, 18273, 18273, 18273, 18262, 18273, 18273, 18273, 18273), class = "Date"), vms_time = c("10:55:15", "22:32:17", "10:55:15", "22:32:17", "10:55:15", "22:32:17", "15:26:01", "10:55:15", "22:32:17", "10:55:15", "22:32:17"), vms_position = c("POINT (0 0.1)", "POINT (3 0.3)", "POINT (0 0.1)", "POINT (3 0.3)", "POINT (0 0.1)", "POINT (3 0.3)", "POINT (4 4)", "POINT (0 0.1)", "POINT (3 0.3)", "POINT (0 0.1)", "POINT (3 0.3)"), distance = structure(c(180.221602566745, 18.012165417519, 335.278629168604, 230.106883933216, 182.602328607533, 18.012165417519, NA, 6.004055139173, 181.019203021658, NA, NA), units = structure(list(numerator = "NM", denominator = character(0)), class = "symbolic_units"), class = "units"), duration = structure(c(20760000, -21062000, -27761000, -69583000, 45092000, 3270000, NA, NA, NA, NA, NA), units = structure(list(numerator = "ms", denominator = character(0)), class = "symbolic_units"), class = "units"), score = c(0, 2.17959673670807, 0, 0, 0, 0.209441144555651, NA, NA, NA, NA, NA), vms_crs = c(4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326), activity_crs = c(4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326)), row.names = c(NA, -11L), class = "data.frame")))
 #' check_anapo_inspector(dataframe1,dataframe2, dataframe3, output = "report",threshold_number_vms = 1)
 #' @export
 check_anapo_inspector <- function(dataframe1,
@@ -6427,7 +6435,9 @@ check_anapo_inspector <- function(dataframe1,
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, harbour_position_departure, harbour_position_landing, logical_harbourdeparture, logical_harbourlanding, nb_vms_bis, activity_date, vessel_code, activity_time, activity_position))
   dataframe_detail <- subset(dataframe_detail, select = -c(vessel_code, min_distance, activity_time_bis, activity_date_time, vms_date_time))
-  dataframe_detail <- dataframe_detail %>% dplyr::mutate(vms_crs = vms_crs, activity_crs = activity_crs)
+  dataframe_detail <- dataframe_detail %>%
+    dplyr::mutate(vms_crs = vms_crs, activity_crs = activity_crs) %>%
+    data.frame()
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$activity_id)
     number_occurrences <- table(all)
@@ -6504,7 +6514,7 @@ check_anapo_inspector <- function(dataframe1,
 #' dataframe2 <- data.frame(activity_id = c("1", "2"),
 #'                          activity_date = as.Date(c("2020/01/01", "2020/02/02")),
 #'                          vessel_code = c("1", "2"))
-#' @expect equal(., structure(list(vms_id = c("1", "2", "3", "4", "5"), vessel_code = c("1", "1", "2", "3", "4"), vms_date = structure(c(18262, 18263, 18294, 18294, 18295), class = "Date"), vms_codevessel = c("vessel_1", "vessel_1", "vessel_2", "vessel_2", "vessel_4"), vessel_type = c("1", "1", "1", "1", "3"), logical = c(TRUE, FALSE, TRUE, TRUE, TRUE), nb_activity = c(1, 0, 1, 0, 0)), row.names = c(NA, -5L), class = c("tbl_df", "tbl", "data.frame")))
+#' @expect equal(., structure(list(vms_id = c("1", "2", "3", "4", "5"), vessel_code = c("1", "1", "2", "3", "4"), vms_date = structure(c(18262, 18263, 18294, 18294, 18295), class = "Date"), vms_codevessel = c("vessel_1", "vessel_1", "vessel_2", "vessel_2", "vessel_4"), vessel_type = c("1", "1", "1", "1", "3"), logical = c(TRUE, FALSE, TRUE, TRUE, TRUE), nb_activity = c(1, 0, 1, 0, 0)), row.names = c(NA, -5L), class = "data.frame"))
 #' check_anapo_activity_consistent_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_anapo_activity_consistent_inspector <- function(dataframe1,
@@ -6604,7 +6614,8 @@ check_anapo_activity_consistent_inspector <- function(dataframe1,
     dplyr::ungroup()
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- dplyr::relocate(.data = dataframe1, nb_activity, .after = logical)
-  dataframe1 <- dplyr::relocate(.data = dataframe1, vms_date, .after = vessel_code)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, vms_date, .after = vessel_code) %>%
+    data.frame()
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$vms_id)
     number_occurrences <- table(all)

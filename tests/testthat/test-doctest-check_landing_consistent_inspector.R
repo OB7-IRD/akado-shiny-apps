@@ -5,9 +5,9 @@ test_that("Doctest: check_landing_consistent_inspector", {
   # Created from @doctest for `check_landing_consistent_inspector`
   # Source file: R/function.R
   # Source line: 448
-  dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4"), trip_landingtotalweight = c(10, 15, 2, NA), trip_localmarkettotalweight = c(2, 1, 7, NA),
-  vessel_capacity = c(20, 10, NA, 13))
-  expect_equal(check_landing_consistent_inspector(dataframe1, output = "report"), structure(list(trip_id = c("1", "2", "3", "4"), logical = c(TRUE, FALSE, FALSE,
-    TRUE), vessel_capacity = c(14, 7, NA, 9.1), trip_weighttotal = c(12, 16, 9, 0)), row.names = c(NA, 4L), class = "data.frame"))
+  dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4"), trip_landingtotalweight = c(10, 15, 2, NA), trip_localmarkettotalweight = c(2, 1, 7, NA), vessel_capacity = c(
+    20, 10, NA, 13))
+  expect_equal(check_landing_consistent_inspector(dataframe1, output = "report"), structure(list(trip_id = c("1", "2", "3", "4"), logical = c(TRUE, FALSE, FALSE, TRUE),
+  vessel_capacity = c(14, 7, NA, 9.1), trip_weighttotal = c(12, 16, 9, 0)), row.names = c(NA, 4L), class = "data.frame"))
 })
 
