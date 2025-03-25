@@ -633,8 +633,8 @@ app_server <- function(input, output, session) {
       content = function(file) {
         data <- calcul_check()[[input$button_download]]
         # Delete icons
-        data[data$Check == "<i class=\"fas fa-check\" role=\"presentation\" aria-label=\"check icon\"></i>", "Check"] <- TRUE
-        data[data$Check != TRUE, "Check"] <- FALSE
+        data[data$Check == "<i class=\"fas fa-check\" role=\"presentation\" aria-label=\"check icon\"></i>", "Check"] <- "TRUE"
+        data[data$Check != "TRUE", "Check"] <- "FALSE"
         # Deletes graphics
         if ("Details problem" %in% colnames(data)) {
           data[!is.na(data$`Details problem`), "Details problem"] <- "Detail"
@@ -650,8 +650,8 @@ app_server <- function(input, output, session) {
       content = function(file) {
         data <- calcul_check()[[input$button_download]]
         # Delete icons
-        data[data$Check == "<i class=\"fas fa-check\" role=\"presentation\" aria-label=\"check icon\"></i>", "Check"] <- TRUE
-        data[data$Check != TRUE, "Check"] <- FALSE
+        data[data$Check == "<i class=\"fas fa-check\" role=\"presentation\" aria-label=\"check icon\"></i>", "Check"] <- "TRUE"
+        data[data$Check != "TRUE", "Check"] <- "FALSE"
         # Deletes graphics
         if ("Details problem" %in% colnames(data)) {
           data[!is.na(data$`Details problem`), "Details problem"] <- "Detail"
