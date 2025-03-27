@@ -107,15 +107,16 @@
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="co">#Activity 1, 2, 3 and 5 are ok,</span></span></span>
 <span class="r-in"><span><span class="co">#Activity 4 is outside the EEZ delimited in the shapefile,</span></span></span>
 <span class="r-in"><span><span class="co">#Activity 6 has a missing EEZ zone and the vessel's activity is in vessel_activity,</span></span></span>
-<span class="r-in"><span><span class="co">#Activity 7 has an EEZ zone unknown to the shapefile and which also does not exist in</span></span></span>
+<span class="r-in"><span><span class="co">#Activity 7 has different EEZ,</span></span></span>
+<span class="r-in"><span><span class="co">#Activity 8 has an EEZ zone unknown to the shapefile and which also does not exist in</span></span></span>
 <span class="r-in"><span><span class="co">#           international_waters_code</span></span></span>
-<span class="r-in"><span><span class="va">dataframe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>activity_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"5"</span>, <span class="st">"6"</span>, <span class="st">"7"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                         vesselactivity_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"6"</span>, <span class="st">"6"</span>, <span class="st">"6"</span>, <span class="st">"6"</span>, <span class="st">"1"</span>, <span class="st">"6"</span>, <span class="st">"6"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                         fpazone_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SYC"</span>, <span class="st">"XSG"</span>, <span class="st">"XIN"</span>, <span class="st">"SYC"</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">"AZE"</span><span class="op">)</span>,</span></span>
-<span class="r-in"><span>                         fpazone_country_iso3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SYC"</span>, <span class="st">"XXX"</span>, <span class="st">"XIN"</span>, <span class="st">"SYC"</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">"AZE"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span><span class="va">dataframe1</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>activity_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"1"</span>, <span class="st">"2"</span>, <span class="st">"3"</span>, <span class="st">"4"</span>, <span class="st">"5"</span>, <span class="st">"6"</span>, <span class="st">"7"</span>, <span class="st">"8"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         vesselactivity_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"6"</span>, <span class="st">"6"</span>, <span class="st">"6"</span>, <span class="st">"6"</span>, <span class="st">"1"</span>, <span class="st">"6"</span>, <span class="st">"6"</span>, <span class="st">"6"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         fpazone_code <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SYC"</span>, <span class="st">"XSG"</span>, <span class="st">"XIN"</span>, <span class="st">"SYC"</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">"AZE"</span>, <span class="st">"AZE"</span><span class="op">)</span>,</span></span>
+<span class="r-in"><span>                         fpazone_country_iso3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SYC"</span>, <span class="st">"XXX"</span>, <span class="st">"XIN"</span>, <span class="st">"SYC"</span>, <span class="cn">NA</span>, <span class="cn">NA</span>, <span class="st">"AZE"</span>, <span class="st">"AZE"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                         activity_position <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"POINT (1 1)"</span>, <span class="st">"POINT (4 3)"</span>, <span class="st">"POINT (-1 -1)"</span>,</span></span>
 <span class="r-in"><span>                                               <span class="st">"POINT (-1 -1)"</span>, <span class="st">"POINT (1 1)"</span>, <span class="st">"POINT (1 1)"</span>,</span></span>
-<span class="r-in"><span>                                               <span class="st">"POINT (6 6)"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span>                                               <span class="st">"POINT (1 1)"</span>, <span class="st">"POINT (6 6)"</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">dataframe2</span> <span class="op">&lt;-</span> <span class="fu">sf</span><span class="fu">::</span><span class="fu"><a href="https://r-spatial.github.io/sf/reference/sf.html" class="external-link">st_sf</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>ISO_TER1 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"SYC"</span>, <span class="st">"XSG"</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                                   ISO_TER2 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span></span>
 <span class="r-in"><span>                                   ISO_TER3 <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="cn">NA</span>, <span class="cn">NA</span><span class="op">)</span>,</span></span>
@@ -128,14 +129,24 @@
 <span class="r-in"><span>                                                         crs <span class="op">=</span> <span class="fl">4326</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">check_eez_inspector</span><span class="op">(</span><span class="va">dataframe1</span>, <span class="va">dataframe2</span>, output <span class="op">=</span> <span class="st">"report"</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[1]]</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   activity_id vesselactivity_code fpazone_code fpazone_country_iso3 logical</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1           1                   6          SYC                  SYC    TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2           2                   6          XSG                  XXX    TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3           3                   6          XIN                  XIN    TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4           4                   6          SYC                  SYC   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5           5                   1         &lt;NA&gt;                 &lt;NA&gt;    TRUE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6           6                   6         &lt;NA&gt;                 &lt;NA&gt;   FALSE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7           7                   6          AZE                  AZE   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   activity_id vesselactivity_code fpazone_code fpazone_country_iso3</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1           1                   6          SYC                  SYC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2           2                   6          XSG                  XXX</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3           3                   6          XIN                  XIN</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4           4                   6          SYC                  SYC</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5           5                   1         &lt;NA&gt;                 &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6           6                   6         &lt;NA&gt;                 &lt;NA&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7           7                   6          AZE                  AZE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8           8                   6          AZE                  AZE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>                       eez_calculated logical</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1                                SYC    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2                                XSG    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3                               &lt;NA&gt;    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4 On land or in international waters   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5                               &lt;NA&gt;    TRUE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6                               &lt;NA&gt;   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7                                SYC   FALSE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8 On land or in international waters   FALSE</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [[2]]</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   activity_id vesselactivity_code fpazone_code fpazone_country_iso3</span>
@@ -146,14 +157,16 @@
 <span class="r-out co"><span class="r-pr">#&gt;</span> 5           5                   1         &lt;NA&gt;                 &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 6           6                   6         &lt;NA&gt;                 &lt;NA&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> 7           7                   6          AZE                  AZE</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   activity_position logical activity_crs</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 1       POINT (1 1)    TRUE         4326</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 2       POINT (4 3)    TRUE         4326</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 3     POINT (-1 -1)    TRUE         4326</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 4     POINT (-1 -1)   FALSE         4326</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 5       POINT (1 1)    TRUE         4326</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 6       POINT (1 1)   FALSE         4326</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> 7       POINT (6 6)   FALSE         4326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8           8                   6          AZE                  AZE</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   activity_position                     eez_calculated logical activity_crs</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 1       POINT (1 1)                                SYC    TRUE         4326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 2       POINT (4 3)                                XSG    TRUE         4326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 3     POINT (-1 -1)                               &lt;NA&gt;    TRUE         4326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 4     POINT (-1 -1) On land or in international waters   FALSE         4326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 5       POINT (1 1)                               &lt;NA&gt;    TRUE         4326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 6       POINT (1 1)                               &lt;NA&gt;   FALSE         4326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 7       POINT (1 1)                                SYC   FALSE         4326</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> 8       POINT (6 6) On land or in international waters   FALSE         4326</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 </code></pre></div>
     </div>
