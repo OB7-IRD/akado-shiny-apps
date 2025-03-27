@@ -3381,15 +3381,16 @@ check_time_route_inspector <- function(dataframe1,
 #' #Activity 1, 2, 3 and 5 are ok,
 #' #Activity 4 is outside the EEZ delimited in the shapefile,
 #' #Activity 6 has a missing EEZ zone and the vessel's activity is in vessel_activity,
-#' #Activity 7 has an EEZ zone unknown to the shapefile and which also does not exist in
+#' #Activity 7 has different EEZ,
+#' #Activity 8 has an EEZ zone unknown to the shapefile and which also does not exist in
 #' #           international_waters_code
-#' dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7"),
-#'                          vesselactivity_code = c("6", "6", "6", "6", "1", "6", "6"),
-#'                          fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE"),
-#'                          fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE"),
+#' dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7", "8"),
+#'                          vesselactivity_code = c("6", "6", "6", "6", "1", "6", "6", "6"),
+#'                          fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE", "AZE"),
+#'                          fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE", "AZE"),
 #'                          activity_position = c("POINT (1 1)", "POINT (4 3)", "POINT (-1 -1)",
 #'                                                "POINT (-1 -1)", "POINT (1 1)", "POINT (1 1)",
-#'                                                "POINT (6 6)"))
+#'                                                "POINT (1 1)", "POINT (6 6)"))
 #' dataframe2 <- sf::st_sf(data.frame(ISO_TER1 = c("SYC", "XSG"),
 #'                                    ISO_TER2 = c(NA, NA),
 #'                                    ISO_TER3 = c(NA, NA),
@@ -3400,7 +3401,7 @@ check_time_route_inspector <- function(dataframe1,
 #'                                                                                    c(5,5), c(5,3),
 #'                                                                                    c(3,3)))),
 #'                                                          crs = 4326)))
-#' @expect equal(., list(structure(list(activity_id = c("1", "2", "3", "4", "5", "6", "7"), vesselactivity_code = c("6", "6", "6", "6", "1", "6", "6"), fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE"), fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE"), logical = c(TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE)), row.names = c(NA, 7L), class = "data.frame"), structure(list(activity_id = c("1", "2", "3", "4", "5", "6", "7"), vesselactivity_code = c("6", "6", "6", "6", "1", "6", "6"), fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE"), fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE"), activity_position = c("POINT (1 1)", "POINT (4 3)", "POINT (-1 -1)", "POINT (-1 -1)", "POINT (1 1)", "POINT (1 1)", "POINT (6 6)"), logical = c(TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE), activity_crs = c(4326, 4326, 4326, 4326, 4326, 4326, 4326)), row.names = c(NA, 7L), class = "data.frame")))
+#' @expect equal(., list(structure(list(activity_id = c("1", "2", "3", "4", "5", "6", "7", "8"), vesselactivity_code = c("6", "6", "6", "6", "1", "6", "6", "6"), fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE", "AZE"), fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE", "AZE"), eez_calculated = c("SYC", "XSG", NA, "On land or in international waters", NA, NA, "SYC", "On land or in international waters"), logical = c(TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE)), row.names = c(NA, 8L), class = "data.frame"), structure(list(activity_id = c("1", "2", "3", "4", "5", "6", "7", "8"), vesselactivity_code = c("6", "6", "6", "6", "1", "6", "6", "6"), fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE", "AZE"), fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE", "AZE"), activity_position = c("POINT (1 1)", "POINT (4 3)", "POINT (-1 -1)", "POINT (-1 -1)", "POINT (1 1)", "POINT (1 1)", "POINT (1 1)", "POINT (6 6)"), eez_calculated = c("SYC", "XSG", NA, "On land or in international waters", NA, NA, "SYC", "On land or in international waters"), logical = c(TRUE, TRUE, TRUE, FALSE, TRUE, FALSE, FALSE, FALSE), activity_crs = c(4326, 4326, 4326, 4326, 4326, 4326, 4326, 4326)), row.names = c(NA, 8L), class = "data.frame")))
 #' check_eez_inspector(dataframe1, dataframe2, output = "report")
 #' @export
 check_eez_inspector <- function(dataframe1,
@@ -3418,6 +3419,9 @@ check_eez_inspector <- function(dataframe1,
   ISO_TER2 <- NULL
   ISO_TER3 <- NULL
   logical_eez <- NULL
+  filter_activity_geo <- NULL
+  eez_calculated <- NULL
+  filter_international_waters <- NULL
   # 1 - Arguments verification ----
   if (!codama::r_table_checking(
     r_table = dataframe1,
@@ -3506,8 +3510,9 @@ check_eez_inspector <- function(dataframe1,
   # Checks for the presence of a declared fishing zone
   dataframe1$logical <- !c(is.na(dataframe1$fpazone_code) & is.na(dataframe1$fpazone_country_iso3))
   # Formats spatial data activity
+  dataframe1$filter_activity_geo <- !is.na(dataframe1$activity_position) & !c(is.na(dataframe1$fpazone_code) & is.na(dataframe1$fpazone_country_iso3))
   data_geo_activity <- dataframe1 %>%
-    dplyr::filter(!is.na(activity_position) & !c(is.na(fpazone_code) & is.na(fpazone_country_iso3))) %>%
+    dplyr::filter(filter_activity_geo) %>%
     sf::st_as_sf(wkt = "activity_position", crs = activity_crs) %>%
     sf::st_transform(activity_position, crs = 4326)
   # Calculates the intersection between activity and eez
@@ -3520,20 +3525,26 @@ check_eez_inspector <- function(dataframe1,
     # Compares declared country with calculated country
     intersect_eez <- intersect_eez %>%
       dplyr::group_by(activity_id) %>%
-      dplyr::summarise(logical_eez = any(c(fpazone_code, fpazone_country_iso3) %in% c(ISO_TER1, ISO_TER2, ISO_TER3)))
+      dplyr::summarise(logical_eez = any(c(fpazone_code, fpazone_country_iso3) %in% c(ISO_TER1, ISO_TER2, ISO_TER3)),
+                       eez_calculated = paste0(unique(c(ISO_TER1, ISO_TER2, ISO_TER3))[!is.na(unique(c(ISO_TER1, ISO_TER2, ISO_TER3)))], collapse = ", "))
     # Merge
     dataframe1 <- dplyr::left_join(dataframe1, intersect_eez, by = dplyr::join_by(activity_id))
   }else {
     dataframe1$logical_eez <- NA
+    dataframe1$eez_calculated <- NA
   }
   # Case of international waters : the calculated country must be missing
-  dataframe1[is.na(dataframe1$logical_eez) & ((dataframe1$fpazone_code %in% international_waters_code & dataframe1$fpazone_country_iso3 %in% international_waters_code) | (is.na(dataframe1$fpazone_code) & dataframe1$fpazone_country_iso3 %in% international_waters_code) | (dataframe1$fpazone_code %in% international_waters_code & is.na(dataframe1$fpazone_country_iso3))), "logical_eez"] <- TRUE
+  dataframe1$filter_international_waters <- ((dataframe1$fpazone_code %in% international_waters_code & dataframe1$fpazone_country_iso3 %in% international_waters_code) | (is.na(dataframe1$fpazone_code) & dataframe1$fpazone_country_iso3 %in% international_waters_code) | (dataframe1$fpazone_code %in% international_waters_code & is.na(dataframe1$fpazone_country_iso3)))
+  dataframe1[is.na(dataframe1$logical_eez) & dataframe1$filter_international_waters, "logical_eez"] <- TRUE
   # Case of no calculated country
   dataframe1[is.na(dataframe1$logical_eez), "logical_eez"] <- FALSE
   dataframe1$logical <- dataframe1$logical & dataframe1$logical_eez
+  dataframe1[is.na(dataframe1$eez_calculated) & dataframe1$filter_activity_geo & !dataframe1$filter_international_waters, "eez_calculated"] <- "On land or in international waters"
   # Case of vessel_activity with no constraints if missing declared fishing zone
   dataframe1$logical[!(dataframe1$vesselactivity_code %in% vessel_activity) & is.na(dataframe1$fpazone_code) & is.na(dataframe1$fpazone_country_iso3)] <- TRUE
-  dataframe1 <- subset(dataframe1, select = -c(logical_eez))
+  # Modify the table for display purposes: add, remove and order column
+  dataframe1 <- dplyr::relocate(.data = dataframe1, eez_calculated, .before = logical)
+  dataframe1 <- subset(dataframe1, select = -c(logical_eez, filter_activity_geo, filter_international_waters))
   activity_data_detail <- dataframe1
   activity_data_detail <- activity_data_detail %>%
     dplyr::mutate(activity_crs = activity_crs)
@@ -6893,6 +6904,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     vessel_statut <- NULL
     nb_activity <- NULL
     trip_previous_id <- NULL
+    eez_calculated <- NULL
     # 1 - Data extraction ----
     reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
@@ -7335,7 +7347,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check eez inspector", sep = "")
         check_eez_inspector_data <- check_eez_inspector(dataframe1 = activity_select, dataframe2 = referential_file()[["shape_eez"]], output = "report")
         # Add button and data for plot in table
-        check_eez <- data_button_plot(data_plot = check_eez_inspector_data[[2]], data_display = check_eez_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3"), name_button = "button_eez", choice_select_row = "all")
+        check_eez <- data_button_plot(data_plot = check_eez_inspector_data[[2]], data_display = check_eez_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3", "eez_calculated"), name_button = "button_eez", choice_select_row = "all")
         # Uses a function to format the table
         check_eez <- table_display_trip(check_eez, activity_select[, c(colnames_activity_id, "activity_position")], type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
@@ -7343,6 +7355,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           .data = check_eez,
           `EEZ` = fpazone_code,
           `Country EEZ` = fpazone_country_iso3,
+          `Calculated EEZ` = eez_calculated,
           `Position activity` = activity_position_ddm,
           `Details problem` = button
         )

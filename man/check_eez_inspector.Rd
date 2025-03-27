@@ -54,15 +54,16 @@ Dataframe 2:
 #Activity 1, 2, 3 and 5 are ok,
 #Activity 4 is outside the EEZ delimited in the shapefile,
 #Activity 6 has a missing EEZ zone and the vessel's activity is in vessel_activity,
-#Activity 7 has an EEZ zone unknown to the shapefile and which also does not exist in
+#Activity 7 has different EEZ,
+#Activity 8 has an EEZ zone unknown to the shapefile and which also does not exist in
 #           international_waters_code
-dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7"),
-                         vesselactivity_code = c("6", "6", "6", "6", "1", "6", "6"),
-                         fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE"),
-                         fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE"),
+dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7", "8"),
+                         vesselactivity_code = c("6", "6", "6", "6", "1", "6", "6", "6"),
+                         fpazone_code = c("SYC", "XSG", "XIN", "SYC", NA, NA, "AZE", "AZE"),
+                         fpazone_country_iso3 = c("SYC", "XXX", "XIN", "SYC", NA, NA, "AZE", "AZE"),
                          activity_position = c("POINT (1 1)", "POINT (4 3)", "POINT (-1 -1)",
                                                "POINT (-1 -1)", "POINT (1 1)", "POINT (1 1)",
-                                               "POINT (6 6)"))
+                                               "POINT (1 1)", "POINT (6 6)"))
 dataframe2 <- sf::st_sf(data.frame(ISO_TER1 = c("SYC", "XSG"),
                                    ISO_TER2 = c(NA, NA),
                                    ISO_TER3 = c(NA, NA),

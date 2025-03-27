@@ -38,6 +38,9 @@ app_server <- function(input, output, session) {
     shape_eez[shape_eez$MRGID == 48964, ]$ISO_TER3 <- "XSG"
     shape_eez[shape_eez$MRGID == 48964, ]$TERRITORY3 <- "Joint regime area: Senegal / Guinea-Bissau"
     shape_eez[shape_eez$MRGID == 48964, ]$SOVEREIGN3 <- "Joint regime area: Senegal / Guinea-Bissau"
+    # Correct eez shapes by adding the zone code for "Ile Tromelin"
+    shape_eez[shape_eez$MRGID == 48946, ]$ISO_TER2 <- "MDG"
+    shape_eez[shape_eez$MRGID == 48946, ]$ISO_TER3 <- "MUS"
     # Reading the file with sea shapes
     shape_sea <- sf::read_sf(dsn =  system.file("shp", "World_Seas", package = "AkadoR"), layer = "World_Seas")
     # Grouping of sea pieces
@@ -243,7 +246,8 @@ app_server <- function(input, output, session) {
                              <li>Longitude : ", data_geo$X, "</li></ul>
                              <b>Problem information : </b><br>
                             <ul><li>Declared eez : ", split_id[8], "</li>
-                            <li>Declared country eez : ", split_id[9], "</li></ul>"))
+                            <li>Declared country eez : ", split_id[9], "</li>
+                            <li>Calculated eez : ", split_id[10], "</li></ul>"))
         ),
         column(9,
           style = "padding-left:0px;padding-right:5px;",
