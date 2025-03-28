@@ -5532,7 +5532,8 @@ check_ldlf_inspector <- function(dataframe1,
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
 #' @param dataframe4 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
 #' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
-#' @param species {\link[base]{character}} expected. Default values: c("SKJ"). Vector of species categorized as small if weight category information is missing
+#' @param species_category_small_big {\link[base]{character}} expected. Default values: c("ALB", "YFT", "BET", "SKJ"). List of the inventory of species (FAO code) used to calculate weight category small and big in well
+#' @param species_category_unknown {\link[base]{character}} expected. Default values: c("SKJ"). Vector of species categorized as small if weight category information is missing
 #' @param weight_category_small {\link[base]{character}} expected. Default values: c("W-1"). Vector of small weight category codes
 #' @param weight_category_big {\link[base]{character}} expected. Default values: c("W-2"). Vector of big weight category codes
 #' @param weight_category_unknown {\link[base]{character}} expected. Default values: c("W-9"). Vector of unknown weight category codes
@@ -5571,28 +5572,30 @@ check_ldlf_inspector <- function(dataframe1,
 #' #Sample 3 has not small weight in well,
 #' #Sample 4 has not bigs weight in sample,
 #' #Sample 5 has different bigs weight,
-#' #Sample 6 has different small weight
-#' dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5", "6"),
+#' #Sample 6 and 7 has different small weight
+#' dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5", "6", "7"),
 #'                          sample_well = c("well_1", "well_2", "well_3", "well_4", "well_5",
-#'                                          "well_6"),
-#'                          trip_id = c("1", "1", "1", "1", "1", "1"),
-#'                          sample_smallsweight = c(6, 25, 14, 0, NA, 10),
-#'                          sample_bigsweight = c(12, 0, 9, NA, 6, 0))
-#' dataframe2 <- data.frame(well_id = c("1", "2", "3", "4", "5", "6"),
-#'                          well_label = c("well_1", "well_2", "well_3", "well_4", "well_5", "well_6"),
-#'                          trip_id = c("1", "1", "1", "1", "1", "1"))
-#' dataframe3 <- data.frame(wellactivity_id = c("1", "2", "3", "4", "5", "6", "7"),
-#'                          well_id = c("1", "1", "2", "3", "4", "5", "6"))
+#'                                          "well_6","well_7"),
+#'                          trip_id = c("1", "1", "1", "1", "1", "1", "1"),
+#'                          sample_smallsweight = c(6, 25, 14, 0, NA, 10, 8),
+#'                          sample_bigsweight = c(12, 0, 9, NA, 6, 0, 0))
+#' dataframe2 <- data.frame(well_id = c("1", "2", "3", "4", "5", "6", "7"),
+#'                          well_label = c("well_1", "well_2", "well_3", "well_4", "well_5", "well_6",
+#'                                         "well_7"),
+#'                          trip_id = c("1", "1", "1", "1", "1", "1", "1"))
+#' dataframe3 <- data.frame(wellactivity_id = c("1", "2", "3", "4", "5", "6", "7", "8"),
+#'                          well_id = c("1", "1", "2", "3", "4", "5", "6", "7"))
 #' dataframe4 <- data.frame(wellactivityspecies_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9",
-#'                                                     "10", "11", "12"),
+#'                                                     "10", "11", "12", "13", "14"),
 #'                          wellactivity_id = c("1", "1", "1", "2", "3", "4", "4", "5", "6", "7",
-#'                                              "7", "7"),
+#'                                              "7", "7", "8", "8"),
 #'                          weightcategory_code = c("W-1", "W-9", "W-2", "W-2", "W-1", "W-2", "W-9",
-#'                                                  "W-2", "W-2", "W-1", "W-9", "W-9"),
+#'                                                  "W-2", "W-2", "W-1", "W-9", "W-9", "W-1", "W-1"),
 #'                          species_fao_code = c("BET", "SKJ", "SKJ", "ALB", "SKJ", "BET", "BET",
-#'                                               "ALB", "SKJ", "SKJ", "SKJ", "BET"),
-#'                          wellactivityspecies_weight = c(4, 2, 7, 5, 25, 9, 14, 5, 17, 10, 5, 2))
-#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4", "5", "6"), logical = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE), sample_smallsweight = c(6, 25, 14, 0, NA, 10), sample_bigsweight = c(12, 0, 9, NA, 6, 0), sample_well = c("well_1", "well_2", "well_3", "well_4", "well_5", "well_6"), weight_small_total = c(6, 25, NaN, NaN, NaN, 15), weight_big = c(12, NA, 9, 5, 17, NA)), row.names = c(NA, -6L), class = "data.frame"))
+#'                                               "ALB", "SKJ", "SKJ", "SKJ", "BET", "ALB", "JOS"),
+#'                          wellactivityspecies_weight = c(4, 2, 7, 5, 25, 9, 14, 5, 17, 10, 5, 2, 7,
+#'                                                         1))
+#' @expect equal(., structure(list(sample_id = c("1", "2", "3", "4", "5", "6", "7"), logical = c(TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE), sample_smallsweight = c(6, 25, 14, 0, NA, 10, 8), sample_bigsweight = c(12, 0, 9, NA, 6, 0, 0), sample_well = c("well_1", "well_2", "well_3", "well_4", "well_5", "well_6", "well_7"), weight_sum_small_filter = c(6, 25, NaN, NaN, NaN, 15, 7), weight_sum_big_filter = c(12, NaN, 9, 5, 17, NaN, NaN), weight_sum_small = c(6, 25, 14, NaN, NaN, 17, 8), weight_sum_big = c(12, NaN, 9, 5, 17, NaN, NaN)), row.names = c(NA, -7L), class = "data.frame"))
 #' check_distribution_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report")
 #' @export
 check_distribution_inspector <- function(dataframe1,
@@ -5600,7 +5603,8 @@ check_distribution_inspector <- function(dataframe1,
                                          dataframe3,
                                          dataframe4,
                                          output,
-                                         species = c("SKJ"),
+                                         species_category_small_big = c("ALB", "YFT", "BET", "SKJ"),
+                                         species_category_unknown = c("SKJ"),
                                          weight_category_small = c("W-1"),
                                          weight_category_big = c("W-2"),
                                          weight_category_unknown = c("W-9")) {
@@ -5611,13 +5615,18 @@ check_distribution_inspector <- function(dataframe1,
   weightcategory_code <- NULL
   wellactivityspecies_weight <- NULL
   species_fao_code <- NULL
-  sample_id <- NULL
   weight_small <- NULL
   weight_small_unknown <- NULL
   sample_smallsweight <- NULL
   sample_bigsweight <- NULL
-  weight_big <- NULL
-  weight_small_total <- NULL
+  weight_big_filter <- NULL
+  weight_small_filter <- NULL
+  weight_big_filter_species <- NULL
+  weight_small_filter_species <- NULL
+  weight_sum_small <- NULL
+  weight_sum_big <- NULL
+  weight_sum_small_filter <- NULL
+  weight_sum_big_filter <- NULL
   sample_smallsweight_bis <- NULL
   sample_bigsweight_bis <- NULL
   weight_small_total_bis <- NULL
@@ -5708,12 +5717,23 @@ check_distribution_inspector <- function(dataframe1,
     ))
   }
   if (!codama::r_type_checking(
-    r_object = species,
+    r_object = species_category_small_big,
     type = "character",
     output = "logical"
   )) {
     return(codama::r_type_checking(
-      r_object = species,
+      r_object = species_category_small_big,
+      type = "character",
+      output = "error"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = species_category_unknown,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = species_category_unknown,
       type = "character",
       output = "error"
     ))
@@ -5757,39 +5777,29 @@ check_distribution_inspector <- function(dataframe1,
   # Merge
   dataframe2 <- dplyr::left_join(dataframe2, dataframe3, by = dplyr::join_by(well_id))
   dataframe2 <- dplyr::left_join(dataframe2, dataframe4, by = dplyr::join_by(wellactivity_id))
-  # Calculation small weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
-  dataframe2_small <- dataframe2 %>%
+  # Calculation small weight and big weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
+  # weight_sum_small and weight_sum_big are calculated to give information to the user but are not used in the control
+  dataframe2_sum_weight <- dataframe2 %>%
     dplyr::group_by(well_id, trip_id, well_label) %>%
-    dplyr::filter(weightcategory_code %in% weight_category_small) %>%
-    dplyr::summarise(weight_small = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE)), .groups = "drop") %>%
-    dplyr::select(-well_id)
-  dataframe2_small_unknown <- dataframe2 %>%
-    dplyr::group_by(well_id, trip_id, well_label) %>%
-    dplyr::filter(weightcategory_code %in% weight_category_unknown & species_fao_code %in% species) %>%
-    dplyr::summarise(weight_small_unknown = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE)), .groups = "drop") %>%
-    dplyr::select(-well_id)
-  # Calculation big weight (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
-  dataframe2_big <- dataframe2 %>%
-    dplyr::group_by(well_id, trip_id, well_label) %>%
-    dplyr::filter(weightcategory_code %in% weight_category_big) %>%
-    dplyr::summarise(weight_big = ifelse(all(is.na(wellactivityspecies_weight)), NaN, sum(wellactivityspecies_weight, na.rm = TRUE)), .groups = "drop") %>%
+    dplyr::mutate(weight_small_filter = ifelse((weightcategory_code %in% weight_category_small) | (weightcategory_code %in% weight_category_unknown), wellactivityspecies_weight, NA),
+                  weight_small_filter_species = ifelse((weightcategory_code %in% weight_category_small & species_fao_code %in% species_category_small_big) | (weightcategory_code %in% weight_category_unknown & species_fao_code %in% species_category_unknown), wellactivityspecies_weight, NA),
+                  weight_big_filter = ifelse(weightcategory_code %in% weight_category_big, wellactivityspecies_weight, NA),
+                  weight_big_filter_species = ifelse(weightcategory_code %in% weight_category_big & species_fao_code %in% species_category_small_big, wellactivityspecies_weight, NA)) %>%
+    dplyr::summarise(weight_sum_small_filter = ifelse(all(is.na(weight_small_filter_species)), NaN, sum(weight_small_filter_species, na.rm = TRUE)),
+                     weight_sum_small = ifelse(all(is.na(weight_small_filter)), NaN, sum(weight_small_filter, na.rm = TRUE)),
+                     weight_sum_big_filter = ifelse(all(is.na(weight_big_filter_species)), NaN, sum(weight_big_filter_species, na.rm = TRUE)),
+                     weight_sum_big = ifelse(all(is.na(weight_big_filter)), NaN, sum(weight_big_filter, na.rm = TRUE)), .groups = "drop") %>%
     dplyr::select(-well_id)
   # Merge
-  dataframe1 <- dplyr::left_join(dataframe1, dataframe2_small, by = dplyr::join_by(trip_id == trip_id, sample_well == well_label))
-  dataframe1 <- dplyr::left_join(dataframe1, dataframe2_small_unknown, by = dplyr::join_by(trip_id == trip_id, sample_well == well_label))
-  dataframe1 <- dplyr::left_join(dataframe1, dataframe2_big, by = dplyr::join_by(trip_id == trip_id, sample_well == well_label))
+  dataframe1 <- dplyr::left_join(dataframe1, dataframe2_sum_weight, by = dplyr::join_by(trip_id == trip_id, sample_well == well_label))
   # Calculation small weight total (Management of NA: if known value performs the sum of the values and ignores the NA, if no known value indicates NA)
-  dataframe1 <- dataframe1 %>%
-    dplyr::group_by(sample_id) %>%
-    dplyr::mutate(weight_small_total = ifelse(all(is.na(c(weight_small, weight_small_unknown))), NaN, sum(c(weight_small, weight_small_unknown), na.rm = TRUE))) %>%
-    dplyr::ungroup()
   # Case of NA
   dataframe1 <- dataframe1 %>%
     dplyr::mutate(
       sample_smallsweight_bis = dplyr::coalesce(sample_smallsweight, 0),
       sample_bigsweight_bis = dplyr::coalesce(sample_bigsweight, 0),
-      weight_big_bis = dplyr::coalesce(weight_big, 0),
-      weight_small_total_bis = dplyr::coalesce(weight_small_total, 0)
+      weight_big_bis = dplyr::coalesce(weight_sum_big_filter, 0),
+      weight_small_total_bis = dplyr::coalesce(weight_sum_small_filter, 0)
     )
   # Check small weight
   comparison_smallsweight <- codama::vector_comparison(
@@ -5809,7 +5819,7 @@ check_distribution_inspector <- function(dataframe1,
   dataframe1$logical <- comparison_smallsweight$logical & comparison_bigsweight$logical
   # Modify the table for display purposes: add, remove and order column
   dataframe1 <- subset(dataframe1, select = -c(trip_id, weight_small_unknown, weight_small, sample_smallsweight_bis, sample_bigsweight_bis, weight_small_total_bis, weight_big_bis))
-  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_well, weight_small_total, weight_big, .after = logical) %>%
+  dataframe1 <- dplyr::relocate(.data = dataframe1, sample_smallsweight, sample_bigsweight, sample_well, weight_sum_small_filter, weight_sum_big_filter, weight_sum_small, weight_sum_big, .after = logical) %>%
     data.frame()
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$sample_id)
@@ -6863,8 +6873,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     weightedweight <- NULL
     vesseltype_label <- NULL
     sum_landing_weight_baitboat <- NULL
-    weight_small_total <- NULL
-    weight_big <- NULL
+    weight_sum_small_filter <- NULL
+    weight_sum_big_filter <- NULL
+    weight_sum_small <- NULL
+    weight_sum_big <- NULL
     activity_date <- NULL
     date_group <- NULL
     activity_id <- NULL
@@ -7082,6 +7094,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                                   package = "AkadoR"),
           database_connection = data_connection,
           anchor = list(select_item = activity_select$activity_id)
+        )
+        # Uses a function to extract list of species used as reference for well distribution control
+        reference_list_species_well_distribution_control <- furdeb::data_extraction(
+          type = "database",
+          file_path = system.file("sql",
+                                  "list_species_reference_well_distribution_control.sql",
+                                  package = "AkadoR"),
+          database_connection = data_connection,
+          anchor = list(select_item = config_data()[["reference_list_species_well_distribution_control"]])
         )
         # Disconnection to the bases
         for (i in seq(from = 1, to = length(config_observe_database))){
@@ -7459,7 +7480,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the small and large sample weights is consistent for the sum of the small and big weights of the associated well
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check distribution inspector", sep = "")
-        check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = wellactivity_select, dataframe4 = data_wellactivityspecies, output = "report")
+        check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = wellactivity_select, dataframe4 = data_wellactivityspecies, output = "report", species_category_small_big = dplyr::pull(reference_list_species_well_distribution_control))
         # Uses a function to format the table
         check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_distribution <- dplyr::rename(
@@ -7467,8 +7488,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           `Small fish weight` = sample_smallsweight,
           `Big fish weight` = sample_bigsweight,
           `Well` = sample_well,
-          `Small fish weight well` = weight_small_total,
-          `Big fish weight well` = weight_big
+          `Small fish weight well filter` = weight_sum_small_filter,
+          `Big fish weight well filter` = weight_sum_big_filter,
+          `Small fish weight well` = weight_sum_small,
+          `Big fish weight well` = weight_sum_big
         )
         # Uses a function which indicates whether the small and large sample weights is consistent for the presence of a sample and the absence of a harbour of landing
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sample harbour inspector", sep = "")

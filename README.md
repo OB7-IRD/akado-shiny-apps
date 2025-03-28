@@ -107,14 +107,21 @@ epsilon : 0.01
 String vector allowing the selection of logbook programs
 
 ``` yml
-logbook_program : ["your_first_programs","your_second_program", 
+logbook_program : ["your_first_programs", "your_second_program", ...]
 ```
 
 String vector allowing the selection of species used to calculate
 weights captured in RF1
 
 ``` yml
-species_RF1 : ["your_first_species","your_second_species", 
+species_RF1 : ["your_first_species", "your_second_species", ...]
+```
+
+String vector allowing the selection of reference list of species used
+for well distribution control
+
+``` yml
+reference_list_species_well_distribution_control : ["your_first_reference_list", "your_second_reference_list", ...]
 ```
 
 Configuring the secure connection to AkadoR.  
