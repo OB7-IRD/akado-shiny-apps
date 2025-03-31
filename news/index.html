@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AkadoR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -41,6 +41,207 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="1.0.2" id="akador-102--20250331">AkadoR 1.0.2- 2025.03.31<a class="anchor" aria-label="anchor" href="#akador-102--20250331"></a></h2>
+<div class="section level3">
+<h3 id="added-1-0-2">Added<a class="anchor" aria-label="anchor" href="#added-1-0-2"></a></h3>
+<ul><li>Add <code>check_category_species_forbidden_well_inspector</code> : function to check inconsistencies between the weight categories and the species in the well</li>
+<li>Add <code>coordinate_dd_to_dmd</code> : function for converting DD (Decimal Degrees) coordinates in DDM (Degrees, Decimal Minutes)</li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed-1-0-2">Changed<a class="anchor" aria-label="anchor" href="#changed-1-0-2"></a></h3>
+<ul><li>full trip selection :
+<ul><li>Add reconstructing full trips between several databases</li>
+</ul></li>
+<li>
+<code>check_activity_sample_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_anapo_activity_consistent_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_anapo_inspector</code> :
+<ul><li>Remove warning check Anapo if dataframe_calcul is empty</li>
+<li>Standardization names arguments :
+<ul><li>minimum_number_vms -&gt; threshold_number_vms</li>
+</ul></li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_distribution_inspector</code> :
+<ul><li>Standardization names arguments :
+<ul><li>weightcategory_small -&gt; weight_category_small</li>
+<li>weightcategory_big -&gt; weight_category_big</li>
+<li>weightcategory_unknown -&gt; weight_category_unknown</li>
+<li>species -&gt; species_category_unknown</li>
+</ul></li>
+<li>Add argument : species_category_small_big</li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_eez_inspector</code> :
+<ul><li>Standardization names arguments :
+<ul><li>internationalwaters_code -&gt; international_waters_code</li>
+<li>vesselactivity -&gt; vessel_activity</li>
+</ul></li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_fishing_context_inspector</code> :
+<ul><li>Standardization names arguments :
+<ul><li>schooltype_object -&gt; school_type_object</li>
+</ul></li>
+<li>Add argument : school_type_free; school_type_unknown</li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_fishing_time_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_harbour_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_landing_consistent_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_landing_total_weight_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_ldlf_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_length_class_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_little_big_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_measure_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_operation_inspector</code> :
+<ul><li>Add argument : vessel_activity, school_type, success_status_school_type, success_status_weight</li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_raising_factor_inspector</code> :
+<ul><li>Standardization names arguments :
+<ul><li>speciesfate -&gt; species_fate</li>
+<li>vesselactivity -&gt; vessel_activity</li>
+</ul></li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_position_inspector</code> :
+<ul><li>Standardization names arguments :
+<ul><li>path_shp_sea -&gt; dataframe3</li>
+</ul></li>
+<li>Remove arguments : layer_shp_sea</li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_sample_harbour_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_sample_without_measure_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_sample_without_species_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_sea_time_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_species_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_super_sample_number_consistent_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_temperature_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_temporal_limit_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_time_route_inspector</code> :
+<ul><li>Standardization names arguments :
+<ul><li>max_seatime -&gt; threshold_sea_time</li>
+<li>max_fishingtime -&gt; threshold_fishing_time</li>
+<li>vesselactivity_seatime -&gt; vessel_activity_sea_time</li>
+<li>objectoperation_seatime -&gt; object_operation_sea_time</li>
+<li>vesselactivity_fishingtime -&gt; vessel_activity_fishing_time</li>
+<li>objectoperation_fishingtime -&gt; object_operation_fishing_time</li>
+</ul></li>
+<li>Patch if referential contains NA</li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_trip_activity_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_weight_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_weight_sample_inspector</code> :
+<ul><li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_weighting_inspector</code> :
+<ul><li>Standardization names arguments :
+<ul><li>sampletype_code_landing_baitboat -&gt; sample_type_code_landing_baitboat</li>
+<li>landingtype_baitboat -&gt; landing_type_baitboat</li>
+</ul></li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_weighting_sample_inspector</code> :
+<ul><li>Standardization names arguments :
+<ul><li>speciesfate -&gt; species_fate</li>
+<li>dataframe1 -&gt; dataframe2</li>
+<li>dataframe2 -&gt; dataframe3</li>
+</ul></li>
+<li>Add argument : dataframe1</li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>check_well_number_consistent_inspector</code> :
+<ul><li>Standardization names arguments :
+<ul><li>vesseltype -&gt; vessel_type</li>
+</ul></li>
+<li>Add exemple and basic unit testing</li>
+</ul></li>
+<li>
+<code>data_to_text</code> :
+<ul><li>Remove text format and evaluate</li>
+</ul></li>
+<li>
+<code>referential_file</code> :
+<ul><li>Add referential shape_sea</li>
+</ul></li>
+<li>Changes position display DD to DDM in app Shiny</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.0.1" id="akador-101--20250206">AkadoR 1.0.1- 2025.02.06<a class="anchor" aria-label="anchor" href="#akador-101--20250206"></a></h2>
 <div class="section level3">

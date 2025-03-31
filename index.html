@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">AkadoR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.1</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -123,18 +123,20 @@ You can use the furdeb package function to help you create the file.</p>
 Numerical value of the difference deemed acceptable between two numbers</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a><span class="fu">epsilon </span><span class="kw">:</span><span class="at"> </span><span class="fl">0.01</span></span></code></pre></div>
 <p>String vector allowing the selection of logbook programs</p>
-<div class="sourceCode" id="cb8"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">logbook_program </span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"your_first_programs"</span><span class="kw">,</span><span class="st">"your_second_program"</span><span class="kw">,</span><span class="at"> </span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">logbook_program </span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"your_first_programs"</span><span class="kw">,</span><span class="at"> </span><span class="st">"your_second_program"</span><span class="kw">,</span><span class="at"> ...</span><span class="kw">]</span></span></code></pre></div>
 <p>String vector allowing the selection of species used to calculate weights captured in RF1</p>
-<div class="sourceCode" id="cb9"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">species_RF1 </span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"your_first_species"</span><span class="kw">,</span><span class="st">"your_second_species"</span><span class="kw">,</span><span class="at"> </span></span></code></pre></div>
+<div class="sourceCode" id="cb9"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb9-1"><a href="#cb9-1" tabindex="-1"></a><span class="fu">species_RF1 </span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"your_first_species"</span><span class="kw">,</span><span class="at"> </span><span class="st">"your_second_species"</span><span class="kw">,</span><span class="at"> ...</span><span class="kw">]</span></span></code></pre></div>
+<p>String vector allowing the selection of reference list of species used for well distribution control</p>
+<div class="sourceCode" id="cb10"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">reference_list_species_well_distribution_control </span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"your_first_reference_list"</span><span class="kw">,</span><span class="at"> </span><span class="st">"your_second_reference_list"</span><span class="kw">,</span><span class="at"> ...</span><span class="kw">]</span></span></code></pre></div>
 <p>Configuring the secure connection to AkadoR.<br>
 A default database is created when the secure connection is activated for the first time. The database includes a user <code>shiny</code> with the password <code>azerty</code> and an administrator <code>shinymanager</code> with the password <code>12345</code>. These credentials must be changed immediately ! Which can be done directly within the application by logging in as the administrator.</p>
-<div class="sourceCode" id="cb10"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">start_AkadoR_configuration </span><span class="kw">:</span></span>
-<span id="cb10-2"><a href="#cb10-2" tabindex="-1"></a><span class="co">  # If you wish to enable secure connection to the application, set TRUE, otherwise set FALSE</span></span>
-<span id="cb10-3"><a href="#cb10-3" tabindex="-1"></a><span class="at">  </span><span class="fu">secure_connection </span><span class="kw">:</span><span class="at"> </span><span class="ch">FALSE</span></span>
-<span id="cb10-4"><a href="#cb10-4" tabindex="-1"></a><span class="co">  # Session expiry time (in minutes) before disconnection in standby mode if secure connection is enabled</span></span>
-<span id="cb10-5"><a href="#cb10-5" tabindex="-1"></a><span class="at">  </span><span class="fu">set_timeout </span><span class="kw">:</span><span class="at"> </span><span class="fl">120.0</span></span>
-<span id="cb10-6"><a href="#cb10-6" tabindex="-1"></a><span class="co">  # Path to file containing data base connection</span></span>
-<span id="cb10-7"><a href="#cb10-7" tabindex="-1"></a><span class="at">  </span><span class="fu">path_database </span><span class="kw">:</span><span class="at"> your_path</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">start_AkadoR_configuration </span><span class="kw">:</span></span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">  # If you wish to enable secure connection to the application, set TRUE, otherwise set FALSE</span></span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="at">  </span><span class="fu">secure_connection </span><span class="kw">:</span><span class="at"> </span><span class="ch">FALSE</span></span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a><span class="co">  # Session expiry time (in minutes) before disconnection in standby mode if secure connection is enabled</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="at">  </span><span class="fu">set_timeout </span><span class="kw">:</span><span class="at"> </span><span class="fl">120.0</span></span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">  # Path to file containing data base connection</span></span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a><span class="at">  </span><span class="fu">path_database </span><span class="kw">:</span><span class="at"> your_path</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="getting-help">Getting help<a class="anchor" aria-label="anchor" href="#getting-help"></a>
