@@ -1,3 +1,122 @@
+# AkadoR 1.0.2- 2025.03.31
+
+## Added
+- Add `check_category_species_forbidden_well_inspector` : function to check inconsistencies between the weight categories and the species in the well
+- Add `coordinate_dd_to_dmd` : function for converting DD (Decimal Degrees) coordinates in DDM (Degrees, Decimal Minutes)
+
+## Changed
+- full trip selection : 
+    - Add reconstructing full trips between several databases
+- `check_activity_sample_inspector` :
+    - Add exemple and basic unit testing
+- `check_anapo_activity_consistent_inspector` :
+    - Add exemple and basic unit testing
+- `check_anapo_inspector` :
+    - Remove warning check Anapo if dataframe_calcul is empty
+    - Standardization names arguments : 
+        - minimum_number_vms -> threshold_number_vms 
+    - Add exemple and basic unit testing
+- `check_distribution_inspector` :
+    - Standardization names arguments : 
+        - weightcategory_small -> weight_category_small
+        - weightcategory_big -> weight_category_big
+        - weightcategory_unknown -> weight_category_unknown 
+        - species -> species_category_unknown 
+    - Add argument : species_category_small_big 
+    - Add exemple and basic unit testing
+- `check_eez_inspector` :
+    - Standardization names arguments : 
+        - internationalwaters_code -> international_waters_code
+        - vesselactivity -> vessel_activity 
+    - Add exemple and basic unit testing
+- `check_fishing_context_inspector` :
+    - Standardization names arguments : 
+        - schooltype_object  -> school_type_object 
+    - Add argument : school_type_free; school_type_unknown 
+    - Add exemple and basic unit testing
+- `check_fishing_time_inspector` :
+    - Add exemple and basic unit testing
+- `check_harbour_inspector` :
+    - Add exemple and basic unit testing
+- `check_landing_consistent_inspector` :
+    - Add exemple and basic unit testing
+- `check_landing_total_weight_inspector` :
+    - Add exemple and basic unit testing
+- `check_ldlf_inspector` :
+    - Add exemple and basic unit testing
+- `check_length_class_inspector` :
+    - Add exemple and basic unit testing
+- `check_little_big_inspector` :
+    - Add exemple and basic unit testing
+- `check_measure_inspector` :
+    - Add exemple and basic unit testing
+- `check_operation_inspector` :
+    - Add argument : vessel_activity, school_type, success_status_school_type, success_status_weight
+    - Add exemple and basic unit testing
+- `check_raising_factor_inspector` :
+    - Standardization names arguments : 
+        - speciesfate -> species_fate 
+        - vesselactivity -> vessel_activity 
+    - Add exemple and basic unit testing
+- `check_position_inspector` :
+    - Standardization names arguments : 
+        - path_shp_sea -> dataframe3
+    - Remove arguments : layer_shp_sea 
+    - Add exemple and basic unit testing
+- `check_sample_harbour_inspector` :
+    - Add exemple and basic unit testing
+- `check_sample_without_measure_inspector` :
+    - Add exemple and basic unit testing
+- `check_sample_without_species_inspector` :
+    - Add exemple and basic unit testing
+- `check_sea_time_inspector` :
+    - Add exemple and basic unit testing
+- `check_species_inspector` :
+    - Add exemple and basic unit testing
+- `check_super_sample_number_consistent_inspector` :
+    - Add exemple and basic unit testing
+- `check_temperature_inspector` :
+    - Add exemple and basic unit testing
+- `check_temporal_limit_inspector` :
+    - Add exemple and basic unit testing
+- `check_time_route_inspector` :
+    - Standardization names arguments : 
+        - max_seatime -> threshold_sea_time
+        - max_fishingtime -> threshold_fishing_time
+        - vesselactivity_seatime -> vessel_activity_sea_time
+        - objectoperation_seatime -> object_operation_sea_time
+        - vesselactivity_fishingtime -> vessel_activity_fishing_time
+        - objectoperation_fishingtime -> object_operation_fishing_time
+    - Patch if referential contains NA
+    - Add exemple and basic unit testing
+- `check_trip_activity_inspector` :
+    - Add exemple and basic unit testing
+- `check_weight_inspector` :
+    - Add exemple and basic unit testing
+- `check_weight_sample_inspector` :
+    - Add exemple and basic unit testing
+- `check_weighting_inspector` :
+    - Standardization names arguments : 
+        - sampletype_code_landing_baitboat -> sample_type_code_landing_baitboat
+        - landingtype_baitboat -> landing_type_baitboat 
+    - Add exemple and basic unit testing
+- `check_weighting_sample_inspector` :
+    - Standardization names arguments : 
+        - speciesfate -> species_fate 
+        - dataframe1 -> dataframe2
+        - dataframe2 -> dataframe3
+     - Add argument : dataframe1
+    - Add exemple and basic unit testing
+- `check_well_number_consistent_inspector` :
+    - Standardization names arguments : 
+        - vesseltype -> vessel_type 
+    - Add exemple and basic unit testing
+- `data_to_text` : 
+     - Remove text format and evaluate
+- `referential_file` : 
+    - Add referential shape_sea
+- Changes position display DD to DDM in app Shiny
+
 # AkadoR 1.0.1- 2025.02.06
 
 ## Added
