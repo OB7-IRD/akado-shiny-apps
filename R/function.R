@@ -5524,6 +5524,138 @@ check_ldlf_inspector <- function(dataframe1,
   }
 }
 
+#' @name check_category_species_forbidden_well_inspector
+#' @title Gives the inconsistencies between the weight categories and the species in the well
+#' @description The purpose of the check_category_species_forbidden_well_inspector function is to provide a table of data that contains an inconsistency between the weight categories and the species in the well
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the check_distribution_inspector () function.
+#' @param output {\link[base]{character}} expected. Kind of expected output. You can choose between "message", "report" or "logical".
+#' @param species {\link[base]{character}} expected. Default values: c("SKJ"). Vector of species that must not have certain weight categories in well (weight_category)
+#' @param weight_category {\link[base]{character}} expected. Default values: c("W-9"). Vector of weight category codes that must not have certain species in well (species)
+#' @details
+#' The input dataframe must contain all these columns for the function to work :
+#' \itemize{
+#' Dataframe 1:
+#'  \item{\code{  wellactivityspecies_id}}
+#'  \item{\code{  species_fao_code}}
+#'  \item{\code{  weightcategory_code}}
+#' }
+#' @return The function returns a {\link[base]{character}} with output is "message", a {\link[base]{data.frame}} with output is "report", a {\link[base]{logical}} with output is "logical"
+#' @doctest
+#' #Sample well 1 and 2 are ok,
+#' #Sample well 3 is associated with the species concerned (species) and the weight category
+#' #              concerned (weight_category)
+#' dataframe1 <- data.frame(wellactivityspecies_id = c("1", "2", "3"),
+#'                          weightcategory_code = c("W-1", "W-9", "W-9"),
+#'                          species_fao_code = c("SKJ", "ALB", "SKJ"))
+#' @expect equal(., structure(list(wellactivityspecies_id = c("1", "2", "3"), species_fao_code  = c("SKJ", "ALB", "SKJ"), weightcategory_code = c("W-1", "W-9", "W-9"), logical = c(TRUE, TRUE, FALSE)), row.names = c(NA, -3L), class = "data.frame"))
+#' check_category_species_forbidden_well_inspector(dataframe1, output = "report")
+#' @export
+check_category_species_forbidden_well_inspector <- function(dataframe1,
+                                                            output,
+                                                            species = c("SKJ"),
+                                                            weight_category = c("W-9")) {
+  # 0 - Global variables assignement ----
+  weightcategory_code <- NULL
+  species_fao_code <- NULL
+  # 1 - Arguments verification ----
+  if (!codama::r_table_checking(
+    r_table = dataframe1,
+    type = "data.frame",
+    column_name = c("wellactivityspecies_id", "species_fao_code", "weightcategory_code"),
+    column_type = c("character", "character", "character"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = dataframe1,
+      type = "data.frame",
+      column_name = c("wellactivityspecies_id", "species_fao_code", "weightcategory_code"),
+      column_type = c("character", "character", "character"),
+      output = "error"
+    )
+  } else {
+    dataframe1 <- dataframe1[, c("wellactivityspecies_id", "species_fao_code", "weightcategory_code")]
+  }
+  # Checks the type and values of output
+  if (!codama::r_type_checking(
+    r_object = output,
+    type = "character",
+    allowed_value = c("message", "report", "logical"),
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = output,
+      type = "character",
+      allowed_value = c("message", "report", "logical"),
+      output = "error"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = species,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = species,
+      type = "character",
+      output = "error"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = weight_category,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = weight_category,
+      type = "character",
+      output = "error"
+    ))
+  }
+  select <- dataframe1$wellactivityspecies_id
+  nrow_first <- length(unique(select))
+  # 2 - Data design ----
+  # Check weight_category and species
+  dataframe1 <- dataframe1 %>%
+    dplyr::mutate(logical = ifelse(weightcategory_code %in% weight_category & species_fao_code %in% species, FALSE, TRUE))
+  if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
+    all <- c(select, dataframe1$wellactivityspecies_id)
+    number_occurrences <- table(all)
+    text <- ""
+    if (any(number_occurrences == 1)) {
+      text <- paste0(text, "Missing item ", "(", sum(number_occurrences == 1), "):", paste0(names(number_occurrences[number_occurrences == 1]), collapse = ", "), "\n")
+    }
+    if (any(number_occurrences > 2)) {
+      text <- paste0(text, "Too many item ", "(", sum(number_occurrences > 2), "):", paste0(names(number_occurrences[number_occurrences > 2]), collapse = ", "))
+    }
+    if (any(is.na(dataframe1$logical))) {
+      text <- paste0(text, "Unknown control result", "(", sum(is.na(dataframe1$logical)), "):", paste0(dataframe1$wellactivityspecies_id[is.na(dataframe1$logical)], collapse = ", "))
+    }
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - your data has some peculiarities that prevent the verification of inconsistencies.\n",
+      text,
+      sep = ""
+    )
+  }
+  # 3 - Export ----
+  if (output == "message") {
+    return(print(paste0("There are ", sum(!dataframe1$logical), " well activity with inconsistencies between the weight categories and the species in the well", collapse = ", ")))
+  }
+  if (output == "report") {
+    return(dataframe1)
+  }
+  if (output == "logical") {
+    if (sum(!dataframe1$logical) == 0) {
+      return(TRUE)
+    } else {
+      return(FALSE)
+    }
+  }
+}
+
 #' @name check_distribution_inspector
 #' @title Gives the inconsistencies between the weights of small and big sample fish and the sum of the small and big weights in the associated well
 #' @description The purpose of the check_distribution_inspector  function is to provide a table of data that contains an inconsistency between the small and large sample weights and the sum of the small and big weights of the associated well
@@ -7015,13 +7147,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           anchor = list(select_item = trip_select()$trip_id_data$trip_id)
         )
         # Uses a function to extract data from wellactivityspecies
-        data_wellactivityspecies <- furdeb::data_extraction(
+        data_wellactivityspecies_select <- furdeb::data_extraction(
           type = "database",
           file_path = system.file("sql",
                                   "wellactivityspecies.sql",
                                   package = "AkadoR"),
           database_connection = data_connection,
-          anchor = list(select_item = wellactivity_select$wellactivity_id)
+          anchor = list(select_item = trip_select()$trip_id_data$trip_id)
         )
         # Uses a function to extract data from route
         route_select <- furdeb::data_extraction(
@@ -7123,6 +7255,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         colnames_samplespecies_id <- c("samplespecies_id", "vessel_code", "trip_enddate", "sample_number", "samplespecies_subsamplenumber", "species_fao_code", "sizemeasuretype_code")
         # Retrieve trip sample species measure : retrieve the vessel code, end of the trip, sample number, species FAO code and type of measure of all the sample that have been selected
         colnames_samplespeciesmeasure_id <- c("samplespeciesmeasure_id", "vessel_code", "trip_enddate", "sample_number", "samplespecies_subsamplenumber", "species_fao_code", "sizemeasuretype_code", "samplespeciesmeasure_sizeclass")
+        # Retrieve trip well activity species : retrieve the vessel code, end of the trip, well label, weight category code and species FAO code of all the well activity species that have been selected
+        colnames_wellactivityspecies_id <- c("wellactivityspecies_id", "vessel_code", "trip_enddate", "well_label", "weightcategory_code", "species_fao_code")
         # Reconstructs info from previous trips in different databases
         for (i in data_trip[is.na(data_trip$trip_previous_id), "trip_id", drop = TRUE]) {
           # Recovers info from trip that has no previous trip
@@ -7478,9 +7612,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           `Big fish weight` = sample_bigsweight,
           `Total weight` = sample_totalweight
         )
+        # Uses a function which indicates whether weight categories is consistent with the species in the well
+        message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check category species forbidden well inspector", sep = "")
+        check_category_species_forbidden_well_inspector_data <- check_category_species_forbidden_well_inspector(dataframe1 = data_wellactivityspecies_select, output = "report")
+        # Uses a function to format the table
+        check_category_species_forbidden_well <- table_display_trip(check_category_species_forbidden_well_inspector_data, data_wellactivityspecies_select[, colnames_wellactivityspecies_id], type_inconsistency = "warning")
         # Uses a function which indicates whether the small and large sample weights is consistent for the sum of the small and big weights of the associated well
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check distribution inspector", sep = "")
-        check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = wellactivity_select, dataframe4 = data_wellactivityspecies, output = "report", species_category_small_big = dplyr::pull(reference_list_species_well_distribution_control))
+        check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = wellactivity_select, dataframe4 = data_wellactivityspecies_select, output = "report", species_category_small_big = dplyr::pull(reference_list_species_well_distribution_control))
         # Uses a function to format the table
         check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_distribution <- dplyr::rename(
@@ -7618,7 +7757,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_activity <- data.frame()
           check_anapo_activity_dataplot <- data.frame()
         }
-        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operation, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez, check_sample_harbour, check_anapo_activity, check_anapo_activity_dataplot))
+        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operation, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez, check_sample_harbour, check_anapo_activity, check_anapo_activity_dataplot, check_category_species_forbidden_well))
       }
     })
   })
@@ -7735,6 +7874,8 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   vms_date <- NULL
   X <- NULL
   Y <- NULL
+  well_label <- NULL
+  weightcategory_code <- NULL
   # Retrieves the name of the column containing the ID
   colname_id <- grep("_id$", colnames(data), value = TRUE)
   # Deletes duplicate columns
@@ -7834,6 +7975,15 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
     data <- dplyr::rename(
       .data = data,
       `Size class` = samplespeciesmeasure_sizeclass
+    )
+  }
+  # Modify the table for display purposes specifically for well activity species : rename column
+  if (length(grep("^wellactivityspecies", colnames(data), value = TRUE)) != 0) {
+    data <- dplyr::rename(
+      .data = data,
+      `Well` = well_label,
+      `FAO code` = species_fao_code,
+      `Weight category` = weightcategory_code
     )
   }
   # Retrieves the name of the column containing the ID

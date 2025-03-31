@@ -7,7 +7,7 @@ test_that("Doctest: check_activity_sample_inspector", {
   # Source line: 5182
   dataframe1 <- data.frame(sample_id = c("1", "2"))
   dataframe2 <- data.frame(sample_id = c("1"), activity_id = c("1"))
-  expect_equal(check_activity_sample_inspector(dataframe1, dataframe2, output = "report"), structure(list(sample_id = c("1", "2"), logical = c(TRUE, FALSE)), row.names = c(
-    NA, -2L), class = "data.frame"))
+  expect_equal(check_activity_sample_inspector(dataframe1, dataframe2, output = "report"), structure(list(sample_id = c("1", "2"), logical = c(TRUE, FALSE)), row.names = c(NA, -2L),
+  class = "data.frame"))
 })
 

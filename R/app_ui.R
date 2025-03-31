@@ -195,6 +195,7 @@ app_ui <- function(request) {
               table_ui(id = "check_activity_sample", title = "Sample activity", text = "<ul><li>Sample must be linked to an activity</li></ul>"),
               table_ui(id = "check_ldlf", title = "LDLF", text = "<ul><li>The type of measure must be compatible with species</li>
                      <li>The type of measurement must be compatible with total, small and big fish weights</li></ul>"),
+              table_ui(id = "check_category_species_forbidden_well", title = "Category with species forbidden in well", text = "<ul><li>Samples must not have certain species (default 'SKJ') associated with certain weight categories (default 'W-9', i.e. unknown)</li></ul>"),
               table_ui(id = "check_distribution", title = "Distribution +10/-10", text = "<ul><li>Sample must have -10/+10 distribution values consistent with those of the reported well</li>
                        <li>The weight of the big category for the well includes by default only the following species 'YFT', 'BET', 'ALB', 'SKJ'</li>
                        <li>The small weight category for the well includes by default only the following species 'YFT', 'BET', 'ALB', 'SKJ' plus the unknown weight category for species 'SKJ'</li></ul>"),
