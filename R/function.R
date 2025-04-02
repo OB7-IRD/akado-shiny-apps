@@ -7533,9 +7533,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check super sample number consistent inspector", sep = "")
         check_super_sample_number_consistent_inspector_data <- check_super_sample_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, output = "report")
         # Uses a function to format the table
-        check_super_sample_number_consistent <- table_display_trip(check_super_sample_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
-        check_super_sample_number_consistent <- dplyr::rename(
-          .data = check_super_sample_number_consistent,
+        check_super_sample_number <- table_display_trip(check_super_sample_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_super_sample_number <- dplyr::rename(
+          .data = check_super_sample_number,
           `Super sample` = sample_supersample,
           `Counts number sub-sample numbers not 0` = count_subsamplenumber_n0,
           `Counts number sub-sample numbers equal 0` = count_subsamplenumber_0,
@@ -7546,9 +7546,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check well number consistent inspector", sep = "")
         check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = data_trip_unprecedented, output = "report")
         # Uses a function to format the table
-        check_well_number_consistent <- table_display_trip(check_well_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
-        check_well_number_consistent <- dplyr::rename(
-          .data = check_well_number_consistent,
+        check_well_number <- table_display_trip(check_well_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_well_number <- dplyr::rename(
+          .data = check_well_number,
           `Well` = sample_well
         )
         # Uses a function which indicates whether the sample is consistent for the percentage of little and big fish sampled
@@ -7699,10 +7699,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
           check_anapo_inspector_dataplot <- data_to_text(data = check_anapo_inspector_dataplot, name_col = "data_plot", name_button = NULL, colname_id = "activity_id", colname_plot = c("vms_position", "vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_crs", "vms_crs", "activity_data", "trip_data"))
           # Number of the table containing the Anapo plot information in calcul_check_server
-          check_anapo_inspector_dataplot$num_table <- 29
+          check_anapo_inspector_dataplot$name_table <- "check_anapo_inspector_dataplot"
           check_anapo_inspector_dataplot$num_row <- seq_len(nrow(check_anapo_inspector_dataplot))
           # Add button and data for plot in table
-          check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data_table, data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = NULL, colname_info = c("num_table", "num_row"), name_button = "button_anapo", choice_select_row = "all")
+          check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data_table, data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = NULL, colname_info = c("name_table", "num_row"), name_button = "button_anapo", choice_select_row = "all")
           # Uses a function to format the table
           check_anapo <- table_display_trip(check_anapo, activity_select[, colnames_activity_id], type_inconsistency = "error")
           check_anapo$min_distance <- trunc(check_anapo$min_distance * 1000) / 1000
@@ -7736,10 +7736,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity_consistent_inspector_data, data_vms[, c("vms_date_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_date_id))
           check_anapo_activity_dataplot <- data_to_text(data = check_anapo_activity_dataplot, name_col = "data_plot", name_button = NULL, colname_id = "vms_date_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"))
           # Number of the table containing the Anapo plot information in calcul_check_server
-          check_anapo_activity_dataplot$num_table <- 34
+          check_anapo_activity_dataplot$name_table <- "check_anapo_activity_dataplot"
           check_anapo_activity_dataplot$num_row <- seq_len(nrow(check_anapo_activity_dataplot))
           # Add button and data for plot in table
-          check_anapo_activity <- data_button_plot(data_plot = check_anapo_activity_dataplot, data_display = check_anapo_activity_consistent_inspector_data, data_id = data_vms_date[, "vms_date_id"], colname_id = "vms_date_id", colname_plot = NULL, colname_info = c("num_table", "num_row"), name_button = "button_anapo_activity")
+          check_anapo_activity <- data_button_plot(data_plot = check_anapo_activity_dataplot, data_display = check_anapo_activity_consistent_inspector_data, data_id = data_vms_date[, "vms_date_id"], colname_id = "vms_date_id", colname_plot = NULL, colname_info = c("name_table", "num_row"), name_button = "button_anapo_activity")
           # Uses a function to format the table
           check_anapo_activity <- table_display_trip(check_anapo_activity, data_vms_date[, c("vessel_code", "vms_date_id", "vms_date", "vms_codevessel", "vessel_type", "vessel_statut")], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -7757,7 +7757,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_activity <- data.frame()
           check_anapo_activity_dataplot <- data.frame()
         }
-        return(list(check_trip_activity, check_fishing_time, check_sea_time, check_landing_consistent, check_landing_total_weigh, check_temporal_limit, check_harbour, check_raising_factor, check_fishing_context, check_operation, check_position, check_weight, check_length_class, check_measure, check_temperature, check_weighting_sample, check_species, check_sample_without_measure, check_sample_without_species, check_super_sample_number_consistent, check_well_number_consistent, check_little_big, check_weighting, check_weight_sample, check_activity_sample, check_ldlf, check_distribution, check_anapo, check_anapo_inspector_dataplot, check_time_route, check_eez, check_sample_harbour, check_anapo_activity, check_anapo_activity_dataplot, check_category_species_forbidden_well))
+        names_check <- c("check_trip_activity", "check_fishing_time", "check_sea_time", "check_landing_consistent", "check_landing_total_weigh", "check_temporal_limit", "check_harbour", "check_raising_factor", "check_fishing_context", "check_operation", "check_position", "check_weight", "check_length_class", "check_measure", "check_temperature", "check_weighting_sample", "check_species", "check_sample_without_measure", "check_sample_without_species", "check_super_sample_number", "check_well_number", "check_little_big", "check_weighting", "check_weight_sample", "check_activity_sample", "check_ldlf", "check_distribution", "check_anapo", "check_anapo_inspector_dataplot", "check_time_route", "check_eez", "check_sample_harbour", "check_anapo_activity", "check_anapo_activity_dataplot", "check_category_species_forbidden_well")
+        return(stats::setNames(mget(names_check), names_check))
       }
     })
   })
@@ -7796,14 +7797,18 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
 }
 
 # Shiny function : format table display serveur
-table_server <- function(id, data, number, parent_in, text_error_trip_select, trip_select, calcul_check, column_no_wrap = NULL) {
+table_server <- function(id, data, name, parent_in, text_error_trip_select, trip_select, calcul_check, column_no_wrap = NULL) {
   # Local binding global variables
   . <- NULL
+  # If no name is specified, use id as name
+  if (missing(name)) {
+    name <- id
+  }
   moduleServer(id, function(input, output, session) {
     output$table <- DT::renderDT({
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (text_error_trip_select() == TRUE && is.data.frame(trip_select()$trip_id_data) && isTruthy(calcul_check())) {
-        data <- data()[[number]]
+        data <- data()[[name]]
         if (parent_in$type_line_check_trip == "inconsistent") {
           data <- data[data$Check != as.character(icon("check")), ]
         }
@@ -7819,7 +7824,7 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
                                                                  text = "Copy data displayed"),
                                                             list(extend = "collection",
                                                                  text = "Download all data",
-                                                                 action = DT::JS(paste0("function ( e, dt, node, config ) {Shiny.setInputValue('button_download', ", number, ", {priority: 'event'});}")))))) %>%
+                                                                 action = DT::JS(paste0("function(){Shiny.setInputValue('button_download', '", name, "', {priority: 'event'});}")))))) %>%
           # If data is not empty
           {if (ncol(data) > 0) DT::formatStyle(., columns = column_no_wrap, "white-space" = "nowrap") else .
           }
@@ -7830,7 +7835,7 @@ table_server <- function(id, data, number, parent_in, text_error_trip_select, tr
 }
 
 # Shiny function : Selection window for choosing the type of file to download
-window_button_download <- function(number) {
+window_button_download <- function(name) {
   modalDialog(downloadButton(outputId = "download_csv", label = "CSV"),
               downloadButton(outputId = "download_excel", label = "Excel"),
               fade = TRUE,
