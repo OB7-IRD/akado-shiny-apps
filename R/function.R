@@ -7291,14 +7291,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         }
         # Uses a function which indicates whether the selected trips contain activities or not
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check trip activity inspector", sep = "")
-        check_trip_activity_inspector_data <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = activity_select, output = "report")
+        check_trip_activity <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = activity_select, output = "report")
         # Uses a function to format the table
-        check_trip_activity <- table_display_trip(check_trip_activity_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "warning")
+        check_trip_activity <- table_display_trip(check_trip_activity, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "warning")
         # Uses a function which indicates whether the selected trips contain fishing time inconsistent
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check fishing time inspector", sep = "")
-        check_fishing_time_inspector_data <- check_fishing_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = route_select, output = "report")
+        check_fishing_time <- check_fishing_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = route_select, output = "report")
         # Uses a function to format the table
-        check_fishing_time <- table_display_trip(check_fishing_time_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
+        check_fishing_time <- table_display_trip(check_fishing_time, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_fishing_time <- dplyr::rename(
           .data = check_fishing_time,
@@ -7307,9 +7307,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain sea time inconsistent
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sea time inspector", sep = "")
-        check_sea_time_inspector_data <- check_sea_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = route_select, output = "report")
+        check_sea_time <- check_sea_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = route_select, output = "report")
         # Uses a function to format the table
-        check_sea_time <- table_display_trip(check_sea_time_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
+        check_sea_time <- table_display_trip(check_sea_time, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_sea_time <- dplyr::rename(
           .data = check_sea_time,
@@ -7318,9 +7318,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain landing total weight inconsistent with vessel capacity
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing consistent inspector", sep = "")
-        check_landing_consistent_inspector_data <- check_landing_consistent_inspector(dataframe1 = data_trip_unprecedented, output = "report")
+        check_landing_consistent <- check_landing_consistent_inspector(dataframe1 = data_trip_unprecedented, output = "report")
         # Uses a function to format the table
-        check_landing_consistent <- table_display_trip(check_landing_consistent_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "warning")
+        check_landing_consistent <- table_display_trip(check_landing_consistent, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
         check_landing_consistent <- dplyr::rename(
           .data = check_landing_consistent,
@@ -7329,9 +7329,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain the total landed weight for canneries inconsistent with the weights of each landing for the canneries
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing total weight inspector", sep = "")
-        check_landing_total_weight_inspector_data <- check_landing_total_weight_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_landing, output = "report", epsilon = config_data()[["epsilon"]])
+        check_landing_total_weigh <- check_landing_total_weight_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_landing, output = "report", epsilon = config_data()[["epsilon"]])
         # Uses a function to format the table
-        check_landing_total_weigh <- table_display_trip(check_landing_total_weight_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
+        check_landing_total_weigh <- table_display_trip(check_landing_total_weigh, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_landing_total_weigh <- dplyr::rename(
           .data = check_landing_total_weigh,
@@ -7362,9 +7362,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain the trip harbour of departure of the current trip inconsistent with the harbour of landing of the previous trip
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check harbour inspector", sep = "")
-        check_harbour_inspector_data <- check_harbour_inspector(dataframe1 = data_trip, output = "report")
+        check_harbour <- check_harbour_inspector(dataframe1 = data_trip, output = "report")
         # Uses a function to format the table
-        check_harbour <- table_display_trip(check_harbour_inspector_data, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
+        check_harbour <- table_display_trip(check_harbour, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_harbour <- dplyr::rename(
           .data = check_harbour,
@@ -7373,9 +7373,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain RF1 inconsistent with threshold values
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check raising factor inspector", sep = "")
-        check_raising_factor_inspector_data <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_full_trip, dataframe3 = data_landing_full_trip, dataframe4 = data_full_trip, output = "report")
+        check_raising_factor <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_catch_full_trip, dataframe3 = data_landing_full_trip, dataframe4 = data_full_trip, output = "report")
         # Uses a function to format the table
-        check_raising_factor <- table_display_trip(check_raising_factor_inspector_data, trip_select()$trip_id_data[, c(colnames_trip_id, "wellcontentstatus_landing_label")], type_inconsistency = "info")
+        check_raising_factor <- table_display_trip(check_raising_factor, trip_select()$trip_id_data[, c(colnames_trip_id, "wellcontentstatus_landing_label")], type_inconsistency = "info")
         check_raising_factor$rf1 <- trunc(check_raising_factor$rf1 * 100000) / 100000
         # Modify the table for display purposes: rename column
         check_raising_factor <- dplyr::rename(
@@ -7385,9 +7385,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the school type is consistent with the association
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check fishing context inspector", sep = "")
-        check_fishing_context_inspector_data <- check_fishing_context_inspector(dataframe1 = activity_select, dataframe2 = data_activity_observedsystem, output = "report")
+        check_fishing_context <- check_fishing_context_inspector(dataframe1 = activity_select, dataframe2 = data_activity_observedsystem, output = "report")
         # Uses a function to format the table
-        check_fishing_context <- table_display_trip(check_fishing_context_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
+        check_fishing_context <- table_display_trip(check_fishing_context, activity_select[, colnames_activity_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_fishing_context <- dplyr::rename(
           .data = check_fishing_context,
@@ -7396,9 +7396,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the succes status is consistent with the vessel activity, the type of school or the weight caught
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check operation inspector", sep = "")
-        check_operation_inspector_data <- check_operation_inspector(dataframe1 = activity_select, output = "report")
+        check_operation <- check_operation_inspector(dataframe1 = activity_select, output = "report")
         # Uses a function to format the table
-        check_operation <- table_display_trip(check_operation_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
+        check_operation <- table_display_trip(check_operation, activity_select[, colnames_activity_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_operation <- dplyr::rename(
           .data = check_operation,
@@ -7409,9 +7409,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the ocean declaration is consistent with activity position
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check position inspector", sep = "")
-        check_position_inspector_data <- check_position_inspector(dataframe1 = activity_select, dataframe2 = data_trip_unprecedented, dataframe3 = referential_file()[["shape_sea"]], output = "report")
+        check_position <- check_position_inspector(dataframe1 = activity_select, dataframe2 = data_trip_unprecedented, dataframe3 = referential_file()[["shape_sea"]], output = "report")
         # Add button and data for plot in table
-        check_position <- data_button_plot(data_plot = check_position_inspector_data[[2]], data_display = check_position_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate"), name_button = "button_position")
+        check_position <- data_button_plot(data_plot = check_position[[2]], data_display = check_position[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate"), name_button = "button_position")
         # Uses a function to format the table
         check_position <- table_display_trip(check_position, activity_select[, c(colnames_activity_id, "activity_position")], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
@@ -7425,9 +7425,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether that sum of the weight indicated for the catch is consistent with activity weight
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weight inspector", sep = "")
-        check_weight_inspector_data <- check_weight_inspector(dataframe1 = activity_select, dataframe2 = data_catch, output = "report")
+        check_weight <- check_weight_inspector(dataframe1 = activity_select, dataframe2 = data_catch, output = "report")
         # Uses a function to format the table
-        check_weight <- table_display_trip(check_weight_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
+        check_weight <- table_display_trip(check_weight, activity_select[, colnames_activity_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_weight <- dplyr::rename(
           .data = check_weight,
@@ -7436,14 +7436,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether that size class of the samples depending on the species and measurement type is consistent with valid threshold
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check length class inspector", sep = "")
-        check_length_class_inspector_data <- check_length_class_inspector(dataframe1 = samplespeciesmeasure_select, output = "report")
+        check_length_class <- check_length_class_inspector(dataframe1 = samplespeciesmeasure_select, output = "report")
         # Uses a function to format the table
-        check_length_class <- table_display_trip(check_length_class_inspector_data, samplespeciesmeasure_select[, colnames_samplespeciesmeasure_id], type_inconsistency = "error")
+        check_length_class <- table_display_trip(check_length_class, samplespeciesmeasure_select[, colnames_samplespeciesmeasure_id], type_inconsistency = "error")
         # Uses a function which indicates whether that total number of individuals measured per sample is consistent with the sum of individuals per sample, species and size class
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check measure inspector", sep = "")
-        check_measure_inspector_data <- check_measure_inspector(dataframe1 = samplespecies_select, dataframe2 = samplespeciesmeasure_select, output = "report")
+        check_measure <- check_measure_inspector(dataframe1 = samplespecies_select, dataframe2 = samplespeciesmeasure_select, output = "report")
         # Uses a function to format the table
-        check_measure <- table_display_trip(check_measure_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_measure <- table_display_trip(check_measure, sample_select[, colnames_sample_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
         check_measure <- dplyr::rename(
           .data = check_measure,
@@ -7452,18 +7452,18 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether that sea surface temperature is consistent with the valid threshold
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check temperature inspector", sep = "")
-        check_temperature_inspector_data <- check_temperature_inspector(dataframe1 = activity_select, output = "report")
+        check_temperature <- check_temperature_inspector(dataframe1 = activity_select, output = "report")
         # Uses a function to format the table
-        check_temperature <- table_display_trip(check_temperature_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
+        check_temperature <- table_display_trip(check_temperature, activity_select[, colnames_activity_id], type_inconsistency = "error")
         check_temperature <- dplyr::rename(
           .data = check_temperature,
           `Sea surface temperature` = activity_seasurfacetemperature
         )
         # Uses a function which indicates whether that catch weight for activity is consistent with the sample weighting
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weighting sample inspector", sep = "")
-        check_weighting_sample_inspector_data <- check_weighting_sample_inspector(dataframe1 = activity_select, dataframe2 = data_catch, dataframe3 = data_sampleactivity, output = "report")
+        check_weighting_sample <- check_weighting_sample_inspector(dataframe1 = activity_select, dataframe2 = data_catch, dataframe3 = data_sampleactivity, output = "report")
         # Uses a function to format the table
-        check_weighting_sample <- table_display_trip(check_weighting_sample_inspector_data, activity_select[, colnames_activity_id], type_inconsistency = "error")
+        check_weighting_sample <- table_display_trip(check_weighting_sample, activity_select[, colnames_activity_id], type_inconsistency = "error")
         check_weighting_sample <- dplyr::rename(
           .data = check_weighting_sample,
           `Sum catch weight` = weight,
@@ -7488,9 +7488,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           dplyr:: filter(fishing_time == 1) %>%
           dplyr::mutate(objectoperation_code_observe = as.character(objectoperation_code_observe)) %>%
           dplyr::pull(objectoperation_code_observe)
-        check_time_route_inspector_data <- check_time_route_inspector(dataframe1 = route_select, dataframe2 = activity_select, dataframe3 = data_floatingobject, vessel_activity_sea_time = vessel_activity_sea_time, object_operation_sea_time = object_operation_sea_time, vessel_activity_fishing_time = vessel_activity_fishing_time, object_operation_fishing_time = object_operation_fishing_time, output = "report")
+        check_time_route <- check_time_route_inspector(dataframe1 = route_select, dataframe2 = activity_select, dataframe3 = data_floatingobject, vessel_activity_sea_time = vessel_activity_sea_time, object_operation_sea_time = object_operation_sea_time, vessel_activity_fishing_time = vessel_activity_fishing_time, object_operation_fishing_time = object_operation_fishing_time, output = "report")
         # Uses a function to format the table
-        check_time_route <- table_display_trip(check_time_route_inspector_data, route_select[, colnames_route_id], type_inconsistency = "error")
+        check_time_route <- table_display_trip(check_time_route, route_select[, colnames_route_id], type_inconsistency = "error")
         check_time_route <- dplyr::rename(
           .data = check_time_route,
           `Sea time` = route_seatime,
@@ -7500,9 +7500,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the eez declaration is consistent with activity position
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check eez inspector", sep = "")
-        check_eez_inspector_data <- check_eez_inspector(dataframe1 = activity_select, dataframe2 = referential_file()[["shape_eez"]], output = "report")
+        check_eez <- check_eez_inspector(dataframe1 = activity_select, dataframe2 = referential_file()[["shape_eez"]], output = "report")
         # Add button and data for plot in table
-        check_eez <- data_button_plot(data_plot = check_eez_inspector_data[[2]], data_display = check_eez_inspector_data[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3", "eez_calculated"), name_button = "button_eez", choice_select_row = "all")
+        check_eez <- data_button_plot(data_plot = check_eez[[2]], data_display = check_eez[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3", "eez_calculated"), name_button = "button_eez", choice_select_row = "all")
         # Uses a function to format the table
         check_eez <- table_display_trip(check_eez, activity_select[, c(colnames_activity_id, "activity_position")], type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
@@ -7516,24 +7516,24 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether that species sampled is consistent with species authorized
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check species inspector", sep = "")
-        check_species_inspector_data <- check_species_inspector(dataframe1 = samplespecies_select, output = "report")
+        check_species <- check_species_inspector(dataframe1 = samplespecies_select, output = "report")
         # Uses a function to format the table
-        check_species <- table_display_trip(check_species_inspector_data, samplespecies_select[, colnames_samplespecies_id], type_inconsistency = "error")
+        check_species <- table_display_trip(check_species, samplespecies_select[, colnames_samplespecies_id], type_inconsistency = "error")
         # Uses a function which indicates whether the sample is consistent with the presence of measurement
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sample without measure inspector", sep = "")
-        check_sample_without_measure_inspector_data <- check_sample_without_measure_inspector(dataframe1 = samplespecies_select, dataframe2 = samplespeciesmeasure_select, output = "report")
+        check_sample_without_measure <- check_sample_without_measure_inspector(dataframe1 = samplespecies_select, dataframe2 = samplespeciesmeasure_select, output = "report")
         # Uses a function to format the table
-        check_sample_without_measure <- table_display_trip(check_sample_without_measure_inspector_data, samplespecies_select[, colnames_samplespecies_id], type_inconsistency = "error")
+        check_sample_without_measure <- table_display_trip(check_sample_without_measure, samplespecies_select[, colnames_samplespecies_id], type_inconsistency = "error")
         # Uses a function which indicates whether the sample is consistent with the presence of species
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sample without species inspector", sep = "")
-        check_sample_without_species_inspector_data <- check_sample_without_species_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, output = "report")
+        check_sample_without_species <- check_sample_without_species_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, output = "report")
         # Uses a function to format the table
-        check_sample_without_species <- table_display_trip(check_sample_without_species_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_sample_without_species <- table_display_trip(check_sample_without_species, sample_select[, colnames_sample_id], type_inconsistency = "error")
         # Uses a function which indicates whether the sample is consistent with the subsample number
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check super sample number consistent inspector", sep = "")
-        check_super_sample_number_consistent_inspector_data <- check_super_sample_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, output = "report")
+        check_super_sample_number <- check_super_sample_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, output = "report")
         # Uses a function to format the table
-        check_super_sample_number <- table_display_trip(check_super_sample_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_super_sample_number <- table_display_trip(check_super_sample_number, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_super_sample_number <- dplyr::rename(
           .data = check_super_sample_number,
           `Super sample` = sample_supersample,
@@ -7544,18 +7544,18 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the sample well number is consistent with the associated trip well numbers
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check well number consistent inspector", sep = "")
-        check_well_number_consistent_inspector_data <- check_well_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = data_trip_unprecedented, output = "report")
+        check_well_number <- check_well_number_consistent_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = data_trip_unprecedented, output = "report")
         # Uses a function to format the table
-        check_well_number <- table_display_trip(check_well_number_consistent_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_well_number <- table_display_trip(check_well_number, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_well_number <- dplyr::rename(
           .data = check_well_number,
           `Well` = sample_well
         )
         # Uses a function which indicates whether the sample is consistent for the percentage of little and big fish sampled
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check little big inspector", sep = "")
-        check_little_big_inspector_data <- check_little_big_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, dataframe3 = samplespeciesmeasure_select, output = "report")
+        check_little_big <- check_little_big_inspector(dataframe1 = sample_select, dataframe2 = samplespecies_select, dataframe3 = samplespeciesmeasure_select, output = "report")
         # Uses a function to format the table
-        check_little_big <- table_display_trip(check_little_big_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_little_big <- table_display_trip(check_little_big, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_little_big$little_percentage <- trunc(check_little_big$little_percentage * 1000) / 10
         check_little_big$big_percentage <- trunc(check_little_big$big_percentage * 1000) / 10
         check_little_big$measure1_percentage <- trunc(check_little_big$measure1_percentage * 1000) / 10
@@ -7572,9 +7572,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the sample is consistent for the weighting
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weighting inspector", sep = "")
-        check_weighting_inspector_data <- check_weighting_inspector(dataframe1 = sample_select, dataframe2 = data_sampleactivity, dataframe3 = data_trip_unprecedented, dataframe4 = data_landing, output = "report")
+        check_weighting <- check_weighting_inspector(dataframe1 = sample_select, dataframe2 = data_sampleactivity, dataframe3 = data_trip_unprecedented, dataframe4 = data_landing, output = "report")
         # Uses a function to format the table
-        check_weighting <- table_display_trip(check_weighting_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_weighting <- table_display_trip(check_weighting, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_weighting <- dplyr::rename(
           .data = check_weighting,
           `Small fish weight` = sample_smallsweight,
@@ -7587,9 +7587,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the sample weight (m10 and p10) is consistent for the global weight
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weight sample inspector", sep = "")
-        check_weight_sample_inspector_data <- check_weight_sample_inspector(dataframe1 = sample_select, output = "report")
+        check_weight_sample <- check_weight_sample_inspector(dataframe1 = sample_select, output = "report")
         # Uses a function to format the table
-        check_weight_sample <- table_display_trip(check_weight_sample_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_weight_sample <- table_display_trip(check_weight_sample, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_weight_sample <- dplyr::rename(
           .data = check_weight_sample,
           `Small fish weight` = sample_smallsweight,
@@ -7598,14 +7598,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the sample and the existence of the activity
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check activity sample inspector", sep = "")
-        check_activity_sample_inspector_data <- check_activity_sample_inspector(dataframe1 = sample_select, dataframe2 = data_sampleactivity, output = "report")
+        check_activity_sample <- check_activity_sample_inspector(dataframe1 = sample_select, dataframe2 = data_sampleactivity, output = "report")
         # Uses a function to format the table
-        check_activity_sample <- table_display_trip(check_activity_sample_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_activity_sample <- table_display_trip(check_activity_sample, sample_select[, colnames_sample_id], type_inconsistency = "error")
         # Uses a function which indicates whether the sample measurement types is consistent for the species or weight values
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check ldlf inspector", sep = "")
-        check_ldlf_inspector_data <- check_ldlf_inspector(dataframe1 = samplespecies_select, dataframe2 = sample_select, output = "report")
+        check_ldlf <- check_ldlf_inspector(dataframe1 = samplespecies_select, dataframe2 = sample_select, output = "report")
         # Uses a function to format the table
-        check_ldlf <- table_display_trip(check_ldlf_inspector_data, samplespecies_select[, colnames_samplespecies_id], type_inconsistency = "error")
+        check_ldlf <- table_display_trip(check_ldlf, samplespecies_select[, colnames_samplespecies_id], type_inconsistency = "error")
         check_ldlf <- dplyr::rename(
           .data = check_ldlf,
           `Small fish weight` = sample_smallsweight,
@@ -7614,14 +7614,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether weight categories is consistent with the species in the well
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check category species forbidden well inspector", sep = "")
-        check_category_species_forbidden_well_inspector_data <- check_category_species_forbidden_well_inspector(dataframe1 = data_wellactivityspecies_select, output = "report")
+        check_category_species_forbidden_well <- check_category_species_forbidden_well_inspector(dataframe1 = data_wellactivityspecies_select, output = "report")
         # Uses a function to format the table
-        check_category_species_forbidden_well <- table_display_trip(check_category_species_forbidden_well_inspector_data, data_wellactivityspecies_select[, colnames_wellactivityspecies_id], type_inconsistency = "warning")
+        check_category_species_forbidden_well <- table_display_trip(check_category_species_forbidden_well, data_wellactivityspecies_select[, colnames_wellactivityspecies_id], type_inconsistency = "warning")
         # Uses a function which indicates whether the small and large sample weights is consistent for the sum of the small and big weights of the associated well
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check distribution inspector", sep = "")
-        check_distribution_inspector_data <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = wellactivity_select, dataframe4 = data_wellactivityspecies_select, output = "report", species_category_small_big = dplyr::pull(reference_list_species_well_distribution_control))
+        check_distribution <- check_distribution_inspector(dataframe1 = sample_select, dataframe2 = data_well, dataframe3 = wellactivity_select, dataframe4 = data_wellactivityspecies_select, output = "report", species_category_small_big = dplyr::pull(reference_list_species_well_distribution_control))
         # Uses a function to format the table
-        check_distribution <- table_display_trip(check_distribution_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_distribution <- table_display_trip(check_distribution, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_distribution <- dplyr::rename(
           .data = check_distribution,
           `Small fish weight` = sample_smallsweight,
@@ -7634,9 +7634,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the small and large sample weights is consistent for the presence of a sample and the absence of a harbour of landing
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sample harbour inspector", sep = "")
-        check_sample_harbour_inspector_data <- check_sample_harbour_inspector(dataframe1 = sample_select, dataframe2 = data_trip_unprecedented, output = "report")
+        check_sample_harbour <- check_sample_harbour_inspector(dataframe1 = sample_select, dataframe2 = data_trip_unprecedented, output = "report")
         # Uses a function to format the table
-        check_sample_harbour <- table_display_trip(check_sample_harbour_inspector_data, sample_select[, colnames_sample_id], type_inconsistency = "error")
+        check_sample_harbour <- table_display_trip(check_sample_harbour, sample_select[, colnames_sample_id], type_inconsistency = "error")
         check_sample_harbour <- dplyr::rename(
           .data = check_sample_harbour,
           `Harbour landing` = harbour_label_landing
