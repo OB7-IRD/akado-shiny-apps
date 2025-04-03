@@ -413,214 +413,75 @@ app_server <- function(input, output, session) {
 
   # Management of the display or not of the boxes in the trip tab
   observeEvent(input$type_check_trip, {
+    # Information on controls, their name, type and the tab where they are displayed (Attention controls must be in the same order as the desired display)
+    check_info <- data.frame(name_check = c("check_trip_activity", "check_fishing_time", "check_sea_time", "check_landing_consistent", "check_landing_total_weigh", "check_temporal_limit", "check_harbour", "check_raising_factor", "check_fishing_context", "check_operation", "check_position", "check_weight", "check_temperature", "check_weighting_sample", "check_time_route", "check_eez", "check_length_class", "check_measure", "check_species", "check_sample_without_measure", "check_sample_without_species", "check_super_sample_number", "check_well_number", "check_little_big", "check_weighting", "check_weight_sample", "check_activity_sample", "check_ldlf", "check_category_species_forbidden_well", "check_distribution", "check_sample_harbour", "check_anapo", "check_anapo_activity"),
+                             type = c("warning", "error", "error", "warning", "error", "error", "error", "info", "error", "error", "error", "error", "error", "error", "error", "warning", "error", "error", "error", "error", "error", "error", "error", "error", "error", "error", "error", "error", "warning", "error", "error", "error", "error"),
+                             tab = c("trip", "trip", "trip", "trip", "trip", "trip", "trip", "trip", "activity", "activity", "activity", "activity", "activity", "activity", "activity", "activity", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "anapo", "anapo"))
+    # Information on the type of control selected by the user, its name and whether it concerns all types of control or not
     if (input$type_check_trip == "All") {
-      removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
-      removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
-      # Trip
-      shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
-      shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
-      insertUI(selector = "#div_check_fishing_time", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_fishing_time", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_sea_time", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_landing_consistent", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_landing_consistent", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_landing_total_weigh", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_temporal_limit", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
-      # Activity
-      shinyjs::show(id = "div_check_fishing_context", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_operation", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_operation", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_operation", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_position", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_weight", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_temperature", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_weighting_sample", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_time_route", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_eez", anim = TRUE, animType = "fade")
-      # Sample
-      shinyjs::show(id = "div_check_length_class", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_measure", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_measure", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_measure", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_species", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_sample_without_measure", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_sample_without_measure", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_sample_without_measure", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_sample_without_species", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_super_sample_number", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_super_sample_number", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_super_sample_number", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_well_number", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_little_big", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_little_big", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_little_big", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_weighting", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_weight_sample", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_weight_sample", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_weight_sample", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_activity_sample", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_ldlf", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_category_species_forbidden_well", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_distribution", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_distribution", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_distribution", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_sample_harbour", anim = TRUE, animType = "fade")
-      # Anapo
-      shinyjs::show(id = "div_check_anapo", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_anapo_activity", anim = TRUE, animType = "fade")
+      type_selected_info <- list(name_type = "all",
+                                 specific_check = FALSE)
     }
     if (input$type_check_trip == "Info") {
-      removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
-      removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
-      shinyjs::hide(id = "div_check_fishing_time", anim = FALSE)
-      shinyjs::hide(id = "div_check_sea_time", anim = FALSE)
-      shinyjs::hide(id = "div_check_landing_total_weigh", anim = FALSE)
-      shinyjs::hide(id = "div_check_temporal_limit", anim = FALSE)
-      shinyjs::hide(id = "div_check_harbour", anim = FALSE)
-      shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
-      shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
-      shinyjs::hide(id = "div_check_fishing_context", anim = FALSE)
-      shinyjs::hide(id = "div_check_operation", anim = FALSE)
-      shinyjs::hide(id = "div_check_position", anim = FALSE)
-      shinyjs::hide(id = "div_check_weight", anim = FALSE)
-      shinyjs::hide(id = "div_check_temperature", anim = FALSE)
-      shinyjs::hide(id = "div_check_weighting_sample", anim = FALSE)
-      shinyjs::hide(id = "div_check_length_class", anim = FALSE)
-      shinyjs::hide(id = "div_check_measure", anim = FALSE)
-      shinyjs::hide(id = "div_check_species", anim = FALSE)
-      shinyjs::hide(id = "div_check_sample_without_measure", anim = FALSE)
-      shinyjs::hide(id = "div_check_sample_without_species", anim = FALSE)
-      shinyjs::hide(id = "div_check_super_sample_number", anim = FALSE)
-      shinyjs::hide(id = "div_check_well_number", anim = FALSE)
-      shinyjs::hide(id = "div_check_little_big", anim = FALSE)
-      shinyjs::hide(id = "div_check_weighting", anim = FALSE)
-      shinyjs::hide(id = "div_check_weight_sample", anim = FALSE)
-      shinyjs::hide(id = "div_check_activity_sample", anim = FALSE)
-      shinyjs::hide(id = "div_check_ldlf", anim = FALSE)
-      shinyjs::show(id = "div_check_category_species_forbidden_well", anim = FALSE)
-      shinyjs::hide(id = "div_check_distribution", anim = FALSE)
-      shinyjs::hide(id = "div_check_time_route", anim = FALSE)
-      shinyjs::hide(id = "div_check_eez", anim = FALSE)
-      shinyjs::hide(id = "div_check_sample_harbour", anim = FALSE)
-      # Trip
-      shinyjs::show(id = "div_check_raising_factor", anim = TRUE, animType = "fade")
-      # Anapo
-      shinyjs::hide(id = "div_check_anapo", anim = FALSE)
-      shinyjs::hide(id = "div_check_anapo_activity", anim = FALSE)
+      type_selected_info <- list(name_type = "info",
+                                 specific_check = TRUE)
     }
     if (input$type_check_trip == "Warning") {
-      removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
-      removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
-      shinyjs::hide(id = "div_check_fishing_time", anim = FALSE)
-      shinyjs::hide(id = "div_check_sea_time", anim = FALSE)
-      shinyjs::hide(id = "div_check_landing_total_weigh", anim = FALSE)
-      shinyjs::hide(id = "div_check_temporal_limit", anim = FALSE)
-      shinyjs::hide(id = "div_check_harbour", anim = FALSE)
-      shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
-      shinyjs::hide(id = "div_check_fishing_context", anim = FALSE)
-      shinyjs::hide(id = "div_check_operation", anim = FALSE)
-      shinyjs::hide(id = "div_check_position", anim = FALSE)
-      shinyjs::hide(id = "div_check_weight", anim = FALSE)
-      shinyjs::hide(id = "div_check_temperature", anim = FALSE)
-      shinyjs::hide(id = "div_check_weighting_sample", anim = FALSE)
-      shinyjs::hide(id = "div_check_length_class", anim = FALSE)
-      shinyjs::hide(id = "div_check_measure", anim = FALSE)
-      shinyjs::hide(id = "div_check_species", anim = FALSE)
-      shinyjs::hide(id = "div_check_sample_without_measure", anim = FALSE)
-      shinyjs::hide(id = "div_check_sample_without_species", anim = FALSE)
-      shinyjs::hide(id = "div_check_super_sample_number", anim = FALSE)
-      shinyjs::hide(id = "div_check_well_number", anim = FALSE)
-      shinyjs::hide(id = "div_check_little_big", anim = FALSE)
-      shinyjs::hide(id = "div_check_weighting", anim = FALSE)
-      shinyjs::hide(id = "div_check_weight_sample", anim = FALSE)
-      shinyjs::hide(id = "div_check_activity_sample", anim = FALSE)
-      shinyjs::hide(id = "div_check_ldlf", anim = FALSE)
-      shinyjs::hide(id = "div_check_distribution", anim = FALSE)
-      shinyjs::hide(id = "div_check_time_route", anim = FALSE)
-      shinyjs::hide(id = "div_check_sample_harbour", anim = FALSE)
-      # Trip
-      shinyjs::show(id = "div_check_trip_activity", anim = TRUE, time = 1, animType = "fade")
-      shinyjs::show(id = "div_check_landing_consistent", anim = TRUE, time = 1, animType = "fade")
-      # Activity
-      shinyjs::show(id = "div_check_eez", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_category_species_forbidden_well", anim = TRUE, animType = "fade")
-      # Anapo
-      shinyjs::hide(id = "div_check_anapo", anim = FALSE)
-      shinyjs::hide(id = "div_check_anapo_activity", anim = FALSE)
+      type_selected_info <- list(name_type = "warning",
+                                 specific_check = TRUE)
     }
     if (input$type_check_trip == "Error") {
-      removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
-      removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
-      shinyjs::hide(id = "div_check_trip_activity", anim = FALSE)
-      shinyjs::hide(id = "div_check_landing_consistent", anim = FALSE)
-      shinyjs::hide(id = "div_check_raising_factor", anim = FALSE)
-      shinyjs::hide(id = "div_check_eez", anim = FALSE)
-      shinyjs::show(id = "div_check_category_species_forbidden_well", anim = FALSE)
-      # Trip
-      shinyjs::show(id = "div_check_fishing_time", anim = TRUE, time = 1, animType = "fade")
-      shinyjs::show(id = "div_check_sea_time", anim = TRUE, time = 1, animType = "fade")
-      insertUI(selector = "#div_check_sea_time", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_sea_time", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_landing_total_weigh", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_temporal_limit", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_temporal_limit", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_harbour", anim = TRUE, animType = "fade")
-      # Activity
-      shinyjs::show(id = "div_check_fishing_context", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_operation", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_operation", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_operation", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_position", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_weight", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_weight", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_temperature", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_weighting_sample", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_weighting_sample", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_time_route", anim = TRUE, animType = "fade")
-      # Sample
-      shinyjs::show(id = "div_check_length_class", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_measure", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_measure", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_measure", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_species", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_sample_without_measure", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_sample_without_measure", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_sample_without_measure", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_sample_without_species", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_super_sample_number", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_super_sample_number", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_super_sample_number", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_well_number", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_little_big", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_little_big", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_little_big", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_weighting", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_weight_sample", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_weight_sample", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_weight_sample", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_activity_sample", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_ldlf", anim = TRUE, animType = "fade")
-      insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      insertUI(selector = "#div_check_ldlf", ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-      shinyjs::show(id = "div_check_distribution", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_sample_harbour", anim = TRUE, animType = "fade")
-      # Anapo
-      shinyjs::show(id = "div_check_anapo", anim = TRUE, animType = "fade")
-      shinyjs::show(id = "div_check_anapo_activity", anim = TRUE, animType = "fade")
+      type_selected_info <- list(name_type = "error",
+                                 specific_check = TRUE)
+    }
+    # Information on tabs, their names and whether or not to display separator lines between controls
+    tab_info <- data.frame(name_tab = c("trip", "activity", "sample", "anapo"),
+                           display_line = c(TRUE, TRUE, TRUE, FALSE))
+    # Checks the type and values of check_info$tab
+    if (!codama::r_type_checking(
+      r_object = check_info$tab,
+      type = "character",
+      allowed_value = tab_info$name_tab,
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = check_info$tab,
+        type = "character",
+        allowed_value = tab_info$name_tab,
+        output = "error"
+      ))
+    }
+    removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
+    removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
+    for (tab in tab_info$name_tab) {
+      # Number of the control displayed within the tab, to display a line for every two controls
+      num_check <- 1
+      # Selection of controls to be displayed
+      if (type_selected_info$specific_check) {
+        # Selection that controls of the same type as the tab
+        name_check_list <- check_info[check_info$tab == tab & check_info$type == type_selected_info$name_type, "name_check"]
+      } else {
+        # Select all controls
+        name_check_list <- check_info[check_info$tab == tab, "name_check"]
+      }
+      # Displaying controls
+      for (name_check in name_check_list) {
+        shinyjs::show(id = paste0("div_", name_check), anim = TRUE, time = 1, animType = "fade")
+        # Display thin lines to separate control lines for md and lg window sizes
+        if (num_check %% 2 == 0 & length(name_check_list) > 2 & tab_info[tab_info$name_tab == tab, "display_line"]) {
+          # Displays a horizontal line every two controls if the tab allows it and there are at least 3 controls in the tab
+          insertUI(selector = paste0("#div_", name_check), ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+          insertUI(selector = paste0("#div_", name_check), ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+        }
+        num_check <- num_check + 1
+      }
+      # Hide controls
+      if (type_selected_info$specific_check) {
+        name_check_list <- check_info[check_info$tab == tab & check_info$type != type_selected_info$name_type, "name_check"]
+        for (name_check in name_check_list) {
+          shinyjs::hide(id = paste0("div_", name_check), anim = FALSE)
+        }
+      }
     }
   })
 
