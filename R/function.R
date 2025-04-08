@@ -7834,6 +7834,63 @@ table_server <- function(id, data, name, parent_in, text_error_trip_select, trip
   })
 }
 
+# Shiny function : Format multiple check tables
+table_server_multiple <- function(check_info, calcul_check = calcul_check, input = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select) {
+  # Format multiple check tables
+  # Use of lapply and not a for loop to avoid lazy evaluation problems
+  table_server_formatted <- lapply(
+    check_info,
+    function(check) {
+      # 1 - Arguments verification ----
+      # Check that the sublist contains an 'id' element
+      if (!("id" %in% names(check))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - Impossible to identify the control because there is no element in the sub-list named 'id'.
+       Present element : ",
+          paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!codama::r_type_checking(
+        r_object = check[["id"]],
+        type = "character",
+        length = 1L,
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["id"]],
+          type = "character",
+          length = 1L,
+          output = "error"
+        ))
+      }
+      # Check that element 'column_no_wrap' in the sub-list is numeric
+      if ("column_no_wrap" %in% names(check)) {
+        if (!codama::r_type_checking(
+          r_object = check[["column_no_wrap"]],
+          type = "numeric",
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = check[["column_no_wrap"]],
+            type = "numeric",
+            output = "error"
+          ))
+        }
+      } else {
+        check[["column_no_wrap"]] <- NULL
+      }
+      # 2 - Data design ----
+      table_server(id = check[["id"]], data = calcul_check, parent_in = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check, column_no_wrap = check[["column_no_wrap"]])
+    }
+  )
+  return(table_server_formatted)
+}
+
 # Shiny function : Selection window for choosing the type of file to download
 window_button_download <- function(name) {
   modalDialog(downloadButton(outputId = "download_csv", label = "CSV"),
