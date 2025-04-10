@@ -7917,6 +7917,171 @@ table_ui <- function(id, title, size_box = "col-sm-12 col-md-6 col-lg-6", text =
   )
 }
 
+# Shiny function : Format multiple table display ui
+table_group_server <- function(check_info, name_tab = c("trip", "activity", "sample", "anapo")) {
+  # 1 - Arguments verification ----
+  if (!codama::r_type_checking(
+    r_object = name_tab,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = name_tab,
+      type = "character",
+      output = "error"
+    ))
+  }
+  if (length(name_tab) != length(unique(name_tab))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Tab names are not unique.
+       Tab name : ",
+      paste0(name_tab, collapse = ", "),
+      sep = ""
+    )
+  }
+  all_id_check <- lapply(
+    check_info,
+    function(check) {
+      # Check that the sublist contains an 'id' element
+      if (!("id" %in% names(check))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - Impossible to identify the control because there is no element in the sub-list named 'id'.
+       Present element : ",
+          paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!codama::r_type_checking(
+        r_object = check[["id"]],
+        type = "character",
+        length = 1L,
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["id"]],
+          type = "character",
+          length = 1L,
+          output = "error"
+        ))
+      }
+      # Check that element 'title' in the sub-list is numeric
+      if ("title" %in% names(check)) {
+        if (!codama::r_type_checking(
+          r_object = check[["title"]],
+          type = "character",
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = check[["title"]],
+            type = "character",
+            output = "error"
+          ))
+        }
+      }
+      # Check that element 'text' in the sub-list is numeric
+      if ("text" %in% names(check)) {
+        if (!codama::r_type_checking(
+          r_object = check[["text"]],
+          type = "character",
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = check[["text"]],
+            type = "character",
+            output = "error"
+          ))
+        }
+      }
+      # Check that element 'size_box' in the sub-list is numeric
+      if ("size_box" %in% names(check)) {
+        if (!codama::r_type_checking(
+          r_object = check[["size_box"]],
+          type = "character",
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = check[["size_box"]],
+            type = "character",
+            output = "error"
+          ))
+        }
+      }
+      # Check that the sublist contains an 'tab' element
+      if (!("tab" %in% names(check))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - Impossible to identify the tab for control because there is no element in the sub-list named 'tab'.
+          Control element available : ",
+          paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!(check[["tab"]] %in% name_tab)) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - Tab reference to display invalid control.
+          Control tab name : ",
+          check[["tab"]],
+          " for control id ", check[["id"]],
+          "\n Tab name available : ",
+          paste0(name_tab, collapse = ", "),
+          sep = ""
+        )
+      }
+      return(check[["id"]])
+    }
+  )
+  if (length(unlist(all_id_check)) != length(unique(unlist(all_id_check)))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Check id are not unique.
+       Check id : ",
+      paste0(unlist(all_id_check), collapse = ", "),
+      sep = ""
+    )
+  }
+  # 2 - Data design ----
+  # Create a check display for each tab
+  # Use of lapply and not a for loop to avoid lazy evaluation problems
+  lapply(
+    name_tab,
+    function(tab) {
+      moduleServer(tab, function(input, output, session) {
+        output$multiple_table <- renderUI({
+          lapply(
+            check_info,
+            function(check) {
+              if (check[["tab"]] == tab) {
+                # Configure display check with recovered parameters
+                do.call("table_ui", check[names(check) %in% c("id", "title", "text", "size_box")])
+              }
+            }
+          )
+        })
+        # Allows you to remove the lazy evaluation of renderUI, which loads boxes only if the tab is previously loaded by the user, unlike DTOutput which loads boxes in all cases
+        shiny::outputOptions(output, "multiple_table", suspendWhenHidden = FALSE)
+      })
+    }
+  )
+}
+
 # Shiny function : Function which formats the trip data for display inconsistency
 table_display_trip <- function(data, data_info, type_inconsistency) {
   # Global variables assignement
