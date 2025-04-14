@@ -953,7 +953,7 @@ check_temporal_limit_inspector <- function(dataframe1,
 #'                          harbour_id_landing_trip_previous = c(NA, "2", "2", NA, NA),
 #'                          harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2", NA,
 #'                                                                  NA))
-#' @expect equal(., structure(list(trip_id = c("1", "2", "3", "4", "5"), logical = c(TRUE, TRUE, FALSE, FALSE, FALSE), harbour_label_departure = c("Harbour_1", "Harbour_2", "Harbour_3", NA, "Harbour_1"), harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2", NA, NA)), row.names = c(NA, 5L), class = "data.frame"))
+#' @expect equal(., structure(list(trip_id = c("1", "2", "3", "4", "5"), logical = c(TRUE, TRUE, FALSE, FALSE, FALSE), harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2", NA, NA), harbour_label_departure = c("Harbour_1", "Harbour_2", "Harbour_3", NA, "Harbour_1")), row.names = c(NA, 5L), class = "data.frame"))
 #' check_harbour_inspector(dataframe1, output = "report")
 #' @export
 check_harbour_inspector <- function(dataframe1,
@@ -1014,7 +1014,7 @@ check_harbour_inspector <- function(dataframe1,
   # Management of missing harbour departure
   dataframe1[is.na(dataframe1$harbour_id_departure), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
-  dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_label_departure, harbour_label_landing_trip_previous, .after = logical)
+  dataframe1 <- dplyr::relocate(.data = dataframe1, harbour_label_landing_trip_previous, harbour_label_departure, .after = logical)
   dataframe1 <- subset(dataframe1, select = -c(harbour_id_departure, harbour_id_landing_trip_previous, trip_previous_id))
   if ((sum(dataframe1$logical, na.rm = TRUE) + sum(!dataframe1$logical, na.rm = TRUE)) != nrow_first || any(is.na(dataframe1$logical))) {
     all <- c(select, dataframe1$trip_id)
@@ -7368,7 +7368,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         # Modify the table for display purposes: rename column
         check_harbour <- dplyr::rename(
           .data = check_harbour,
-          `Harbour landing` = harbour_label_landing_trip_previous,
+          `Previous harbour landing` = harbour_label_landing_trip_previous,
           `Harbour departure` = harbour_label_departure
         )
         # Uses a function which indicates whether the selected trips contain RF1 inconsistent with threshold values

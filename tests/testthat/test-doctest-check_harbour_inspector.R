@@ -9,7 +9,7 @@ test_that("Doctest: check_harbour_inspector", {
     "Harbour_1"), trip_previous_id = c(NA, "1", "2", NA, "6"), harbour_id_landing_trip_previous = c(NA, "2", "2", NA, NA), harbour_label_landing_trip_previous = c(NA, "Harbour_2",
     "Harbour_2", NA, NA))
   expect_equal(check_harbour_inspector(dataframe1, output = "report"), structure(list(trip_id = c("1", "2", "3", "4", "5"), logical = c(TRUE, TRUE, FALSE, FALSE, FALSE),
-  harbour_label_departure = c("Harbour_1", "Harbour_2", "Harbour_3", NA, "Harbour_1"), harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2", NA, NA)), row.names = c(NA,
+  harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2", NA, NA), harbour_label_departure = c("Harbour_1", "Harbour_2", "Harbour_3", NA, "Harbour_1")), row.names = c(NA,
     5L), class = "data.frame"))
 })
 
