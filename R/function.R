@@ -7906,7 +7906,7 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
           output = "error"
         ))
       }
-      # Check that element 'title' in the sub-list is numeric
+      # Check that element 'title' in the sub-list is character
       if (!("title" %in% names(tab))) {
         stop(
           format(
@@ -7930,7 +7930,7 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
           output = "error"
         ))
       }
-      # Check that element 'text' in the sub-list is numeric
+      # Check that element 'text' in the sub-list is character
       if ("text" %in% names(tab)) {
         if (!codama::r_type_checking(
           r_object = tab[["text"]],
@@ -7940,6 +7940,20 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
           return(codama::r_type_checking(
             r_object = tab[["text"]],
             type = "character",
+            output = "error"
+          ))
+        }
+      }
+      # Check that element 'display_dividing_lines' in the sub-list is logical
+      if ("display_dividing_lines" %in% names(tab)) {
+        if (!codama::r_type_checking(
+          r_object = tab[["display_dividing_lines"]],
+          type = "logical",
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = tab[["display_dividing_lines"]],
+            type = "logical",
             output = "error"
           ))
         }
@@ -7989,7 +8003,7 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
           output = "error"
         ))
       }
-      # Check that element 'title' in the sub-list is numeric
+      # Check that element 'title' in the sub-list is character
       if ("title" %in% names(check)) {
         if (!codama::r_type_checking(
           r_object = check[["title"]],
@@ -8003,7 +8017,7 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
           ))
         }
       }
-      # Check that element 'text' in the sub-list is numeric
+      # Check that element 'text' in the sub-list is character
       if ("text" %in% names(check)) {
         if (!codama::r_type_checking(
           r_object = check[["text"]],
@@ -8017,7 +8031,23 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
           ))
         }
       }
-      # Check that element 'size_box' in the sub-list is numeric
+      # Check that element 'type' in the sub-list is character
+      if ("type" %in% names(check)) {
+        if (!codama::r_type_checking(
+          r_object = check[["type"]],
+          type = "character",
+          allowed_value = c("error", "warning", "info"),
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = check[["type"]],
+            type = "character",
+            allowed_value = c("error", "warning", "info"),
+            output = "error"
+          ))
+        }
+      }
+      # Check that element 'size_box' in the sub-list is character
       if ("size_box" %in% names(check)) {
         if (!codama::r_type_checking(
           r_object = check[["size_box"]],
@@ -8058,6 +8088,7 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
           sep = ""
         )
       }
+      # Check that element 'tab' in the sub-list is character
       if (!codama::r_type_checking(
         r_object = check[["tab"]],
         type = "character",
@@ -8105,7 +8136,7 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
   # Instantiating the menu and retrieving reactive values
   reactive_value_menu <- mod_tab_menu_server(id = id, tab_info = tab_info)
   # Instantiating the tab
-  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info)
+  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_trip = reactive_value_menu$type_check_trip)
   # Creation of all tables
   lapply(
     check_info,

@@ -11,9 +11,9 @@ test_that("Doctest: check_raising_factor_inspector", {
     "1", "1"), trip_id = c("1", "1", "1", "2", "2", "3", "3", "3", "5"))
   dataframe3 <- data.frame(landing_id = c("1", "2", "3", "4", "5"), landing_weight = c(9, 2, 8, 25, 12), species_fao_code = c("YFT", "TUN", "TUN", "TUN", "BET"), trip_id = c(
     "1", "1", "2", "4", "6"))
-  dataframe4 <- data.frame(trip_id = c("1", "2", "3", "4", "5", "6", "7"), trip_end_full_trip_id = c("1", "2", "4", "4", "5", "6", "7"), vessel_id = c("1", "1", "1", "1", "1",
-    "1", "1"), country_fleetcountry = c("1", "1", "1", "1", "1", "1", "1"))
-  expect_equal(check_raising_factor_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report"), structure(list(trip_id = c("1", "2", "3", "4", "5", "6", "7"),
-  logical = c(TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE), rf1 = c(0.916666666666667, 0.615384615384615, 1, 1, NA, NA, NA)), row.names = c(NA, 7L), class = "data.frame"))
+  dataframe4 <- data.frame(trip_id = c("1", "2", "3", "4", "5", "6", "7"), trip_end_full_trip_id = c("1", "2", "4", "4", "5", "6", "7"), vessel_id = c("1", "1", "1", "1",
+    "1", "1", "1"), country_fleetcountry = c("1", "1", "1", "1", "1", "1", "1"))
+  expect_equal(check_raising_factor_inspector(dataframe1, dataframe2, dataframe3, dataframe4, output = "report"), structure(list(trip_id = c("1", "2", "3", "4", "5", "6",
+    "7"), logical = c(TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, TRUE), rf1 = c(0.916666666666667, 0.615384615384615, 1, 1, NA, NA, NA)), row.names = c(NA, 7L), class = "data.frame"))
 })
 

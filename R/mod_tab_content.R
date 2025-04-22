@@ -15,6 +15,7 @@ mod_tab_content_ui <- function(id) {
 #' @param id Internal parameters for shiny
 #' @param tab_info {\link[base]{list}} expected. Information about the dynamic tab display
 #' @param check_info {\link[base]{list}} expected. Information about the dynamic check display
+#' @param type_check_trip {\link[base]{character}} expected. Reactive value containing the type of check selected by the user
 #' @return The function returns nothing, instantiating the tab
 #' @details
 #' \itemize{
@@ -31,7 +32,7 @@ mod_tab_content_ui <- function(id) {
 #'  \item{\code{  size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected}}
 #' }
 #' @export
-mod_tab_content_server <- function(id, tab_info, check_info) {
+mod_tab_content_server <- function(id, tab_info, check_info, type_check_trip) {
   moduleServer(id, function(input, output, session) {
     # Creation of all tab, both static tab and user-specified dynamic tab (static tabs are also created here, as the UI does not support the mixing of dynamic and static tabs)
     output$content <- shiny::renderUI({
@@ -142,6 +143,52 @@ mod_tab_content_server <- function(id, tab_info, check_info) {
       )
       do.call(shinydashboard::tabItems, items)
     })
+
+    # Management of the display or not of the boxes in the trip tab
+    observeEvent(type_check_trip(), {
+      # Information on the type of control selected by the user, its name and whether it concerns all types of control or not
+      if (input$type_check_trip == "All") {
+        type_selected_info <- list(name_type = "all",
+                                   specific_check = FALSE)
+      }
+      if (input$type_check_trip == "Info") {
+        type_selected_info <- list(name_type = "info",
+                                   specific_check = TRUE)
+      }
+      if (input$type_check_trip == "Warning") {
+        type_selected_info <- list(name_type = "warning",
+                                   specific_check = TRUE)
+      }
+      if (input$type_check_trip == "Error") {
+        type_selected_info <- list(name_type = "error",
+                                   specific_check = TRUE)
+      }
+      removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
+      removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
+      for (tab in tab_info) {
+        # Number of the control displayed within the tab, to display a line for every two controls
+        num_check <- 0
+        for (check in check_info) {
+          if (check[["tab"]] == tab[["id"]]) {
+            # Controls the display of check according to the type chosen by the user
+            if (type_selected_info$specific_check && ((!is.null(check[["type"]]) && check[["type"]] != type_selected_info$name_type) || (is.null(check[["type"]]) && "error" != type_selected_info$name_type))) {
+              # Hide controls
+              shinyjs::hide(id = paste0("div_", check[["id"]]), anim = FALSE, asis = TRUE)
+            } else {
+              # Displaying controls
+              shinyjs::show(id = paste0("div_", check[["id"]]), anim = TRUE, time = 1, animType = "fade", asis = TRUE)
+              num_check <- num_check + 1
+              # Display thin lines to separate control lines for md and lg window sizes
+              if (num_check %% 2 == 0 & num_check > 0 & ((!is.null(tab[["display_dividing_lines"]]) && tab[["display_dividing_lines"]]) || (is.null(tab[["display_dividing_lines"]]) && TRUE))) {
+                # Displays a horizontal line every two controls if the tab allows it and there are at least 3 controls in the tab
+                insertUI(selector = paste0("#div_", check[["id"]]), ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+                insertUI(selector = paste0("#div_", check[["id"]]), ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
+              }
+            }
+          }
+        }
+      }
+    })
   })
 }
 
@@ -149,4 +196,4 @@ mod_tab_content_server <- function(id, tab_info, check_info) {
 # mod_tab_content_ui("tab_content_1")
 
 ## To be copied in the server
-# mod_tab_content_server("tab_content_1", tab_info, check_info)
+# mod_tab_content_server("tab_content_1", tab_info, check_info, type_check_trip)

@@ -47,7 +47,7 @@ mod_tab_menu_server <- function(id, tab_info) {
         shinydashboard::menuItem("Summary", tabName = "summary", icon = icon("scroll")),
         # Creating static radioButtons
         hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #333, #ccc, #333); background-image: -moz-linear-gradient(left, #333, #ccc, #333); background-image: -ms-linear-gradient(left,#333, #ccc, #333); background-image: -o-linear-gradient(left, #333, #ccc, #333);"),
-        radioButtons(inputId = "type_check_trip", label = "Choose the display of verification type", choiceNames = c("All (Info, warning or error)", "Info only", "Warning only", "Error only"), choiceValues = list("All", "Info", "Warning", "Error")),
+        radioButtons(inputId = NS(namespace = id, id = "type_check_trip"), label = "Choose the display of verification type", choiceNames = c("All (Info, warning or error)", "Info only", "Warning only", "Error only"), choiceValues = list("All", "Info", "Warning", "Error")),
         radioButtons(inputId = NS(namespace = id, id = "type_line_check_trip"), label = "Choose the display of line type", choiceNames = list(HTML(paste0("All ( ", icon("check"), " - ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )")), HTML(paste0("Info, warning or error ( ", icon("info"), " - ", icon("exclamation"), " - ", icon("xmark"), " )"))), choiceValues = list("All", "inconsistent")),
         # Creating the static setting menu
         shinydashboard::menuItem("Settings", tabName = "setting", icon = icon("gear"))
@@ -56,7 +56,8 @@ mod_tab_menu_server <- function(id, tab_info) {
     # Return reactive value use by other module
     return(
       list(
-        type_line_check_trip = reactive(input$type_line_check_trip)
+        type_line_check_trip = reactive(input$type_line_check_trip),
+        type_check_trip = reactive(input$type_check_trip)
       )
     )
   })

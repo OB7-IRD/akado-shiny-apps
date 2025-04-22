@@ -66,71 +66,86 @@ app_server <- function(input, output, session) {
   # id : Tab identification, mandatory, character expected
   # title : Name to be displayed for tab, mandatory, character expected
   # icon : Picture to be displayed for tab, optional, character expected
+  # display_dividing_lines : Whether or not to display separator lines between check, optional (default : TRUE), logical expected
   tab_info <- list(list(id = "trip",
                         title = "Trip",
-                        icon = "ship"),
+                        icon = "ship",
+                        display_dividing_lines = TRUE),
                    list(id = "activity",
                         title = "Activity",
-                        icon = "list-check"),
+                        icon = "list-check",
+                        display_dividing_lines = TRUE),
                    list(id = "sample",
                         title = "Sample",
-                        icon = "fish"),
+                        icon = "fish",
+                        display_dividing_lines = TRUE),
                    list(id = "anapo",
                         title = "Anapo",
-                        icon = "route"))
-  # Check display information
+                        icon = "route",
+                        display_dividing_lines = FALSE))
+  # Check display information (Attention controls must be in the same order as the desired display)
   # id : Check identification, mandatory, character expected
   # tab : Tab identification, mandatory, character expected
   # title : Name to be displayed for check, optional, character expected
   # text : Text to be displayed for check, optional, character expected
+  # type : Check type, you can choose between "error", "warning" or "info", optional (default : error), character expected
   # column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected
   # size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected
   check_info <- list(list(id = "check_trip_activity",
                           tab = "trip",
                           title = "Presence of activity",
+                          type = "warning",
                           column_no_wrap = c(2)),
                      list(id = "check_fishing_time",
                           tab = "trip",
                           title = "Fishing time",
                           text = "<ul><li>If the values are not equivalent, you must enter the sum in the 'Fishing Time' field of the trip</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_sea_time",
                           tab = "trip",
                           title = "Sea time",
                           text = "<ul><li>If the values are not equivalent, you must enter the sum in the 'Sea Time' field of the trip</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_landing_consistent",
                           tab = "trip",
                           title = "Vessel capacity",
                           text = "<ul><li>If the total landed weight is greater than the vessel's capacity, you must verify that the 'landed weight' is correct</li></ul>",
+                          type = "warning",
                           column_no_wrap = c(2)),
                      list(id = "check_landing_total_weigh",
                           tab = "trip",
                           title = "Total landed weight",
                           text = "<ul><li>If the values are not equal, you must enter the value of the sum of the commercial lots in the 'Landed Weight' field of the trip</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_temporal_limit",
                           tab = "trip",
                           title = "Time coverage",
                           text = "<ul><li>You must check the fishing log to see if a day is missing</li>
                                   <li>You must verify that the departure and arrival dates match in the fishing logbook and landing documents</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_harbour",
                           tab = "trip",
                           title = "Harbour",
                           text = "<ul><li>Check if all fishing logs have been entered</li>
                                   <li>Check with the captain to see if any trip have been made in the meantime</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_raising_factor",
                           tab = "trip",
                           title = "Raising Factor",
                           text = "<ul><li>If the ratio is not between 0.9 < R < 1.1 (Landing/catch), you need to check the partial landing value</li></ul>",
+                          type = "info",
                           column_no_wrap = c(2)),
                      list(id = "check_fishing_context",
                           tab = "activity",
                           title = "Fishing context",
                           text = "<ul><li>If the school type is \"object school\" (code 1), then there must be at least one object-type association</li>
                                   <li>If the school type is \"free school\" (code 2), then the association identifier, if it exists, must not be of object type</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2, 3)),
                      list(id = "check_operation",
                           tab = "activity",
@@ -138,27 +153,32 @@ app_server <- function(input, output, session) {
                           text = "<ul><li>If the vessel activity is \"Fishing (skiff is deployed)\" (code 6), then it needs a success status, otherwise it must not have any</li>
                                   <li>If the school type is \"Undefined\" (code 0), success type must not be \"Positive\" (code 1) or \"Null\" (code 0)</li>
                                   <li>If the weight is not 0 then success type must be \"Positive\" (code 1) or \"Unknown\" (code 2), otherwise, if it exists, must be 0</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2, 3)),
                      list(id = "check_position",
                           tab = "activity",
                           title = "Position",
                           text = "<ul><li>If the position is on land, you need to check the latitude and longitude</li>
                                   <li>If the position and ocean are different, you need to check these fields with the logbook</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2, 3)),
                      list(id = "check_weight",
                           tab = "activity",
                           title = "Total Catch Weight",
                           text = "<ul><li>If the values are different, you must transfer the sum of the elementary captures to the activity</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2, 3)),
                      list(id = "check_temperature",
                           tab = "activity",
                           title = "Temperature",
                           text = "<ul><li>Indicates whether the temperature is between 15 and 32 for the activity</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2, 3)),
                      list(id = "check_weighting_sample",
                           tab = "activity",
                           title = "Weighting sample",
                           text = "<ul><li>Indicates whether the sum of the catch weights for the activity is consistent with the sum of the sample weighted weights link for the activity</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2, 3)),
                      list(id = "check_time_route",
                           tab = "activity",
@@ -166,78 +186,93 @@ app_server <- function(input, output, session) {
                           text = "<ul><li>Indicates whether sea time and fishing time exceed their maximum limits (default 24 for sea time and 13 for fishing time).</li>
                                   <li>Indicates whether sea time is less than fishing time</li><li>Indicates whether sea time equals 0 while sea activities are associated</li>
                                   <li>Indicates whether fishing time equals 0 while fishing activities are associated</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2, 3)),
                      list(id = "check_eez",
                           tab = "activity",
                           title = "EEZ",
                           text = "<ul><li>Indicates when the declared and calculated eez are different</li>
                                   <li>Indicates when there is no declared eez for fishing activities </li></ul>",
+                          type = "warning",
                           column_no_wrap = c(2, 3)),
                      list(id = "check_length_class",
                           tab = "sample",
                           title = "Size class",
                           text = "<ul><li>Indicates FL measurements of species 'YFT', 'BET', 'ALB' greater than 80</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_measure",
                           tab = "sample",
                           title = "Measurement",
                           text = "<ul><li>Indicates per sample whether the sum of individuals measured in the species samples is different from the sum of individuals measured in the size classes</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_species",
                           tab = "sample",
                           title = "Species",
                           text = "<ul><li>Indicates species not conforming with respect to the following list:'YFT', 'SKJ', 'BET', 'ALB', 'LTA', 'FRI', 'TUN', 'KAW', 'LOT'</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_sample_without_measure",
                           tab = "sample",
                           title = "Sample without measurement",
                           text = "<ul><li>Indicates species samples that have no size measurement</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_sample_without_species",
                           tab = "sample",
                           title = "Sample without species",
                           text = "<ul><li>Indicates samples that have no species samples</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_super_sample_number",
                           tab = "sample",
                           title = "Super sample",
                           text = "<ul><li>If the sample is a super sample, then there must be several sub-samples, numbered from 1</li><li>Otherwise there must be a single sub-sample, numbered 0</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_well_number",
                           tab = "sample",
                           title = "Well",
                           text = "<ul><li>The sample well must exist in the trip well plan</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_little_big",
                           tab = "sample",
                           title = "Ratio of small over big fish",
                           text = "<ul><li>The percentages of small over big fish must be consistent within the sample</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_weighting",
                           tab = "sample",
                           title = "Weighting",
                           text = "<ul><li>The weighting for each sample must be coherent</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_weight_sample",
                           tab = "sample",
                           title = "Weight sample",
                           text = "<ul><li>Only one value must be entered between the total weight and the count of the weight of small or big fish</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_activity_sample",
                           tab = "sample",
                           title = "Sample activity",
                           text = "<ul><li>Sample must be linked to an activity</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_ldlf",
                           tab = "sample",
                           title = "LDLF",
                           text = "<ul><li>The type of measure must be compatible with species</li>
                                   <li>The type of measurement must be compatible with total, small and big fish weights</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_category_species_forbidden_well",
                           tab = "sample",
                           title = "Category prohibited for some species in wells",
                           text = "<ul><li>Samples must not have certain species (default 'SKJ') associated with certain weight categories (default 'W-9', i.e. unknown)</li></ul>",
+                          type = "warning",
                           column_no_wrap = c(2)),
                      list(id = "check_distribution",
                           tab = "sample",
@@ -245,17 +280,20 @@ app_server <- function(input, output, session) {
                           text = "<ul><li>Sample must have -10/+10 distribution values consistent with those of the reported well</li>
                                   <li>The weight of the big category for the well includes by default only the following species 'YFT', 'BET', 'ALB', 'SKJ'</li>
                                   <li>The small weight category for the well includes by default only the following species 'YFT', 'BET', 'ALB', 'SKJ' plus the unknown weight category for species 'SKJ'</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2)),
                      list(id = "check_sample_harbour",
                           tab = "sample",
                           title = "Sample harbour",
                           text = "<ul><li>Samples must have a harbour of landing</li></ul>",
+                          type = "error",
                           column_no_wrap = c(2, 3)),
                      list(id = "check_anapo",
                           tab = "anapo",
                           title = "Anapo",
                           text = "<ul><li>There must be at least 20 VMS positions during the day</li>
                           <li>There must be at least one VMS position nearer than 10 miles away OR the score (resulting from geographical and temporal distance) must be greater than or equal to 0.5 OR the position must be in a harbour</li></ul>",
+                          type = "error",
                           size_box = "col-sm-12 col-md-12 col-lg-12",
                           column_no_wrap = c(2, 3, 12, 13, 14)),
                      list(id = "check_anapo_activity",
@@ -263,6 +301,7 @@ app_server <- function(input, output, session) {
                           title = "Anapo activity",
                           text = "<ul><li>Each VMS must have at least one existing activity, for vessel types seiner (large and without bait (5,6)), bait boat (freezer and ice (1,2)) and supply (10)</li></ul>
                                   (Warning: in case of inconsistency all vessels (Vessel code) linked to the VMS vessel code are displayed inconsistently, select only active vessels (Vessel status 1) if you are not working on historical data)",
+                          type = "error",
                           size_box = "col-sm-12 col-md-12 col-lg-12",
                           column_no_wrap = c(2)))
 
@@ -524,80 +563,6 @@ app_server <- function(input, output, session) {
       easyClose = TRUE,
       footer = NULL
     ))
-  })
-
-  # Management of the display or not of the boxes in the trip tab
-  observeEvent(input$type_check_trip, {
-    # Information on controls, their name, type and the tab where they are displayed (Attention controls must be in the same order as the desired display)
-    check_info <- data.frame(name_check = c("check_trip_activity", "check_fishing_time", "check_sea_time", "check_landing_consistent", "check_landing_total_weigh", "check_temporal_limit", "check_harbour", "check_raising_factor", "check_fishing_context", "check_operation", "check_position", "check_weight", "check_temperature", "check_weighting_sample", "check_time_route", "check_eez", "check_length_class", "check_measure", "check_species", "check_sample_without_measure", "check_sample_without_species", "check_super_sample_number", "check_well_number", "check_little_big", "check_weighting", "check_weight_sample", "check_activity_sample", "check_ldlf", "check_category_species_forbidden_well", "check_distribution", "check_sample_harbour", "check_anapo", "check_anapo_activity"),
-                             type = c("warning", "error", "error", "warning", "error", "error", "error", "info", "error", "error", "error", "error", "error", "error", "error", "warning", "error", "error", "error", "error", "error", "error", "error", "error", "error", "error", "error", "error", "warning", "error", "error", "error", "error"),
-                             tab = c("trip", "trip", "trip", "trip", "trip", "trip", "trip", "trip", "activity", "activity", "activity", "activity", "activity", "activity", "activity", "activity", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "sample", "anapo", "anapo"))
-    # Information on the type of control selected by the user, its name and whether it concerns all types of control or not
-    if (input$type_check_trip == "All") {
-      type_selected_info <- list(name_type = "all",
-                                 specific_check = FALSE)
-    }
-    if (input$type_check_trip == "Info") {
-      type_selected_info <- list(name_type = "info",
-                                 specific_check = TRUE)
-    }
-    if (input$type_check_trip == "Warning") {
-      type_selected_info <- list(name_type = "warning",
-                                 specific_check = TRUE)
-    }
-    if (input$type_check_trip == "Error") {
-      type_selected_info <- list(name_type = "error",
-                                 specific_check = TRUE)
-    }
-    # Information on tabs, their names and whether or not to display separator lines between controls
-    tab_info <- data.frame(name_tab = c("trip", "activity", "sample", "anapo"),
-                           display_line = c(TRUE, TRUE, TRUE, FALSE))
-    # Checks the type and values of check_info$tab
-    if (!codama::r_type_checking(
-      r_object = check_info$tab,
-      type = "character",
-      allowed_value = tab_info$name_tab,
-      output = "logical"
-    )) {
-      return(codama::r_type_checking(
-        r_object = check_info$tab,
-        type = "character",
-        allowed_value = tab_info$name_tab,
-        output = "error"
-      ))
-    }
-    removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
-    removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
-    for (tab in tab_info$name_tab) {
-      # Number of the control displayed within the tab, to display a line for every two controls
-      num_check <- 1
-      # Selection of controls to be displayed
-      if (type_selected_info$specific_check) {
-        # Selection that controls of the same type as the tab
-        name_check_list <- check_info[check_info$tab == tab & check_info$type == type_selected_info$name_type, "name_check"]
-      } else {
-        # Select all controls
-        name_check_list <- check_info[check_info$tab == tab, "name_check"]
-      }
-      # Displaying controls
-      for (name_check in name_check_list) {
-        shinyjs::show(id = paste0("div_", name_check), anim = TRUE, time = 1, animType = "fade")
-        # Display thin lines to separate control lines for md and lg window sizes
-        if (num_check %% 2 == 0 & length(name_check_list) > 2 & tab_info[tab_info$name_tab == tab, "display_line"]) {
-          # Displays a horizontal line every two controls if the tab allows it and there are at least 3 controls in the tab
-          insertUI(selector = paste0("#div_", name_check), ui = div(div(class = "clearfix visible-md", id = "div_visible_md_check"), div(class = "visible-md", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-          insertUI(selector = paste0("#div_", name_check), ui = div(div(class = "clearfix visible-lg", id = "div_visible_lg_check"), div(class = "visible-lg", hr(style = "border: 0;height: 1px; background-image: -webkit-linear-gradient(left, #F4F4F4, #333, #F4F4F4); background-image: -moz-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4); background-image: -ms-linear-gradient(left,#F4F4F4, #9A9A9A, #F4F4F4); background-image: -o-linear-gradient(left, #F4F4F4, #9A9A9A, #F4F4F4);"))), where = "afterEnd")
-        }
-        num_check <- num_check + 1
-      }
-      # Hide controls
-      if (type_selected_info$specific_check) {
-        name_check_list <- check_info[check_info$tab == tab & check_info$type != type_selected_info$name_type, "name_check"]
-        for (name_check in name_check_list) {
-          shinyjs::hide(id = paste0("div_", name_check), anim = FALSE)
-        }
-      }
-    }
   })
 
   # Summary page text

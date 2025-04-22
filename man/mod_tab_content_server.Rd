@@ -4,7 +4,7 @@
 \alias{mod_tab_content_server}
 \title{tab_content Server Functions}
 \usage{
-mod_tab_content_server(id, tab_info, check_info)
+mod_tab_content_server(id, tab_info, check_info, type_check_trip)
 }
 \arguments{
 \item{id}{Internal parameters for shiny}
@@ -12,6 +12,8 @@ mod_tab_content_server(id, tab_info, check_info)
 \item{tab_info}{{\link[base]{list}} expected. Information about the dynamic tab display}
 
 \item{check_info}{{\link[base]{list}} expected. Information about the dynamic check display}
+
+\item{type_check_trip}{{\link[base]{character}} expected. Reactive value containing the type of check selected by the user}
 }
 \value{
 The function returns nothing, instantiating the tab

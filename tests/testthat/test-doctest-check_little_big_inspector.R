@@ -11,8 +11,8 @@ test_that("Doctest: check_little_big_inspector", {
     "YFT", "BET", "YFT", "ALB", "YFT", "YFT"), sizemeasuretype_code = c("PD1", "PD1", "FL", "PD1", "FL", "FL", "PD1", "FL", "PD1", "PD1", "PD1", "PD1"), sample_id = c("1",
     "2", "2", "3", "4", "5", "5", "6", "6", "8", "9", "10"))
   dataframe3 <- data.frame(samplespeciesmeasure_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"), samplespeciesmeasure_sizeclass = c(20, 26, 70, 20, 10,
-    45, 36, 30, 32, 24, 13, 13), samplespeciesmeasure_count = c(5, 1, 9, 8, 10, 25, 2, 16, 4, 3, 6, 6), samplespecies_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10",
-    "11", "12"))
+    45, 36, 30, 32, 24, 13, 13), samplespeciesmeasure_count = c(5, 1, 9, 8, 10, 25, 2, 16, 4, 3, 6, 6), samplespecies_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9",
+    "10", "11", "12"))
   expect_equal(check_little_big_inspector(dataframe1, dataframe2, dataframe3, output = "report"), structure(list(sample_id = c("1", "10", "11", "12", "2", "3", "4", "5", "6",
     "7", "8", "9"), logical = c(TRUE, FALSE, FALSE, FALSE, TRUE, FALSE, TRUE, TRUE, FALSE, TRUE, TRUE, TRUE), sample_smallsweight = c(10, 0, 3, 0, 20, 1, 30, 3, 7, 4, 12, 0),
   sample_bigsweight = c(NA, NA, 0, 4, 2, 9, 3, 5, 4, 13, 5, 0), sample_totalweight = c(NA, 5, 0, 0, NA, NA, 33, NA, NA, 7, 2, 0), little_percentage = c(1, 1, 0, 0, 0.9, 1, 1,
