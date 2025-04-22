@@ -62,6 +62,22 @@ app_server <- function(input, output, session) {
   # Displays the errors and notifications that occur when you want to start the calculation
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
 
+  # Information about the dynamic tab display
+  # id : Tab identification, mandatory, character expected
+  # title : Name to be displayed for tab, mandatory, character expected
+  # icon : Picture to be displayed for tab, optional, character expected
+  tab_info <- list(list(id = "trip",
+                        title = "Trip",
+                        icon = "ship"),
+                   list(id = "activity",
+                        title = "Activity",
+                        icon = "list-check"),
+                   list(id = "sample",
+                        title = "Sample",
+                        icon = "fish"),
+                   list(id = "anapo",
+                        title = "Anapo",
+                        icon = "route"))
   # Check display information
   # id : Check identification, mandatory, character expected
   # tab : Tab identification, mandatory, character expected
@@ -220,7 +236,7 @@ app_server <- function(input, output, session) {
                           column_no_wrap = c(2)),
                      list(id = "check_category_species_forbidden_well",
                           tab = "sample",
-                          title = "Category with species forbidden in well",
+                          title = "Category prohibited for some species in wells",
                           text = "<ul><li>Samples must not have certain species (default 'SKJ') associated with certain weight categories (default 'W-9', i.e. unknown)</li></ul>",
                           column_no_wrap = c(2)),
                      list(id = "check_distribution",
@@ -249,9 +265,16 @@ app_server <- function(input, output, session) {
                                   (Warning: in case of inconsistency all vessels (Vessel code) linked to the VMS vessel code are displayed inconsistently, select only active vessels (Vessel status 1) if you are not working on historical data)",
                           size_box = "col-sm-12 col-md-12 col-lg-12",
                           column_no_wrap = c(2)))
-  # Format multiple check tables
-  table_server_multiple(check_info = check_info, calcul_check = calcul_check, input = input, text_error_trip_select = text_error_trip_select, trip_select = trip_select)
-  table_group_server(check_info = check_info)
+
+  # Tab creation, menu, tab content
+  tab(id = "tab", tab_info = tab_info, check_info = check_info, calcul_check = calcul_check, text_error_trip_select = text_error_trip_select, trip_select = trip_select)
+
+  # Force activation of first tab at startup, remove the lazy evaluation
+  observe({
+    if (is.null(input$sidebarmenu_id)) {
+      shinydashboard::updateTabItems(session, "sidebarmenu_id", selected = "home")
+    }
+  })
 
   # Date control plot, display in a window
   output$plot_temporal_limit <- plotly::renderPlotly({
