@@ -15,7 +15,8 @@ mod_tab_content_ui <- function(id) {
 #' @param id Internal parameters for shiny
 #' @param tab_info {\link[base]{list}} expected. Information about the dynamic tab display
 #' @param check_info {\link[base]{list}} expected. Information about the dynamic check display
-#' @param type_check_trip {\link[base]{character}} expected. Reactive value containing the type of check selected by the user
+#' @param type_check_info {\link[base]{list}} expected. Information about the dynamic type of check
+#' @param type_check {\link[base]{character}} expected. Reactive value containing the type of check selected by the user
 #' @return The function returns nothing, instantiating the tab
 #' @details
 #' \itemize{
@@ -28,11 +29,17 @@ mod_tab_content_ui <- function(id) {
 #'  \item{\code{  tab : Tab identification, mandatory, character expected}}
 #'  \item{\code{  title : Name to be displayed for check, optional, character expected}}
 #'  \item{\code{  text : Text to be displayed for check, optional, character expected}}
+#'  \item{\code{  type : Check type, you must choose between check type identifiers (type_check_info), mandatory, character expected}}
 #'  \item{\code{  column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected}}
 #'  \item{\code{  size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected}}
 #' }
+#' \itemize{
+#' type_check_info:
+#'  \item{\code{  id : Button selection identification, mandatory, character expected}}
+#'  \item{\code{  specific_check : Indicates whether the selection should display specific controls or not, optional (default : TRUE), logical expected}}
+#' }
 #' @export
-mod_tab_content_server <- function(id, tab_info, check_info, type_check_trip) {
+mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, type_check) {
   moduleServer(id, function(input, output, session) {
     # Creation of all tab, both static tab and user-specified dynamic tab (static tabs are also created here, as the UI does not support the mixing of dynamic and static tabs)
     output$content <- shiny::renderUI({
@@ -145,23 +152,16 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_trip) {
     })
 
     # Management of the display or not of the boxes in the trip tab
-    observeEvent(type_check_trip(), {
+    observeEvent(type_check(), {
       # Information on the type of control selected by the user, its name and whether it concerns all types of control or not
-      if (input$type_check_trip == "All") {
-        type_selected_info <- list(name_type = "all",
-                                   specific_check = FALSE)
-      }
-      if (input$type_check_trip == "Info") {
-        type_selected_info <- list(name_type = "info",
-                                   specific_check = TRUE)
-      }
-      if (input$type_check_trip == "Warning") {
-        type_selected_info <- list(name_type = "warning",
-                                   specific_check = TRUE)
-      }
-      if (input$type_check_trip == "Error") {
-        type_selected_info <- list(name_type = "error",
-                                   specific_check = TRUE)
+      specific_check <- lapply(type_check_info, function(check) {
+        if (is.list(check) && check[["id"]] == input$type_check) {
+          check[["specific_check"]]
+        }
+      })
+      specific_check <- unlist(specific_check)
+      if (is.null(specific_check)) {
+        specific_check <- TRUE
       }
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
       removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
@@ -171,7 +171,7 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_trip) {
         for (check in check_info) {
           if (check[["tab"]] == tab[["id"]]) {
             # Controls the display of check according to the type chosen by the user
-            if (type_selected_info$specific_check && ((!is.null(check[["type"]]) && check[["type"]] != type_selected_info$name_type) || (is.null(check[["type"]]) && "error" != type_selected_info$name_type))) {
+            if (specific_check && check[["type"]] != input$type_check) {
               # Hide controls
               shinyjs::hide(id = paste0("div_", check[["id"]]), anim = FALSE, asis = TRUE)
             } else {
@@ -196,4 +196,4 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_trip) {
 # mod_tab_content_ui("tab_content_1")
 
 ## To be copied in the server
-# mod_tab_content_server("tab_content_1", tab_info, check_info, type_check_trip)
+# mod_tab_content_server("tab_content_1", tab_info, check_info, type_check)

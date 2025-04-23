@@ -4,7 +4,7 @@
 \alias{mod_tab_content_server}
 \title{tab_content Server Functions}
 \usage{
-mod_tab_content_server(id, tab_info, check_info, type_check_trip)
+mod_tab_content_server(id, tab_info, check_info, type_check_info, type_check)
 }
 \arguments{
 \item{id}{Internal parameters for shiny}
@@ -13,7 +13,9 @@ mod_tab_content_server(id, tab_info, check_info, type_check_trip)
 
 \item{check_info}{{\link[base]{list}} expected. Information about the dynamic check display}
 
-\item{type_check_trip}{{\link[base]{character}} expected. Reactive value containing the type of check selected by the user}
+\item{type_check_info}{{\link[base]{list}} expected. Information about the dynamic type of check}
+
+\item{type_check}{{\link[base]{character}} expected. Reactive value containing the type of check selected by the user}
 }
 \value{
 The function returns nothing, instantiating the tab
@@ -32,7 +34,13 @@ check_info:
  \item{\code{  tab : Tab identification, mandatory, character expected}}
  \item{\code{  title : Name to be displayed for check, optional, character expected}}
  \item{\code{  text : Text to be displayed for check, optional, character expected}}
+ \item{\code{  type : Check type, you must choose between check type identifiers (type_check_info), mandatory, character expected}}
  \item{\code{  column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected}}
  \item{\code{  size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected}}
+}
+\itemize{
+type_check_info:
+ \item{\code{  id : Button selection identification, mandatory, character expected}}
+ \item{\code{  specific_check : Indicates whether the selection should display specific controls or not, optional (default : TRUE), logical expected}}
 }
 }

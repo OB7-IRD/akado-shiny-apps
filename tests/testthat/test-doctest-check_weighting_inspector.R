@@ -10,8 +10,7 @@ test_that("Doctest: check_weighting_inspector", {
     NA, NA, NA, 33, 8, 9, 142, 2, 14, 10, 3, 0, NA, 0, 0, 104, 24, 36, 12), trip_id = c("1", "1", "2", "3", "4", "5", "6", "7", "8", "8", "8", "8", "8", "8", "1", "1", "1",
     "1", "1"), sampletype_code = c("1", "1", "1", "11", "11", "1", "1", NA, "1", "1", "1", "1", "1", "1", "1", NA, NA, NA, NA))
   dataframe2 <- data.frame(sampleactivity_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17"), sampleactivity_weightedweight = c(
-    70, 5, 18, 12, 33, 5, 9, 4, 13, 7, 4, 15, 116, 104, 24, 35, 11), sample_id = c("1", "1", "2", "3", "4", "5", "6", "8", "9", "11", "12", "14", "15", "16", "17", "18",
-    "19"))
+    70, 5, 18, 12, 33, 5, 9, 4, 13, 7, 4, 15, 116, 104, 24, 35, 11), sample_id = c("1", "1", "2", "3", "4", "5", "6", "8", "9", "11", "12", "14", "15", "16", "17", "18", "19"))
   dataframe3 <- data.frame(trip_id = c("1", "2", "3", "4", "6", "7", "8"), vesseltype_code = c("6", "6", "2", "2", "3", "2", "2"), vesseltype_label = c("vessel_type_1",
     "vessel_type_1", "vessel_type_2", "vessel_type_2", "vessel_type_3", "vessel_type_2", "vessel_type_2"))
   dataframe4 <- data.frame(landing_id = c("1", "2", "3", "4", "5", "6"), landing_weight = c(85, 26, 30, 2.6, 20, 3), weightcategory_code = c("W-1", "W-1", "L-YFT-10",

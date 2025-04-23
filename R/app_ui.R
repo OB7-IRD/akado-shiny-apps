@@ -55,8 +55,6 @@ app_ui <- function(request) {
         tags$style(".fa-info {color:#F4D03F}"),
         # Green background color for notifications id = "notif_default"
         tags$style("#shiny-notification-notif_default {background-color:#B2E8A2;}"),
-        # Font size buttons in menu
-        tags$style("#tab-type_check_trip, #tab-type_line_check_trip {font-size:11px;}"),
         # Changes paddings between columns in display tables
         tags$style(HTML("table.dataTable thead>tr>th.sorting{
           padding-left:2px;

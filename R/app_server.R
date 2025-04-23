@@ -62,6 +62,24 @@ app_server <- function(input, output, session) {
   # Displays the errors and notifications that occur when you want to start the calculation
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
 
+  # Information about the radio button to select check
+  # title : Button title, mandatory, character expected
+  # id : Button selection identification, mandatory, character expected
+  # text : Display text for button selection, mandatory, character expected
+  # specific_check : Indicates whether the selection should display specific controls or not, optional (default : TRUE), logical expected
+  type_check_info <- list(title = "Choose the display of verification type",
+                          list(id = "all",
+                               text = "All (Info, warning or error)",
+                               specific_check = FALSE),
+                          list(id = "info",
+                               text = "Info only",
+                               specific_check = TRUE),
+                          list(id = "warning",
+                               text = "Warning only",
+                               specific_check = TRUE),
+                          list(id = "error",
+                               text = "Error only",
+                               specific_check = TRUE))
   # Information about the dynamic tab display
   # id : Tab identification, mandatory, character expected
   # title : Name to be displayed for tab, mandatory, character expected
@@ -88,7 +106,7 @@ app_server <- function(input, output, session) {
   # tab : Tab identification, mandatory, character expected
   # title : Name to be displayed for check, optional, character expected
   # text : Text to be displayed for check, optional, character expected
-  # type : Check type, you can choose between "error", "warning" or "info", optional (default : error), character expected
+  # type : Check type, you must choose between check type identifiers (type_check_info), mandatory, character expected
   # column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected
   # size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected
   check_info <- list(list(id = "check_trip_activity",
@@ -306,7 +324,7 @@ app_server <- function(input, output, session) {
                           column_no_wrap = c(2)))
 
   # Tab creation, menu, tab content
-  tab(id = "tab", tab_info = tab_info, check_info = check_info, calcul_check = calcul_check, text_error_trip_select = text_error_trip_select, trip_select = trip_select)
+  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check, text_error_trip_select = text_error_trip_select, trip_select = trip_select)
 
   # Force activation of first tab at startup, remove the lazy evaluation
   observe({

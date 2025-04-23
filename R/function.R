@@ -7797,7 +7797,7 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
 }
 
 # Shiny function : format table display serveur
-table_server <- function(id, data, name, text_error_trip_select, trip_select, type_line_check_trip, column_no_wrap = NULL) {
+table_server <- function(id, data, name, text_error_trip_select, trip_select, type_line_check, column_no_wrap = NULL) {
   # Local binding global variables
   . <- NULL
   # If no name is specified, use id as name
@@ -7807,9 +7807,9 @@ table_server <- function(id, data, name, text_error_trip_select, trip_select, ty
   moduleServer(id, function(input, output, session) {
     output$table <- DT::renderDT({
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
-      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()$trip_id_data) && isTruthy(data()) && isTruthy(type_line_check_trip())) {
+      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()$trip_id_data) && isTruthy(data()) && isTruthy(type_line_check())) {
         data <- data()[[name]]
-        if (type_line_check_trip() == "inconsistent") {
+        if (type_line_check() == "inconsistent") {
           data <- data[data$Check != as.character(icon("check")), ]
         }
         data <- DT::datatable(data,
@@ -7861,7 +7861,7 @@ table_ui <- function(id, title, size_box = "col-sm-12 col-md-6 col-lg-6", text =
 }
 
 # Shiny function : creation tab, menu and content
-tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, trip_select) {
+tab <- function(id, tab_info, check_info, type_check_info, calcul_check, text_error_trip_select, trip_select) {
   # 1 - Arguments verification ----
   if (!codama::r_type_checking(
     r_object = id,
@@ -7875,6 +7875,117 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
       length = 1L,
       output = "error"
     ))
+  }
+  # Check type_check_info arguments and retrieve all choice identifiers
+  # Check that the sublist contains an 'title' element
+  if (!("title" %in% names(type_check_info))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Information is missing for the button used to select the check to be displayed. There is no element in the sub-list named 'title'.
+       Present element : ",
+      paste0(paste(names(type_check_info), type_check_info, sep = " : "), collapse = ", "),
+      sep = ""
+    )
+  }
+  if (!codama::r_type_checking(
+    r_object = type_check_info[["title"]],
+    type = "character",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = type_check_info[["title"]],
+      type = "character",
+      length = 1L,
+      output = "error"
+    ))
+  }
+  all_id_choice_type_check <- lapply(
+    type_check_info,
+    function(choice) {
+      if (is.list(choice)) {
+        # Check that the sublist contains an 'id' element
+        if (!("id" %in% names(choice))) {
+          stop(
+            format(
+              x = Sys.time(),
+              format = "%Y-%m-%d %H:%M:%S"
+            ),
+            " - Impossible to identify the choice because there is no element in the sub-list named 'id'.
+       Present element : ",
+            paste0(paste(names(choice), choice, sep = " : "), collapse = ", "),
+            sep = ""
+          )
+        }
+        if (!codama::r_type_checking(
+          r_object = choice[["id"]],
+          type = "character",
+          length = 1L,
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = choice[["id"]],
+            type = "character",
+            length = 1L,
+            output = "error"
+          ))
+        }
+        # Check that element 'text' in the sub-list is character
+        if (!("text" %in% names(choice))) {
+          stop(
+            format(
+              x = Sys.time(),
+              format = "%Y-%m-%d %H:%M:%S"
+            ),
+            " - Tabs must have a text, there is no element in the sub-list named 'text'.
+         Present element : ",
+            paste0(paste(names(choice), choice, sep = " : "), collapse = ", "),
+            sep = ""
+          )
+        }
+        if (!codama::r_type_checking(
+          r_object = choice[["text"]],
+          type = "character",
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = choice[["text"]],
+            type = "character",
+            output = "error"
+          ))
+        }
+        # Check that element 'specific_check' in the sub-list is logical
+        if ("specific_check" %in% names(choice)) {
+          if (!codama::r_type_checking(
+            r_object = choice[["specific_check"]],
+            type = "logical",
+            output = "logical"
+          )) {
+            return(codama::r_type_checking(
+              r_object = choice[["specific_check"]],
+              type = "logical",
+              output = "error"
+            ))
+          }
+        }
+        return(choice[["id"]])
+      }
+    }
+  )
+  if (length(unlist(all_id_choice_type_check)) != length(unique(unlist(all_id_choice_type_check)))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Choice id of check types are not unique.
+       Choice id : ",
+      paste0(unlist(all_id_choice_type_check), collapse = ", "),
+      sep = ""
+    )
   }
   # Check tab_info arguments and retrieve all tab identifiers
   all_id_tab <- lapply(
@@ -8032,20 +8143,30 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
         }
       }
       # Check that element 'type' in the sub-list is character
-      if ("type" %in% names(check)) {
-        if (!codama::r_type_checking(
+      if (!("type" %in% names(check))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - Check must have a type, there is no element in the sub-list named 'type'.
+       Present element : ",
+          paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!codama::r_type_checking(
+        r_object = check[["type"]],
+        type = "character",
+        allowed_value = unlist(all_id_choice_type_check),
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
           r_object = check[["type"]],
           type = "character",
-          allowed_value = c("error", "warning", "info"),
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = check[["type"]],
-            type = "character",
-            allowed_value = c("error", "warning", "info"),
-            output = "error"
-          ))
-        }
+          allowed_value = unlist(all_id_choice_type_check),
+          output = "error"
+        ))
       }
       # Check that element 'size_box' in the sub-list is character
       if ("size_box" %in% names(check)) {
@@ -8133,15 +8254,17 @@ tab <- function(id, tab_info, check_info, calcul_check, text_error_trip_select, 
     )
   }
   # 2 - Data design ----
+  # Instantiating the radio button to select the display of controls
+  mod_radiobuttons_type_check_server(id = id, type_check_info = type_check_info)
   # Instantiating the menu and retrieving reactive values
   reactive_value_menu <- mod_tab_menu_server(id = id, tab_info = tab_info)
   # Instantiating the tab
-  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_trip = reactive_value_menu$type_check_trip)
+  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_info, type_check = reactive_value_menu$type_check)
   # Creation of all tables
   lapply(
     check_info,
     function(check) {
-      do.call(table_server, c(check[names(check) %in% c("id", "column_no_wrap")], data = calcul_check, text_error_trip_select = text_error_trip_select, trip_select = trip_select, type_line_check_trip = reactive_value_menu$type_line_check_trip))
+      do.call(table_server, c(check[names(check) %in% c("id", "column_no_wrap")], data = calcul_check, text_error_trip_select = text_error_trip_select, trip_select = trip_select, type_line_check = reactive_value_menu$type_line_check))
     }
   )
 }
