@@ -7796,44 +7796,6 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
   })
 }
 
-# Shiny function : format table display serveur
-table_server <- function(id, data, name, text_error_trip_select, trip_select, type_line_check, column_no_wrap = NULL) {
-  # Local binding global variables
-  . <- NULL
-  # If no name is specified, use id as name
-  if (missing(name)) {
-    name <- id
-  }
-  moduleServer(id, function(input, output, session) {
-    output$table <- DT::renderDT({
-      # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
-      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()$trip_id_data) && isTruthy(data()) && isTruthy(type_line_check())) {
-        data <- data()[[name]]
-        if (type_line_check() == "inconsistent") {
-          data <- data[data$Check != as.character(icon("check")), ]
-        }
-        data <- DT::datatable(data,
-                              escape = FALSE,
-                              rownames = FALSE,
-                              extensions = "Buttons",
-                              options = list(lengthChange = FALSE,
-                                             scrollX = TRUE,
-                                             dom = "Bfrtip",
-                                             buttons = list(
-                                                            list(extend = "copy",
-                                                                 text = "Copy data displayed"),
-                                                            list(extend = "collection",
-                                                                 text = "Download all data",
-                                                                 action = DT::JS(paste0("function(){Shiny.setInputValue('button_download', '", name, "', {priority: 'event'});}")))))) %>%
-          # If data is not empty
-          {if (ncol(data) > 0) DT::formatStyle(., columns = column_no_wrap, "white-space" = "nowrap") else .
-          }
-        return(data)
-      }
-    })
-  })
-}
-
 # Shiny function : Selection window for choosing the type of file to download
 window_button_download <- function(name) {
   modalDialog(downloadButton(outputId = "download_csv", label = "CSV"),
@@ -7844,24 +7806,8 @@ window_button_download <- function(name) {
               title = "Download Table")
 }
 
-# Shiny function : format table display ui
-table_ui <- function(id, title, size_box = "col-sm-12 col-md-6 col-lg-6", text = NULL) {
-  div(
-    id = paste0("div_", id),
-    class = size_box,
-    shinydashboard::box(
-      width = "100%",
-      title = title,
-      status = "primary",
-      solidHeader = TRUE,
-      HTML(text),
-      shinycssloaders::withSpinner(DT::DTOutput(NS(namespace = id, id = "table")), type = 6, size = 0.5, proxy.height = "70px")
-    )
-  )
-}
-
 # Shiny function : creation tab, menu and content
-tab <- function(id, tab_info, check_info, type_check_info, calcul_check, text_error_trip_select, trip_select) {
+tab <- function(id, tab_info, check_info, type_check_info, calcul_check) {
   # 1 - Arguments verification ----
   if (!codama::r_type_checking(
     r_object = id,
@@ -8264,7 +8210,7 @@ tab <- function(id, tab_info, check_info, type_check_info, calcul_check, text_er
   lapply(
     check_info,
     function(check) {
-      do.call(table_server, c(check[names(check) %in% c("id", "column_no_wrap")], data = calcul_check, text_error_trip_select = text_error_trip_select, trip_select = trip_select, type_line_check = reactive_value_menu$type_line_check))
+      do.call(mod_table_server, c(check[names(check) %in% c("id", "column_no_wrap")], data = calcul_check, type_line_check = reactive_value_menu$type_line_check))
     }
   )
 }

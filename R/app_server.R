@@ -324,7 +324,7 @@ app_server <- function(input, output, session) {
                           column_no_wrap = c(2)))
 
   # Tab creation, menu, tab content
-  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check, text_error_trip_select = text_error_trip_select, trip_select = trip_select)
+  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check)
 
   # Force activation of first tab at startup, remove the lazy evaluation
   observe({

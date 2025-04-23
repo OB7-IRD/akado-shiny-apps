@@ -121,7 +121,7 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, ty
                   function(check) {
                     if (check[["tab"]] == tab[["id"]]) {
                       # Configure display check with recovered parameters
-                      do.call(table_ui, check[names(check) %in% c("id", "title", "text", "size_box")])
+                      do.call(mod_table_ui, check[names(check) %in% c("id", "title", "text", "size_box")])
                     }
                   }
                 )
