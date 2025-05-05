@@ -6963,6 +6963,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
 calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data, referential_file) {
   moduleServer(id, function(input, output, session) {
     # 0 - Global variables assignement ----
+    . <- NULL
     trip_fishingtime <- NULL
     sum_route_fishingtime <- NULL
     trip_seatime <- NULL
@@ -7049,6 +7050,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     nb_activity <- NULL
     trip_previous_id <- NULL
     eez_calculated <- NULL
+    X <- NULL
+    Y <- NULL
     # 1 - Data extraction ----
     reactive({
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
@@ -7350,9 +7353,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           tidyr::complete(activity_date = seq.Date(min(trip_startdate[1], trip_enddate[1]), max(trip_startdate[1], trip_enddate[1]), by = "day"), trip_startdate = trip_startdate[1], trip_enddate = trip_enddate[1])
         # Replaces NA for missing dates
         check_temporal_limit_data_plot <- check_temporal_limit_data_plot %>% tidyr::replace_na(list(inter_activity_date = TRUE, exter_activity_date = FALSE, count_freq = 0, logical = FALSE))
-        check_temporal_limit_data_plot <- subset(check_temporal_limit_data_plot, select = -c(trip_enddate))
+        # Retrieving information for the plot
+        check_temporal_limit_data_plot <- dplyr::inner_join(check_temporal_limit_data_plot, trip_select()$trip_id_data[, c("trip_id", "vessel_code")], by = dplyr::join_by(trip_id))
+        check_temporal_limit_data_plot <- data_to_list(data = check_temporal_limit_data_plot, name_col_dataplot = "data", colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("trip_startdate", "trip_enddate", "vessel_code"), rename_colname_info = c("startdate", "enddate", "vessel_code"))
+        # Name of the table containing the temporal plot information in calcul_check_server
+        check_temporal_limit$name_table <- "check_temporal_limit_data_plot"
         # Add button and data for plot in table
-        check_temporal_limit <- data_button_plot(data_plot = check_temporal_limit_data_plot, data_display = check_temporal_limit, data_id = trip_select()$trip_id_data[, colnames_trip_id], colname_id = "trip_id", colname_plot = c("activity_date", "logical", "count_freq"), colname_info = c("vessel_code", "trip_startdate", "trip_enddate"), name_button = "button_temporal_limit")
+        check_temporal_limit <- data_button_plot(data = check_temporal_limit, colname_id = "trip_id", colname_info = c("name_table"), name_button = "button_temporal_limit")
         # Uses a function to format the table
         check_temporal_limit <- table_display_trip(check_temporal_limit, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
@@ -7409,9 +7416,23 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the ocean declaration is consistent with activity position
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check position inspector", sep = "")
-        check_position <- check_position_inspector(dataframe1 = activity_select, dataframe2 = data_trip_unprecedented, dataframe3 = referential_file()[["shape_sea"]], output = "report")
+        check_position_inspector_data <- check_position_inspector(dataframe1 = activity_select, dataframe2 = data_trip_unprecedented, dataframe3 = referential_file()[["shape_sea"]], output = "report")
+        check_position_data_plot <- check_position_inspector_data[[2]]
+        # Retrieves X, Y coordinates of position
+        check_position_data_plot_geo <- check_position_data_plot %>%
+          dplyr::filter(!is.na(activity_position)) %>%
+          sf::st_as_sf(wkt = "activity_position", crs = "4326", remove = FALSE) %>%
+          dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+          dplyr::mutate(X = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), Y = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
+        check_position_data_plot <- dplyr::left_join(check_position_data_plot, check_position_data_plot_geo[, c("activity_id", "X", "Y")], by = dplyr::join_by(activity_id))
+        # Retrieving information for the plot
+        check_position_data_plot <- dplyr::inner_join(check_position_data_plot, activity_select[, c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number")], by = dplyr::join_by(activity_id))
+        check_position_data_plot <- data_to_list(data = check_position_data_plot, name_col_dataplot = "data", colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate", "X", "Y"), rename_colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate", "X", "Y"))
+        # Name of the table containing the position plot information in calcul_check_server
+        check_position <- check_position_inspector_data[[1]]
+        check_position$name_table <- "check_position_data_plot"
         # Add button and data for plot in table
-        check_position <- data_button_plot(data_plot = check_position[[2]], data_display = check_position[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "type", "ocean_label", "ocean_calculate"), name_button = "button_position")
+        check_position <- data_button_plot(data = check_position, colname_id = "activity_id", colname_info = c("name_table"), name_button = "button_position")
         # Uses a function to format the table
         check_position <- table_display_trip(check_position, activity_select[, c(colnames_activity_id, "activity_position")], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
@@ -7500,9 +7521,25 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the eez declaration is consistent with activity position
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check eez inspector", sep = "")
-        check_eez <- check_eez_inspector(dataframe1 = activity_select, dataframe2 = referential_file()[["shape_eez"]], output = "report")
+        check_eez_inspector_data <- check_eez_inspector(dataframe1 = activity_select, dataframe2 = referential_file()[["shape_eez"]], output = "report")
+        check_eez_data_plot <- check_eez_inspector_data[[2]]
+        # Retrieves X, Y coordinates of position
+        check_eez_data_plot_geo <- check_eez_data_plot %>%
+          dplyr::filter(!is.na(activity_position)) %>%
+          sf::st_as_sf(wkt = "activity_position", crs = "4326", remove = FALSE) %>%
+          dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+          dplyr::mutate(X = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), Y = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
+        check_eez_data_plot <- dplyr::left_join(check_eez_data_plot, check_eez_data_plot_geo[, c("activity_id", "X", "Y")], by = dplyr::join_by(activity_id))
+        # Retrieving information for the plot
+        check_eez_data_plot <- dplyr::inner_join(check_eez_data_plot, activity_select[, c("activity_id", "vessel_code", "trip_enddate", "activity_date", "activity_number")], by = dplyr::join_by(activity_id))
+        # Add names of file referential geographical shape (store in referential_file)
+        check_eez_data_plot$referential_geographical_shape <- "shape_eez"
+        check_eez_data_plot <- data_to_list(data = check_eez_data_plot, name_col_dataplot = "data", colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3", "eez_calculated", "X", "Y", "referential_geographical_shape"), rename_colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3", "eez_calculated", "X", "Y", "referential_geographical_shape"))
+        # Name of the table containing the position plot information in calcul_check_server
+        check_eez <- check_eez_inspector_data[[1]]
+        check_eez$name_table <- "check_eez_data_plot"
         # Add button and data for plot in table
-        check_eez <- data_button_plot(data_plot = check_eez[[2]], data_display = check_eez[[1]], data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3", "eez_calculated"), name_button = "button_eez", choice_select_row = "all")
+        check_eez <- data_button_plot(data = check_eez, colname_id = "activity_id", colname_info = c("name_table"), name_button = "button_eez", choice_select_row = "all")
         # Uses a function to format the table
         check_eez <- table_display_trip(check_eez, activity_select[, c(colnames_activity_id, "activity_position")], type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
@@ -7687,22 +7724,31 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_inspector_dataplot_range_date <- check_anapo_inspector_dataplot_range_date %>%
             dplyr::group_by(date_group, trip_id, activity_id) %>%
             dplyr::distinct()
-          check_anapo_inspector_dataplot_range_date <- data_to_text(data = check_anapo_inspector_dataplot_range_date, name_col = "trip_data", name_button = NULL, colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
+          check_anapo_inspector_dataplot_range_date <- data_to_list(data = check_anapo_inspector_dataplot_range_date, name_col_dataplot = "data_trip", colname_id = "activity_id", colname_plot = c("activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL, rename_colname_info = NULL)
           # Data formatting controlled activity
           check_anapo_inspector_dataplot_activity <- check_anapo_inspector_dataplot %>%
             dplyr::select(c("vessel_code", "trip_enddate", "activity_id", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code")) %>%
             dplyr::distinct()
-          check_anapo_inspector_dataplot_activity <- data_to_text(data = check_anapo_inspector_dataplot_activity, name_col = "activity_data", name_button = NULL, colname_id = "activity_id", colname_plot = c("vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code"), colname_info = NULL)
-          check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% dplyr::select(-c("vessel_code", "trip_enddate", "activity_number", "activity_time", "vesselactivity_code"))
-          check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_range_date, by = dplyr::join_by(activity_id))
-          check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_dataplot, check_anapo_inspector_dataplot_activity, by = dplyr::join_by(activity_id))
-          check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>% tibble::as_tibble()
-          check_anapo_inspector_dataplot <- data_to_text(data = check_anapo_inspector_dataplot, name_col = "data_plot", name_button = NULL, colname_id = "activity_id", colname_plot = c("vms_position", "vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_crs", "vms_crs", "activity_data", "trip_data"))
-          # Number of the table containing the Anapo plot information in calcul_check_server
-          check_anapo_inspector_dataplot$name_table <- "check_anapo_inspector_dataplot"
-          check_anapo_inspector_dataplot$num_row <- seq_len(nrow(check_anapo_inspector_dataplot))
+          # Retrieves X, Y coordinates of position
+          check_anapo_inspector_dataplot_activity_geo <- check_anapo_inspector_dataplot_activity %>%
+            dplyr::filter(!is.na(activity_position)) %>%
+            sf::st_as_sf(wkt = "activity_position", crs = "4326", remove = FALSE) %>%
+            dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
+            dplyr::mutate(X = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), Y = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
+          check_anapo_inspector_dataplot_activity <- dplyr::left_join(check_anapo_inspector_dataplot_activity, check_anapo_inspector_dataplot_activity_geo[, c("activity_id", "X", "Y")], by = dplyr::join_by(activity_id))
+          check_anapo_inspector_dataplot_activity <- data_to_list(data = check_anapo_inspector_dataplot_activity, name_col_dataplot = "data_activity", colname_id = "activity_id", colname_plot = c("vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_position", "activity_number", "grounding", "vesselactivity_code", "X", "Y"), colname_info = NULL, rename_colname_info = NULL)
+          check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>%
+            dplyr::select(-c("vessel_code", "trip_enddate", "activity_number", "activity_time", "vesselactivity_code"))
+          check_anapo_inspector_dataplot <- data_to_list(data = check_anapo_inspector_dataplot, name_col_dataplot = "data_vms", colname_id = "activity_id", colname_plot = c("vms_position", "vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_crs", "vms_crs"), rename_colname_info = c("crs_activity", "crs_vms"))
+          activity_id_tmp <- names(check_anapo_inspector_dataplot_range_date)[names(check_anapo_inspector_dataplot_range_date) %in% names(check_anapo_inspector_dataplot_activity) & names(check_anapo_inspector_dataplot_range_date) %in% names(check_anapo_inspector_dataplot)]
+          # Merge the various lists containing inofrmation useful for the plot
+          check_anapo_inspector_dataplot <- lapply(stats::setNames(activity_id_tmp, activity_id_tmp), function(id) {
+            return(c(check_anapo_inspector_dataplot_range_date[[id]], check_anapo_inspector_dataplot_activity[[id]], check_anapo_inspector_dataplot[[id]]))
+          })
+          # Name of the table containing the Anapo plot information in calcul_check_server
+          check_anapo_inspector_data_table$name_table <- "check_anapo_inspector_dataplot"
           # Add button and data for plot in table
-          check_anapo <- data_button_plot(data_plot = check_anapo_inspector_dataplot, data_display = check_anapo_inspector_data_table, data_id = activity_select[, colnames_activity_id], colname_id = "activity_id", colname_plot = NULL, colname_info = c("name_table", "num_row"), name_button = "button_anapo", choice_select_row = "all")
+          check_anapo <- data_button_plot(data = check_anapo_inspector_data_table, colname_id = "activity_id", colname_info = c("name_table"), name_button = "button_anapo", choice_select_row = "all")
           # Uses a function to format the table
           check_anapo <- table_display_trip(check_anapo, activity_select[, colnames_activity_id], type_inconsistency = "error")
           check_anapo$min_distance <- trunc(check_anapo$min_distance * 1000) / 1000
@@ -7730,16 +7776,15 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             dplyr::distinct() %>%
             dplyr::relocate(vessel_code)
           # Check that VMS can be associated with activities on the same date
-          check_anapo_activity_consistent_inspector_data <- check_anapo_activity_consistent_inspector(dataframe1 = data_vms_date, dataframe2 = trip_select()$data_activity_vms, output = "report") %>%
+          check_anapo_activity_consistent <- check_anapo_activity_consistent_inspector(dataframe1 = data_vms_date, dataframe2 = trip_select()$data_activity_vms, output = "report") %>%
             dplyr::rename(vms_date_id = vms_id)
           # Retrieving information for the plot
-          check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity_consistent_inspector_data, data_vms[, c("vms_date_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_date_id))
-          check_anapo_activity_dataplot <- data_to_text(data = check_anapo_activity_dataplot, name_col = "data_plot", name_button = NULL, colname_id = "vms_date_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"))
-          # Number of the table containing the Anapo plot information in calcul_check_server
-          check_anapo_activity_dataplot$name_table <- "check_anapo_activity_dataplot"
-          check_anapo_activity_dataplot$num_row <- seq_len(nrow(check_anapo_activity_dataplot))
+          check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity_consistent, data_vms[, c("vms_date_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_date_id))
+          check_anapo_activity_dataplot <- data_to_list(data = check_anapo_activity_dataplot, name_col_dataplot = "data_vms", colname_id = "vms_date_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"), rename_colname_info = c("date_vms", "crs_vms", "vessel_code", "vessel_type"))
+          # Name of the table containing the Anapo plot information in calcul_check_server
+          check_anapo_activity_consistent$name_table <- "check_anapo_activity_dataplot"
           # Add button and data for plot in table
-          check_anapo_activity <- data_button_plot(data_plot = check_anapo_activity_dataplot, data_display = check_anapo_activity_consistent_inspector_data, data_id = data_vms_date[, "vms_date_id"], colname_id = "vms_date_id", colname_plot = NULL, colname_info = c("name_table", "num_row"), name_button = "button_anapo_activity")
+          check_anapo_activity <- data_button_plot(data = check_anapo_activity_consistent, colname_id = "vms_date_id", colname_info = c("name_table"), name_button = "button_anapo_activity")
           # Uses a function to format the table
           check_anapo_activity <- table_display_trip(check_anapo_activity, data_vms_date[, c("vessel_code", "vms_date_id", "vms_date", "vms_codevessel", "vessel_type", "vessel_statut")], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
@@ -7757,7 +7802,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_activity <- data.frame()
           check_anapo_activity_dataplot <- data.frame()
         }
-        names_check <- c("check_trip_activity", "check_fishing_time", "check_sea_time", "check_landing_consistent", "check_landing_total_weigh", "check_temporal_limit", "check_harbour", "check_raising_factor", "check_fishing_context", "check_operation", "check_position", "check_weight", "check_length_class", "check_measure", "check_temperature", "check_weighting_sample", "check_species", "check_sample_without_measure", "check_sample_without_species", "check_super_sample_number", "check_well_number", "check_little_big", "check_weighting", "check_weight_sample", "check_activity_sample", "check_ldlf", "check_distribution", "check_anapo", "check_anapo_inspector_dataplot", "check_time_route", "check_eez", "check_sample_harbour", "check_anapo_activity", "check_anapo_activity_dataplot", "check_category_species_forbidden_well")
+        names_check <- c("check_trip_activity", "check_fishing_time", "check_sea_time", "check_landing_consistent", "check_landing_total_weigh", "check_temporal_limit", "check_harbour", "check_raising_factor", "check_fishing_context", "check_operation", "check_position", "check_weight", "check_length_class", "check_measure", "check_temperature", "check_weighting_sample", "check_species", "check_sample_without_measure", "check_sample_without_species", "check_super_sample_number", "check_well_number", "check_little_big", "check_weighting", "check_weight_sample", "check_activity_sample", "check_ldlf", "check_distribution", "check_anapo", "check_anapo_inspector_dataplot", "check_time_route", "check_eez", "check_sample_harbour", "check_anapo_activity", "check_anapo_activity_dataplot", "check_category_species_forbidden_well", "check_temporal_limit_data_plot", "check_position_data_plot", "check_eez_data_plot")
         return(stats::setNames(mget(names_check), names_check))
       }
     })
@@ -8353,11 +8398,22 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
   return(data)
 }
 
-# Function to create a data.frame in character
-data_to_text <- function(data, name_col, name_button, colname_id, colname_plot, colname_info) {
-  # 0 - Global variables assignement ----
-  `:=` <- NULL
-  # Arguments verification
+# Function to create a data.frame in list
+data_to_list <- function(data, name_col_dataplot, colname_id, colname_plot, colname_info, rename_colname_info) {
+  # 1 - Arguments verification ----
+  if (!codama::r_type_checking(
+    r_object = name_col_dataplot,
+    type = "character",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = name_col_dataplot,
+      type = "character",
+      length = 1L,
+      output = "error"
+    ))
+  }
   if (!codama::r_type_checking(
     r_object = colname_id,
     type = "character",
@@ -8371,20 +8427,80 @@ data_to_text <- function(data, name_col, name_button, colname_id, colname_plot, 
       output = "error"
     ))
   }
-  code_txt <- data %>%
-    dplyr::group_by(!!as.name(colname_id)) %>%
-    dplyr::summarise(!!name_col := paste0(ifelse(is.null(name_button), "", paste0(name_button, "&")), paste0(deparse(dplyr::pick(colname_plot)), collapse = ""), ifelse(is.null(colname_info), "", paste0("&", unique(!!as.name(colname_id)), "&", paste0(sapply(unique(dplyr::pick(colname_info)), function(val) {
-                                                                                                                                                                                                                                                                                                                   if (inherits(val, "Date")) {
-                                                                                                                                                                                                                                                                                                                     format(val, "%Y-%m-%d")
-                                                                                                                                                                                                                                                                                                                   }else {
-                                                                                                                                                                                                                                                                                                                          as.character(val)}}), collapse = "&")))), .groups = "drop")
-  return(code_txt)
+  if (!codama::r_type_checking(
+    r_object = colname_plot,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = colname_plot,
+      type = "character",
+      output = "error"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = colname_info,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = colname_info,
+      type = "character",
+      output = "error"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = rename_colname_info,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = rename_colname_info,
+      type = "character",
+      output = "error"
+    ))
+  }
+  if (length(colname_info) != length(rename_colname_info)) {
+    stop(
+      format(
+        x = Sys.time(),
+        "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Error, the following arguments must be of the same size : \"colname_info\" and \"name_col_infoplot\"\n"
+    )
+  }
+  # 2 - Data design ----
+  # Recovery of unique identifiers
+  id_unique <- data %>%
+    dplyr::pull(colname_id) %>%
+    unique()
+  # Lists useful plot information for each id
+  data_list <- lapply(stats::setNames(id_unique, id_unique), function(id) {
+    # sub-table with information on id
+    data_tmp <- data %>%
+      dplyr::filter(!!as.name(colname_id) %in% id) %>%
+      dplyr::ungroup()
+    list_tmp <- list()
+    # extracts the data frame used for the plot
+    if (length(colname_plot) > 0) {
+      list_tmp[[name_col_dataplot]] <-  data_tmp %>%
+        dplyr::select(colname_plot)
+    }
+    # extracts the value used for the plot
+    if (length(colname_info) > 0) {
+      for (i in seq_along(colname_info)) {
+        list_tmp[[rename_colname_info[i]]] <- data_tmp %>%
+          dplyr::pull(colname_info[i]) %>%
+          unique()
+      }
+    }
+    return(list_tmp)
+  })
+  return(data_list)
 }
 
 # Shiny function : Function to create the button in the table that will create the plot
-data_button_plot <- function(data_plot, data_display, data_id, colname_id, colname_plot, colname_info, name_button, choice_select_row = "error") {
-  # Global variables assignement
-  buttontmp <- NULL
+data_button_plot <- function(data, colname_id, colname_info, name_button, choice_select_row = "error") {
   # Arguments verification
   if (!codama::r_type_checking(
     r_object = choice_select_row,
@@ -8399,29 +8515,26 @@ data_button_plot <- function(data_plot, data_display, data_id, colname_id, colna
       output = "error"
     ))
   }
-  # Add line identification
-  data_plot <- merge(data_id, data_plot, by = colname_id, all.x = TRUE)
-  # Add button and data for plot in table
-  data_plot <- data_to_text(data = data_plot, name_col = "buttontmp", name_button = "button", colname_id = colname_id, colname_plot = colname_plot, colname_info = colname_info)
-  data_display <- merge(data_display, data_plot, by = colname_id)
   # Select the lines that will display a plot
   if (choice_select_row == "all") {
-    select_row <- rep(TRUE, nrow(data_display))
+    select_row <- rep(TRUE, nrow(data))
   }
   if (choice_select_row == "error") {
-    select_row <- data_display$logical == FALSE
+    select_row <- data$logical == FALSE
   }
   if (choice_select_row == "valid") {
-    select_row <- data_display$logical == TRUE
+    select_row <- data$logical == TRUE
   }
-  data_display <- data_display %>% dplyr::mutate(button = NA)
-  data_display$button[select_row] <- sapply(which(select_row), function(c) {
-    as.character(shiny::actionButton(inputId = data_display$buttontmp[c], label = "Detail", onclick = paste0('Shiny.setInputValue(\"', name_button, '\", this.id, {priority: \"event\"})')))
-  })
-  data_display <- data_display %>% dplyr::select(!buttontmp)
-  return(data_display)
+  data <- data %>% dplyr::mutate(button = NA)
+  # Add button in table
+  if (any(select_row)) {
+    data$button[select_row] <- sapply(which(select_row), function(num_row) {
+      as.character(shiny::actionButton(inputId = paste0(data[num_row, c(colname_info, colname_id)], collapse = "&"), label = "Detail", onclick = paste0('Shiny.setInputValue(\"', name_button, '\", this.id, {priority: \"event\"})')))
+    })
+  }
+  data <- data %>% dplyr::select(!c(colname_info))
+  return(data)
 }
-
 
 # Function to create the plot of the consistency of the dates by trip
 plot_temporal_limit <- function(data, startdate, enddate) {
@@ -8453,6 +8566,30 @@ plot_temporal_limit <- function(data, startdate, enddate) {
     )
 }
 
+# Function to create the windows with plot of the consistency of the dates by trip
+plot_temporal_limit_windows <- function(vessel_code, enddate) {
+  showModal(modalDialog(
+    fluidRow(
+      column(3,
+             style = "padding-left:5px;padding-right:0px;",
+             HTML(
+                  # Non-breaking hyphen (-)
+                  gsub("-", "&#8209;",
+                       paste0("<b>Trip information : </b><br>
+                              <ul><li>Vessel code : ", vessel_code, "</li>
+                              <li>Trip end date : ", enddate, "</li></ul>")))),
+      column(9,
+             style = "padding-left:0px;padding-right:5px;",
+             plotly::plotlyOutput("plot_temporal_limit"))
+    ),
+    title = "Time coverage detail",
+    size = "l",
+    fade = TRUE,
+    easyClose = TRUE,
+    footer = NULL
+  ))
+}
+
 # Function to create the plot of the consistency of the position for the activity
 plot_position <- function(data) {
   # Local binding global variables
@@ -8475,6 +8612,38 @@ plot_position <- function(data) {
     plotly::plot_ly(type = "scattermapbox", mode = "markers", marker = list(size = 10)) %>%
       plotly::layout(showlegend = FALSE, mapbox = list(style = "carto-positron"))
   }
+}
+
+# Function to create the windows with plot of the consistency of the position for the activity
+plot_position_windows <- function(vessel_code, trip_enddate, activity_date, activity_number, Y, X, type, ocean_label, ocean_calculate) {
+  showModal(modalDialog(
+    fluidRow(
+      column(3,
+             style = "padding-left:5px;padding-right:0px;",
+             HTML(
+                  # Non-breaking hyphen (-)
+                  gsub("-", "&#8209;",
+                       paste0("<b>Trip information : </b><br>
+                              <ul><li>Vessel code : ", vessel_code, "</li>
+                              <li>Trip end date : ", trip_enddate, "</li>
+                              <li>Activity date : ", activity_date, "</li>
+                              <li>Activity number : ", activity_number, "</li>
+                              <li>Latitude : ", Y, "</li>
+                              <li>Longitude : ", X, "</li></ul>
+                              <b>Problem information : </b><br>
+                              <ul><li>Type : ", type, "</li>
+                              <li>Ocean trip : ", ocean_label, "</li>
+                              <li>Ocean activity : ", ocean_calculate, "</li></ul>")))),
+      column(9,
+             style = "padding-left:0px;padding-right:5px;",
+             plotly::plotlyOutput("plot_position"))
+    ),
+    title = "Position",
+    size = "l",
+    fade = TRUE,
+    easyClose = TRUE,
+    footer = NULL
+  ))
 }
 
 # Function to create the plot of the consistency of the eez for the activity
@@ -8512,6 +8681,39 @@ plot_eez <- function(data, referential_geographical_shape) {
     plotly::add_sf(name = "EEZ", data = referential_geographical_shape, type = "scattermapbox",  mode = "lines", hovertemplate = ~text, fill = "none")
   return(plot)
 }
+
+# Function to create the windows with plot of the consistency of the eez for the activity
+plot_eez_windows <- function(vessel_code, trip_enddate, activity_date, activity_number, Y, X, fpazone_code, fpazone_country_iso3, eez_calculated) {
+  showModal(modalDialog(
+    fluidRow(
+      column(3,
+             style = "padding-left:5px;padding-right:0px;",
+             HTML(
+                  # Non-breaking hyphen (-)
+                  gsub("-", "&#8209;",
+                       paste0("<b>Trip information : </b><br>
+                              <ul><li>Vessel code : ", vessel_code, "</li>
+                              <li>Trip end date : ", trip_enddate, "</li>
+                              <li>Activity date : ", activity_date, "</li>
+                              <li>Activity number : ", activity_number, "</li>
+                              <li>Latitude : ", Y, "</li>
+                              <li>Longitude : ", X, "</li></ul>
+                              <b>Problem information : </b><br>
+                              <ul><li>Declared eez : ", fpazone_code, "</li>
+                              <li>Declared country eez : ", fpazone_country_iso3, "</li>
+                              <li>Calculated eez : ", eez_calculated, "</li></ul>")))),
+      column(9,
+             style = "padding-left:0px;padding-right:5px;",
+             plotly::plotlyOutput("plot_eez"))
+    ),
+    title = "Position",
+    size = "l",
+    fade = TRUE,
+    easyClose = TRUE,
+    footer = NULL
+  ))
+}
+
 
 # Function to create the plot of the consistency of the position for the activity and VMS
 plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip) {
@@ -8585,7 +8787,7 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   }
   if (!all(is.na(data_vms$vms_position))) {
     plot <- plot %>%
-      plotly::add_trace(name = "VMS day", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", hovertemplate = ~text, marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF")) %>%
+      plotly::add_trace(name = "VMS", data = data_geo_vms, lat = ~Y, lon = ~X, type = "scattermapbox", mode = "lines+markers", hovertemplate = ~text, marker = list(color = grDevices::colorRampPalette(c("#00F7FF", "#3B18AA"))(nrow(data_geo_vms)), size = 10), line = list(color = "#0032FF")) %>%
       plotly::layout(mapbox = list(center = list(lon = data_geo_vms$X[1], lat = data_geo_vms$Y[1])))
   }
   if (!all(is.na(data_activity$activity_position))) {
@@ -8596,8 +8798,57 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   return(plot)
 }
 
+# Function to create the windows with plot of the consistency of the position for the activity and VMS
+plot_anapo_windows <- function(data_activity) {
+  # 1 - Arguments verification ----
+  if (!codama::r_table_checking(
+    r_table = data_activity,
+    type = "data.frame",
+    column_name = c("vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_number", "vesselactivity_code", "Y", "X", "grounding"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = data_activity,
+      type = "data.frame",
+      column_name = c("vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_number", "vesselactivity_code", "Y", "X", "grounding"),
+      output = "error"
+    )
+  } else {
+    data_activity <- data_activity[, c("vessel_code", "trip_enddate", "activity_date", "activity_time", "activity_number", "vesselactivity_code", "Y", "X", "grounding")]
+  }
+  # 2 - Data design ----
+  showModal(modalDialog(
+    fluidRow(
+      column(3,
+             style = "padding-left:5px;padding-right:0px;",
+             HTML(
+                  # Non-breaking hyphen (-)
+                  gsub("-", "&#8209;",
+                       paste0("<b>Trip information : </b><br>
+                              <ul><li>Vessel code : ", data_activity[["vessel_code"]], "</li>
+                              <li>Trip end date : ", data_activity[["trip_enddate"]], "</li>
+                              <li>Activity date : ", data_activity[["activity_date"]], "</li>
+                              <li>Activity time : ", data_activity[["activity_time"]], "</li>
+                              <li>Activity number : ", data_activity[["activity_number"]], "</li>
+                              <li>Vessel activity : ", data_activity[["vesselactivity_code"]], "</li>
+                              <li>Latitude : ", data_activity[["Y"]], "</li>
+                              <li>Longitude : ", data_activity[["X"]], "</li>
+                              <li>Grounding : ", data_activity[["grounding"]], "</li></ul>")))),
+      column(9,
+             style = "padding-left:0px;padding-right:5px;",
+             plotly::plotlyOutput("plot_anapo"))
+    ),
+    title = "Position",
+    size = "l",
+    fade = TRUE,
+    easyClose = TRUE,
+    footer = NULL
+  ))
+}
+
+
 # Function to create the plot of the consistency of the position for VMS
-plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
+plot_anapo_activity <- function(data_vms, crs_vms, date_vms) {
   # Local binding global variables
   . <- NULL
   vms_time <- NULL
@@ -8611,7 +8862,7 @@ plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
   # Format date time and order
   if (!all(is.na(data_vms$vms_position))) {
     data_vms <- data_vms %>%
-      dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time))) %>%
+      dplyr::mutate(date_time = as.POSIXct(paste(date_vms, vms_time))) %>%
       dplyr::arrange(date_time)
   }
   # Spatial formatting
@@ -8623,7 +8874,7 @@ plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
   }
   # text hovertemplate
   if (!all(is.na(data_vms$vms_position))) {
-    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", vms_date, "<br>Time:", vms_time, "<br>Position:", latitude, ",", longitude, "<extra></extra>"))
+    data_geo_vms <- data_geo_vms %>% dplyr::mutate(text = paste("Date:", date_vms, "<br>Time:", vms_time, "<br>Position:", latitude, ",", longitude, "<extra></extra>"))
   }
   # Plot
   plot <- plotly::plot_ly() %>%
@@ -8635,6 +8886,32 @@ plot_anapo_activity <- function(data_vms, crs_vms, vms_date) {
   }
   return(plot)
 }
+
+# Function to create the windows with plot of the consistency of the position for VMS
+plot_anapo_activity_windows <- function(vessel_code, date_vms, vessel_type) {
+  showModal(modalDialog(
+    fluidRow(
+      column(3,
+             style = "padding-left:5px;padding-right:0px;",
+             HTML(
+                  # Non-breaking hyphen (-)
+                  gsub("-", "&#8209;",
+                       paste0("<b>Trip information : </b><br>
+                              <ul><li>Vessel code : ", vessel_code, "</li>
+                              <li>VMS date : ", date_vms, "</li>
+                              <li>Vessel type : ", vessel_type, "</li></ul>")))),
+      column(9,
+             style = "padding-left:0px;padding-right:5px;",
+             plotly::plotlyOutput("plot_anapo_activity"))
+    ),
+    title = "Position",
+    size = "l",
+    fade = TRUE,
+    easyClose = TRUE,
+    footer = NULL
+  ))
+}
+
 
 # Function detects activity linked solely to grounding
 column_grounding <- function(data,

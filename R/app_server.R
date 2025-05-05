@@ -336,251 +336,121 @@ app_server <- function(input, output, session) {
   # Date control plot, display in a window
   output$plot_temporal_limit <- plotly::renderPlotly({
     split_id <- strsplit(input$button_temporal_limit, "&")[[1]]
-    data <- eval(parse(text = split_id[[2]]))
-    startdate <- as.Date(x = split_id[5], format = "%Y-%m-%d")
-    enddate <- as.Date(x = split_id[6], format = "%Y-%m-%d")
-    plot_temporal_limit(data, startdate, enddate)
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    # Retrieves the reference files indicated by data, which will then be used by plot
+    list_tmp_referential_file <- list()
+    data_tmp <- data
+    for (i in seq_along(data)){
+      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
+        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
+        data_tmp[[names(data[i])]] <- NULL
+      }
+    }
+    # Retrieves all values of plot arguments
+    do.call(plot_temporal_limit, c(data_tmp[names(data_tmp) %in% names(formals(plot_temporal_limit))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_temporal_limit))]))
   })
 
   # Date control window
   observeEvent(input$button_temporal_limit, {
     split_id <- strsplit(input$button_temporal_limit, "&")[[1]]
-    vessel_code <- split_id[4]
-    enddate <- split_id[6]
-    # Non-breaking hyphen (-)
-    enddate <- gsub("-", "&#8209;", enddate)
-    showModal(modalDialog(
-      fluidRow(
-        column(3,
-          style = "padding-left:5px;padding-right:0px;",
-          HTML(paste0("<b>Trip information : </b><br>
-                             <ul><li>Vessel code : ", vessel_code, "</li>
-                             <li>Trip end date : ", enddate, "</li></ul>"))
-        ),
-        column(9,
-          style = "padding-left:0px;padding-right:5px;",
-          plotly::plotlyOutput("plot_temporal_limit")
-        )
-      ),
-      title = "Time coverage detail",
-      size = "l",
-      fade = TRUE,
-      easyClose = TRUE,
-      footer = NULL
-    ))
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    do.call(plot_temporal_limit_windows, data[names(formals(plot_temporal_limit_windows))])
   })
 
   # Position control plot, display in a window
   output$plot_position <- plotly::renderPlotly({
     split_id <- strsplit(input$button_position, "&")[[1]]
-    data <- eval(parse(text = split_id[[2]]))
-    plot_position(data)
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    # Retrieves the reference files indicated by data, which will then be used by plot
+    list_tmp_referential_file <- list()
+    data_tmp <- data
+    for (i in seq_along(data)){
+      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
+        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
+        data_tmp[[names(data[i])]] <- NULL
+      }
+    }
+    # Retrieves all values of plot arguments
+    do.call(plot_position, c(data_tmp[names(data_tmp) %in% names(formals(plot_position))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_position))]))
   })
 
   # Position control window
   observeEvent(input$button_position, {
-    # Local binding global variables
-    . <- NULL
-    X <- NULL
-    Y <- NULL
-    # Split information
     split_id <- strsplit(input$button_position, "&")[[1]]
-    enddate <- split_id[5]
-    activity_date <- split_id[6]
-    # Spatial formatting
-    data <- eval(parse(text = split_id[[2]]))
-    if (!is.na(data$activity_position)) {
-      data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>%
-        dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
-        dplyr::mutate(X = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), Y = coordinate_dd_to_dmd(coordinate =  Y, latitude = TRUE))
-    }else {
-      data_geo <- data.frame(Y = c(), X = c())
-    }
-    # Non-breaking hyphen (-)
-    enddate <- gsub("-", "&#8209;", enddate)
-    activity_date <- gsub("-", "&#8209;", activity_date)
-    showModal(modalDialog(
-      fluidRow(
-        column(3,
-          style = "padding-left:5px;padding-right:0px;",
-          HTML(paste0("<b>Trip information : </b><br>
-                             <ul><li>Vessel code : ", split_id[4], "</li>
-                             <li>Trip end date : ", enddate, "</li>
-                             <li>Activity date : ", activity_date, "</li>
-                             <li>Activity number : ", split_id[7], "</li>
-                             <li>Latitude : ", data_geo$Y, "</li>
-                             <li>Longitude : ", data_geo$X, "</li></ul>
-                             <b>Problem information : </b><br>
-                             <ul><li>Type : ", split_id[8], "</li>
-                             <li>Ocean trip : ", split_id[9], "</li>
-                             <li>Ocean activity : ", split_id[10], "</li></ul>"))
-        ),
-        column(9,
-          style = "padding-left:0px;padding-right:5px;",
-          plotly::plotlyOutput("plot_position")
-        )
-      ),
-      title = "Position",
-      size = "l",
-      fade = TRUE,
-      easyClose = TRUE,
-      footer = NULL
-    ))
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    do.call(plot_position_windows, data[names(formals(plot_position_windows))])
   })
 
   # EEZ control plot, display in a window
   output$plot_eez <- plotly::renderPlotly({
     split_id <- strsplit(input$button_eez, "&")[[1]]
-    data <- eval(parse(text = split_id[[2]]))
-    plot_eez(data = data, referential_geographical_shape = referential_file()[["shape_eez"]])
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    # Retrieves the reference files indicated by data, which will then be used by plot
+    list_tmp_referential_file <- list()
+    data_tmp <- data
+    for (i in seq_along(data)){
+      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
+        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
+        data_tmp[[names(data[i])]] <- NULL
+      }
+    }
+    # Retrieves all values of plot arguments
+    do.call(plot_eez, c(data_tmp[names(data_tmp) %in% names(formals(plot_eez))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_eez))]))
   })
 
   # EEZ control window
   observeEvent(input$button_eez, {
-    # Local binding global variables
-    . <- NULL
-    X <- NULL
-    Y <- NULL
-    # Split information
     split_id <- strsplit(input$button_eez, "&")[[1]]
-    enddate <- split_id[5]
-    activity_date <- split_id[6]
-    # Spatial formatting
-    data <- eval(parse(text = split_id[[2]]))
-    if (!is.na(data$activity_position)) {
-      data_geo <- sf::st_as_sf(data, wkt = "activity_position", crs = "activity_crs") %>%
-        dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
-        dplyr::mutate(X = coordinate_dd_to_dmd(coordinate =  X, latitude = FALSE), Y = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
-    }else {
-      data_geo <- data.frame(Y = c(), X = c())
-    }
-    # Non-breaking hyphen (-)
-    enddate <- gsub("-", "&#8209;", enddate)
-    activity_date <- gsub("-", "&#8209;", activity_date)
-    showModal(modalDialog(
-      fluidRow(
-        column(3,
-          style = "padding-left:5px;padding-right:0px;",
-          HTML(paste0("<b>Trip information : </b><br>
-                             <ul><li>Vessel code : ", split_id[4], "</li>
-                             <li>Trip end date : ", enddate, "</li>
-                             <li>Activity date : ", activity_date, "</li>
-                             <li>Activity number : ", split_id[7], "</li>
-                             <li>Latitude : ", data_geo$Y, "</li>
-                             <li>Longitude : ", data_geo$X, "</li></ul>
-                             <b>Problem information : </b><br>
-                            <ul><li>Declared eez : ", split_id[8], "</li>
-                            <li>Declared country eez : ", split_id[9], "</li>
-                            <li>Calculated eez : ", split_id[10], "</li></ul>"))
-        ),
-        column(9,
-          style = "padding-left:0px;padding-right:5px;",
-          plotly::plotlyOutput("plot_eez")
-        )
-      ),
-      title = "EEZ",
-      size = "l",
-      fade = TRUE,
-      easyClose = TRUE,
-      footer = NULL
-    ))
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    do.call(plot_eez_windows, data[names(formals(plot_eez_windows))])
   })
 
   # Anapo control plot, display in a window
   output$plot_anapo <- plotly::renderPlotly({
     split_id <- strsplit(input$button_anapo, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[split_id[4]]][as.numeric(split_id[5]), "data_plot"][[1]], "&")[[1]]
-    data <- eval(parse(text = data_all_click[[1]]))
-    activity_crs <- data_all_click[[3]]
-    vms_crs <- data_all_click[[4]]
-    activity_data <- eval(parse(text = data_all_click[[5]]))
-    trip_data <- eval(parse(text = data_all_click[[6]]))
-    plot_anapo(data_vms = data, crs_vms = vms_crs, crs_activity = activity_crs, data_activity = activity_data, data_trip = trip_data)
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    # Retrieves the reference files indicated by data, which will then be used by plot
+    list_tmp_referential_file <- list()
+    data_tmp <- data
+    for (i in seq_along(data)){
+      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
+        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
+        data_tmp[[names(data[i])]] <- NULL
+      }
+    }
+    # Retrieves all values of plot arguments
+    do.call(plot_anapo, c(data_tmp[names(data_tmp) %in% names(formals(plot_anapo))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_anapo))]))
   })
 
   # Anapo control window
   observeEvent(input$button_anapo, {
-    # Local binding global variables
-    X <- NULL
-    Y <- NULL
     split_id <- strsplit(input$button_anapo, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[split_id[4]]][as.numeric(split_id[5]), "data_plot"][[1]], "&")[[1]]
-    activity_data <- eval(parse(text = data_all_click[[5]]))
-    activity_crs <- data_all_click[[3]]
-    # Spatial formatting
-    if (!is.na(activity_data$activity_position)) {
-      data_geo <- sf::st_as_sf(activity_data, wkt = "activity_position", crs = activity_crs) %>%
-        dplyr::mutate(tibble::as_tibble(sf::st_coordinates(.))) %>%
-        dplyr::mutate(X = coordinate_dd_to_dmd(coordinate = X, latitude = FALSE), Y = coordinate_dd_to_dmd(coordinate = Y, latitude = TRUE))
-    }else {
-      data_geo <- data.frame(Y = c(), X = c())
-    }
-    # Non-breaking hyphen (-)
-    enddate <- gsub("-", "&#8209;", activity_data[1, "trip_enddate", drop = TRUE])
-    activity_date <- gsub("-", "&#8209;", activity_data[1, "activity_date", drop = TRUE])
-    showModal(modalDialog(
-      fluidRow(
-        column(3,
-          style = "padding-left:5px;padding-right:0px;",
-          HTML(paste0("<b>Trip information : </b><br>
-                             <ul><li>Vessel code : ", activity_data[1, "vessel_code", drop = TRUE], "</li>
-                             <li>Trip end date : ", enddate, "</li>
-                             <li>Activity date : ", activity_date, "</li>
-                             <li>Activity time : ", activity_data[1, "activity_time", drop = TRUE], "</li>
-                             <li>Activity number : ", activity_data[1, "activity_number", drop = TRUE], "</li>
-                             <li>Vessel activity : ", activity_data[1, "vesselactivity_code", drop = TRUE], "</li>
-                             <li>Latitude : ", data_geo$Y, "</li>
-                             <li>Longitude : ", data_geo$X, "</li>
-                             <li>Grounding : ", activity_data[1, "grounding", drop = TRUE], "</li></ul>"))
-        ),
-        column(9,
-          style = "padding-left:0px;padding-right:5px;",
-          plotly::plotlyOutput("plot_anapo")
-        )
-      ),
-      title = "Anapo",
-      size = "l",
-      fade = TRUE,
-      easyClose = TRUE,
-      footer = NULL
-    ))
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    do.call(plot_anapo_windows, data[names(formals(plot_anapo_windows))])
   })
 
   # Anapo activity control plot, display in a window
   output$plot_anapo_activity <- plotly::renderPlotly({
     split_id <- strsplit(input$button_anapo_activity, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[split_id[4]]][as.numeric(split_id[5]), "data_plot"][[1]], "&")[[1]]
-    vms_data <- eval(parse(text = data_all_click[[1]]))
-    vms_crs <- data_all_click[[4]]
-    plot_anapo_activity(data_vms = vms_data, crs_vms = vms_crs, vms_date = data_all_click[[3]])
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    # Retrieves the reference files indicated by data, which will then be used by plot
+    list_tmp_referential_file <- list()
+    data_tmp <- data
+    for (i in seq_along(data)){
+      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
+        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
+        data_tmp[[names(data[i])]] <- NULL
+      }
+    }
+    # Retrieves all values of plot arguments
+    do.call(plot_anapo_activity, c(data_tmp[names(data_tmp) %in% names(formals(plot_anapo_activity))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_anapo_activity))]))
   })
 
   # Anapo activity control window
   observeEvent(input$button_anapo_activity, {
     split_id <- strsplit(input$button_anapo_activity, "&")[[1]]
-    data_all_click <- strsplit(calcul_check()[[split_id[4]]][as.numeric(split_id[5]), "data_plot"][[1]], "&")[[1]]
-    # Non-breaking hyphen (-)
-    vms_date <- gsub("-", "&#8209;", data_all_click[[3]])
-    showModal(modalDialog(
-      fluidRow(
-        column(3,
-          style = "padding-left:5px;padding-right:0px;",
-          HTML(paste0("<b>Trip information : </b><br>
-                             <ul><li>Vessel code : ", data_all_click[[5]], "</li>
-                             <li>VMS date : ", vms_date, "</li>
-                             <li>Vessel type : ", data_all_click[[6]], "</li></ul>"))
-        ),
-        column(9,
-          style = "padding-left:0px;padding-right:5px;",
-          plotly::plotlyOutput("plot_anapo_activity")
-        )
-      ),
-      title = "Anapo activity",
-      size = "l",
-      fade = TRUE,
-      easyClose = TRUE,
-      footer = NULL
-    ))
+    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
+    do.call(plot_anapo_activity_windows, data[names(formals(plot_anapo_activity_windows))])
   })
 
   # Summary page text
