@@ -109,6 +109,9 @@ app_server <- function(input, output, session) {
   # type : Check type, you must choose between check type identifiers (type_check_info), mandatory, character expected
   # column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected
   # size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected
+  # name_function_plot : Name of the function that creates the plot, optional, character expected
+  # name_function_text_plot : Name of the function that creates the text to be displayed in the plot window, optional, character expected
+  # title_window : Plot window name, optional, character expected
   check_info <- list(list(id = "check_trip_activity",
                           tab = "trip",
                           title = "Presence of activity",
@@ -144,7 +147,10 @@ app_server <- function(input, output, session) {
                           text = "<ul><li>You must check the fishing log to see if a day is missing</li>
                                   <li>You must verify that the departure and arrival dates match in the fishing logbook and landing documents</li></ul>",
                           type = "error",
-                          column_no_wrap = c(2)),
+                          column_no_wrap = c(2),
+                          name_function_plot = "plot_temporal_limit",
+                          name_function_text_plot = "plot_temporal_limit_windows",
+                          title_window = "Time coverage detail"),
                      list(id = "check_harbour",
                           tab = "trip",
                           title = "Harbour",
@@ -179,7 +185,10 @@ app_server <- function(input, output, session) {
                           text = "<ul><li>If the position is on land, you need to check the latitude and longitude</li>
                                   <li>If the position and ocean are different, you need to check these fields with the logbook</li></ul>",
                           type = "error",
-                          column_no_wrap = c(2, 3)),
+                          column_no_wrap = c(2, 3),
+                          name_function_plot = "plot_position",
+                          name_function_text_plot = "plot_position_windows",
+                          title_window = "Position"),
                      list(id = "check_weight",
                           tab = "activity",
                           title = "Total Catch Weight",
@@ -212,7 +221,10 @@ app_server <- function(input, output, session) {
                           text = "<ul><li>Indicates when the declared and calculated eez are different</li>
                                   <li>Indicates when there is no declared eez for fishing activities </li></ul>",
                           type = "warning",
-                          column_no_wrap = c(2, 3)),
+                          column_no_wrap = c(2, 3),
+                          name_function_plot = "plot_eez",
+                          name_function_text_plot = "plot_eez_windows",
+                          title_window = "EEZ"),
                      list(id = "check_length_class",
                           tab = "sample",
                           title = "Size class",
@@ -313,7 +325,10 @@ app_server <- function(input, output, session) {
                           <li>There must be at least one VMS position nearer than 10 miles away OR the score (resulting from geographical and temporal distance) must be greater than or equal to 0.5 OR the position must be in a harbour</li></ul>",
                           type = "error",
                           size_box = "col-sm-12 col-md-12 col-lg-12",
-                          column_no_wrap = c(2, 3, 12, 13, 14)),
+                          column_no_wrap = c(2, 3, 12, 13, 14),
+                          name_function_plot = "plot_anapo",
+                          name_function_text_plot = "plot_anapo_windows",
+                          title_window = "Anapo"),
                      list(id = "check_anapo_activity",
                           tab = "anapo",
                           title = "Anapo activity",
@@ -321,136 +336,19 @@ app_server <- function(input, output, session) {
                                   (Warning: in case of inconsistency all vessels (Vessel code) linked to the VMS vessel code are displayed inconsistently, select only active vessels (Vessel status 1) if you are not working on historical data)",
                           type = "error",
                           size_box = "col-sm-12 col-md-12 col-lg-12",
-                          column_no_wrap = c(2)))
+                          column_no_wrap = c(2),
+                          name_function_plot = "plot_anapo_activity",
+                          name_function_text_plot = "plot_anapo_activity_windows",
+                          title_window = "Anapo activity"))
 
   # Tab creation, menu, tab content
-  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check)
+  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file)
 
   # Force activation of first tab at startup, remove the lazy evaluation
   observe({
     if (is.null(input$sidebarmenu_id)) {
       shinydashboard::updateTabItems(session, "sidebarmenu_id", selected = "home")
     }
-  })
-
-  # Date control plot, display in a window
-  output$plot_temporal_limit <- plotly::renderPlotly({
-    split_id <- strsplit(input$button_temporal_limit, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    # Retrieves the reference files indicated by data, which will then be used by plot
-    list_tmp_referential_file <- list()
-    data_tmp <- data
-    for (i in seq_along(data)){
-      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
-        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
-        data_tmp[[names(data[i])]] <- NULL
-      }
-    }
-    # Retrieves all values of plot arguments
-    do.call(plot_temporal_limit, c(data_tmp[names(data_tmp) %in% names(formals(plot_temporal_limit))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_temporal_limit))]))
-  })
-
-  # Date control window
-  observeEvent(input$button_temporal_limit, {
-    split_id <- strsplit(input$button_temporal_limit, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    do.call(plot_temporal_limit_windows, data[names(formals(plot_temporal_limit_windows))])
-  })
-
-  # Position control plot, display in a window
-  output$plot_position <- plotly::renderPlotly({
-    split_id <- strsplit(input$button_position, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    # Retrieves the reference files indicated by data, which will then be used by plot
-    list_tmp_referential_file <- list()
-    data_tmp <- data
-    for (i in seq_along(data)){
-      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
-        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
-        data_tmp[[names(data[i])]] <- NULL
-      }
-    }
-    # Retrieves all values of plot arguments
-    do.call(plot_position, c(data_tmp[names(data_tmp) %in% names(formals(plot_position))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_position))]))
-  })
-
-  # Position control window
-  observeEvent(input$button_position, {
-    split_id <- strsplit(input$button_position, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    do.call(plot_position_windows, data[names(formals(plot_position_windows))])
-  })
-
-  # EEZ control plot, display in a window
-  output$plot_eez <- plotly::renderPlotly({
-    split_id <- strsplit(input$button_eez, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    # Retrieves the reference files indicated by data, which will then be used by plot
-    list_tmp_referential_file <- list()
-    data_tmp <- data
-    for (i in seq_along(data)){
-      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
-        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
-        data_tmp[[names(data[i])]] <- NULL
-      }
-    }
-    # Retrieves all values of plot arguments
-    do.call(plot_eez, c(data_tmp[names(data_tmp) %in% names(formals(plot_eez))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_eez))]))
-  })
-
-  # EEZ control window
-  observeEvent(input$button_eez, {
-    split_id <- strsplit(input$button_eez, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    do.call(plot_eez_windows, data[names(formals(plot_eez_windows))])
-  })
-
-  # Anapo control plot, display in a window
-  output$plot_anapo <- plotly::renderPlotly({
-    split_id <- strsplit(input$button_anapo, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    # Retrieves the reference files indicated by data, which will then be used by plot
-    list_tmp_referential_file <- list()
-    data_tmp <- data
-    for (i in seq_along(data)){
-      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
-        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
-        data_tmp[[names(data[i])]] <- NULL
-      }
-    }
-    # Retrieves all values of plot arguments
-    do.call(plot_anapo, c(data_tmp[names(data_tmp) %in% names(formals(plot_anapo))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_anapo))]))
-  })
-
-  # Anapo control window
-  observeEvent(input$button_anapo, {
-    split_id <- strsplit(input$button_anapo, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    do.call(plot_anapo_windows, data[names(formals(plot_anapo_windows))])
-  })
-
-  # Anapo activity control plot, display in a window
-  output$plot_anapo_activity <- plotly::renderPlotly({
-    split_id <- strsplit(input$button_anapo_activity, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    # Retrieves the reference files indicated by data, which will then be used by plot
-    list_tmp_referential_file <- list()
-    data_tmp <- data
-    for (i in seq_along(data)){
-      if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
-        list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
-        data_tmp[[names(data[i])]] <- NULL
-      }
-    }
-    # Retrieves all values of plot arguments
-    do.call(plot_anapo_activity, c(data_tmp[names(data_tmp) %in% names(formals(plot_anapo_activity))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(plot_anapo_activity))]))
-  })
-
-  # Anapo activity control window
-  observeEvent(input$button_anapo_activity, {
-    split_id <- strsplit(input$button_anapo_activity, "&")[[1]]
-    data <- calcul_check()[[split_id[1]]][[split_id[2]]]
-    do.call(plot_anapo_activity_windows, data[names(formals(plot_anapo_activity_windows))])
   })
 
   # Summary page text

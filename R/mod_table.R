@@ -30,10 +30,14 @@ mod_table_ui <- function(id, title = NULL, size_box = "col-sm-12 col-md-6 col-lg
 #' @param data {\link[base]{list}} expected. Reactive list containing results tables for all checks
 #' @param name {\link[base]{character}} expected. Control identifier in data to be displayed
 #' @param type_line_check {\link[base]{character}} expected. Reactive value containing the type of line selected by the user
+#' @param referential_file {\link[base]{list}} expected. Reactive list containing referential tables for all plot
 #' @param column_no_wrap {\link[base]{integer}} expected. Default values: NULL. Column numbers that should not be subject to automatic line breaks
+#' @param name_function_plot {\link[base]{character}} expected. Default values: NULL. Name of the function that creates the plot
+#' @param name_function_text_plot {\link[base]{character}} expected. Default values: NULL. Name of the function that creates the text to be displayed in the plot window
+#' @param title_window {\link[base]{character}} expected. Default values: NULL. Plot window name
 #' @return The function returns nothing, instantiating the table
 #' @export
-mod_table_server <- function(id, data, name, type_line_check, column_no_wrap = NULL) {
+mod_table_server <- function(id, data, name, type_line_check, referential_file, column_no_wrap = NULL, name_function_plot = NULL, name_function_text_plot = NULL, title_window = NULL) {
   # Local binding global variables
   . <- NULL
   # If no name is specified, use id as name
@@ -41,6 +45,7 @@ mod_table_server <- function(id, data, name, type_line_check, column_no_wrap = N
     name <- id
   }
   moduleServer(id, function(input, output, session) {
+    # Display table
     output$table <- DT::renderDT({
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
       if (isTruthy(data()) && isTruthy(type_line_check())) {
@@ -66,6 +71,66 @@ mod_table_server <- function(id, data, name, type_line_check, column_no_wrap = N
         return(data)
       }
     })
+
+    # Display window and plot
+    if (!is.null(name_function_plot)) {
+      # Button name
+      name_button <- paste0("button_", id)
+      # Control plot, display in a window
+      output$plot <- plotly::renderPlotly({
+        split_id <- strsplit(input[[name_button]], "&")[[1]]
+        data <- data()[[split_id[1]]][[split_id[2]]]
+        # Retrieves the reference files indicated by data, which will then be used by plot
+        list_tmp_referential_file <- list()
+        data_tmp <- data
+        for (i in seq_along(data)) {
+          if (length(data[[i]]) == 1 && data[[i]] %in% names(referential_file())) {
+            list_tmp_referential_file[[names(data[i])]] <- referential_file()[[data[[i]]]]
+            data_tmp[[names(data[i])]] <- NULL
+          }
+        }
+        # Retrieves all values of plot arguments
+        do.call(name_function_plot, c(data_tmp[names(data_tmp) %in% names(formals(name_function_plot))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(name_function_plot))]))
+      })
+
+      # Control window
+      observeEvent(input[[name_button]], {
+        split_id <- strsplit(input[[name_button]], "&")[[1]]
+        data <- data()[[split_id[1]]][[split_id[2]]]
+        # Executes, if supplied by user, the function that indicates the text to be displayed
+        if (!is.null(name_function_text_plot)) {
+          text <- do.call(name_function_text_plot, data[names(data) %in% names(formals(name_function_text_plot))])
+        } else {
+          text <- ""
+        }
+        # Recover window title, if supplied by user
+        if (!is.null(title_window)) {
+          title <- title_window
+        } else {
+          title <- ""
+        }
+        # Display window
+        showModal(modalDialog(
+          fluidRow(
+            column(3,
+                   style = "padding-left:5px;padding-right:0px;",
+                   HTML(
+                        # Non-breaking hyphen (-)
+                        gsub("-", "&#8209;",
+                             text
+                        ))),
+            column(9,
+                   style = "padding-left:0px;padding-right:5px;",
+                   plotly::plotlyOutput(shiny::NS(namespace = id, "plot")))
+          ),
+          title = title,
+          size = "l",
+          fade = TRUE,
+          easyClose = TRUE,
+          footer = NULL
+        ))
+      })
+    }
   })
 }
 
@@ -73,4 +138,4 @@ mod_table_server <- function(id, data, name, type_line_check, column_no_wrap = N
 # mod_table_ui("table_1", title, size_box, text)
 
 ## To be copied in the server
-# mod_table_server("table_1", data, name, type_line_check, column_no_wrap)
+# mod_table_server("table_1", data, name, type_line_check, column_no_wrap, name_function_plot, name_function_text_plot, title_plot)

@@ -4,7 +4,17 @@
 \alias{mod_table_server}
 \title{table Server Functions}
 \usage{
-mod_table_server(id, data, name, type_line_check, column_no_wrap = NULL)
+mod_table_server(
+  id,
+  data,
+  name,
+  type_line_check,
+  referential_file,
+  column_no_wrap = NULL,
+  name_function_plot = NULL,
+  name_function_text_plot = NULL,
+  title_window = NULL
+)
 }
 \arguments{
 \item{id}{Internal parameters for shiny}
@@ -15,7 +25,15 @@ mod_table_server(id, data, name, type_line_check, column_no_wrap = NULL)
 
 \item{type_line_check}{{\link[base]{character}} expected. Reactive value containing the type of line selected by the user}
 
+\item{referential_file}{{\link[base]{list}} expected. Reactive list containing referential tables for all plot}
+
 \item{column_no_wrap}{{\link[base]{integer}} expected. Default values: NULL. Column numbers that should not be subject to automatic line breaks}
+
+\item{name_function_plot}{{\link[base]{character}} expected. Default values: NULL. Name of the function that creates the plot}
+
+\item{name_function_text_plot}{{\link[base]{character}} expected. Default values: NULL. Name of the function that creates the text to be displayed in the plot window}
+
+\item{title_window}{{\link[base]{character}} expected. Default values: NULL. Plot window name}
 }
 \value{
 The function returns nothing, instantiating the table
