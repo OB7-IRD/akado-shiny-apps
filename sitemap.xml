@@ -38,6 +38,14 @@
 <url><loc>/reference/check_weighting_sample_inspector.html</loc></url>
 <url><loc>/reference/check_well_number_consistent_inspector.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
+<url><loc>/reference/mod_radiobuttons_type_check_server.html</loc></url>
+<url><loc>/reference/mod_radiobuttons_type_check_ui.html</loc></url>
+<url><loc>/reference/mod_tab_content_server.html</loc></url>
+<url><loc>/reference/mod_tab_content_ui.html</loc></url>
+<url><loc>/reference/mod_tab_menu_server.html</loc></url>
+<url><loc>/reference/mod_tab_menu_ui.html</loc></url>
+<url><loc>/reference/mod_table_server.html</loc></url>
+<url><loc>/reference/mod_table_ui.html</loc></url>
 <url><loc>/reference/pipe.html</loc></url>
 <url><loc>/reference/run_app.html</loc></url>
 <url><loc>/reference/server_authentication.html</loc></url>
