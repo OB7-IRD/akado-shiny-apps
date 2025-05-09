@@ -56,12 +56,6 @@ app_server <- function(input, output, session) {
     return(stats::setNames(mget(names_referential), names_referential))
   })
 
-  # Performs all calculations to test for inconsistencies
-  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file)
-
-  # Displays the errors and notifications that occur when you want to start the calculation
-  error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
-
   # Information about the radio button to select check
   # title : Button title, mandatory, character expected
   # id : Button selection identification, mandatory, character expected
@@ -340,6 +334,81 @@ app_server <- function(input, output, session) {
                           name_function_plot = "plot_anapo_activity",
                           name_function_text_plot = "plot_anapo_activity_windows",
                           title_window = "Anapo activity"))
+  # Information about the sql
+  # file : Name of sql file (without .sql extension), mandatory, character expected
+  # anchor : list containing information in case of anchor in sql file, the left part is the name given to the anchor in the SQL, the right part is the content of the anchor, which may come from another SQL (indicate the name of the file, note that use_selection_other_sql must be TRUE for this one), or from a parameter in the configuration file, or from the SQL initializing the user's query (trip_selected or vessel_selected), optional, character expected
+  # use_selection_other_sql : Indicates whether the SQL is used in the construction of other SQLs, optional (default : FALSE), logical expected
+  # column : Name of column to be used to supply values when used in other SQL anchors, optional (but mandatory if use_selection_other_sql is TRUE), character expected
+  sql_info <- list(list(file = "activity",
+                        anchor = list(select_item = "trip_selected"),
+                        use_selection_other_sql = TRUE,
+                        column = "activity_id"),
+                   list(file = "sample",
+                        anchor = list(select_item = "trip_selected"),
+                        use_selection_other_sql = TRUE,
+                        column = "sample_id"),
+                   list(file = "samplespecies",
+                        anchor = list(select_item = "trip_selected"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "samplespeciesmeasure",
+                        anchor = list(select_item = "trip_selected"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "well",
+                        anchor = list(select_item = "trip_selected"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "landing",
+                        anchor = list(select_item = "trip_selected"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "sampleactivity",
+                        anchor = list(select_item = "sample"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "trip",
+                        anchor = list(select_item_1 = "logbook_program",
+                                      select_item_2 = "trip_selected",
+                                      select_item_3 = "vessel_selected"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "wellactivity",
+                        anchor = list(select_item = "trip_selected"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "wellactivityspecies",
+                        anchor = list(select_item = "trip_selected"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "route",
+                        anchor = list(select_item = "trip_selected"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "full_trip",
+                        anchor = list(select_item_1 = "logbook_program",
+                                      select_item_2 = "trip_selected",
+                                      select_item_3 = "vessel_selected"),
+                        use_selection_other_sql = TRUE,
+                        column = "trip_id"),
+                   list(file = "catch_full_trip",
+                        anchor = list(select_item = "full_trip"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "landing_full_trip",
+                        anchor = list(select_item = "full_trip"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "activity_observedsystem",
+                        anchor = list(select_item = "activity"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "catch",
+                        anchor = list(select_item = "activity"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "transmittingbuoy",
+                        anchor = list(select_item = "activity"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "floatingobject",
+                        anchor = list(select_item = "activity"),
+                        use_selection_other_sql = FALSE),
+                   list(file = "list_species_reference_well_distribution_control",
+                        anchor = list(select_item = "reference_list_species_well_distribution_control"),
+                        use_selection_other_sql = FALSE))
+
+  # Performs all calculations to test for inconsistencies
+  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, sql_info = sql_info)
+
+  # Displays the errors and notifications that occur when you want to start the calculation
+  error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
 
   # Tab creation, menu, tab content
   tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file)
