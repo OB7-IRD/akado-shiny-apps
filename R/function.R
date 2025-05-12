@@ -6978,7 +6978,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     button <- NULL
     harbour_label_departure <- NULL
     harbour_label_landing_trip_previous <- NULL
-    harbour_id_landing_trip_previous <- NULL
     schooltype_code <- NULL
     association_object_count <- NULL
     vesselactivity_code <- NULL
@@ -7048,7 +7047,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     vessel_type <- NULL
     vessel_statut <- NULL
     nb_activity <- NULL
-    trip_previous_id <- NULL
     eez_calculated <- NULL
     X <- NULL
     Y <- NULL
@@ -7341,8 +7339,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           DBI::dbDisconnect(data_connection[[i]][[2]])
         }
         # 3 - Data design ----
-        # Create an intermediate dataset without information from previous trips to limit duplication problems in previous trips
-        data_trip_unprecedented <- unique(subset(data_sql$data_trip, select = -c(trip_previous_id, harbour_id_landing_trip_previous, harbour_label_landing_trip_previous)))
         # Retrieve trip : retrieve the vessel code, end of the trip of all the trip that have been selected
         colnames_trip_id <- c("trip_id", "vessel_code", "trip_enddate")
         # Retrieve trip route : retrieve the vessel code, end of the trip, date of route of all the route that have been selected
@@ -7358,22 +7354,52 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         # Retrieve trip well activity species : retrieve the vessel code, end of the trip, well label, weight category code and species FAO code of all the well activity species that have been selected
         colnames_wellactivityspecies_id <- c("wellactivityspecies_id", "vessel_code", "trip_enddate", "well_label", "weightcategory_code", "species_fao_code")
         # Reconstructs info from previous trips in different databases
-        for (i in data_sql$data_trip[is.na(data_sql$data_trip$trip_previous_id), "trip_id", drop = TRUE]) {
+        if (!codama::r_table_checking(
+          r_table = data_sql$data_previous_trip,
+          type = "data.frame",
+          column_name = c("trip_previous_id", "trip_id", "vessel_code", "trip_enddate", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_landing", "harbour_label_landing"),
+          column_type = c("character", "character", "character", "Date", "character", "character", "character", "character"),
+          output = "logical"
+        )) {
+          codama::r_table_checking(
+            r_table = data_sql$data_previous_trip,
+            type = "data.frame",
+            column_name = c("trip_previous_id", "trip_id", "vessel_code", "trip_enddate", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_landing", "harbour_label_landing"),
+            column_type = c("character", "character", "character", "Date", "character", "character", "character", "character"),
+            output = "error"
+          )
+        }
+        for (i in data_sql$data_previous_trip[is.na(data_sql$data_previous_trip$trip_previous_id), "trip_id", drop = TRUE]) {
           # Recovers info from trip that has no previous trip
-          current_data <- data_sql$data_trip[data_sql$data_trip$trip_id %in% i, ]
+          current_data <- data_sql$data_previous_trip[data_sql$data_previous_trip$trip_id %in% i, ]
           # Search for trips from the same vessel and with a date lower than the current trip
-          date_previous_trip <- data_sql$data_trip[data_sql$data_trip$vessel_code %in% current_data$vessel_code & current_data$trip_enddate > data_sql$data_trip$trip_enddate, "trip_enddate", drop = TRUE]
+          date_previous_trip <- data_sql$data_previous_trip[data_sql$data_previous_trip$vessel_code %in% current_data$vessel_code & current_data$trip_enddate > data_sql$data_previous_trip$trip_enddate, "trip_enddate", drop = TRUE]
           if (length(date_previous_trip) > 0) {
             date_min_full_trip <- max(date_previous_trip, na.rm = TRUE)
-            previous_trip <- data_sql$data_trip[data_sql$data_trip$vessel_code %in% current_data$vessel_code & data_sql$data_trip$trip_enddate == date_min_full_trip, ]
+            previous_trip <- data_sql$data_previous_trip[data_sql$data_previous_trip$vessel_code %in% current_data$vessel_code & data_sql$data_previous_trip$trip_enddate == date_min_full_trip, ]
             # Assigns information from previous trip
-            data_sql$data_trip[data_sql$data_trip$trip_id %in% i, c("trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous")] <- previous_trip[, c("trip_id", "harbour_id_landing", "harbour_label_landing"), drop = TRUE]
+            data_sql$data_previous_trip[data_sql$data_previous_trip$trip_id %in% i, c("trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous")] <- previous_trip[, c("trip_id", "harbour_id_landing", "harbour_label_landing"), drop = TRUE]
           }
         }
         # Remove trips not selected by the user but which have been useful for finding previous trips located in another database
-        data_sql$data_trip <- data_sql$data_trip %>%
+        data_sql$data_previous_trip <- data_sql$data_previous_trip %>%
           dplyr::filter(trip_id %in% trip_select()$trip_id_data$trip_id)
         # Reconstructs full trips from different databases
+        if (!codama::r_table_checking(
+          r_table = data_sql$data_full_trip,
+          type = "data.frame",
+          column_name = c("trip_end_full_trip_id", "trip_id", "vessel_id", "trip_enddate"),
+          column_type = c("character", "character", "character", "Date"),
+          output = "logical"
+        )) {
+          codama::r_table_checking(
+            r_table = data_sql$data_full_trip,
+            type = "data.frame",
+            column_name = c("trip_end_full_trip_id", "trip_id", "vessel_id", "trip_enddate"),
+            column_type = c("character", "character", "character", "Date"),
+            output = "error"
+          )
+        }
         for (i in data_sql$data_full_trip[is.na(data_sql$data_full_trip$trip_end_full_trip_id) & !is.na(data_sql$data_full_trip$trip_id), "trip_id", drop = TRUE]) {
           # Recover trip info that doesn't belong to a finished full trip
           current_data <- data_sql$data_full_trip[data_sql$data_full_trip$trip_id %in% i, ]
@@ -7386,17 +7412,17 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           }
         }
         # Checks data consistency
-        if (nrow(data_sql$data_trip) != length(trip_select()$trip_id_data$trip_id)) {
-          warning(text_object_more_or_less(id = trip_select()$trip_id_data$trip_id, result_check = data_sql$data_trip$trip_id))
+        if (nrow(data_sql$data_previous_trip) != length(trip_select()$trip_id_data$trip_id)) {
+          warning(text_object_more_or_less(id = trip_select()$trip_id_data$trip_id, result_check = data_sql$data_previous_trip$trip_id))
         }
         # Uses a function which indicates whether the selected trips contain activities or not
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check trip activity inspector", sep = "")
-        check_trip_activity <- check_trip_activity_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_sql$data_activity, output = "report")
+        check_trip_activity <- check_trip_activity_inspector(dataframe1 = data_sql$data_trip, dataframe2 = data_sql$data_activity, output = "report")
         # Uses a function to format the table
         check_trip_activity <- table_display_trip(check_trip_activity, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "warning")
         # Uses a function which indicates whether the selected trips contain fishing time inconsistent
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check fishing time inspector", sep = "")
-        check_fishing_time <- check_fishing_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_sql$data_route, output = "report")
+        check_fishing_time <- check_fishing_time_inspector(dataframe1 = data_sql$data_trip, dataframe2 = data_sql$data_route, output = "report")
         # Uses a function to format the table
         check_fishing_time <- table_display_trip(check_fishing_time, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
@@ -7407,7 +7433,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain sea time inconsistent
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sea time inspector", sep = "")
-        check_sea_time <- check_sea_time_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_sql$data_route, output = "report")
+        check_sea_time <- check_sea_time_inspector(dataframe1 = data_sql$data_trip, dataframe2 = data_sql$data_route, output = "report")
         # Uses a function to format the table
         check_sea_time <- table_display_trip(check_sea_time, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
@@ -7418,7 +7444,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain landing total weight inconsistent with vessel capacity
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing consistent inspector", sep = "")
-        check_landing_consistent <- check_landing_consistent_inspector(dataframe1 = data_trip_unprecedented, output = "report")
+        check_landing_consistent <- check_landing_consistent_inspector(dataframe1 = data_sql$data_trip, output = "report")
         # Uses a function to format the table
         check_landing_consistent <- table_display_trip(check_landing_consistent, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "warning")
         # Modify the table for display purposes: rename column
@@ -7429,7 +7455,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain the total landed weight for canneries inconsistent with the weights of each landing for the canneries
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check landing total weight inspector", sep = "")
-        check_landing_total_weigh <- check_landing_total_weight_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_sql$data_landing, output = "report", epsilon = config_data()[["epsilon"]])
+        check_landing_total_weigh <- check_landing_total_weight_inspector(dataframe1 = data_sql$data_trip, dataframe2 = data_sql$data_landing, output = "report", epsilon = config_data()[["epsilon"]])
         # Uses a function to format the table
         check_landing_total_weigh <- table_display_trip(check_landing_total_weigh, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
@@ -7440,7 +7466,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain the trip start and end date inconsistent with the dates of activity
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check temporal limit inspector", sep = "")
-        check_temporal_limit_inspector_data <- check_temporal_limit_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_sql$data_route, output = "report")
+        check_temporal_limit_inspector_data <- check_temporal_limit_inspector(dataframe1 = data_sql$data_trip, dataframe2 = data_sql$data_route, output = "report")
         # Data preparation
         check_temporal_limit <- check_temporal_limit_inspector_data[[1]]
         check_temporal_limit_data_plot <- check_temporal_limit_inspector_data[[2]]
@@ -7466,7 +7492,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain the trip harbour of departure of the current trip inconsistent with the harbour of landing of the previous trip
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check harbour inspector", sep = "")
-        check_harbour <- check_harbour_inspector(dataframe1 = data_sql$data_trip, output = "report")
+        check_harbour <- check_harbour_inspector(dataframe1 = data_sql$data_previous_trip, output = "report")
         # Uses a function to format the table
         check_harbour <- table_display_trip(check_harbour, trip_select()$trip_id_data[, colnames_trip_id], type_inconsistency = "error")
         # Modify the table for display purposes: rename column
@@ -7477,7 +7503,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the selected trips contain RF1 inconsistent with threshold values
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check raising factor inspector", sep = "")
-        check_raising_factor <- check_raising_factor_inspector(dataframe1 = data_trip_unprecedented, dataframe2 = data_sql$data_catch_full_trip, dataframe3 = data_sql$data_landing_full_trip, dataframe4 = data_sql$data_full_trip, output = "report")
+        check_raising_factor <- check_raising_factor_inspector(dataframe1 = data_sql$data_trip, dataframe2 = data_sql$data_catch_full_trip, dataframe3 = data_sql$data_landing_full_trip, dataframe4 = data_sql$data_full_trip, output = "report")
         # Uses a function to format the table
         check_raising_factor <- table_display_trip(check_raising_factor, trip_select()$trip_id_data[, c(colnames_trip_id, "wellcontentstatus_landing_label")], type_inconsistency = "info")
         check_raising_factor$rf1 <- trunc(check_raising_factor$rf1 * 100000) / 100000
@@ -7513,7 +7539,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the ocean declaration is consistent with activity position
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check position inspector", sep = "")
-        check_position_inspector_data <- check_position_inspector(dataframe1 = data_sql$data_activity, dataframe2 = data_trip_unprecedented, dataframe3 = referential_file()[["shape_sea"]], output = "report")
+        check_position_inspector_data <- check_position_inspector(dataframe1 = data_sql$data_activity, dataframe2 = data_sql$data_trip, dataframe3 = referential_file()[["shape_sea"]], output = "report")
         check_position_data_plot <- check_position_inspector_data[[2]]
         # Retrieves X, Y coordinates of position
         check_position_data_plot_geo <- check_position_data_plot %>%
@@ -7632,7 +7658,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         # Add names of file referential geographical shape (store in referential_file)
         check_eez_data_plot$referential_geographical_shape <- "shape_eez"
         check_eez_data_plot <- data_to_list(data = check_eez_data_plot, name_col_dataplot = "data", colname_id = "activity_id", colname_plot = c("activity_position", "activity_crs"), colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3", "eez_calculated", "X", "Y", "referential_geographical_shape"), rename_colname_info = c("vessel_code", "trip_enddate", "activity_date", "activity_number", "fpazone_code", "fpazone_country_iso3", "eez_calculated", "X", "Y", "referential_geographical_shape"))
-        # Name of the table containing the position plot information in calcul_check_server
+        # Name of the table containing the eez plot information in calcul_check_server
         check_eez <- check_eez_inspector_data[[1]]
         check_eez$name_table <- "check_eez_data_plot"
         # Add button and data for plot in table
@@ -7678,7 +7704,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the sample well number is consistent with the associated trip well numbers
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check well number consistent inspector", sep = "")
-        check_well_number <- check_well_number_consistent_inspector(dataframe1 = data_sql$data_sample, dataframe2 = data_sql$data_well, dataframe3 = data_trip_unprecedented, output = "report")
+        check_well_number <- check_well_number_consistent_inspector(dataframe1 = data_sql$data_sample, dataframe2 = data_sql$data_well, dataframe3 = data_sql$data_trip, output = "report")
         # Uses a function to format the table
         check_well_number <- table_display_trip(check_well_number, data_sql$data_sample[, colnames_sample_id], type_inconsistency = "error")
         check_well_number <- dplyr::rename(
@@ -7706,7 +7732,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the sample is consistent for the weighting
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check weighting inspector", sep = "")
-        check_weighting <- check_weighting_inspector(dataframe1 = data_sql$data_sample, dataframe2 = data_sql$data_sampleactivity, dataframe3 = data_trip_unprecedented, dataframe4 = data_sql$data_landing, output = "report")
+        check_weighting <- check_weighting_inspector(dataframe1 = data_sql$data_sample, dataframe2 = data_sql$data_sampleactivity, dataframe3 = data_sql$data_trip, dataframe4 = data_sql$data_landing, output = "report")
         # Uses a function to format the table
         check_weighting <- table_display_trip(check_weighting, data_sql$data_sample[, colnames_sample_id], type_inconsistency = "error")
         check_weighting <- dplyr::rename(
@@ -7768,7 +7794,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         )
         # Uses a function which indicates whether the small and large sample weights is consistent for the presence of a sample and the absence of a harbour of landing
         message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check sample harbour inspector", sep = "")
-        check_sample_harbour <- check_sample_harbour_inspector(dataframe1 = data_sql$data_sample, dataframe2 = data_trip_unprecedented, output = "report")
+        check_sample_harbour <- check_sample_harbour_inspector(dataframe1 = data_sql$data_sample, dataframe2 = data_sql$data_trip, output = "report")
         # Uses a function to format the table
         check_sample_harbour <- table_display_trip(check_sample_harbour, data_sql$data_sample[, colnames_sample_id], type_inconsistency = "error")
         check_sample_harbour <- dplyr::rename(
@@ -7779,7 +7805,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         if ("data_vms" %in% names(trip_select())) {
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check anapo inspector", sep = "")
           # Recovers all trip positions
-          check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = data_sql$data_activity, dataframe2 = data_trip_unprecedented, dataframe3 = trip_select()$data_vms, activity_crs = ifelse(length(stats::na.omit(unique(data_sql$data_activity$activity_crs))) == 0, 4326, stats::na.omit(unique(data_sql$data_activity$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(trip_select()$data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(trip_select()$data_vms$vms_crs))), output = "report")
+          check_anapo_inspector_data <- check_anapo_inspector(dataframe1 = data_sql$data_activity, dataframe2 = data_sql$data_trip, dataframe3 = trip_select()$data_vms, activity_crs = ifelse(length(stats::na.omit(unique(data_sql$data_activity$activity_crs))) == 0, 4326, stats::na.omit(unique(data_sql$data_activity$activity_crs))), vms_crs = ifelse(length(stats::na.omit(unique(trip_select()$data_vms$vms_crs))) == 0, 4326, stats::na.omit(unique(trip_select()$data_vms$vms_crs))), output = "report")
           check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_data[[2]], data_sql$data_activity[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = dplyr::join_by(activity_id))
           # Add information on whether the activity is linked to a grounding (object or buoy) or not in data plot
           data_tmp_grounding <- column_grounding(data = check_anapo_inspector_dataplot, data_transmittingbuoy = data_sql$data_transmittingbuoy)
@@ -7879,7 +7905,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity, data_vms[, c("vms_date_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_date_id))
           check_anapo_activity_dataplot <- data_to_list(data = check_anapo_activity_dataplot, name_col_dataplot = "data_vms", colname_id = "vms_date_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"), rename_colname_info = c("date_vms", "crs_vms", "vessel_code", "vessel_type"))
           if (nrow(check_anapo_activity) > 0) {
-            # Name of the table containing the Anapo plot information in calcul_check_server
+            # Name of the table containing the Anapo activity plot information in calcul_check_server
             check_anapo_activity$name_table <- "check_anapo_activity_dataplot"
             # Add button and data for plot in table
             check_anapo_activity <- data_button_plot(id = "check_anapo_activity", data = check_anapo_activity, colname_id = "vms_date_id", colname_info = c("name_table"))
