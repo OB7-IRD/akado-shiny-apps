@@ -7873,15 +7873,17 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             dplyr::distinct() %>%
             dplyr::relocate(vessel_code)
           # Check that VMS can be associated with activities on the same date
-          check_anapo_activity_consistent <- check_anapo_activity_consistent_inspector(dataframe1 = data_vms_date, dataframe2 = trip_select()$data_activity_vms, output = "report") %>%
+          check_anapo_activity <- check_anapo_activity_consistent_inspector(dataframe1 = data_vms_date, dataframe2 = trip_select()$data_activity_vms, output = "report") %>%
             dplyr::rename(vms_date_id = vms_id)
           # Retrieving information for the plot
-          check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity_consistent, data_vms[, c("vms_date_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_date_id))
+          check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity, data_vms[, c("vms_date_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_date_id))
           check_anapo_activity_dataplot <- data_to_list(data = check_anapo_activity_dataplot, name_col_dataplot = "data_vms", colname_id = "vms_date_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"), rename_colname_info = c("date_vms", "crs_vms", "vessel_code", "vessel_type"))
-          # Name of the table containing the Anapo plot information in calcul_check_server
-          check_anapo_activity_consistent$name_table <- "check_anapo_activity_dataplot"
-          # Add button and data for plot in table
-          check_anapo_activity <- data_button_plot(id = "check_anapo_activity", data = check_anapo_activity_consistent, colname_id = "vms_date_id", colname_info = c("name_table"))
+          if (nrow(check_anapo_activity) > 0) {
+            # Name of the table containing the Anapo plot information in calcul_check_server
+            check_anapo_activity$name_table <- "check_anapo_activity_dataplot"
+            # Add button and data for plot in table
+            check_anapo_activity <- data_button_plot(id = "check_anapo_activity", data = check_anapo_activity, colname_id = "vms_date_id", colname_info = c("name_table"))
+          }
           # Uses a function to format the table
           check_anapo_activity <- table_display_trip(check_anapo_activity, data_vms_date[, c("vessel_code", "vms_date_id", "vms_date", "vms_codevessel", "vessel_type", "vessel_statut")], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
