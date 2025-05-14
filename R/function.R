@@ -6873,32 +6873,28 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
             db_port = observe_database[["port"]]
           )))
         }
-        # Selected trip with the vessel code and the end date of the trip
+        trip_id_data <- furdeb::data_extraction(
+          type = "database",
+          file_path = system.file("sql",
+                                  "trip_selected.sql",
+                                  package = "AkadoR"),
+          database_connection = data_connection,
+          anchor = list(select_item_1 = config_data()[["logbook_program"]],
+                        select_item_2 = as.character(parent_in$vessel_number),
+                        select_item_3 = parent_in$trip_end_date,
+                        select_item_4 = parent_in$trip_start_date_range,
+                        select_item_5 = parent_in$trip_end_date_range)
+        )
+        # If selected trip with the vessel code and the end date of the trip
         if (isTruthy(parent_in$vessel_number) && isTruthy(parent_in$trip_end_date)) {
-          trip_id_data <- furdeb::data_extraction(
-            type = "database",
-            file_path = system.file("sql",
-                                    "trip_selected_vesselcode_enddate.sql",
-                                    package = "AkadoR"),
-            database_connection = data_connection,
-            anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = as.character(parent_in$vessel_number), select_item_3 = parent_in$trip_end_date)
-          )
           # VMS selection parameter date range by user-selected trip duration
           start_date_range <- min(trip_id_data$trip_startdate)
           end_date_range <- max(trip_id_data$trip_enddate)
           # VMS selection parameter vessel number by user-selected explicit
           vessel_number <- as.character(parent_in$vessel_number)
         }
-        # Selected trip with a date range
+        # If selected trip with a date range
         if (isTruthy(parent_in$trip_start_date_range) && isTruthy(parent_in$trip_end_date_range)) {
-          trip_id_data <- furdeb::data_extraction(
-            type = "database",
-            file_path = system.file("sql",
-                                    "trip_selected_startdate_enddate.sql",
-                                    package = "AkadoR"),
-            database_connection = data_connection,
-            anchor = list(select_item_1 = config_data()[["logbook_program"]], select_item_2 = parent_in$trip_start_date_range, select_item_3 = parent_in$trip_end_date_range)
-          )
           # VMS selection parameter date range by user-selected period explicit
           start_date_range <- parent_in$trip_start_date_range
           end_date_range <- parent_in$trip_end_date_range
