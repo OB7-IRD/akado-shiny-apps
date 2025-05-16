@@ -6857,6 +6857,14 @@ config_data_server <- function(id, parent_in) {
 
 # Shiny function : Retrieves the list of trips and VMS selected by the user
 trip_select_server <- function(id, parent_in, text_error_trip_select, config_data) {
+  # 0 - Global variables assignement ----
+  vms_id <- NULL
+  vessel_code <- NULL
+  vms_date <- NULL
+  vms_codevessel <- NULL
+  vessel_type <- NULL
+  vessel_statut <- NULL
+  # 1 - Data design ----
   moduleServer(id, function(input, output, session) {
     eventReactive(input$start_button, {
       # If the connection data exists and there was no error in the trip selection, makes the connection
@@ -6935,11 +6943,16 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
               database_connection = data_connection_vms,
               anchor = list(select_item_1 = start_date_range, select_item_2 = end_date_range, select_item_3 = vessel_number)
             )
-            # Force date type, otherwise empty dataframe sets to charactere format
-            data_vms$vms_date <- as.Date(data_vms$vms_date)
             # Disconnection to the bases
             DBI::dbDisconnect(data_connection_vms[[2]])
-            list_return <- list(trip_id_data = trip_id_data, data_vms = data_vms, data_activity_vms = data_activity_vms)
+            # Force date type, otherwise empty dataframe sets to charactere format
+            data_vms$vms_date <- as.Date(data_vms$vms_date)
+            # Removal of duplicate lines for date and vessel (id, time, position, ... not considered here)
+            data_vms_route <- data_vms %>%
+              dplyr::select(vms_id, vms_date, vessel_code, vms_codevessel, vessel_type, vessel_statut) %>%
+              dplyr::distinct() %>%
+              dplyr::relocate(vessel_code)
+            list_return <- list(trip_id_data = trip_id_data, data_vms = data_vms, data_vms_route = data_vms_route, data_activity_vms = data_activity_vms)
           }else {
             list_return <- list(trip_id_data = trip_id_data)
           }
@@ -7035,10 +7048,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
     ocean_calculate <- NULL
     weight <- NULL
     count_subsamplenumber <- NULL
-    vessel_code <- NULL
     vms_id <- NULL
-    vms_date <- NULL
-    vms_date_id <- NULL
     vms_codevessel <- NULL
     vessel_type <- NULL
     vessel_statut <- NULL
@@ -7885,29 +7895,19 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           )
           # Uses a function which indicates whether VMS is consistent for the presence of activity
           message(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start anapo activity consistent inspector", sep = "")
-          # Creation of an identifier for a vessel VMS at a given date
-          data_vms <- trip_select()$data_vms %>%
-            dplyr::mutate(vms_date_id = paste0(vessel_code, "_", vms_date))
-          # Removal of duplicate lines for date and vessel (id, time, position, ... not considered here)
-          data_vms_date <- data_vms  %>%
-            dplyr::select(vms_date_id, vms_date, vessel_code, vms_codevessel, vessel_type, vessel_statut) %>%
-            dplyr::mutate(vms_id = vms_date_id) %>%
-            dplyr::distinct() %>%
-            dplyr::relocate(vessel_code)
           # Check that VMS can be associated with activities on the same date
-          check_anapo_activity <- check_anapo_activity_consistent_inspector(dataframe1 = data_vms_date, dataframe2 = trip_select()$data_activity_vms, output = "report") %>%
-            dplyr::rename(vms_date_id = vms_id)
+          check_anapo_activity <- check_anapo_activity_consistent_inspector(dataframe1 = trip_select()$data_vms_route, dataframe2 = trip_select()$data_activity_vms, output = "report")
           # Retrieving information for the plot
-          check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity, data_vms[, c("vms_date_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_date_id))
-          check_anapo_activity_dataplot <- data_to_list(data = check_anapo_activity_dataplot, name_col_dataplot = "data_vms", colname_id = "vms_date_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"), rename_colname_info = c("date_vms", "crs_vms", "vessel_code", "vessel_type"))
+          check_anapo_activity_dataplot <- dplyr::inner_join(check_anapo_activity, trip_select()$data_vms[, c("vms_id", "vms_time", "vms_position", "vms_crs")], by = dplyr::join_by(vms_id))
+          check_anapo_activity_dataplot <- data_to_list(data = check_anapo_activity_dataplot, name_col_dataplot = "data_vms", colname_id = "vms_id", colname_plot = c("vms_position", "vms_time"), colname_info = c("vms_date", "vms_crs", "vessel_code", "vessel_type"), rename_colname_info = c("date_vms", "crs_vms", "vessel_code", "vessel_type"))
           if (nrow(check_anapo_activity) > 0) {
             # Name of the table containing the Anapo activity plot information in calcul_check_server
             check_anapo_activity$name_table <- "check_anapo_activity_dataplot"
             # Add button and data for plot in table
-            check_anapo_activity <- data_button_plot(id = "check_anapo_activity", data = check_anapo_activity, colname_id = "vms_date_id", colname_info = c("name_table"))
+            check_anapo_activity <- data_button_plot(id = "check_anapo_activity", data = check_anapo_activity, colname_id = "vms_id", colname_info = c("name_table"))
           }
           # Uses a function to format the table
-          check_anapo_activity <- table_display_trip(check_anapo_activity, data_vms_date[, c("vessel_code", "vms_date_id", "vms_date", "vms_codevessel", "vessel_type", "vessel_statut")], type_inconsistency = "error")
+          check_anapo_activity <- table_display_trip(check_anapo_activity, trip_select()$data_vms_route[, c("vessel_code", "vms_id", "vms_date", "vms_codevessel", "vessel_type", "vessel_statut")], type_inconsistency = "error")
           # Modify the table for display purposes: rename column
           check_anapo_activity <- dplyr::rename(
             .data = check_anapo_activity,

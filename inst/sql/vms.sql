@@ -1,6 +1,7 @@
 --- Recovers information about the VMS of the trip
 SELECT 
-    n.id::text AS vms_id, 
+    CONCAT(tb."NUMBAT", '_', n."date"::date) AS vms_id,
+    n.id::text AS clean_nafpositionmessage_id, 
     n."date"::date AS vms_date, 
     n."time"::text AS vms_time,
     st_asText(n.the_geom)::text AS vms_position,
@@ -15,4 +16,4 @@ FROM
 WHERE 
    n."date" >= ?select_item_1 AND 
    n."date" <= ?select_item_2 AND
-   (tb."NUMBAT" IN (SELECT NULLIF(val, '')::integer FROM UNNEST(ARRAY[ ?select_item_3 ]) AS val) OR CONCAT( ?select_item_3 ) IN ('')) 
+   (tb."NUMBAT" = NULLIF( ?select_item_3 , '')::integer OR (?select_item_3) IN (''))
