@@ -32,12 +32,12 @@ mod_table_ui <- function(id, title = NULL, size_box = "col-sm-12 col-md-6 col-lg
 #' @param type_line_check {\link[base]{character}} expected. Reactive value containing the type of line selected by the user
 #' @param referential_file {\link[base]{list}} expected. Reactive list containing referential tables for all plot
 #' @param column_no_wrap {\link[base]{integer}} expected. Default values: NULL. Column numbers that should not be subject to automatic line breaks
-#' @param name_function_plot {\link[base]{character}} expected. Default values: NULL. Name of the function that creates the plot
-#' @param name_function_text_plot {\link[base]{character}} expected. Default values: NULL. Name of the function that creates the text to be displayed in the plot window
+#' @param function_plot {\link[base]{character}} expected. Default values: NULL. Name of the function that creates the plot
+#' @param function_text_plot {\link[base]{character}} expected. Default values: NULL. Name of the function that creates the text to be displayed in the plot window
 #' @param title_window {\link[base]{character}} expected. Default values: NULL. Plot window name
 #' @return The function returns nothing, instantiating the table
 #' @export
-mod_table_server <- function(id, data, name, type_line_check, referential_file, column_no_wrap = NULL, name_function_plot = NULL, name_function_text_plot = NULL, title_window = NULL) {
+mod_table_server <- function(id, data, name, type_line_check, referential_file, column_no_wrap = NULL, function_plot = NULL, function_text_plot = NULL, title_window = NULL) {
   # Local binding global variables
   . <- NULL
   # If no name is specified, use id as name
@@ -73,7 +73,7 @@ mod_table_server <- function(id, data, name, type_line_check, referential_file, 
     })
 
     # Display window and plot
-    if (!is.null(name_function_plot)) {
+    if (!is.null(function_plot)) {
       # Button name
       name_button <- paste0("button_", id)
       # Control plot, display in a window
@@ -90,7 +90,7 @@ mod_table_server <- function(id, data, name, type_line_check, referential_file, 
           }
         }
         # Retrieves all values of plot arguments
-        do.call(name_function_plot, c(data_tmp[names(data_tmp) %in% names(formals(name_function_plot))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(name_function_plot))]))
+        do.call(function_plot, c(data_tmp[names(data_tmp) %in% names(formals(function_plot))], list_tmp_referential_file[names(list_tmp_referential_file) %in% names(formals(function_plot))]))
       })
 
       # Control window
@@ -98,8 +98,8 @@ mod_table_server <- function(id, data, name, type_line_check, referential_file, 
         split_id <- strsplit(input[[name_button]], "&")[[1]]
         data <- data()[[split_id[1]]][[split_id[2]]]
         # Executes, if supplied by user, the function that indicates the text to be displayed
-        if (!is.null(name_function_text_plot)) {
-          text <- do.call(name_function_text_plot, data[names(data) %in% names(formals(name_function_text_plot))])
+        if (!is.null(function_text_plot)) {
+          text <- do.call(function_text_plot, data[names(data) %in% names(formals(function_text_plot))])
         } else {
           text <- ""
         }
@@ -138,4 +138,4 @@ mod_table_server <- function(id, data, name, type_line_check, referential_file, 
 # mod_table_ui("table_1", title, size_box, text)
 
 ## To be copied in the server
-# mod_table_server("table_1", data, name, type_line_check, column_no_wrap, name_function_plot, name_function_text_plot, title_plot)
+# mod_table_server("table_1", data, name, type_line_check, column_no_wrap, function_plot, function_text_plot, title_plot)

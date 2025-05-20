@@ -11,8 +11,8 @@ mod_table_server(
   type_line_check,
   referential_file,
   column_no_wrap = NULL,
-  name_function_plot = NULL,
-  name_function_text_plot = NULL,
+  function_plot = NULL,
+  function_text_plot = NULL,
   title_window = NULL
 )
 }
@@ -29,9 +29,9 @@ mod_table_server(
 
 \item{column_no_wrap}{{\link[base]{integer}} expected. Default values: NULL. Column numbers that should not be subject to automatic line breaks}
 
-\item{name_function_plot}{{\link[base]{character}} expected. Default values: NULL. Name of the function that creates the plot}
+\item{function_plot}{{\link[base]{character}} expected. Default values: NULL. Name of the function that creates the plot}
 
-\item{name_function_text_plot}{{\link[base]{character}} expected. Default values: NULL. Name of the function that creates the text to be displayed in the plot window}
+\item{function_text_plot}{{\link[base]{character}} expected. Default values: NULL. Name of the function that creates the text to be displayed in the plot window}
 
 \item{title_window}{{\link[base]{character}} expected. Default values: NULL. Plot window name}
 }
