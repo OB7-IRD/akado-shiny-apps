@@ -6969,7 +6969,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
 }
 
 # Shiny function : Performs all calculations to test for inconsistencies
-calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data, referential_file, sql_info, check_info) {
+calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data, referential_file, sql_info, check_info, column_user_info) {
   moduleServer(id, function(input, output, session) {
     # 0 - Global variables assignement ----
     trip_id <- NULL
@@ -7167,6 +7167,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         name_data <- paste0("data_", sql[["file"]])
         return(list(file = sql[["file"]], use_selection_other_sql = use_selection_other_sql, name_data = name_data))
       })
+      name_column_sql <- sapply(sql_info, `[[`, "column_user_id")
       name_file_sql <- sapply(info_sql_internal, `[[`, "file")
       name_data_sql <- sapply(info_sql_internal, `[[`, "name_data")
       # Identifies SQL that will also be used to retrieve other SQLs
@@ -7418,6 +7419,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           }
         }
       })
+      name_rename_column_user_check <- sapply(check_info, `[[`, "rename_column_user")
       if (any(names(trip_select()) %in% c("check", "plot"))) {
         stop(
           format(
@@ -7471,6 +7473,64 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           paste0(names(config_data()), collapse = ", "),
           "\n Names of reference data sets : ",
           paste0(names(referential_file()), collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!codama::r_type_checking(
+        r_object = column_user_info[["rename_id_column_user"]],
+        type = "list",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = column_user_info[["rename_id_column_user"]],
+          type = "list",
+          output = "error"
+        ))
+      }
+      if (!all(names(column_user_info[["rename_id_column_user"]]) %in% unlist(name_column_sql))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - The column names of sub-list named 'rename_id_column_user' must also exist in at least one sub-list 'column_user_id', if the rename only concerns a specific check, then use the 'rename_column_user' sub-list.",
+          "\n Problematic column names of sub-list named 'rename_id_column_user' : ",
+          paste0(names(column_user_info[["rename_id_column_user"]])[!(names(column_user_info[["rename_id_column_user"]]) %in% unlist(name_column_sql))], collapse = ", "),
+          sep = ""
+        )
+      }
+      if (any(names(column_user_info[["rename_id_column_user"]]) %in% names(unlist(name_rename_column_user_check)))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - The column names of sub-list named 'rename_id_column_user' must not also be indicated in a sub-list 'rename_column_user', either the column allows the user to identify the row, in which case use sub-list 'rename_id_column_user', or it is specific to a check, in which case use sub-list 'rename_column_user'.",
+          "\n Problematic column names of sub-list named 'rename_id_column_user' : ",
+          paste0(names(column_user_info[["rename_id_column_user"]])[names(column_user_info[["rename_id_column_user"]]) %in% names(unlist(name_rename_column_user_check))], collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!codama::r_type_checking(
+        r_object = column_user_info[["order_id_column_user"]],
+        type = "character",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = column_user_info[["order_id_column_user"]],
+          type = "character",
+          output = "error"
+        ))
+      }
+      if (!all(names(column_user_info[["order_id_column_user"]]) %in% unlist(name_column_sql))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - The column names of sub-list named 'order_id_column_user' must also exist in at least one sub-list 'column_user_id'.",
+          "\n Problematic column names of sub-list named 'order_id_column_user' : ",
+          paste0(names(column_user_info[["order_id_column_user"]])[!(names(column_user_info[["order_id_column_user"]]) %in% unlist(name_column_sql))], collapse = ", "),
           sep = ""
         )
       }
@@ -7771,10 +7831,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               # Finds the table containing the information needed for the user to identify the rows
               if (check[["table_user_id"]] %in% name_file_sql) {
                 # Extract data in data_sql
-                table_display_trip_data_info <- data_sql[[paste0("data_", check[["table_user_id"]])]][,  c(sql_info[[which(name_file_sql == check[["table_user_id"]])]][["column_user_id"]], check[["additional_column_user"]])]
+                table_display_data_info <- data_sql[[paste0("data_", check[["table_user_id"]])]][,  c(sql_info[[which(name_file_sql == check[["table_user_id"]])]][["column_user_id"]], check[["additional_column_user"]])]
               } else if (check[["table_user_id"]] %in% names(trip_select())) {
                 # Extract data in trip_select
-                table_display_trip_data_info <- trip_select()[[check[["table_user_id"]]]][,  c(check[["additional_column_user"]])]
+                table_display_data_info <- trip_select()[[check[["table_user_id"]]]][,  c(check[["additional_column_user"]])]
               } else {
                 stop(
                   format(
@@ -7791,7 +7851,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                 )
               }
               # Uses a function to format the table (adds data_info columns allowing the user to identify rows (predefined column depending on the table specified in table_user_id for control purposes, with the possibility of adding columns in additional_column_user but which must already be present in the SQL linked to table_user_id) and modifies the display of certain columns (addition of icon, coordinate conversion, rename))
-              table_result <- table_display_trip(data = table_result, data_info = table_display_trip_data_info, type_inconsistency = check[["type"]])
+              table_result <- table_display(data = table_result, data_info = table_display_data_info, type_inconsistency = check[["type"]], rename = column_user_info[["rename_id_column_user"]], order = column_user_info[["order_id_column_user"]])
               # Modify the table for display purposes: rename column
               if (!is.null(check[["rename_column_user"]])) {
                 table_result <- table_result %>% dplyr::rename_with(~ unlist(check[["rename_column_user"]]), names(check[["rename_column_user"]]))
@@ -8314,28 +8374,84 @@ tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referen
   )
 }
 
-# Shiny function : Function which formats the trip data for display inconsistency
-table_display_trip <- function(data, data_info, type_inconsistency) {
-  # Global variables assignement
+#' @name table_display
+#' @title Transforms table display
+#' @description Shiny function : Function that formats the display of check results, positions, row order and column names
+#' @param data {\link[base]{data.frame}} expected. data frame containing check information
+#' @param data_info {\link[base]{data.frame}} expected. data frame containing information to enable the user to identify lines
+#' @param type_inconsistency {\link[base]{character}} expected. Control type. You can choose between "error", "warning" or "info".
+#' @param rename {\link[base]{list}} expected. List of column names to be renamed (the left part is the column names, the right part is the new names)
+#' @param order {\link[base]{character}} expected. Column names according to which rows are to be sorted.
+#' @returns The function returns a {\link[base]{data.frame}}
+#' @export
+table_display <- function(data, data_info, type_inconsistency, rename, order) {
+  # 0 - Global variables assignement ----
   . <- NULL
   `:=` <- NULL
-  vessel_code <- NULL
-  trip_enddate <- NULL
-  activity_date <- NULL
-  activity_time <- NULL
-  activity_number <- NULL
-  vesselactivity_code <- NULL
-  sample_number <- NULL
-  species_fao_code <- NULL
-  sizemeasuretype_code <- NULL
-  samplespeciesmeasure_sizeclass <- NULL
-  samplespecies_subsamplenumber <- NULL
-  vms_date <- NULL
   X <- NULL
   Y <- NULL
-  well_label <- NULL
-  weightcategory_code <- NULL
   button <- NULL
+  # 1 - Arguments verification ----
+  if (!codama::r_table_checking(
+    r_table = data,
+    type = "data.frame",
+    column_name = c("logical"),
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = data,
+      type = "data.frame",
+      column_name = c("logical"),
+      output = "error"
+    )
+  }
+  if (!codama::r_table_checking(
+    r_table = data_info,
+    type = "data.frame",
+    output = "logical"
+  )) {
+    codama::r_table_checking(
+      r_table = data_info,
+      type = "data.frame",
+      output = "error"
+    )
+  }
+  if (!codama::r_type_checking(
+    r_object = type_inconsistency,
+    type = "character",
+    allowed_value = c("error", "warning", "info"),
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = type_inconsistency,
+      type = "character",
+      allowed_value = c("error", "warning", "info"),
+      output = "error"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = rename,
+    type = "list",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = rename,
+      type = "list",
+      output = "error"
+    ))
+  }
+  if (!codama::r_type_checking(
+    r_object = order,
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = order,
+      type = "character",
+      output = "error"
+    ))
+  }
+  # 2 - Data design ----
   # Retrieves the name of the column containing the ID
   colname_id <- grep("_id$", colnames(data), value = TRUE)
   # Deletes duplicate columns
@@ -8375,75 +8491,17 @@ table_display_trip <- function(data, data_info, type_inconsistency) {
       dplyr::relocate(new_name_column, .after = column) %>%
       dplyr::select(-column)
   }
-  # Modify the table for display purposes: rename column
-  if (length(grep("^vms_", colnames(data), value = TRUE)) != 0) {
-    # Sort rows by vessel
-    data <- data %>% dplyr::arrange(vessel_code)
-    # Rename column
+  # Sort rows
+  order_tmp <- order[order %in% colnames(data)]
+  data <- data %>% dplyr::arrange_at(order_tmp)
+  # Rename column
+  rename_tmp <- rename[names(rename) %in% colnames(data)]
+  data <- data %>% dplyr::rename_with(~ unlist(rename_tmp), names(rename_tmp))
+  # Modify the table for display purposes specifically for logical : rename column
+  if (length(grep("logical", colnames(data), value = TRUE)) != 0) {
     data <- dplyr::rename(
       .data = data,
-      `Vessel code` = vessel_code,
-      `VMS date` = vms_date,
       Check = logical
-    )
-  }else {
-    # Sort rows by date
-    data <- data %>% dplyr::arrange(trip_enddate)
-    # Rename column
-    data <- dplyr::rename(
-      .data = data,
-      `Vessel code` = vessel_code,
-      `Trip enddate` = trip_enddate,
-      Check = logical
-    )
-  }
-  # Modify the table for display purposes specifically for routes : rename column
-  if (length(grep("^route_", colnames(data), value = TRUE)) != 0) {
-    data <- dplyr::rename(
-      .data = data,
-      `Activity date` = activity_date
-    )
-  }
-  # Modify the table for display purposes specifically for activities : rename column
-  if (length(grep("^activity_", colnames(data), value = TRUE)) != 0) {
-    data <- dplyr::rename(
-      .data = data,
-      `Activity date` = activity_date,
-      `Activity time` = activity_time,
-      `Activity number` = activity_number,
-      `Vessel activity` = vesselactivity_code
-    )
-  }
-  # Modify the table for display purposes specifically for samples : rename column
-  if (length(grep("^sample", colnames(data), value = TRUE)) != 0) {
-    data <- dplyr::rename(
-      .data = data,
-      `Sample number` = sample_number
-    )
-  }
-  # Modify the table for display purposes specifically for samples species : rename column
-  if (length(grep("^samplespecies", colnames(data), value = TRUE)) != 0) {
-    data <- dplyr::rename(
-      .data = data,
-      `Sub sample number` = samplespecies_subsamplenumber,
-      `FAO code` = species_fao_code,
-      `Size measure type` = sizemeasuretype_code
-    )
-  }
-  # Modify the table for display purposes specifically for samples species measure : rename column
-  if (length(grep("^samplespeciesmeasure", colnames(data), value = TRUE)) != 0) {
-    data <- dplyr::rename(
-      .data = data,
-      `Size class` = samplespeciesmeasure_sizeclass
-    )
-  }
-  # Modify the table for display purposes specifically for well activity species : rename column
-  if (length(grep("^wellactivityspecies", colnames(data), value = TRUE)) != 0) {
-    data <- dplyr::rename(
-      .data = data,
-      `Well` = well_label,
-      `FAO code` = species_fao_code,
-      `Weight category` = weightcategory_code
     )
   }
   # Modify the table for display purposes specifically for button : rename column

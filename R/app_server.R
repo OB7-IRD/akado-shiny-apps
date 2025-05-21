@@ -506,7 +506,7 @@ app_server <- function(input, output, session) {
                           need_vms = TRUE,
                           table_user_id = "vms_route",
                           additional_column_user = c("vessel_code", "vms_id", "vms_date", "vms_codevessel", "vessel_type", "vessel_statut"),
-                          rename_column_user = list(nb_activity = "Number activities", vessel_type = "Vessel type", vessel_statut = "Vessel statut", vms_codevessel = "VMS vessel code"),
+                          rename_column_user = list(nb_activity = "Number activities", vessel_type = "Vessel type", vessel_statut = "Vessel statut", vms_codevessel = "VMS vessel code", vms_date = "VMS date"),
                           size_box = "col-sm-12 col-md-12 col-lg-12",
                           column_no_wrap = c(2),
                           function_plot = plot_anapo_activity,
@@ -594,9 +594,14 @@ app_server <- function(input, output, session) {
                         anchor = list(select_item = "reference_list_species_well_distribution_control"),
                         use_selection_other_sql = FALSE,
                         vector = TRUE))
+  # Information about the column user
+  # rename_id_column_user : List of column names to be renamed (the left part is the column names of column_user_id in sql_info, the right part is the new names), mandatory, character expected
+  # order_id_column_user : Column names of column_user_id in sql_info, according to which rows are to be sorted
+  column_user_info <- list(rename_id_column_user = list(vessel_code = "Vessel code", trip_enddate = "Trip enddate", activity_date = "Activity date",  activity_time = "Activity time", activity_number = "Activity number", vesselactivity_code = "Vessel activity", sample_number = "Sample number", samplespecies_subsamplenumber = "Sub sample number", species_fao_code = "FAO code", sizemeasuretype_code = "Size measure type", samplespeciesmeasure_sizeclass = "Size class", well_label = "Well", weightcategory_code = "Weight category"),
+                           order_id_column_user = c("vessel_code", "trip_enddate"))
 
   # Performs all calculations to test for inconsistencies
-  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, sql_info = sql_info, check_info = check_info)
+  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, sql_info = sql_info, check_info = check_info, column_user_info = column_user_info)
 
   # Displays the errors and notifications that occur when you want to start the calculation
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
