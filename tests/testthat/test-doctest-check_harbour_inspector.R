@@ -4,7 +4,7 @@
 test_that("Doctest: check_harbour_inspector", {
   # Created from @doctest for `check_harbour_inspector`
   # Source file: R/function.R
-  # Source line: 943
+  # Source line: 947
   dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4", "5"), harbour_id_departure = c("1", "2", "3", NA, "1"), harbour_label_departure = c("Harbour_1",
     "Harbour_2", "Harbour_3", NA, "Harbour_1"), trip_previous_id = c(NA, "1", "2", NA, "6"), harbour_id_landing_trip_previous = c(NA, "2", "2", NA, NA),
   harbour_label_landing_trip_previous = c(NA, "Harbour_2", "Harbour_2", NA, NA))

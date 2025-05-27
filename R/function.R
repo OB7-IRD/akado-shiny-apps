@@ -669,7 +669,11 @@ check_landing_total_weight_inspector <- function(dataframe1,
   dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   dataframe1$difference <- ifelse(is.na(dataframe1$trip_landingtotalweight), 0, dataframe1$trip_landingtotalweight) - ifelse(is.na(dataframe1$sum_weightlanding), 0, dataframe1$sum_weightlanding)
   dataframe1$difference <- abs(dataframe1$difference)
-  dataframe1$epsilon <- epsilon
+  if (nrow(dataframe1) > 0) {
+    dataframe1$epsilon <- epsilon
+  } else {
+    dataframe1$epsilon <- numeric()
+  }
   # Compare sum difference with epsilon
   comparison <- codama::vector_comparison(
     first_vector = dataframe1$difference,
@@ -1328,8 +1332,13 @@ check_raising_factor_inspector <- function(dataframe1,
     dplyr::group_by(trip_end_full_trip_id) %>%
     dplyr::summarise(full_trip_sum_landing_weight = ifelse(all(is.na(sum_landing_weight)), sum_landing_weight[NA_integer_], sum(sum_landing_weight, na.rm = TRUE)), full_trip_sum_catch_weight = ifelse(all(is.na(sum_catch_weight)), sum_catch_weight[NA_integer_], sum(sum_catch_weight, na.rm = TRUE)), .groups = "drop") %>%
     dplyr::mutate(rf1 = full_trip_sum_landing_weight / full_trip_sum_catch_weight)
-  dataframe4$lower_threshold <- threshold[1]
-  dataframe4$upper_threshold <- threshold[2]
+  if (nrow(dataframe4) > 0) {
+    dataframe4$lower_threshold <- threshold[1]
+    dataframe4$upper_threshold <- threshold[2]
+  } else {
+    dataframe4$lower_threshold <- numeric()
+    dataframe4$upper_threshold <- numeric()
+  }
   # Selection of user-supplied trips
   dataframe4 <- dplyr::left_join(data.frame(trip_id = dataframe1$trip_id), unique(dataframe4), by = dplyr::join_by(trip_id))
   # Merge data
@@ -1531,7 +1540,11 @@ check_fishing_context_inspector <- function(dataframe1,
     dplyr::summarise(association_object_count = dplyr::n())
   # Merge
   dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(activity_id))
-  dataframe1$threshold <- 0
+  if (nrow(dataframe1) > 0) {
+    dataframe1$threshold <- 0
+  } else {
+    dataframe1$threshold <- numeric()
+  }
   dataframe1$association_object_count[is.na(dataframe1$association_object_count)] <- 0
   # Indicates whether or not an object-type association exists
   comparison <- codama::vector_comparison(
@@ -1743,7 +1756,11 @@ check_operation_inspector <- function(dataframe1,
   # Case of success status NA: no constraints
   dataframe1$logical_successstatus_schooltype[is.na(dataframe1$successstatus_code)] <- TRUE
   # Indicates whether captured weight is greater than 0
-  dataframe1$threshold <- 0
+  if (nrow(dataframe1) > 0) {
+    dataframe1$threshold <- 0
+  } else {
+    dataframe1$threshold <- numeric()
+  }
   comparison_successstatus_weight <- codama::vector_comparison(
     first_vector = dataframe1$activity_weight,
     second_vector = dataframe1$threshold,
@@ -2005,15 +2022,24 @@ check_position_inspector <- function(dataframe1,
   # 2 - Data design ----
   dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   # Indicates whether in land harbour
-  dataframe1$logical_harbour <- FALSE
+  if (nrow(dataframe1) > 0) {
+    dataframe1$logical_harbour <- FALSE
+  } else {
+    dataframe1$logical_harbour <- logical()
+  }
   # Formats spatial data activity
   data_geo_activity <- dataframe1 %>%
     dplyr::filter(!is.na(activity_position)) %>%
     sf::st_as_sf(., wkt = "activity_position", crs = activity_crs) %>%
     sf::st_transform(activity_position, crs = 4326)
   # Retrieves point coordinates
-  data_geo_activity <- data_geo_activity %>%
-    dplyr::mutate(dplyr::as_tibble(sf::st_coordinates(.)))
+  if (nrow(data_geo_activity) > 0) {
+    data_geo_activity <- data_geo_activity %>%
+      dplyr::mutate(dplyr::as_tibble(sf::st_coordinates(.)))
+  } else {
+    data_geo_activity$X <- numeric()
+    data_geo_activity$Y <- numeric()
+  }
   # Checks whether the point is within the bounds of CRS 4326
   data_geo_activity <- data_geo_activity %>%
     dplyr::mutate(logical_bounding = (X >= -180 & X <= 180 & Y >= -90 & Y <= 90)) %>%
@@ -2042,7 +2068,11 @@ check_position_inspector <- function(dataframe1,
     dataframe1 <- dplyr::left_join(dataframe1, data.frame(data_geo_activity_harbourdeparture)[, c("activity_id", "logical_harbourdeparture")], by = dplyr::join_by(activity_id))
     dataframe1$logical_harbourdeparture[is.na(dataframe1$logical_harbourdeparture)] <- FALSE
   }else {
-    dataframe1$logical_harbourdeparture <- FALSE
+    if (nrow(dataframe1) > 0) {
+      dataframe1$logical_harbourdeparture <- FALSE
+    } else {
+      dataframe1$logical_harbourdeparture <- logical()
+    }
   }
   # If harbour landing position exists
   if (any(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_landing))) {
@@ -2068,7 +2098,11 @@ check_position_inspector <- function(dataframe1,
     dataframe1 <- dplyr::left_join(dataframe1, data.frame(data_geo_activity_harbourlanding)[, c("activity_id", "logical_harbourlanding")], by = dplyr::join_by(activity_id))
     dataframe1$logical_harbourlanding[is.na(dataframe1$logical_harbourlanding)] <- FALSE
   }else {
-    dataframe1$logical_harbourlanding <- FALSE
+    if (nrow(dataframe1) > 0) {
+      dataframe1$logical_harbourlanding <- FALSE
+    } else {
+      dataframe1$logical_harbourlanding <- logical()
+    }
   }
   # Logical in harbour
   dataframe1$logical_harbour <- dataframe1$logical_harbour | dataframe1$logical_harbourdeparture | dataframe1$logical_harbourlanding
@@ -2090,7 +2124,11 @@ check_position_inspector <- function(dataframe1,
   dataframe1$logical_harbour[!is.na(dataframe1$ocean_calculate)] <- FALSE
   dataframe1$logical <- dataframe1$logical_ocean | dataframe1$logical_harbour
   # Gives the type of location
-  dataframe1$type <- "Sea"
+  if (nrow(dataframe1) > 0) {
+    dataframe1$type <- "Sea"
+  } else {
+    dataframe1$type <- character()
+  }
   dataframe1$type[is.na(dataframe1$ocean_calculate)] <- "Excluding shapes oceans"
   dataframe1$type[is.na(dataframe1$activity_position)] <- "No position"
   dataframe1$type[dataframe1$logical_harbour] <- "Harbour"
@@ -2254,7 +2292,11 @@ check_weight_inspector <- function(dataframe1,
   dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(activity_id))
   dataframe1$difference <- ifelse(is.na(dataframe1$activity_weight), 0, dataframe1$activity_weight) - ifelse(is.na(dataframe1$sum_catch_weight), 0, dataframe1$sum_catch_weight)
   dataframe1$difference <- abs(dataframe1$difference)
-  dataframe1$epsilon <- epsilon
+  if (nrow(dataframe1) > 0) {
+    dataframe1$epsilon <- epsilon
+  } else {
+    dataframe1$epsilon <- numeric()
+  }
   # Compare weight of the activity or the sum of the catch
   # Compare sum difference with epsilon
   comparison <- codama::vector_comparison(
@@ -2421,7 +2463,11 @@ check_length_class_inspector <- function(dataframe1,
   select <- dataframe1$samplespeciesmeasure_id
   nrow_first <- length(unique(select))
   # 2 - Data design ----
-  dataframe1$threshold <- threshold
+  if (nrow(dataframe1) > 0) {
+    dataframe1$threshold <- threshold
+  } else {
+    dataframe1$threshold <- numeric()
+  }
   # Compare size class of the samples
   comparison_sizeclass <- codama::vector_comparison(
     first_vector = dataframe1$samplespeciesmeasure_sizeclass,
@@ -2726,8 +2772,13 @@ check_temperature_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Compare RF1 to valid threshold
-  dataframe1$lower_threshold <- threshold[1]
-  dataframe1$upper_threshold <- threshold[2]
+  if (nrow(dataframe1) > 0) {
+    dataframe1$lower_threshold <- threshold[1]
+    dataframe1$upper_threshold <- threshold[2]
+  } else {
+    dataframe1$lower_threshold <- numeric()
+    dataframe1$upper_threshold <- numeric()
+  }
   comparison_less <- codama::vector_comparison(
     first_vector = dataframe1$activity_seasurfacetemperature,
     second_vector = dataframe1$upper_threshold,
@@ -2970,7 +3021,11 @@ check_weighting_sample_inspector <- function(dataframe1,
   # Calcul difference
   dataframe1$difference <- ifelse(is.na(dataframe1$weight), 0, dataframe1$weight) - ifelse(is.na(dataframe1$weightedweight), 0, dataframe1$weightedweight)
   dataframe1$difference <- abs(dataframe1$difference)
-  dataframe1$epsilon <- epsilon
+  if (nrow(dataframe1) > 0) {
+    dataframe1$epsilon <- epsilon
+  } else {
+    dataframe1$epsilon <- numeric()
+  }
   # Compare sum difference with epsilon
   comparison <- codama::vector_comparison(
     first_vector = dataframe1$difference,
@@ -3254,7 +3309,11 @@ check_time_route_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Compare sea time and the threshold
-  dataframe1$threshold <- threshold_sea_time
+  if (nrow(dataframe1) > 0) {
+    dataframe1$threshold <- threshold_sea_time
+  } else {
+    dataframe1$threshold <- numeric()
+  }
   comparison_sea_threshold <- codama::vector_comparison(
     first_vector = dataframe1$route_seatime,
     second_vector = dataframe1$threshold,
@@ -3262,7 +3321,11 @@ check_time_route_inspector <- function(dataframe1,
     output = "report"
   )
   # Compare fishing time and the threshold
-  dataframe1$threshold <- threshold_fishing_time
+  if (nrow(dataframe1) > 0) {
+    dataframe1$threshold <- threshold_fishing_time
+  } else {
+    dataframe1$threshold <- numeric()
+  }
   comparison_fishing_threshold <- codama::vector_comparison(
     first_vector = dataframe1$route_fishingtime,
     second_vector = dataframe1$threshold,
@@ -3530,8 +3593,13 @@ check_eez_inspector <- function(dataframe1,
     # Merge
     dataframe1 <- dplyr::left_join(dataframe1, intersect_eez, by = dplyr::join_by(activity_id))
   }else {
-    dataframe1$logical_eez <- NA
-    dataframe1$eez_calculated <- NA
+    if (nrow(dataframe1) > 0) {
+      dataframe1$logical_eez <- NA
+      dataframe1$eez_calculated <- NA
+    } else {
+      dataframe1$logical_eez <- logical()
+      dataframe1$eez_calculated <- character()
+    }
   }
   # Case of international waters : the calculated country must be missing
   dataframe1$filter_international_waters <- ((dataframe1$fpazone_code %in% international_waters_code & dataframe1$fpazone_country_iso3 %in% international_waters_code) | (is.na(dataframe1$fpazone_code) & dataframe1$fpazone_country_iso3 %in% international_waters_code) | (dataframe1$fpazone_code %in% international_waters_code & is.na(dataframe1$fpazone_country_iso3)))
@@ -4086,7 +4154,11 @@ check_super_sample_number_consistent_inspector <- function(dataframe1,
     dplyr::group_by(sample_id) %>%
     dplyr::summarise(count_subsamplenumber_n0 = sum(samplespecies_subsamplenumber != 0), count_subsamplenumber_0 = sum(samplespecies_subsamplenumber == 0), count_samplespecies = sum(!is.na(unique(samplespecies_id))), count_subsamplenumber = sum(!is.na(unique(samplespecies_subsamplenumber))), count_subsamplenumber_1 = sum(samplespecies_subsamplenumber == 1))
   # Merge
-  dataframe1$logical <- TRUE
+  if (nrow(dataframe1) > 0) {
+    dataframe1$logical <- TRUE
+  } else {
+    dataframe1$logical <- logical()
+  }
   dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(sample_id))
   # Case of NA count_subsamplenumber_n0, count_subsamplenumber_0, count_samplespecies or count_subsamplenumber_1
   dataframe1 <- dataframe1 %>%
@@ -4279,7 +4351,11 @@ check_well_number_consistent_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   # Merge
-  dataframe2$logical <- TRUE
+  if (nrow(dataframe2) > 0) {
+    dataframe2$logical <- TRUE
+  } else {
+    dataframe2$logical <- logical()
+  }
   dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id == trip_id, sample_well == well_label))
   dataframe1 <- dplyr::left_join(dataframe1, dataframe3, by = dplyr::join_by(trip_id))
   # Search well not link
@@ -6083,7 +6159,11 @@ check_sample_harbour_inspector <- function(dataframe1,
   nrow_first <- length(unique(select))
   # 2 - Data design ----
   dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
-  dataframe1$logical <- TRUE
+  if (nrow(dataframe1) > 0) {
+    dataframe1$logical <- TRUE
+  } else {
+    dataframe1$logical <- logical()
+  }
   # Check if missing harbour
   dataframe1[is.na(dataframe1$harbour_id_landing), "logical"] <- FALSE
   # Modify the table for display purposes: add, remove and order column
@@ -6415,7 +6495,11 @@ check_anapo_inspector <- function(dataframe1,
   # Indicates activity whether in harbour
   dataframe1 <- dplyr::left_join(dataframe1, dataframe2, by = dplyr::join_by(trip_id))
   # Indicates whether in land harbour
-  dataframe1$logical <- FALSE
+  if (nrow(dataframe1) > 0) {
+    dataframe1$logical <- FALSE
+  } else {
+    dataframe1$logical <- logical()
+  }
   # Formats spatial data activity
   dataframe_activity_geo <- dataframe1 %>%
     dplyr::filter(!is.na(activity_position)) %>%
@@ -6423,8 +6507,13 @@ check_anapo_inspector <- function(dataframe1,
     sf::st_transform(activity_position, crs = 4326)
   sf::st_geometry(dataframe_activity_geo) <- "activity_position_geometry"
   # Retrieves point coordinates
-  dataframe_activity_geo <- dataframe_activity_geo %>%
-    dplyr::mutate(dplyr::as_tibble(sf::st_coordinates(.)))
+  if (nrow(dataframe_activity_geo) > 0) {
+    dataframe_activity_geo <- dataframe_activity_geo %>%
+      dplyr::mutate(dplyr::as_tibble(sf::st_coordinates(.)))
+  } else {
+    dataframe_activity_geo$X <- numeric()
+    dataframe_activity_geo$Y <- numeric()
+  }
   # Checks whether the point is within the bounds of CRS 4326
   dataframe_activity_geo <- dataframe_activity_geo %>%
     dplyr::mutate(logical_bounding = (X >= -180 & X <= 180 & Y >= -90 & Y <= 90))
@@ -6454,7 +6543,11 @@ check_anapo_inspector <- function(dataframe1,
     dataframe1 <- dplyr::left_join(dataframe1, data.frame(dataframe_activity_geo_harbourdeparture)[, c("activity_id", "logical_harbourdeparture")], by = dplyr::join_by(activity_id))
     dataframe1$logical_harbourdeparture[is.na(dataframe1$logical_harbourdeparture)] <- FALSE
   }else {
-    dataframe1$logical_harbourdeparture <- FALSE
+    if (nrow(dataframe1) > 0) {
+      dataframe1$logical_harbourdeparture <- FALSE
+    } else {
+      dataframe1$logical_harbourdeparture <- logical()
+    }
   }
   # If harbour landing position exists
   if (any(!is.na(dataframe1$activity_position) & !is.na(dataframe1$harbour_position_landing))) {
@@ -6480,7 +6573,11 @@ check_anapo_inspector <- function(dataframe1,
     dataframe1 <- dplyr::left_join(dataframe1, data.frame(dataframe_activity_geo_harbourlanding)[, c("activity_id", "logical_harbourlanding")], by = dplyr::join_by(activity_id))
     dataframe1$logical_harbourlanding[is.na(dataframe1$logical_harbourlanding)] <- FALSE
   }else {
-    dataframe1$logical_harbourlanding <- FALSE
+    if (nrow(dataframe1) > 0) {
+      dataframe1$logical_harbourlanding <- FALSE
+    } else {
+      dataframe1$logical_harbourlanding <- logical()
+    }
   }
   # Logical in harbour
   dataframe1$logical <- dataframe1$logical | dataframe1$logical_harbourdeparture | dataframe1$logical_harbourlanding
@@ -6552,7 +6649,11 @@ check_anapo_inspector <- function(dataframe1,
     dplyr::distinct()
   dataframe1 <- dplyr::left_join(dataframe1, dataframe_calcul_min, by = dplyr::join_by(activity_id))
   # Check if distance between activity and nearest VMS point below threshold
-  dataframe1[!is.na(dataframe1$min_distance) & dataframe1$min_distance < threshold_geographical, "logical"] <- TRUE
+  if (nrow(dataframe1) > 0) {
+    dataframe1[!is.na(dataframe1$min_distance) & dataframe1$min_distance < threshold_geographical, "logical"] <- TRUE
+  } else {
+    dataframe1[!is.na(dataframe1$min_distance) & units::drop_units(dataframe1$min_distance) < units::drop_units(threshold_geographical), "logical"] <- logical()
+  }
   dataframe_calcul <- dataframe3 %>%
     dplyr::filter(!logical & !is.na(activity_position)) %>%
     subset(select = -c(logical)) %>%

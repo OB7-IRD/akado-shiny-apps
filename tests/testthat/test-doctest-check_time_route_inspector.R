@@ -4,7 +4,7 @@
 test_that("Doctest: check_time_route_inspector", {
   # Created from @doctest for `check_time_route_inspector`
   # Source file: R/function.R
-  # Source line: 3060
+  # Source line: 3115
   dataframe1 <- data.frame(route_id = c("1", "2", "3", "4", "5", "6", "7", "8"), route_seatime = c(6, 2, 0, NA, 8, 26, 15, 8), route_fishingtime = c(5, 0, 2, 4,
     NA, 7, 14, 9))
   dataframe2 <- data.frame(activity_id = c("1", "2", "3", "4", "5"), vesselactivity_code = c("2", "13", "103", "15", "6"), route_id = c("1", "1", "2", "2", "3"))

@@ -4,7 +4,7 @@
 test_that("Doctest: check_weighting_inspector", {
   # Created from @doctest for `check_weighting_inspector`
   # Source file: R/function.R
-  # Source line: 4712
+  # Source line: 4788
   dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19"),
   sample_smallsweight = c(10, 32, 2.5, 30, 12, 7, NA, 6, NA, 4, 8, 3, 7, 13, 54, 3, 8, 2, 16), sample_bigsweight = c(50, 2, 9, 3, 6, 13, 0, 3, 7, 2, 0, 2, 8, 3,
     62, 8, 15, 6, 1), sample_totalweight = c(NA, NA, NA, 33, 8, 9, 142, 2, 14, 10, 3, 0, NA, 0, 0, 104, 24, 36, 12), trip_id = c("1", "1", "2", "3", "4", "5", "6",

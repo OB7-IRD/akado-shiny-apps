@@ -4,7 +4,7 @@
 test_that("Doctest: check_weighting_sample_inspector", {
   # Created from @doctest for `check_weighting_sample_inspector`
   # Source file: R/function.R
-  # Source line: 2819
+  # Source line: 2870
   dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5"))
   dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5", "6"), catch_weight = c(4, 2, 5, 10, 3, 8), speciesfate_code = c("6", "6", "6", "6", "6", "6"),
   species_fao_code = c("YFT", "JOS", "ALB", "YFT", "YFT", "FRI"), activity_id = c("1", "1", "1", "2", "2", "5"))

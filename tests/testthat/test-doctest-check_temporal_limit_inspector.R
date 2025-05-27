@@ -4,7 +4,7 @@
 test_that("Doctest: check_temporal_limit_inspector", {
   # Created from @doctest for `check_temporal_limit_inspector`
   # Source file: R/function.R
-  # Source line: 747
+  # Source line: 751
   dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4", "5", "6"), trip_startdate = as.Date(c("2020/01/01", "2020/01/01", NA, "2020/01/24", "2020/02/01",
     "2020/02/13")), trip_enddate = as.Date(c("2020/01/02", "2020/01/02", "2020/01/24", NA, "2020/02/03", "2020/02/14")))
   dataframe2 <- data.frame(route_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"), activity_date = as.Date(c("2020/01/01", "2020/01/02",

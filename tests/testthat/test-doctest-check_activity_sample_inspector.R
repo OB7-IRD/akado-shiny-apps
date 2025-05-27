@@ -4,7 +4,7 @@
 test_that("Doctest: check_activity_sample_inspector", {
   # Created from @doctest for `check_activity_sample_inspector`
   # Source file: R/function.R
-  # Source line: 5182
+  # Source line: 5258
   dataframe1 <- data.frame(sample_id = c("1", "2"))
   dataframe2 <- data.frame(sample_id = c("1"), activity_id = c("1"))
   expect_equal(check_activity_sample_inspector(dataframe1, dataframe2, output = "report"), structure(list(sample_id = c("1", "2"), logical = c(TRUE, FALSE)),

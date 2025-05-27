@@ -4,7 +4,7 @@
 test_that("Doctest: check_little_big_inspector", {
   # Created from @doctest for `check_little_big_inspector`
   # Source file: R/function.R
-  # Source line: 4369
+  # Source line: 4445
   dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"), sample_smallsweight = c(10, 20, 1, 30, 3, 7, 4, 12, 0, 0,
     3, 0), sample_bigsweight = c(NA, 2, 9, 3, 5, 4, 13, 5, 0, NA, 0, 4), sample_totalweight = c(NA, NA, NA, 33, NA, NA, 7, 2, 0, 5, 0, 0))
   dataframe2 <- data.frame(samplespecies_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"), species_fao_code = c("YFT", "BET", "BET", "YFT",

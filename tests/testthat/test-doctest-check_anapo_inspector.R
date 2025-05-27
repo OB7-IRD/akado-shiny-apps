@@ -4,7 +4,7 @@
 test_that("Doctest: check_anapo_inspector", {
   # Created from @doctest for `check_anapo_inspector`
   # Source file: R/function.R
-  # Source line: 6171
+  # Source line: 6251
   dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6"), activity_date = as.Date(c("2020/01/01", "2020/01/12", "2020/01/12", "2020/01/13",
     "2020/01/12", "2020/01/12")), activity_time = c("05:26:01", "10:41:15", "16:41:15", "03:12:34", "05:56:12", "23:26:47"), activity_position = c("POINT (1 1)",
     "POINT (0 0)", "POINT (3 0)", "POINT (4 4)", NA, "POINT (3 0.6)"), trip_id = c("1", "2", "2", "2", "2", "2"))

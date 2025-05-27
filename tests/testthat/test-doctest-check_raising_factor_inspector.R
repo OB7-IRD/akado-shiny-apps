@@ -4,7 +4,7 @@
 test_that("Doctest: check_raising_factor_inspector", {
   # Created from @doctest for `check_raising_factor_inspector`
   # Source file: R/function.R
-  # Source line: 1100
+  # Source line: 1104
   dataframe1 <- data.frame(trip_id = c("1", "2", "3", "4", "5", "6", "7"))
   dataframe2 <- data.frame(catch_id = c("1", "2", "3", "4", "5", "6", "7", "8", "9"), catch_weight = c(10, 2, 15, 8, 5, 25, 4, 5, 9), speciesfate_code = c("6",
     "6", "1", "6", "6", "6", "6", "6", "6"), species_fao_code = c("TUN", "YFT", "TUN", "TUN", "TUN", "SKJ", "SKJ", "LOT", "BET"), vesselactivity_code = c("1", "1",

@@ -4,7 +4,7 @@
 test_that("Doctest: check_distribution_inspector", {
   # Created from @doctest for `check_distribution_inspector`
   # Source file: R/function.R
-  # Source line: 5702
+  # Source line: 5778
   dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4", "5", "6", "7"), sample_well = c("well_1", "well_2", "well_3", "well_4", "well_5", "well_6", "well_7"),
   trip_id = c("1", "1", "1", "1", "1", "1", "1"), sample_smallsweight = c(6, 25, 14, 0, NA, 10, 8), sample_bigsweight = c(12, 0, 9, NA, 6, 0, 0))
   dataframe2 <- data.frame(well_id = c("1", "2", "3", "4", "5", "6", "7"), well_label = c("well_1", "well_2", "well_3", "well_4", "well_5", "well_6", "well_7"),
