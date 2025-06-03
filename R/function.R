@@ -7846,7 +7846,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             if (!is.null(check[["need_vms"]]) && check[["need_vms"]] && !("vms" %in% names(trip_select()))) {
               return(stats::setNames(list(data.frame()), check[["id"]]))
             } else {
-              # print message
+              # Print message
               cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check id ", check[["id"]], " \n", sep = "")
               # Finds the data frames to supply as arguments to the control function
               argument <- lapply(stats::setNames(check[["argument_function_check"]], names(check[["argument_function_check"]])), function(argument) {
@@ -9127,11 +9127,21 @@ plot_anapo_data <- function(dataframe1, dataframe2, dataframe3) {
   check_anapo_inspector_dataplot <- check_anapo_inspector_dataplot %>%
     dplyr::select(-c("vessel_code", "trip_enddate", "activity_number", "activity_time", "vesselactivity_code"))
   check_anapo_inspector_dataplot <- data_to_list(data = check_anapo_inspector_dataplot, name_col_dataplot = "data_vms", colname_id = "activity_id", colname_plot = c("vms_position", "vms_date", "vms_time", "distance", "duration", "score"), colname_info = c("activity_crs", "vms_crs"), rename_colname_info = c("crs_activity", "crs_vms"))
-  activity_id_tmp <- names(check_anapo_inspector_dataplot_range_date)[names(check_anapo_inspector_dataplot_range_date) %in% names(check_anapo_inspector_dataplot_activity) & names(check_anapo_inspector_dataplot_range_date) %in% names(check_anapo_inspector_dataplot)]
   # Merge the various lists containing inofrmation useful for the plot
-  check_anapo_inspector_dataplot <- lapply(stats::setNames(activity_id_tmp, activity_id_tmp), function(id) {
-    return(c(check_anapo_inspector_dataplot_range_date[[id]], check_anapo_inspector_dataplot_activity[[id]], check_anapo_inspector_dataplot[[id]]))
-  })
+  if (length(check_anapo_inspector_dataplot_range_date) == length(check_anapo_inspector_dataplot_activity) && length(check_anapo_inspector_dataplot_range_date) == length(check_anapo_inspector_dataplot) && all(names(check_anapo_inspector_dataplot_range_date) == names(check_anapo_inspector_dataplot_activity)) && all(names(check_anapo_inspector_dataplot_range_date) == names(check_anapo_inspector_dataplot))) {
+    check_anapo_inspector_dataplot <- Map(c, check_anapo_inspector_dataplot_range_date, check_anapo_inspector_dataplot_activity, check_anapo_inspector_dataplot)
+  } else {
+    warning(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Problems when building the different lists for the Anapo plots.\n",
+      "See next identifiers : ",
+      paste0(names(table(c(names(check_anapo_inspector_dataplot_range_date), names(check_anapo_inspector_dataplot_activity), names(check_anapo_inspector_dataplot)))[table(c(names(check_anapo_inspector_dataplot_range_date), names(check_anapo_inspector_dataplot_activity), names(check_anapo_inspector_dataplot))) != 3]), collapse = ", "),
+      sep = ""
+    )
+  }
   return(check_anapo_inspector_dataplot)
 }
 
