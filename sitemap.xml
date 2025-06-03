@@ -37,6 +37,7 @@
 <url><loc>/reference/check_weighting_inspector.html</loc></url>
 <url><loc>/reference/check_weighting_sample_inspector.html</loc></url>
 <url><loc>/reference/check_well_number_consistent_inspector.html</loc></url>
+<url><loc>/reference/data_button_plot.html</loc></url>
 <url><loc>/reference/index.html</loc></url>
 <url><loc>/reference/mod_radiobuttons_type_check_server.html</loc></url>
 <url><loc>/reference/mod_radiobuttons_type_check_ui.html</loc></url>
@@ -52,5 +53,6 @@
 <url><loc>/reference/set_server_authentication.html</loc></url>
 <url><loc>/reference/set_start_configuration.html</loc></url>
 <url><loc>/reference/start_configuration.html</loc></url>
+<url><loc>/reference/table_display.html</loc></url>
 </urlset>
 
