@@ -8691,29 +8691,21 @@ data_to_list <- function(data, name_col_dataplot, colname_id, colname_plot, coln
     )
   }
   # 2 - Data design ----
-  # Recovery of unique identifiers
-  id_unique <- data %>%
-    dplyr::pull(colname_id) %>%
-    unique()
+  # Partition table by id
+  data_split <- data %>%
+    dplyr::ungroup() %>%
+    dplyr::select(c(colname_id, colname_plot, colname_info)) %>%
+    split(data[[colname_id]])
   # Lists useful plot information for each id
-  data_list <- lapply(stats::setNames(id_unique, id_unique), function(id) {
-    # sub-table with information on id
-    data_tmp <- data %>%
-      dplyr::filter(!!as.name(colname_id) %in% id) %>%
-      dplyr::ungroup()
+  data_list <- lapply(stats::setNames(data_split, names(data_split)), function(data_tmp) {
     list_tmp <- list()
-    # extracts the data frame used for the plot
+    # Extracts the data frame used for the plot
     if (length(colname_plot) > 0) {
-      list_tmp[[name_col_dataplot]] <-  data_tmp %>%
-        dplyr::select(colname_plot)
+      list_tmp[[name_col_dataplot]] <-  data_tmp[, colname_plot]
     }
-    # extracts the value used for the plot
+    # Extracts the value used for the plot
     if (length(colname_info) > 0) {
-      for (i in seq_along(colname_info)) {
-        list_tmp[[rename_colname_info[i]]] <- data_tmp %>%
-          dplyr::pull(colname_info[i]) %>%
-          unique()
-      }
+      list_tmp <- c(list_tmp, stats::setNames(lapply(colname_info, function(col) unique(data_tmp[[col]])), rename_colname_info))
     }
     return(list_tmp)
   })
