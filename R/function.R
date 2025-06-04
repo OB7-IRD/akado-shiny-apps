@@ -9159,6 +9159,8 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   vms_date <- NULL
   vesselactivity_code <- NULL
   grounding <- NULL
+  vms_time_bis <- NULL
+  activity_time_bis <- NULL
   date_time <- NULL
   X <- NULL
   Y <- NULL
@@ -9168,13 +9170,21 @@ plot_anapo <- function(data_vms, crs_vms, crs_activity, data_activity, data_trip
   data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
   if (!all(is.na(data_vms$vms_position))) {
+    # Gives a temporary hour for VMS that are missing an hour
+    data_vms$vms_time_bis <- data_vms$vms_time
+    data_vms[is.na(data_vms$vms_time), "vms_time_bis"] <- "00:00:00"
     data_vms <- data_vms %>%
-      dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time))) %>%
-      dplyr::arrange(date_time)
+      dplyr::mutate(date_time = as.POSIXct(paste(vms_date, vms_time_bis))) %>%
+      dplyr::arrange(date_time) %>%
+      dplyr::select(!c(vms_time_bis))
   }
+  # Gives a temporary hour for activities that are missing an hour
+  data_trip$activity_time_bis <- data_trip$activity_time
+  data_trip[is.na(data_trip$activity_time), "activity_time_bis"] <- "00:00:00"
   data_trip <- data_trip %>%
-    dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time))) %>%
-    dplyr::arrange(date_time)
+    dplyr::mutate(date_time = as.POSIXct(paste(activity_date, activity_time_bis))) %>%
+    dplyr::arrange(date_time) %>%
+    dplyr::select(!c(activity_time_bis))
   # Spatial formatting
   if (!all(is.na(data_vms$vms_position))) {
     data_geo_vms <- data_vms[!is.na(data_vms$vms_position), ] %>%
@@ -9274,6 +9284,7 @@ plot_anapo_activity <- function(data_vms, crs_vms, date_vms) {
   # Local binding global variables
   . <- NULL
   vms_time <- NULL
+  vms_time_bis <- NULL
   date_time <- NULL
   X <- NULL
   Y <- NULL
@@ -9283,9 +9294,13 @@ plot_anapo_activity <- function(data_vms, crs_vms, date_vms) {
   data_vms <- data_vms %>% dplyr::filter(!is.na(data_vms$vms_position))
   # Format date time and order
   if (!all(is.na(data_vms$vms_position))) {
+    # Gives a temporary hour for VMS that are missing an hour
+    data_vms$vms_time_bis <- data_vms$vms_time
+    data_vms[is.na(data_vms$vms_time), "vms_time_bis"] <- "00:00:00"
     data_vms <- data_vms %>%
-      dplyr::mutate(date_time = as.POSIXct(paste(date_vms, vms_time))) %>%
-      dplyr::arrange(date_time)
+      dplyr::mutate(date_time = as.POSIXct(paste(date_vms, vms_time_bis))) %>%
+      dplyr::arrange(date_time) %>%
+      dplyr::select(!c(vms_time_bis))
   }
   # Spatial formatting
   if (!all(is.na(data_vms$vms_position))) {
