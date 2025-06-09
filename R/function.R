@@ -7848,125 +7848,129 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             } else {
               # Print message
               cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start check id ", check[["id"]], " \n", sep = "")
-              # Finds the data frames to supply as arguments to the control function
-              argument <- lapply(stats::setNames(check[["argument_function_check"]], names(check[["argument_function_check"]])), function(argument) {
-                if (argument %in% name_file_sql) {
-                  # Extract data from data SQL
-                  data_sql[[paste0("data_", argument)]]
-                } else if (argument %in% names(referential_file())) {
-                  # Retrieves parameter values from referential file
-                  referential_file()[[argument]]
-                } else if (argument %in% names(config_data())) {
-                  # Retrieves parameter values from configuration file
-                  config_data()[[argument]]
-                } else if (argument %in% names(trip_select())) {
-                  # Extract data from data SQL retrieved directly via user selections
-                  trip_select()[[argument]]
-                } else {
-                  argument
-                }
-              })
-              # Executes the control function
-              check_result <- do.call(check[["function_check"]], argument)
-              # Save in a new variable the data frame that will serve as the basis for the table displayed in the shiny application
-              if (inherits(x = check_result, what = "list")) {
-                table_result <- check_result[[1]]
-              } else {
-                table_result <- check_result
-              }
-              # Executes the function that modifies the table display specifically for this check
-              if (!is.null(check[["function_display"]])) {
-                if (!is.null(check[["argument_function_display"]])) {
-                  # Finds the data frames to supply as arguments to the display function
-                  argument <- lapply(stats::setNames(check[["argument_function_display"]], names(check[["argument_function_display"]])), function(argument) {
-                    if (argument %in% name_file_sql) {
-                      # Extract data
-                      data_sql[[paste0("data_", argument)]]
-                    } else if (argument == "check") {
-                      table_result
-                    } else if (argument == "plot") {
-                      check_result[[2]]
-                    } else {
-                      argument
-                    }
-                  })
-                  table_result <- do.call(check[["function_display"]], argument)
-                } else {
-                  table_result <- do.call(check[["function_display"]], list(table_result))
-                }
-              }
-              if (!is.null(check[["function_plot"]])) {
-                if (!is.null(check[["function_data_plot"]])) {
-                  # Finds the data frames to supply as arguments to the data plot function
-                  argument <- lapply(stats::setNames(check[["argument_function_data_plot"]], names(check[["argument_function_data_plot"]])), function(argument) {
-                    if (argument %in% name_file_sql) {
-                      # Extract data
-                      data_sql[[paste0("data_", argument)]]
-                    } else if (argument %in% names(trip_select())) {
-                      trip_select()[[argument]]
-                    } else if (argument == "check") {
-                      table_result
-                    } else if (argument == "plot") {
-                      check_result[[2]]
-                    } else {
-                      argument
-                    }
-                  })
-                  # Executes the data plot function
-                  data_plot <- do.call(check[["function_data_plot"]], argument)
-                } else {
-                  data_plot <- check_result[[2]]
-                }
-                # Name of the table containing the plot information in calcul_check_server
-                if (nrow(table_result) > 0) {
-                  name_data_plot <- paste0(check[["id"]], "_data_plot")
-                  table_result$name_table <- name_data_plot
-                  # Add button and data for plot in table
-                  argument <- list(id = check[["id"]], data = table_result, colname_id = grep("_id$", colnames(table_result), value = TRUE), colname_info = "name_table")
-                  if (!is.null(check[["choice_display_plot"]])) {
-                    argument <- c(argument, choice_select_row = check[["choice_display_plot"]])
+              tryCatch({
+                # Finds the data frames to supply as arguments to the control function
+                argument <- lapply(stats::setNames(check[["argument_function_check"]], names(check[["argument_function_check"]])), function(argument) {
+                  if (argument %in% name_file_sql) {
+                    # Extract data from data SQL
+                    data_sql[[paste0("data_", argument)]]
+                  } else if (argument %in% names(referential_file())) {
+                    # Retrieves parameter values from referential file
+                    referential_file()[[argument]]
+                  } else if (argument %in% names(config_data())) {
+                    # Retrieves parameter values from configuration file
+                    config_data()[[argument]]
+                  } else if (argument %in% names(trip_select())) {
+                    # Extract data from data SQL retrieved directly via user selections
+                    trip_select()[[argument]]
+                  } else {
+                    argument
                   }
-                  table_result <- do.call(data_button_plot, argument)
+                })
+                # Executes the control function
+                check_result <- do.call(check[["function_check"]], argument)
+                # Save in a new variable the data frame that will serve as the basis for the table displayed in the shiny application
+                if (inherits(x = check_result, what = "list")) {
+                  table_result <- check_result[[1]]
+                } else {
+                  table_result <- check_result
                 }
-              }
-              # Finds the table containing the information needed for the user to identify the rows
-              if (check[["table_user_id"]] %in% name_file_sql) {
-                # Extract data in data_sql
-                table_display_data_info <- data_sql[[paste0("data_", check[["table_user_id"]])]][,  c(sql_info[[which(name_file_sql == check[["table_user_id"]])]][["column_user_id"]], check[["additional_column_user"]])]
-              } else if (check[["table_user_id"]] %in% names(trip_select())) {
-                # Extract data in trip_select
-                table_display_data_info <- trip_select()[[check[["table_user_id"]]]][,  c(check[["additional_column_user"]])]
-              } else {
-                stop(
-                  format(
-                    x = Sys.time(),
-                    format = "%Y-%m-%d %H:%M:%S"
-                  ),
-                  " - The sub-list named 'table_user_id' must be a name of the file SQL (", paste0(name_file_sql, collapse = ", "), ") or a name from the SQL initializing the user's query trip_select() (", paste0(names(trip_select()), collapse = ", "), ")",
-                  "\n check id : ",
-                  check[["id"]],
-                  "\n table_user_id : ",
-                  check[["table_user_id"]]
-                  ,
-                  sep = ""
-                )
-              }
-              # Uses a function to format the table (adds data_info columns allowing the user to identify rows (predefined column depending on the table specified in table_user_id for control purposes, with the possibility of adding columns in additional_column_user but which must already be present in the SQL linked to table_user_id) and modifies the display of certain columns (addition of icon, coordinate conversion, rename))
-              table_result <- table_display(data = table_result, data_info = table_display_data_info, type_inconsistency = check[["type"]], rename = column_user_info[["rename_id_column_user"]], order = column_user_info[["order_id_column_user"]])
-              # Modify the table for display purposes: rename column
-              if (!is.null(check[["rename_column_user"]])) {
-                table_result <- table_result %>% dplyr::rename_with(~ unlist(check[["rename_column_user"]]), names(check[["rename_column_user"]]))
-              }
-              # return data check and data plot check if exist
-              if (!is.null(check[["function_data_plot"]])) {
-                return(stats::setNames(c(list(table_result), list(data_plot)), c(check[["id"]], name_data_plot)))
-              } else {
-                return(stats::setNames(list(table_result), check[["id"]]))
-              }
+                # Executes the function that modifies the table display specifically for this check
+                if (!is.null(check[["function_display"]])) {
+                  if (!is.null(check[["argument_function_display"]])) {
+                    # Finds the data frames to supply as arguments to the display function
+                    argument <- lapply(stats::setNames(check[["argument_function_display"]], names(check[["argument_function_display"]])), function(argument) {
+                      if (argument %in% name_file_sql) {
+                        # Extract data
+                        data_sql[[paste0("data_", argument)]]
+                      } else if (argument == "check") {
+                        table_result
+                      } else if (argument == "plot") {
+                        check_result[[2]]
+                      } else {
+                        argument
+                      }
+                    })
+                    table_result <- do.call(check[["function_display"]], argument)
+                  } else {
+                    table_result <- do.call(check[["function_display"]], list(table_result))
+                  }
+                }
+                if (!is.null(check[["function_plot"]])) {
+                  if (!is.null(check[["function_data_plot"]])) {
+                    # Finds the data frames to supply as arguments to the data plot function
+                    argument <- lapply(stats::setNames(check[["argument_function_data_plot"]], names(check[["argument_function_data_plot"]])), function(argument) {
+                      if (argument %in% name_file_sql) {
+                        # Extract data
+                        data_sql[[paste0("data_", argument)]]
+                      } else if (argument %in% names(trip_select())) {
+                        trip_select()[[argument]]
+                      } else if (argument == "check") {
+                        table_result
+                      } else if (argument == "plot") {
+                        check_result[[2]]
+                      } else {
+                        argument
+                      }
+                    })
+                    # Executes the data plot function
+                    data_plot <- do.call(check[["function_data_plot"]], argument)
+                  } else {
+                    data_plot <- check_result[[2]]
+                  }
+                  # Name of the table containing the plot information in calcul_check_server
+                  if (nrow(table_result) > 0) {
+                    table_result$name_table <- check[["id"]]
+                    # Add button and data for plot in table
+                    argument <- list(id = check[["id"]], data = table_result, colname_id = grep("_id$", colnames(table_result), value = TRUE), colname_info = "name_table")
+                    if (!is.null(check[["choice_display_plot"]])) {
+                      argument <- c(argument, choice_select_row = check[["choice_display_plot"]])
+                    }
+                    table_result <- do.call(data_button_plot, argument)
+                  }
+                }
+                # Finds the table containing the information needed for the user to identify the rows
+                if (check[["table_user_id"]] %in% name_file_sql) {
+                  # Extract data in data_sql
+                  table_display_data_info <- data_sql[[paste0("data_", check[["table_user_id"]])]][,  c(sql_info[[which(name_file_sql == check[["table_user_id"]])]][["column_user_id"]], check[["additional_column_user"]])]
+                } else if (check[["table_user_id"]] %in% names(trip_select())) {
+                  # Extract data in trip_select
+                  table_display_data_info <- trip_select()[[check[["table_user_id"]]]][,  c(check[["additional_column_user"]])]
+                } else {
+                  stop(
+                    format(
+                      x = Sys.time(),
+                      format = "%Y-%m-%d %H:%M:%S"
+                    ),
+                    " - The sub-list named 'table_user_id' must be a name of the file SQL (", paste0(name_file_sql, collapse = ", "), ") or a name from the SQL initializing the user's query trip_select() (", paste0(names(trip_select()), collapse = ", "), ")",
+                    "\n check id : ",
+                    check[["id"]],
+                    "\n table_user_id : ",
+                    check[["table_user_id"]]
+                    ,
+                    sep = ""
+                  )
+                }
+                # Uses a function to format the table (adds data_info columns allowing the user to identify rows (predefined column depending on the table specified in table_user_id for control purposes, with the possibility of adding columns in additional_column_user but which must already be present in the SQL linked to table_user_id) and modifies the display of certain columns (addition of icon, coordinate conversion, rename))
+                table_result <- table_display(data = table_result, data_info = table_display_data_info, type_inconsistency = check[["type"]], rename = column_user_info[["rename_id_column_user"]], order = column_user_info[["order_id_column_user"]])
+                # Modify the table for display purposes: rename column
+                if (!is.null(check[["rename_column_user"]])) {
+                  table_result <- table_result %>% dplyr::rename_with(~ unlist(check[["rename_column_user"]]), names(check[["rename_column_user"]]))
+                }
+                # return data check and data plot check if exist
+                if (!is.null(check[["function_data_plot"]])) {
+                  return(stats::setNames(list(list(table = table_result, list_plot = data_plot)), check[["id"]]))
+                } else {
+                  return(stats::setNames(list(list(table = table_result)), check[["id"]]))
+                }
+              }, error = function(error_message) {
+                message("Error, check failure: ", conditionMessage(error_message))
+                return(stats::setNames(list(list(error = (paste("Control failure :  ", error_message)))), check[["id"]]))
+              })
             }
           }
         })
-        table_finish <- unlist(table_finish, recursive = FALSE)
+        table_finish
       }
     })
   })
