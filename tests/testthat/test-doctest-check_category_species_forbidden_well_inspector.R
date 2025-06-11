@@ -6,7 +6,7 @@ test_that("Doctest: check_category_species_forbidden_well_inspector", {
   # Source file: R/function.R
   # Source line: 5619
   dataframe1 <- data.frame(wellactivityspecies_id = c("1", "2", "3"), weightcategory_code = c("W-1", "W-9", "W-9"), species_fao_code = c("SKJ", "ALB", "SKJ"))
-  expect_equal(check_category_species_forbidden_well_inspector(dataframe1, output = "report"), structure(list(wellactivityspecies_id = c("1", "2", "3"),
-  species_fao_code = c("SKJ", "ALB", "SKJ"), weightcategory_code = c("W-1", "W-9", "W-9"), logical = c(TRUE, TRUE, FALSE)), row.names = c(NA, -3L), class = "data.frame"))
+  expect_equal(check_category_species_forbidden_well_inspector(dataframe1, output = "report"), structure(list(wellactivityspecies_id = c("1", "2", "3"), species_fao_code = c(
+    "SKJ", "ALB", "SKJ"), weightcategory_code = c("W-1", "W-9", "W-9"), logical = c(TRUE, TRUE, FALSE)), row.names = c(NA, -3L), class = "data.frame"))
 })
 

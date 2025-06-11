@@ -7637,7 +7637,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
       }
       # 2 - Data extraction ----
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
-      if (text_error_trip_select() == TRUE && is.data.frame(trip_select()$trip_selected)) {
+      if (text_error_trip_select() == TRUE && !is.logical(trip_select())) {
         # Connection to the base
         config_observe_database <- config_data()[["databases_configuration"]]
         data_connection <- list()
@@ -7981,7 +7981,7 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
   moduleServer(id, function(input, output, session) {
     output$text <- renderText({
       # If there are errors in the selection parameters
-      if (!text_error_trip_select()) {
+      if (is.character(text_error_trip_select())) {
         showNotification(id = "notif_warning", ui = text_error_trip_select(), type = "error")
         return(paste0("<span style=\"color:red\">", text_error_trip_select(), "</span>"))
       }
