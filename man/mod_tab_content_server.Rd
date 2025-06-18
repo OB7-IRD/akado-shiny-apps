@@ -4,7 +4,14 @@
 \alias{mod_tab_content_server}
 \title{tab_content Server Functions}
 \usage{
-mod_tab_content_server(id, tab_info, check_info, type_check_info, type_check)
+mod_tab_content_server(
+  id,
+  tab_info,
+  check_info,
+  type_check_info,
+  type_check,
+  config_data
+)
 }
 \arguments{
 \item{id}{Internal parameters for shiny}
@@ -16,6 +23,8 @@ mod_tab_content_server(id, tab_info, check_info, type_check_info, type_check)
 \item{type_check_info}{{\link[base]{list}} expected. Information about the dynamic type of check}
 
 \item{type_check}{{\link[base]{character}} expected. Reactive value containing the type of check selected by the user}
+
+\item{config_data}{{\link[base]{list}} expected. Reactive value contains the contents of the configuration file}
 }
 \value{
 The function returns nothing, instantiating the tab
@@ -42,5 +51,9 @@ check_info:
 type_check_info:
  \item{\code{  id : Button selection identification, mandatory, character expected}}
  \item{\code{  specific_check : Indicates whether the selection should display specific controls or not, optional (default : TRUE), logical expected}}
+}
+\itemize{
+config_data:
+ \item{\code{  databases_configuration : named list with database connection information}}
 }
 }

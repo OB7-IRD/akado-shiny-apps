@@ -17,6 +17,7 @@ mod_tab_content_ui <- function(id) {
 #' @param check_info {\link[base]{list}} expected. Information about the dynamic check display
 #' @param type_check_info {\link[base]{list}} expected. Information about the dynamic type of check
 #' @param type_check {\link[base]{character}} expected. Reactive value containing the type of check selected by the user
+#' @param config_data {\link[base]{list}} expected. Reactive value contains the contents of the configuration file
 #' @return The function returns nothing, instantiating the tab
 #' @details
 #' \itemize{
@@ -38,8 +39,12 @@ mod_tab_content_ui <- function(id) {
 #'  \item{\code{  id : Button selection identification, mandatory, character expected}}
 #'  \item{\code{  specific_check : Indicates whether the selection should display specific controls or not, optional (default : TRUE), logical expected}}
 #' }
+#' \itemize{
+#' config_data:
+#'  \item{\code{  databases_configuration : named list with database connection information}}
+#' }
 #' @export
-mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, type_check) {
+mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, type_check, config_data) {
   moduleServer(id, function(input, output, session) {
     # Creation of all tab, both static tab and user-specified dynamic tab (static tabs are also created here, as the UI does not support the mixing of dynamic and static tabs)
     output$content <- shiny::renderUI({
@@ -94,10 +99,7 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, ty
               status = "primary",
               solidHeader = TRUE,
               title = "Data base Observe",
-              selectInput(
-                inputId = "data_base_observe", label = "Choose a data base:",
-                choices = list("---", "NY", "NJ", "CT")
-              )
+              selectInput(inputId = NS(namespace = id, id = "data_base_observe"), label = "Choose a data base:", choices = list("Initialization"), multiple = TRUE)
             ),
             shinydashboard::box(
               width = 12,
@@ -149,6 +151,25 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, ty
         ))
       )
       do.call(shinydashboard::tabItems, items)
+    })
+
+    # Initializes database selection memory
+    choices_data_base_observe <- reactiveValues(old_value = "", current_value = "")
+
+    observeEvent(config_data(), {
+      # Saves old selection options
+      choices_data_base_observe$old_value <- choices_data_base_observe$current_value
+      # Defines the options for database selection Observe
+      if (is.null(config_data())) {
+        choices_data_base_observe$current_value <- "No configuration file"
+      } else {
+        choices_data_base_observe$current_value <- names(config_data()[["databases_configuration"]])
+      }
+      # If database are change in config_data
+      if (length(choices_data_base_observe$old_value) != length(choices_data_base_observe$current_value) || any(choices_data_base_observe$old_value != choices_data_base_observe$current_value)) {
+        # Updated options for database selection Observe
+        updateSelectInput(session, "data_base_observe", choices = choices_data_base_observe$current_value)
+      }
     })
 
     # Management of the display or not of the boxes in the trip tab

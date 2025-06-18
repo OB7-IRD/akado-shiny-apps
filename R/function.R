@@ -6910,7 +6910,7 @@ check_anapo_activity_consistent_inspector <- function(dataframe1,
 }
 
 # Shiny function : Error message if the trip selection elements are not correctly filled in
-text_error_trip_select_server <- function(id, parent_in) {
+text_error_trip_select_server <- function(id, parent_in, config_data) {
   moduleServer(id, function(input, output, session) {
     eventReactive(input$start_button, {
       # if no selection element is filled in
@@ -6929,6 +6929,22 @@ text_error_trip_select_server <- function(id, parent_in) {
       if (isTruthy(parent_in$trip_start_date_range) && isTruthy(parent_in$trip_end_date_range) && parent_in$trip_start_date_range > parent_in$trip_end_date_range) {
         return("Error: start date must be before end date")
       }
+      # If the connection file is missing
+      if (!isTruthy(config_data())) {
+        text <- "Error: There is no configuration file for the connection to the base"
+        showNotification(id = "notif_warning", ui = text, type = "error")
+        return(paste0(text, ", please either select one using the \"settings\" tab or put it in ", file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml")))
+      }
+      # If the database selection is missing
+      if (is.null(parent_in$`tab-data_base_observe`)) {
+        return("Error: please select a database Observe")
+      }
+      # If connection information is missing for at least one base in the configuration file
+      if (!all(parent_in$`tab-data_base_observe` %in% names(config_data()[["databases_configuration"]]))) {
+        text <- paste0("Error: connection information for the database : ", paste0(parent_in$`tab-data_base_observe`[!parent_in$`tab-data_base_observe` %in% names(config_data()[["databases_configuration"]])], collapse = ", "), ", are not available in the connection file")
+        showNotification(id = "notif_warning", ui = text, type = "error")
+        return(paste0(text, ", please modify the configuration file or do not select this base"))
+      }
       return(TRUE)
     })
   })
@@ -6937,7 +6953,8 @@ text_error_trip_select_server <- function(id, parent_in) {
 # Shiny function : Read the .yml file of configuration for the connection
 config_data_server <- function(id, parent_in) {
   moduleServer(id, function(input, output, session) {
-    eventReactive(input$start_button, {
+    # Triggers reading of the configuration file when the user loads one (parent_in$setting_file_path) (also enables reading of the file when the application is launched via initialization of parent_in$setting_file_path) or when a calculation is restarted (input$start_button) (enables the user to take advantage of the new version available in .appconfig)
+    eventReactive(c(input$start_button, parent_in$setting_file_path), {
       # If the user has not specified a file and the file exists in the default path, indicates the default path
       if (is.null(parent_in$setting_file_path$datapath) && file.exists(file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"))) {
         path_setting_file <- file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml")
@@ -6973,7 +6990,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
       if (text_error_trip_select() == TRUE) {
         config_observe_database <- config_data()[["databases_configuration"]]
         data_connection <- list()
-        for (observe_database in config_observe_database){
+        for (observe_database in config_observe_database[c(parent_in$`tab-data_base_observe`)]){
           data_connection <- append(data_connection, list(furdeb::postgresql_dbconnection(
             db_user = observe_database[["login"]],
             db_password = observe_database[["password"]],
@@ -6994,22 +7011,22 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
                         select_item_4 = parent_in$trip_start_date_range,
                         select_item_5 = parent_in$trip_end_date_range)
         )
-        # If selected trip with the vessel code and the end date of the trip
-        if (isTruthy(parent_in$vessel_number) && isTruthy(parent_in$trip_end_date)) {
-          # VMS selection parameter date range by user-selected trip duration
-          start_date_range <- min(trip_selected$trip_startdate)
-          end_date_range <- max(trip_selected$trip_enddate)
-          # VMS selection parameter vessel number by user-selected explicit
-          vessel_number <- as.character(parent_in$vessel_number)
-        }
-        # If selected trip with a date range
-        if (isTruthy(parent_in$trip_start_date_range) && isTruthy(parent_in$trip_end_date_range)) {
-          # VMS selection parameter date range by user-selected period explicit
-          start_date_range <- parent_in$trip_start_date_range
-          end_date_range <- parent_in$trip_end_date_range
-          vessel_number <- ""
-        }
         if (dim(trip_selected)[1] > 0) {
+          # If selected trip with the vessel code and the end date of the trip
+          if (isTruthy(parent_in$vessel_number) && isTruthy(parent_in$trip_end_date)) {
+            # VMS selection parameter date range by user-selected trip duration
+            start_date_range <- min(trip_selected$trip_startdate)
+            end_date_range <- max(trip_selected$trip_enddate)
+            # VMS selection parameter vessel number by user-selected explicit
+            vessel_number <- as.character(parent_in$vessel_number)
+          }
+          # If selected trip with a date range
+          if (isTruthy(parent_in$trip_start_date_range) && isTruthy(parent_in$trip_end_date_range)) {
+            # VMS selection parameter date range by user-selected period explicit
+            start_date_range <- parent_in$trip_start_date_range
+            end_date_range <- parent_in$trip_end_date_range
+            vessel_number <- ""
+          }
           # Uses a function to extract data from VMS
           activity_vms <- furdeb::data_extraction(
             type = "database",
@@ -7021,7 +7038,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
           )
         }
         # Disconnection to the base
-        for (i in seq(from = 1, to = length(config_observe_database))) {
+        for (i in seq(from = 1, to = length(data_connection))) {
           DBI::dbDisconnect(data_connection[[i]][[2]])
         }
         if (dim(trip_selected)[1] > 0) {
@@ -7070,11 +7087,11 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
 }
 
 # Shiny function : Performs all calculations to test for inconsistencies
-calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data, referential_file, sql_info, check_info, column_user_info) {
+calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data, referential_file, sql_info, check_info, column_user_info, parent_in) {
   moduleServer(id, function(input, output, session) {
     # 0 - Global variables assignement ----
     trip_id <- NULL
-    reactive({
+    eventReactive(trip_select(), {
       # 1 - Arguments verification ----
       # Check arguments and replace missing information with default values and add new internal information for SQL
       info_sql_internal <- lapply(sql_info, function(sql) {
@@ -7641,7 +7658,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         # Connection to the base
         config_observe_database <- config_data()[["databases_configuration"]]
         data_connection <- list()
-        for (observe_database in config_observe_database){
+        for (observe_database in config_observe_database[c(parent_in$`tab-data_base_observe`)]){
           data_connection <- append(data_connection, list(furdeb::postgresql_dbconnection(
             db_user = observe_database[["login"]],
             db_password = observe_database[["password"]],
@@ -7679,7 +7696,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           # Checks that the name of the column to be used to supply values when used in other SQL anchors exists in the dataset.s
           if (!(sql[["column_anchor"]] %in% colnames(data)) && (!("vector" %in% names(sql)) || !sql[["vector"]])) {
             # Disconnection to the bases
-            for (i in seq(from = 1, to = length(config_observe_database))) {
+            for (i in seq(from = 1, to = length(data_connection))) {
               DBI::dbDisconnect(data_connection[[i]][[2]])
             }
             stop(
@@ -7697,7 +7714,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               data <- dplyr::pull(data)
             } else {
               # Disconnection to the bases
-              for (i in seq(from = 1, to = length(config_observe_database))) {
+              for (i in seq(from = 1, to = length(data_connection))) {
                 DBI::dbDisconnect(data_connection[[i]][[2]])
               }
               stop(
@@ -7755,7 +7772,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               data <- dplyr::pull(data)
             } else {
               # Disconnection to the bases
-              for (i in seq(from = 1, to = length(config_observe_database))) {
+              for (i in seq(from = 1, to = length(data_connection))) {
                 DBI::dbDisconnect(data_connection[[i]][[2]])
               }
               stop(
@@ -7774,7 +7791,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         data_sql <- c(data_sql, data_select_sql)
         rm(data_select_sql)
         # Disconnection to the bases
-        for (i in seq(from = 1, to = length(config_observe_database))) {
+        for (i in seq(from = 1, to = length(data_connection))) {
           DBI::dbDisconnect(data_connection[[i]][[2]])
         }
         # 3 - Data design ----
@@ -7977,19 +7994,13 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
 }
 
 # Shiny function : Displays the errors and notifications that occur when you want to start the calculation
-error_trip_select_serveur <- function(id, text_error_trip_select, config_data, trip_select, calcul_check) {
+error_trip_select_serveur <- function(id, text_error_trip_select, config_data, trip_select, calcul_check, parent_in) {
   moduleServer(id, function(input, output, session) {
     output$text <- renderText({
       # If there are errors in the selection parameters
       if (is.character(text_error_trip_select())) {
         showNotification(id = "notif_warning", ui = text_error_trip_select(), type = "error")
         return(paste0("<span style=\"color:red\">", text_error_trip_select(), "</span>"))
-      }
-      # If the connection file is missing
-      if (text_error_trip_select() && !isTruthy(config_data())) {
-        text <- "Error: There is no configuration file for the connection to the base"
-        showNotification(id = "notif_warning", ui = text, type = "error")
-        return(paste0("<span style=\"color:red\">", text, ", please either select one using the \"settings\" tab or put it in ", file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"), "</span>"))
       }
       # If the selected trip is not found in the database
       if (text_error_trip_select() == TRUE && !is.list(trip_select()) && trip_select() == FALSE) {
@@ -8019,7 +8030,7 @@ window_button_download <- function(name) {
 }
 
 # Shiny function : creation tab, menu and content
-tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referential_file) {
+tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referential_file, config_data) {
   # 1 - Arguments verification ----
   if (!codama::r_type_checking(
     r_object = id,
@@ -8469,7 +8480,7 @@ tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referen
   # Instantiating the menu and retrieving reactive values
   reactive_value_menu <- mod_tab_menu_server(id = id, tab_info = tab_info)
   # Instantiating the tab
-  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_info, type_check = reactive_value_menu$type_check)
+  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_info, type_check = reactive_value_menu$type_check, config_data = config_data)
   # Creation of all tables
   lapply(
     check_info,

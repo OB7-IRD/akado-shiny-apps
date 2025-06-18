@@ -16,11 +16,11 @@ app_server <- function(input, output, session) {
     }
   })
 
-  # Error message if the trip selection elements are not correctly filled in
-  text_error_trip_select <- text_error_trip_select_server(id = "start_button", parent_in = input)
-
   # Read the .yml file of configuration for the connection
   config_data <- config_data_server(id = "start_button", parent_in = input)
+
+  # Error message if the trip selection elements are not correctly filled in
+  text_error_trip_select <- text_error_trip_select_server(id = "start_button", parent_in = input, config_data = config_data)
 
   # Retrieves the list of trips selected by the user
   trip_select <- trip_select_server(id = "start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data)
@@ -601,13 +601,13 @@ app_server <- function(input, output, session) {
                            order_id_column_user = c("vessel_code", "trip_enddate"))
 
   # Performs all calculations to test for inconsistencies
-  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, sql_info = sql_info, check_info = check_info, column_user_info = column_user_info)
+  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, sql_info = sql_info, check_info = check_info, column_user_info = column_user_info, parent_in = input)
 
   # Displays the errors and notifications that occur when you want to start the calculation
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
 
   # Tab creation, menu, tab content
-  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file)
+  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data)
 
   # Force activation of first tab at startup, remove the lazy evaluation
   observe({
