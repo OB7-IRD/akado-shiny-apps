@@ -27,7 +27,7 @@ mod_table_ui <- function(id, title = NULL, size_box = "col-sm-12 col-md-6 col-lg
 #' @title table Server Functions
 #' @description A shiny Module for creation of all table
 #' @param id Internal parameters for shiny
-#' @param data {\link[base]{list}} expected. Reactive list containing results tables for all checks
+#' @param data_all {\link[base]{list}} expected. Reactive list containing results tables for all checks
 #' @param name {\link[base]{character}} expected. Control identifier in data to be displayed
 #' @param type_line_check {\link[base]{character}} expected. Reactive value containing the type of line selected by the user
 #' @param referential_file {\link[base]{list}} expected. Reactive list containing referential tables for all plot
@@ -37,7 +37,7 @@ mod_table_ui <- function(id, title = NULL, size_box = "col-sm-12 col-md-6 col-lg
 #' @param title_window {\link[base]{character}} expected. Default values: NULL. Plot window name
 #' @return The function returns nothing, instantiating the table
 #' @export
-mod_table_server <- function(id, data, name, type_line_check, referential_file, column_no_wrap = NULL, function_plot = NULL, function_text_plot = NULL, title_window = NULL) {
+mod_table_server <- function(id, data_all, name, type_line_check, referential_file, column_no_wrap = NULL, function_plot = NULL, function_text_plot = NULL, title_window = NULL) {
   # Local binding global variables
   . <- NULL
   # If no name is specified, use id as name
@@ -48,12 +48,12 @@ mod_table_server <- function(id, data, name, type_line_check, referential_file, 
     # Display table
     output$table <- DT::renderDT({
       # If there was no error in the trip selection and that there are trips for user settings and the calculations for the consistency tests are finished, displays the table
-      if (isTruthy(data()) && isTruthy(type_line_check())) {
+      if (isTruthy(data_all()) && isTruthy(type_line_check())) {
         # In the event of an error during control, the error is displayed instead of the table
-        if (!is.null(data()[[name]][["error"]])) {
-          stop(paste("Error, check failure: ", data()[[name]][["error"]]))
+        if (!is.null(data_all()[[name]][["error"]])) {
+          stop(paste("Error, check failure: ", data_all()[[name]][["error"]]))
         }
-        data <- data()[[name]][["table"]]
+        data <- data_all()[[name]][["table"]]
         if (type_line_check() == "inconsistent") {
           data <- data[data$Check != as.character(icon("check")), ]
         }
@@ -83,7 +83,7 @@ mod_table_server <- function(id, data, name, type_line_check, referential_file, 
       # Control plot, display in a window
       output$plot <- plotly::renderPlotly({
         split_id <- strsplit(input[[name_button]], "&")[[1]]
-        data <- data()[[split_id[1]]][["list_plot"]][[split_id[2]]]
+        data <- data_all()[[split_id[1]]][["list_plot"]][[split_id[2]]]
         # Retrieves the reference files indicated by data, which will then be used by plot
         list_tmp_referential_file <- list()
         data_tmp <- data
@@ -100,7 +100,7 @@ mod_table_server <- function(id, data, name, type_line_check, referential_file, 
       # Control window
       observeEvent(input[[name_button]], {
         split_id <- strsplit(input[[name_button]], "&")[[1]]
-        data <- data()[[split_id[1]]][["list_plot"]][[split_id[2]]]
+        data <- data_all()[[split_id[1]]][["list_plot"]][[split_id[2]]]
         # Executes, if supplied by user, the function that indicates the text to be displayed
         if (!is.null(function_text_plot)) {
           text <- do.call(function_text_plot, data[names(data) %in% names(formals(function_text_plot))])

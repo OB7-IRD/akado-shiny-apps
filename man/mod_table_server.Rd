@@ -6,7 +6,7 @@
 \usage{
 mod_table_server(
   id,
-  data,
+  data_all,
   name,
   type_line_check,
   referential_file,
@@ -19,7 +19,7 @@ mod_table_server(
 \arguments{
 \item{id}{Internal parameters for shiny}
 
-\item{data}{{\link[base]{list}} expected. Reactive list containing results tables for all checks}
+\item{data_all}{{\link[base]{list}} expected. Reactive list containing results tables for all checks}
 
 \item{name}{{\link[base]{character}} expected. Control identifier in data to be displayed}
 

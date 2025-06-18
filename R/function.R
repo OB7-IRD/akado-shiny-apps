@@ -8474,7 +8474,7 @@ tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referen
   lapply(
     check_info,
     function(check) {
-      do.call(mod_table_server, c(check[names(check) %in% names(formals(mod_table_server))], data = calcul_check, type_line_check = reactive_value_menu$type_line_check, referential_file = referential_file))
+      do.call(mod_table_server, c(check[names(check) %in% names(formals(mod_table_server))], data_all = calcul_check, type_line_check = reactive_value_menu$type_line_check, referential_file = referential_file))
     }
   )
 }
