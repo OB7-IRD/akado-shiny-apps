@@ -8030,7 +8030,7 @@ window_button_download <- function(name) {
 }
 
 # Shiny function : creation tab, menu and content
-tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referential_file, config_data) {
+tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referential_file, config_data, res_auth, user_info) {
   # 1 - Arguments verification ----
   if (!codama::r_type_checking(
     r_object = id,
@@ -8474,13 +8474,82 @@ tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referen
       sep = ""
     )
   }
+  # Check user_info arguments
+  all_id_user <- lapply(
+    user_info,
+    function(user) {
+      # Check that the sublist contains an 'id' element
+      if (!("id" %in% names(user))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - Impossible to identify the user because there is no element in the sub-list named 'id'.",
+          "\n Present element : ",
+          paste0(paste(names(user), user, sep = " : "), collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!codama::r_type_checking(
+        r_object = user[["id"]],
+        type = "character",
+        length = 1L,
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = user[["id"]],
+          type = "character",
+          length = 1L,
+          output = "error"
+        ))
+      }
+      # Check that the sublist contains an 'bd_name' element
+      if (!("bd_name" %in% names(user))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - User must have a bd_name, there is no element in the sub-list named 'bd_name'.",
+          "\n Present element : ",
+          paste0(paste(names(user), user, sep = " : "), collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!codama::r_type_checking(
+        r_object = user[["bd_name"]],
+        type = "character",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = user[["bd_name"]],
+          type = "character",
+          output = "error"
+        ))
+      }
+      return(user[["id"]])
+    }
+  )
+  if (length(unlist(all_id_user)) != length(unique(unlist(all_id_user)))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - User id are not unique.",
+      "\n User id : ",
+      paste0(unlist(all_id_user), collapse = ", "),
+      sep = ""
+    )
+  }
   # 2 - Data design ----
   # Instantiating the radio button to select the display of controls
   mod_radiobuttons_type_check_server(id = id, type_check_info = type_check_info)
   # Instantiating the menu and retrieving reactive values
   reactive_value_menu <- mod_tab_menu_server(id = id, tab_info = tab_info)
   # Instantiating the tab
-  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_info, type_check = reactive_value_menu$type_check, config_data = config_data)
+  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_info, type_check = reactive_value_menu$type_check, config_data = config_data, res_auth = res_auth, user_info = user_info)
   # Creation of all tables
   lapply(
     check_info,

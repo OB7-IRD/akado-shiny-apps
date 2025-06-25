@@ -18,6 +18,8 @@ mod_tab_content_ui <- function(id) {
 #' @param type_check_info {\link[base]{list}} expected. Information about the dynamic type of check
 #' @param type_check {\link[base]{character}} expected. Reactive value containing the type of check selected by the user
 #' @param config_data {\link[base]{list}} expected. Reactive value contains the contents of the configuration file
+#' @param res_auth {\link[base]{character}} expected. Reactive value containing information about the user's connection
+#' @param user_info {\link[base]{list}} expected. Information about the dynamic user type
 #' @return The function returns nothing, instantiating the tab
 #' @details
 #' \itemize{
@@ -44,7 +46,7 @@ mod_tab_content_ui <- function(id) {
 #'  \item{\code{  databases_configuration : named list with database connection information}}
 #' }
 #' @export
-mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, type_check, config_data) {
+mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, type_check, config_data, res_auth, user_info) {
   moduleServer(id, function(input, output, session) {
     # Creation of all tab, both static tab and user-specified dynamic tab (static tabs are also created here, as the UI does not support the mixing of dynamic and static tabs)
     output$content <- shiny::renderUI({
@@ -163,7 +165,37 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, ty
       if (is.null(config_data())) {
         choices_data_base_observe$current_value <- "No configuration file"
       } else {
-        choices_data_base_observe$current_value <- names(config_data()[["databases_configuration"]])
+        # Launching the application without authentication
+        if (is.null(res_auth)) {
+          choices_data_base_observe$current_value <- names(config_data()[["databases_configuration"]])
+        } else {
+          name_id <- sapply(user_info, `[[`, "id")
+          # Checks that the user type is specified in user_info
+          if (!(res_auth[["user_type"]] %in% name_id)) {
+            stop(
+              format(
+                x = Sys.time(),
+                format = "%Y-%m-%d %H:%M:%S"
+              ),
+              " - user type ", res_auth[["user_type"]], " is unknown in user_info.\n",
+              sep = ""
+            )
+          }
+          user_info_current <- user_info[[which(name_id %in% res_auth[["user_type"]])]]
+          # Checks that the BD names is specified in configuration file
+          if (!all(user_info_current[["bd_name"]] %in% names(config_data()[["databases_configuration"]]))) {
+            stop(
+              format(
+                x = Sys.time(),
+                format = "%Y-%m-%d %H:%M:%S"
+              ),
+              " - Database ", user_info_current[["bd_name"]], " for user ", res_auth[["user_type"]], " is not defined in the configuration file.\n",
+              sep = ""
+            )
+          }
+          # Lists the possible database choices for this user
+          choices_data_base_observe$current_value <- user_info_current[["bd_name"]]
+        }
       }
       # If database are change in config_data
       if (length(choices_data_base_observe$old_value) != length(choices_data_base_observe$current_value) || any(choices_data_base_observe$old_value != choices_data_base_observe$current_value)) {

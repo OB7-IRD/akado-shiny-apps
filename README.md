@@ -127,9 +127,10 @@ reference_list_species_well_distribution_control : ["your_first_reference_list",
 Configuring the secure connection to AkadoR.  
 A default database is created when the secure connection is activated
 for the first time. The database includes a user `shiny` with the
-password `azerty` and an administrator `shinymanager` with the password
-`12345`. These credentials must be changed immediately ! Which can be
-done directly within the application by logging in as the administrator.
+password `azerty`, user type `logbook` and an administrator
+`shinymanager` with the password `12345`, user type `all`. These
+credentials must be changed immediately ! Which can be done directly
+within the application by logging in as the administrator.
 
 ``` yml
 start_AkadoR_configuration :

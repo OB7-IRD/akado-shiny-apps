@@ -5,8 +5,8 @@ test_that("Doctest: check_weight_sample_inspector", {
   # Created from @doctest for `check_weight_sample_inspector`
   # Source file: R/function.R
   # Source line: 5121
-  dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"), sample_smallsweight = c(10, NA, 12, NA), sample_bigsweight = c(50,
-    NA, NA, 0), sample_totalweight = c(NA, 9, 5, 0))
+  dataframe1 <- data.frame(sample_id = c("1", "2", "3", "4"), sample_smallsweight = c(10, NA, 12, NA), sample_bigsweight = c(50, NA,
+    NA, 0), sample_totalweight = c(NA, 9, 5, 0))
   expect_equal(check_weight_sample_inspector(dataframe1, output = "report"), structure(list(sample_id = c("1", "2", "3", "4"),
   logical = c(TRUE, TRUE, FALSE, FALSE), sample_totalweight = c(NA, 9, 5, 0), sample_smallsweight = c(10, NA, 12, NA),
   sample_bigsweight = c(50, NA, NA, 0)), row.names = c(NA, -4L), class = "data.frame"))

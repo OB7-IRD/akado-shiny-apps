@@ -599,6 +599,13 @@ app_server <- function(input, output, session) {
   # order_id_column_user : Column names of column_user_id in sql_info, according to which rows are to be sorted
   column_user_info <- list(rename_id_column_user = list(vessel_code = "Vessel code", trip_enddate = "Trip enddate", activity_date = "Activity date",  activity_time = "Activity time", activity_number = "Activity number", vesselactivity_code = "Vessel activity", sample_number = "Sample number", samplespecies_subsamplenumber = "Sub sample number", species_fao_code = "FAO code", sizemeasuretype_code = "Size measure type", samplespeciesmeasure_sizeclass = "Size class", well_label = "Well", weightcategory_code = "Weight category"),
                            order_id_column_user = c("vessel_code", "trip_enddate"))
+  # Information about the user
+  # id : user type name, mandatory, character expected
+  # bd_name : user-accessible database names (defined in configuration file), character expected
+  user_info <- list(list(id = "logbook",
+                         bd_name = c("observe_acquisition")),
+                    list(id = "all",
+                         bd_name = c("observe_main", "observe_acquisition")))
 
   # Performs all calculations to test for inconsistencies
   calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, sql_info = sql_info, check_info = check_info, column_user_info = column_user_info, parent_in = input)
@@ -607,7 +614,7 @@ app_server <- function(input, output, session) {
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
 
   # Tab creation, menu, tab content
-  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data)
+  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data, res_auth = res_auth, user_info = user_info)
 
   # Force activation of first tab at startup, remove the lazy evaluation
   observe({
