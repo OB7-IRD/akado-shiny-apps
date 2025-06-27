@@ -54,6 +54,10 @@ mod_table_server <- function(id, data_all, name, type_line_check, referential_fi
           stop(paste("Error, check failure: ", data_all()[[name]][["error"]]))
         }
         data <- data_all()[[name]][["table"]]
+        # If the table doesn't exist, create an empty table
+        if (is.null(data)) {
+          data <- data.frame()
+        }
         if (type_line_check() == "inconsistent") {
           data <- data[data$Check != as.character(icon("check")), ]
         }

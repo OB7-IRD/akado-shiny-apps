@@ -105,10 +105,15 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, ty
             ),
             shinydashboard::box(
               width = 12,
-              align = "center",
               status = "primary",
-              actionButton(inputId = NS(namespace = "start_button", id = "start_button"), label = "Start"),
-              shinycssloaders::withSpinner(htmlOutput(NS(namespace = "error_trip_select", id = "text")), type = 6, size = 0.5, proxy.height = "70px")
+              fluidRow(
+                style = "display: flex; align-items: center; flex-wrap: wrap;",
+                column(width = 2, offset = 5, align = "center",
+                       actionButton(inputId = NS(namespace = "start_button", id = "start_button"), label = "Start"),
+                       shinycssloaders::withSpinner(htmlOutput(NS(namespace = "error_trip_select", id = "text")), type = 6, size = 0.5, proxy.height = "70px")),
+                column(width = 5,
+                       selectInput(inputId = NS(namespace = id, id = "select_check"), label = "Choose a check (optional):", choices = choices_check(), multiple = TRUE, selected = choices_check()))
+              )
             )
           )
         )),
@@ -158,6 +163,7 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, ty
     # Initializes database selection memory
     choices_data_base_observe <- reactiveValues(old_value = "", current_value = "")
 
+    # Update choice for database selection Observe
     observeEvent(config_data(), {
       # Saves old selection options
       choices_data_base_observe$old_value <- choices_data_base_observe$current_value
@@ -202,6 +208,31 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, ty
         # Updated options for database selection Observe
         updateSelectInput(session, "data_base_observe", choices = choices_data_base_observe$current_value)
       }
+    })
+
+    # Update choice for check selection
+    choices_check <- reactive({
+      # List check identifiers
+      name_id <- sapply(check_info, `[[`, "id")
+      # Launching the application without authentication
+      if (is.null(res_auth)) {
+        choices_check_current_value <- name_id
+      } else {
+        # Filter check by user type
+        choices_check_current_value <- name_id[sapply(check_info, function(check) any(check[["user_type"]] %in% res_auth[["user_type"]]))]
+      }
+      # Checks that the user type has access to at least 1 control
+      if (identical(choices_check_current_value, character(0))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - No check allowed for this user type ", res_auth[["user_type"]], ".\n",
+          sep = ""
+        )
+      }
+      choices_check_current_value
     })
 
     # Management of the display or not of the boxes in the trip tab

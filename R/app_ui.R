@@ -68,6 +68,12 @@ app_ui <- function(request) {
           type = "text/css",
           ".modal-dialog {width:75% !important; }"
         ),
+        # Defines a maximum height for the selection box and adds a vertical scroll bar if necessary
+        tags$style(".selectize-input {
+          max-height: 100px;
+          overflow-y: auto;
+          overflow-x: hidden;}"
+        ),
         mod_tab_content_ui("tab")
       )
     )

@@ -6945,6 +6945,10 @@ text_error_trip_select_server <- function(id, parent_in, config_data) {
         showNotification(id = "notif_warning", ui = text, type = "error")
         return(paste0(text, ", please modify the configuration file or do not select this base"))
       }
+      # If the check selection is missing
+      if (is.null(parent_in[["tab-select_check"]])) {
+        return("Error: please select at least 1 check")
+      }
       return(TRUE)
     })
   })
@@ -7418,6 +7422,30 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             output = "error"
           ))
         }
+        # Check that the sublist contains an 'user_type' element
+        if (!("user_type" %in% names(check))) {
+          stop(
+            format(
+              x = Sys.time(),
+              format = "%Y-%m-%d %H:%M:%S"
+            ),
+            " - Information is missing for check. There is no element in the sub-list named 'user_type', mandatory.",
+            "\n Present element : ",
+            paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+            sep = ""
+          )
+        }
+        if (!codama::r_type_checking(
+          r_object = check[["user_type"]],
+          type = "character",
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = check[["user_type"]],
+            type = "character",
+            output = "error"
+          ))
+        }
         # Check that element 'rename_column_user' in the sub-list is list
         if ("rename_column_user" %in% names(check)) {
           if (!codama::r_type_checking(
@@ -7857,6 +7885,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
         if (nrow(data_sql$data_previous_trip) != length(trip_select()$trip_selected$trip_id)) {
           warning(text_object_more_or_less(id = trip_select()$trip_selected$trip_id, result_check = data_sql$data_previous_trip$trip_id))
         }
+        # Filter check by user selection
+        check_info <- check_info[sapply(check_info, function(check) any(check[["id"]] %in% parent_in[["tab-select_check"]]))]
+        # Execute check
         table_finish <- sapply(check_info, function(check) {
           if (!is.null(check[["function_check"]])) {
             # If the control needs VMS but the connection to the VMS database could not be made to create the data_vms dataset, then the control is not carried out
