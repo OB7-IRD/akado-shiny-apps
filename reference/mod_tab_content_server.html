@@ -47,7 +47,16 @@
     </div>
 
     <div id="ref-usage">
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mod_tab_content_server</span><span class="op">(</span><span class="va">id</span>, <span class="va">tab_info</span>, <span class="va">check_info</span>, <span class="va">type_check_info</span>, <span class="va">type_check</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">mod_tab_content_server</span><span class="op">(</span></span>
+<span>  <span class="va">id</span>,</span>
+<span>  <span class="va">tab_info</span>,</span>
+<span>  <span class="va">check_info</span>,</span>
+<span>  <span class="va">type_check_info</span>,</span>
+<span>  <span class="va">type_check</span>,</span>
+<span>  <span class="va">config_data</span>,</span>
+<span>  <span class="va">res_auth</span>,</span>
+<span>  <span class="va">user_info</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div id="arguments">
@@ -73,6 +82,18 @@
 <dt id="arg-type-check">type_check<a class="anchor" aria-label="anchor" href="#arg-type-check"></a></dt>
 <dd><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> expected. Reactive value containing the type of check selected by the user</p></dd>
 
+
+<dt id="arg-config-data">config_data<a class="anchor" aria-label="anchor" href="#arg-config-data"></a></dt>
+<dd><p><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> expected. Reactive value contains the contents of the configuration file</p></dd>
+
+
+<dt id="arg-res-auth">res_auth<a class="anchor" aria-label="anchor" href="#arg-res-auth"></a></dt>
+<dd><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> expected. Reactive value containing information about the user's connection</p></dd>
+
+
+<dt id="arg-user-info">user_info<a class="anchor" aria-label="anchor" href="#arg-user-info"></a></dt>
+<dd><p><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> expected. Information about the dynamic user type</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -91,6 +112,7 @@
 <li><p><code>  size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected</code></p></li>
 </ul><ul><li><p><code>  id : Button selection identification, mandatory, character expected</code></p></li>
 <li><p><code>  specific_check : Indicates whether the selection should display specific controls or not, optional (default : TRUE), logical expected</code></p></li>
+</ul><ul><li><p><code>  databases_configuration : named list with database connection information</code></p></li>
 </ul></div>
 
   </div>
