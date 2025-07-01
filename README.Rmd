@@ -103,7 +103,7 @@ String vector allowing the selection of reference list of species used for well 
 reference_list_species_well_distribution_control : ["your_first_reference_list", "your_second_reference_list", ...]
 ```
 Configuring the secure connection to AkadoR.  
-A default database is created when the secure connection is activated for the first time. The database includes a user `shiny` with the password `azerty`, user type `logbook` and an administrator `shinymanager` with the password `12345`, user type `all`. These credentials must be changed immediately ! Which can be done directly within the application by logging in as the administrator.
+A default database is created when the secure connection is activated for the first time. The database includes a user `shiny` with the password `azerty`, check user types `logbook` (access to logbook check only) and an administrator `shinymanager` with the password `12345`, check user types `logbook;vms_logbook` (access to logbook and vms logbook check) . These credentials must be changed immediately ! Which can be done directly within the application by logging in as the administrator. The administrator must also specify which databases each user is authorized to access (list the database names defined in the configuration file at step databases_configuration, databases must be separated by ; for example "your_database_name_1;your_database_name_2" in the column database_user_types of the database).
 ```{yml}
 start_AkadoR_configuration :
   # If you wish to enable secure connection to the application, set TRUE, otherwise set FALSE

@@ -210,7 +210,8 @@ server_authentication <- function(secure_connection = FALSE, path_database = fil
       database_connection <- data.frame(
         user = c("shiny", "shinymanager"),
         password = c("azerty", "12345"),
-        user_type = c("logbook", "all"),
+        check_user_types = c("logbook", "logbook;vms_logbook"),
+        database_user_types = c("", ""),
         admin = c(FALSE, TRUE)
       )
       # Path verification

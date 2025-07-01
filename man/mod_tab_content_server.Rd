@@ -11,8 +11,7 @@ mod_tab_content_server(
   type_check_info,
   type_check,
   config_data,
-  res_auth,
-  user_info
+  res_auth
 )
 }
 \arguments{
@@ -29,8 +28,6 @@ mod_tab_content_server(
 \item{config_data}{{\link[base]{list}} expected. Reactive value contains the contents of the configuration file}
 
 \item{res_auth}{{\link[base]{character}} expected. Reactive value containing information about the user's connection}
-
-\item{user_info}{{\link[base]{list}} expected. Information about the dynamic user type}
 }
 \value{
 The function returns nothing, instantiating the tab
