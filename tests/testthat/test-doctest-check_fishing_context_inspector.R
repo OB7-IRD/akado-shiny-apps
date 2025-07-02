@@ -6,10 +6,9 @@ test_that("Doctest: check_fishing_context_inspector", {
   # Source file: R/function.R
   # Source line: 1427
   dataframe1 <- data.frame(activity_id = c("1", "2", "3", "4", "5", "6", "7"), schooltype_code = c("2", "1", "2", "1", NA, "0", "2"))
-  dataframe2 <- data.frame(observedsystem_id = c("1", "2", "3", "4", "5"), activity_id = c("1", "2", "2", "3", "4"), schooltype_code = c("2",
-    "2", "1", "1", "2"))
-  expect_equal(check_fishing_context_inspector(dataframe1, dataframe2, output = "report"), structure(list(activity_id = c("1", "2", "3", "4",
-    "5", "6", "7"), logical = c(TRUE, TRUE, FALSE, FALSE, TRUE, TRUE, TRUE), schooltype_code = c("2", "1", "2", "1", NA, "0", "2"),
-  association_object_count = c(0, 1, 1, 0, 0, 0, 0)), row.names = c(NA, 7L), class = "data.frame"))
+  dataframe2 <- data.frame(observedsystem_id = c("1", "2", "3", "4", "5"), activity_id = c("1", "2", "2", "3", "4"), schooltype_code = c("2", "2", "1", "1", "2"))
+  expect_equal(check_fishing_context_inspector(dataframe1, dataframe2, output = "report"), structure(list(activity_id = c("1", "2", "3", "4", "5", "6", "7"), logical = c(TRUE,
+    TRUE, FALSE, FALSE, TRUE, TRUE, TRUE), schooltype_code = c("2", "1", "2", "1", NA, "0", "2"), association_object_count = c(0, 1, 1, 0, 0, 0, 0)), row.names = c(NA, 7L),
+  class = "data.frame"))
 })
 

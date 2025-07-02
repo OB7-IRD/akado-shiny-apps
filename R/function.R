@@ -6909,6 +6909,24 @@ check_anapo_activity_consistent_inspector <- function(dataframe1,
   }
 }
 
+# Function that checks the consistency of the various lists before filtering by the user
+function_consistency_list <- function(sql_info, column_user_info) {
+  # 1 - Arguments verification ----
+  name_column_sql <- sapply(sql_info, `[[`, "column_user_id")
+  if (!all(names(column_user_info[["rename_id_column_user"]]) %in% unlist(name_column_sql))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - The column names of sub-list named 'rename_id_column_user' must also exist in at least one sub-list 'column_user_id', if the rename only concerns a specific check, then use the 'rename_column_user' sub-list.",
+      "\n Problematic column names of sub-list named 'rename_id_column_user' : ",
+      paste0(names(column_user_info[["rename_id_column_user"]])[!(names(column_user_info[["rename_id_column_user"]]) %in% unlist(name_column_sql))], collapse = ", "),
+      sep = ""
+    )
+  }
+}
+
 # Shiny function : Error message if the trip selection elements are not correctly filled in
 text_error_trip_select_server <- function(id, parent_in, config_data) {
   moduleServer(id, function(input, output, session) {
@@ -6978,7 +6996,7 @@ config_data_server <- function(id, parent_in) {
 }
 
 # Shiny function : Retrieves the list of trips and VMS selected by the user
-trip_select_server <- function(id, parent_in, text_error_trip_select, config_data) {
+trip_select_server <- function(id, parent_in, text_error_trip_select, config_data, sql_info_selected) {
   # 0 - Global variables assignement ----
   vms_id <- NULL
   vessel_code <- NULL
@@ -6989,6 +7007,8 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
   # 1 - Data design ----
   moduleServer(id, function(input, output, session) {
     eventReactive(input$start_button, {
+      # Recovery of reactive values
+      sql_info <- sql_info_selected()[["sql_info_input_user"]]
       # If the connection data exists and there was no error in the trip selection, makes the connection
       req(config_data())
       if (text_error_trip_select() == TRUE) {
@@ -7003,6 +7023,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
             db_port = observe_database[["port"]]
           )))
         }
+        cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start sql trip_selected \n", sep = "")
         trip_selected <- furdeb::data_extraction(
           type = "database",
           file_path = system.file("sql",
@@ -7015,6 +7036,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
                         select_item_4 = parent_in$trip_start_date_range,
                         select_item_5 = parent_in$trip_end_date_range)
         )
+        list_return <- list(trip_selected = trip_selected)
         if (dim(trip_selected)[1] > 0) {
           # If selected trip with the vessel code and the end date of the trip
           if (isTruthy(parent_in$vessel_number) && isTruthy(parent_in$trip_end_date)) {
@@ -7031,6 +7053,9 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
             end_date_range <- parent_in$trip_end_date_range
             vessel_number <- ""
           }
+        }
+        if (dim(trip_selected)[1] > 0 && "activity_vms" %in% sapply(sql_info, `[[`, "file")) {
+          cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start sql activity_vms \n", sep = "")
           # Uses a function to extract data from VMS
           activity_vms <- furdeb::data_extraction(
             type = "database",
@@ -7040,12 +7065,13 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
             database_connection = data_connection,
             anchor = list(select_item_1 = start_date_range, select_item_2 = end_date_range, select_item_3 = vessel_number)
           )
+          list_return <- append(list_return, list(activity_vms = activity_vms))
         }
         # Disconnection to the base
         for (i in seq(from = 1, to = length(data_connection))) {
           DBI::dbDisconnect(data_connection[[i]][[2]])
         }
-        if (dim(trip_selected)[1] > 0) {
+        if (dim(trip_selected)[1] > 0 && "vms" %in% sapply(sql_info, `[[`, "file")) {
           # If the database is "vms", read, transform and execute the SQL query that selects the trips according to the user parameters
           if (!is.null(config_data()[["vms_databases_configuration"]][["vms"]])) {
             # Connection to the base VMS
@@ -7057,6 +7083,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
               db_port = config_data()[["vms_databases_configuration"]][["vms"]][["port"]]
             )
             # Uses a function to extract data from VMS
+            cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start sql vms \n", sep = "")
             vms <- furdeb::data_extraction(
               type = "database",
               file_path = system.file("sql",
@@ -7074,9 +7101,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
               dplyr::select(vms_id, vms_date, vessel_code, vms_codevessel, vessel_type, vessel_statut) %>%
               dplyr::distinct() %>%
               dplyr::relocate(vessel_code)
-            list_return <- list(trip_selected = trip_selected, vms = vms, vms_route = vms_route, activity_vms = activity_vms)
-          }else {
-            list_return <- list(trip_selected = trip_selected)
+            list_return <- append(list_return, list(vms = vms, vms_route = vms_route))
           }
         }
         # If trips have been found return them otherwise return FALSE
@@ -7091,14 +7116,17 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
 }
 
 # Shiny function : Performs all calculations to test for inconsistencies
-calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data, referential_file, sql_info, check_info, column_user_info, parent_in) {
+calcul_check_server <- function(id, text_error_trip_select, trip_select, config_data, referential_file, check_info_selected, sql_info_selected, column_user_info, parent_in) {
   moduleServer(id, function(input, output, session) {
     # 0 - Global variables assignement ----
     trip_id <- NULL
     eventReactive(trip_select(), {
       # 1 - Arguments verification ----
+      # Recovery of reactive values
+      check_info <- check_info_selected()
+      sql_info <- sql_info_selected()[["sql_info"]]
       # Check arguments and replace missing information with default values and add new internal information for SQL
-      info_sql_internal <- lapply(sql_info, function(sql) {
+      lapply(sql_info, function(sql) {
         # Check that the sublist contains an 'file' element
         if (!("file" %in% names(sql))) {
           stop(
@@ -7279,26 +7307,14 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             ))
           }
         }
-        # Add default value FALSE for use_selection_other_sql
-        if (!is.null(sql[["use_selection_other_sql"]]) && sql[["use_selection_other_sql"]]) {
-          use_selection_other_sql <- TRUE
-        } else {
-          use_selection_other_sql <- FALSE
-        }
-        # Add future data frame names
-        name_data <- paste0("data_", sql[["file"]])
-        return(list(file = sql[["file"]], use_selection_other_sql = use_selection_other_sql, name_data = name_data))
       })
       name_column_sql <- sapply(sql_info, `[[`, "column_user_id")
-      name_file_sql <- sapply(info_sql_internal, `[[`, "file")
-      name_data_sql <- sapply(info_sql_internal, `[[`, "name_data")
-      # Identifies SQL that will also be used to retrieve other SQLs
-      logical_data_select <- sapply(info_sql_internal, `[[`, "use_selection_other_sql")
+      name_file_sql <- sapply(sql_info, `[[`, "file")
       # Check that the anchor reference is correct
       lapply(sql_info, function(sql) {
         if ("anchor" %in% names(sql)) {
           # For SQL that allows the extraction of other SQL (use_selection_other_sql is TRUE), only references to data frames initializing the user query or configuration file arguments are allowed
-          if (!is.null(sql[["use_selection_other_sql"]]) && sql[["use_selection_other_sql"]]) {
+          if (sql[["use_selection_other_sql"]]) {
             if (any(!c(unlist(sql[["anchor"]]) %in% c("trip_selected", "vessel_selected", names(config_data()))))) {
               stop(
                 format(
@@ -7315,7 +7331,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             }
           } else {
             # For SQL that doesn't allow the extraction of other SQL (use_selection_other_sql is FALSE), only references to data frames initializing the user query, configuration file arguments or the name of another SQL file (with use_selection_other_sql is TRUE, the column indicated in id can be used as anchor) are allowed
-            if (any(!c(unlist(sql[["anchor"]]) %in% c("trip_selected", "vessel_selected", names(config_data()), name_file_sql[logical_data_select])))) {
+            if (any(!c(unlist(sql[["anchor"]]) %in% c("trip_selected", "vessel_selected", names(config_data()), name_file_sql[sapply(sql_info, `[[`, "use_selection_other_sql")])))) {
               stop(
                 format(
                   x = Sys.time(),
@@ -7633,18 +7649,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           output = "error"
         ))
       }
-      if (!all(names(column_user_info[["rename_id_column_user"]]) %in% unlist(name_column_sql))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - The column names of sub-list named 'rename_id_column_user' must also exist in at least one sub-list 'column_user_id', if the rename only concerns a specific check, then use the 'rename_column_user' sub-list.",
-          "\n Problematic column names of sub-list named 'rename_id_column_user' : ",
-          paste0(names(column_user_info[["rename_id_column_user"]])[!(names(column_user_info[["rename_id_column_user"]]) %in% unlist(name_column_sql))], collapse = ", "),
-          sep = ""
-        )
-      }
       if (any(names(column_user_info[["rename_id_column_user"]]) %in% names(unlist(name_rename_column_user_check)))) {
         stop(
           format(
@@ -7683,122 +7687,50 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
       # 2 - Data extraction ----
       # If there was no error in the trip selection and that there are trips for user settings, performs consistency tests
       if (text_error_trip_select() == TRUE && !is.logical(trip_select())) {
-        # Connection to the base
-        config_observe_database <- config_data()[["databases_configuration"]]
-        data_connection <- list()
-        for (observe_database in config_observe_database[c(parent_in$`tab-data_base_observe`)]){
-          data_connection <- append(data_connection, list(furdeb::postgresql_dbconnection(
-            db_user = observe_database[["login"]],
-            db_password = observe_database[["password"]],
-            db_dbname = observe_database[["dbname"]],
-            db_host = observe_database[["host"]],
-            db_port = observe_database[["port"]]
-          )))
-        }
-        # Retrieve only data that will also be used to retrieve other SQLs
-        data_select_sql <- lapply(stats::setNames(sql_info[unlist(logical_data_select)], name_data_sql[unlist(logical_data_select)]), function(sql) {
-          # Retrieves anchor values to be supplied to SQL
-          if (!is.null(sql[["anchor"]])) {
-            anchor <- lapply(stats::setNames(sql[["anchor"]], names(sql[["anchor"]])), function(anchor) {
-              if (anchor == "trip_selected") {
-                # Recovers trip_id values available directly in the SQL initializing the user's request
-                trip_select()$trip_selected$trip_id
-              } else if (anchor == "vessel_selected") {
-                # Recovers vessel_id values available directly in the SQL initializing the user's request
-                trip_select()$trip_selected$vessel_id
-              } else if (anchor %in% names(config_data())) {
-                # Retrieves parameter values from configuration file
-                config_data()[[anchor]]
-              }
-            })
-          } else {
-            anchor <- NULL
+        # If the selected controls use data from SQL indicate this in sql_info
+        if (!identical(sql_info, list())) {
+          # Connection to the base
+          config_observe_database <- config_data()[["databases_configuration"]]
+          data_connection <- list()
+          for (observe_database in config_observe_database[c(parent_in$`tab-data_base_observe`)]){
+            data_connection <- append(data_connection, list(furdeb::postgresql_dbconnection(
+              db_user = observe_database[["login"]],
+              db_password = observe_database[["password"]],
+              db_dbname = observe_database[["dbname"]],
+              db_host = observe_database[["host"]],
+              db_port = observe_database[["port"]]
+            )))
           }
-          # Execute SQL query
-          data <- furdeb::data_extraction(type = "database",
-                                          file_path = system.file("sql",
-                                                                  paste0(sql[["file"]], ".sql"),
-                                                                  package = "AkadoR"),
-                                          database_connection = data_connection,
-                                          anchor = anchor)
-          # Checks that the name of the column to be used to supply values when used in other SQL anchors exists in the dataset.s
-          if (!(sql[["column_anchor"]] %in% colnames(data)) && (!("vector" %in% names(sql)) || !sql[["vector"]])) {
-            # Disconnection to the bases
-            for (i in seq(from = 1, to = length(data_connection))) {
-              DBI::dbDisconnect(data_connection[[i]][[2]])
-            }
-            stop(
-              format(
-                x = Sys.time(),
-                format = "%Y-%m-%d %H:%M:%S"
-              ),
-              " - The SQL ", sql[["file"]], " file does not contain the ", sql[["column_anchor"]], " column indicated in sub-list named 'column_anchor'.",
-              sep = ""
-            )
-          }
-          # Transforms dataframe into vector if vector argument is TRUE
-          if (!is.null(sql[["vector"]]) && sql[["vector"]]) {
-            if (ncol(data) == 1) {
-              data <- dplyr::pull(data)
-            } else {
-              # Disconnection to the bases
-              for (i in seq(from = 1, to = length(data_connection))) {
-                DBI::dbDisconnect(data_connection[[i]][[2]])
-              }
-              stop(
-                format(
-                  x = Sys.time(),
-                  format = "%Y-%m-%d %H:%M:%S"
-                ),
-                " - The SQL ", sql[["file"]], " file cannot be transformed into a vector because there are ", ncol(data), " columns",
-                "\n The sub-list named 'vector' must not be TRUE",
-                sep = ""
-              )
-            }
-          }
-          return(data)
-        })
-        # Retrieve only data that will not be used to retrieve other SQL
-        data_sql <- lapply(stats::setNames(sql_info[!unlist(logical_data_select)], name_data_sql[!unlist(logical_data_select)]), function(sql) {
-          # Retrieves anchor values to be supplied to SQL
-          if (!is.null(sql[["anchor"]])) {
-            anchor <- lapply(stats::setNames(sql[["anchor"]], names(sql[["anchor"]])), function(anchor) {
-              if (anchor == "trip_selected") {
-                # Recovers trip_id values available directly in the SQL initializing the user's request
-                trip_select()$trip_selected$trip_id
-              } else if (anchor == "vessel_selected") {
-                # Recovers vessel_id values available directly in the SQL initializing the user's request
-                trip_select()$trip_selected$vessel_id
-              } else if (anchor %in% names(config_data())) {
-                # Retrieves parameter values from configuration file
-                config_data()[[anchor]]
-              } else {
-                # Retrieves the name of the column to be used as the anchor value
-                name_id <- sql_info[[which(sapply(sql_info, `[[`, "file") == anchor)]][["column_anchor"]]
-                if (!is.null(name_id)) {
-                  # Extract anchor values in other data SQL
-                  data_select_sql[[paste0("data_", anchor)]][[name_id]]
-                } else {
-                  # Extract anchor values in other vector SQL
-                  data_select_sql[[paste0("data_", anchor)]]
+          # Retrieve only data that will also be used to retrieve other SQLs
+          data_select_sql <- lapply(stats::setNames(sql_info[unlist(sapply(sql_info, `[[`, "use_selection_other_sql"))], paste0("data_", sapply(sql_info, `[[`, "file"))[unlist(sapply(sql_info, `[[`, "use_selection_other_sql"))]), function(sql) {
+            # Print message
+            cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start sql id ", sql[["file"]], " \n", sep = "")
+            # Retrieves anchor values to be supplied to SQL
+            if (!is.null(sql[["anchor"]])) {
+              anchor <- lapply(stats::setNames(sql[["anchor"]], names(sql[["anchor"]])), function(anchor) {
+                if (anchor == "trip_selected") {
+                  # Recovers trip_id values available directly in the SQL initializing the user's request
+                  trip_select()$trip_selected$trip_id
+                } else if (anchor == "vessel_selected") {
+                  # Recovers vessel_id values available directly in the SQL initializing the user's request
+                  trip_select()$trip_selected$vessel_id
+                } else if (anchor %in% names(config_data())) {
+                  # Retrieves parameter values from configuration file
+                  config_data()[[anchor]]
                 }
-              }
-            })
-          } else {
-            anchor <- NULL
-          }
-          # Execute SQL query
-          data <- furdeb::data_extraction(type = "database",
-                                          file_path = system.file("sql",
-                                                                  paste0(sql[["file"]], ".sql"),
-                                                                  package = "AkadoR"),
-                                          database_connection = data_connection,
-                                          anchor = anchor)
-          # Transforms dataframe into vector if vector argument is TRUE
-          if (!is.null(sql[["vector"]]) && sql[["vector"]]) {
-            if (ncol(data) == 1) {
-              data <- dplyr::pull(data)
+              })
             } else {
+              anchor <- NULL
+            }
+            # Execute SQL query
+            data <- furdeb::data_extraction(type = "database",
+                                            file_path = system.file("sql",
+                                                                    paste0(sql[["file"]], ".sql"),
+                                                                    package = "AkadoR"),
+                                            database_connection = data_connection,
+                                            anchor = anchor)
+            # Checks that the name of the column to be used to supply values when used in other SQL anchors exists in the dataset
+            if (!(sql[["column_anchor"]] %in% colnames(data)) && (!("vector" %in% names(sql)) || !sql[["vector"]])) {
               # Disconnection to the bases
               for (i in seq(from = 1, to = length(data_connection))) {
                 DBI::dbDisconnect(data_connection[[i]][[2]])
@@ -7808,85 +7740,168 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                   x = Sys.time(),
                   format = "%Y-%m-%d %H:%M:%S"
                 ),
-                " - The SQL ", sql[["file"]], " file cannot be transformed into a vector because there are ", ncol(data), " columns",
-                "\n The sub-list named 'vector' must not be TRUE",
+                " - The SQL ", sql[["file"]], " file does not contain the ", sql[["column_anchor"]], " column indicated in sub-list named 'column_anchor'.",
                 sep = ""
               )
             }
+            # Transforms dataframe into vector if vector argument is TRUE
+            if (!is.null(sql[["vector"]]) && sql[["vector"]]) {
+              if (ncol(data) == 1) {
+                data <- dplyr::pull(data)
+              } else {
+                # Disconnection to the bases
+                for (i in seq(from = 1, to = length(data_connection))) {
+                  DBI::dbDisconnect(data_connection[[i]][[2]])
+                }
+                stop(
+                  format(
+                    x = Sys.time(),
+                    format = "%Y-%m-%d %H:%M:%S"
+                  ),
+                  " - The SQL ", sql[["file"]], " file cannot be transformed into a vector because there are ", ncol(data), " columns",
+                  "\n The sub-list named 'vector' must not be TRUE",
+                  sep = ""
+                )
+              }
+            }
+            return(data)
+          })
+          # Retrieve only data that will not be used to retrieve other SQL
+          data_sql <- lapply(stats::setNames(sql_info[!unlist(sapply(sql_info, `[[`, "use_selection_other_sql"))], paste0("data_", sapply(sql_info, `[[`, "file"))[!unlist(sapply(sql_info, `[[`, "use_selection_other_sql"))]), function(sql) {
+            # Print message
+            cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start sql id ", sql[["file"]], " \n", sep = "")
+            # Retrieves anchor values to be supplied to SQL
+            if (!is.null(sql[["anchor"]])) {
+              anchor <- lapply(stats::setNames(sql[["anchor"]], names(sql[["anchor"]])), function(anchor) {
+                if (anchor == "trip_selected") {
+                  # Recovers trip_id values available directly in the SQL initializing the user's request
+                  trip_select()$trip_selected$trip_id
+                } else if (anchor == "vessel_selected") {
+                  # Recovers vessel_id values available directly in the SQL initializing the user's request
+                  trip_select()$trip_selected$vessel_id
+                } else if (anchor %in% names(config_data())) {
+                  # Retrieves parameter values from configuration file
+                  config_data()[[anchor]]
+                } else {
+                  # Retrieves the name of the column to be used as the anchor value
+                  name_id <- sql_info[[which(sapply(sql_info, `[[`, "file") == anchor)]][["column_anchor"]]
+                  if (!is.null(name_id)) {
+                    # Extract anchor values in other data SQL
+                    data_select_sql[[paste0("data_", anchor)]][[name_id]]
+                  } else {
+                    # Extract anchor values in other vector SQL
+                    data_select_sql[[paste0("data_", anchor)]]
+                  }
+                }
+              })
+            } else {
+              anchor <- NULL
+            }
+            # Execute SQL query
+            data <- furdeb::data_extraction(type = "database",
+                                            file_path = system.file("sql",
+                                                                    paste0(sql[["file"]], ".sql"),
+                                                                    package = "AkadoR"),
+                                            database_connection = data_connection,
+                                            anchor = anchor)
+            # Transforms dataframe into vector if vector argument is TRUE
+            if (!is.null(sql[["vector"]]) && sql[["vector"]]) {
+              if (ncol(data) == 1) {
+                data <- dplyr::pull(data)
+              } else {
+                # Disconnection to the bases
+                for (i in seq(from = 1, to = length(data_connection))) {
+                  DBI::dbDisconnect(data_connection[[i]][[2]])
+                }
+                stop(
+                  format(
+                    x = Sys.time(),
+                    format = "%Y-%m-%d %H:%M:%S"
+                  ),
+                  " - The SQL ", sql[["file"]], " file cannot be transformed into a vector because there are ", ncol(data), " columns",
+                  "\n The sub-list named 'vector' must not be TRUE",
+                  sep = ""
+                )
+              }
+            }
+            return(data)
+          })
+          data_sql <- c(data_sql, data_select_sql)
+          rm(data_select_sql)
+          # Disconnection to the bases
+          for (i in seq(from = 1, to = length(data_connection))) {
+            DBI::dbDisconnect(data_connection[[i]][[2]])
           }
-          return(data)
-        })
-        data_sql <- c(data_sql, data_select_sql)
-        rm(data_select_sql)
-        # Disconnection to the bases
-        for (i in seq(from = 1, to = length(data_connection))) {
-          DBI::dbDisconnect(data_connection[[i]][[2]])
+        } else {
+          data_sql <- list()
         }
         # 3 - Data design ----
-        # Reconstructs info from previous trips in different databases
-        if (!codama::r_table_checking(
-          r_table = data_sql$data_previous_trip,
-          type = "data.frame",
-          column_name = c("trip_previous_id", "trip_id", "vessel_code", "trip_enddate", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_landing", "harbour_label_landing"),
-          column_type = c("character", "character", "character", "Date", "character", "character", "character", "character"),
-          output = "logical"
-        )) {
-          codama::r_table_checking(
+        if (!is.null(data_sql$data_previous_trip)) {
+          # Reconstructs info from previous trips in different databases
+          if (!codama::r_table_checking(
             r_table = data_sql$data_previous_trip,
             type = "data.frame",
             column_name = c("trip_previous_id", "trip_id", "vessel_code", "trip_enddate", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_landing", "harbour_label_landing"),
             column_type = c("character", "character", "character", "Date", "character", "character", "character", "character"),
-            output = "error"
-          )
-        }
-        for (i in data_sql$data_previous_trip[is.na(data_sql$data_previous_trip$trip_previous_id), "trip_id", drop = TRUE]) {
-          # Recovers info from trip that has no previous trip
-          current_data <- data_sql$data_previous_trip[data_sql$data_previous_trip$trip_id %in% i, ]
-          # Search for trips from the same vessel and with a date lower than the current trip
-          date_previous_trip <- data_sql$data_previous_trip[data_sql$data_previous_trip$vessel_code %in% current_data$vessel_code & current_data$trip_enddate > data_sql$data_previous_trip$trip_enddate, "trip_enddate", drop = TRUE]
-          if (length(date_previous_trip) > 0) {
-            date_min_full_trip <- max(date_previous_trip, na.rm = TRUE)
-            previous_trip <- data_sql$data_previous_trip[data_sql$data_previous_trip$vessel_code %in% current_data$vessel_code & data_sql$data_previous_trip$trip_enddate == date_min_full_trip, ]
-            # Assigns information from previous trip
-            data_sql$data_previous_trip[data_sql$data_previous_trip$trip_id %in% i, c("trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous")] <- previous_trip[, c("trip_id", "harbour_id_landing", "harbour_label_landing"), drop = TRUE]
+            output = "logical"
+          )) {
+            codama::r_table_checking(
+              r_table = data_sql$data_previous_trip,
+              type = "data.frame",
+              column_name = c("trip_previous_id", "trip_id", "vessel_code", "trip_enddate", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous", "harbour_id_landing", "harbour_label_landing"),
+              column_type = c("character", "character", "character", "Date", "character", "character", "character", "character"),
+              output = "error"
+            )
+          }
+          for (i in data_sql$data_previous_trip[is.na(data_sql$data_previous_trip$trip_previous_id), "trip_id", drop = TRUE]) {
+            # Recovers info from trip that has no previous trip
+            current_data <- data_sql$data_previous_trip[data_sql$data_previous_trip$trip_id %in% i, ]
+            # Search for trips from the same vessel and with a date lower than the current trip
+            date_previous_trip <- data_sql$data_previous_trip[data_sql$data_previous_trip$vessel_code %in% current_data$vessel_code & current_data$trip_enddate > data_sql$data_previous_trip$trip_enddate, "trip_enddate", drop = TRUE]
+            if (length(date_previous_trip) > 0) {
+              date_min_full_trip <- max(date_previous_trip, na.rm = TRUE)
+              previous_trip <- data_sql$data_previous_trip[data_sql$data_previous_trip$vessel_code %in% current_data$vessel_code & data_sql$data_previous_trip$trip_enddate == date_min_full_trip, ]
+              # Assigns information from previous trip
+              data_sql$data_previous_trip[data_sql$data_previous_trip$trip_id %in% i, c("trip_previous_id", "harbour_id_landing_trip_previous", "harbour_label_landing_trip_previous")] <- previous_trip[, c("trip_id", "harbour_id_landing", "harbour_label_landing"), drop = TRUE]
+            }
+          }
+          # Remove trips not selected by the user but which have been useful for finding previous trips located in another database
+          data_sql$data_previous_trip <- data_sql$data_previous_trip %>%
+            dplyr::filter(trip_id %in% trip_select()$trip_selected$trip_id)
+          # Checks data consistency
+          if (nrow(data_sql$data_previous_trip) != length(trip_select()$trip_selected$trip_id)) {
+            warning(text_object_more_or_less(id = trip_select()$trip_selected$trip_id, result_check = data_sql$data_previous_trip$trip_id))
           }
         }
-        # Remove trips not selected by the user but which have been useful for finding previous trips located in another database
-        data_sql$data_previous_trip <- data_sql$data_previous_trip %>%
-          dplyr::filter(trip_id %in% trip_select()$trip_selected$trip_id)
-        # Reconstructs full trips from different databases
-        if (!codama::r_table_checking(
-          r_table = data_sql$data_full_trip,
-          type = "data.frame",
-          column_name = c("trip_end_full_trip_id", "trip_id", "vessel_id", "trip_enddate"),
-          column_type = c("character", "character", "character", "Date"),
-          output = "logical"
-        )) {
-          codama::r_table_checking(
+        if (!is.null(data_sql$data_full_trip)) {
+          # Reconstructs full trips from different databases
+          if (!codama::r_table_checking(
             r_table = data_sql$data_full_trip,
             type = "data.frame",
             column_name = c("trip_end_full_trip_id", "trip_id", "vessel_id", "trip_enddate"),
             column_type = c("character", "character", "character", "Date"),
-            output = "error"
-          )
-        }
-        for (i in data_sql$data_full_trip[is.na(data_sql$data_full_trip$trip_end_full_trip_id) & !is.na(data_sql$data_full_trip$trip_id), "trip_id", drop = TRUE]) {
-          # Recover trip info that doesn't belong to a finished full trip
-          current_data <- data_sql$data_full_trip[data_sql$data_full_trip$trip_id %in% i, ]
-          # Search for trips on the same vessel, in a finished full trip and with a date later than the current trip
-          date_full_trip <- data_sql$data_full_trip[data_sql$data_full_trip$vessel_id %in% current_data$vessel_id & !is.na(data_sql$data_full_trip$trip_end_full_trip_id) & current_data$trip_enddate <= data_sql$data_full_trip$trip_enddate, "trip_enddate", drop = TRUE]
-          if (length(date_full_trip) > 0) {
-            date_min_full_trip <- min(date_full_trip, na.rm = TRUE)
-            # Assigns the identifier of the finished full trip
-            data_sql$data_full_trip[data_sql$data_full_trip$trip_id %in% i, "trip_end_full_trip_id"] <- data_sql$data_full_trip[data_sql$data_full_trip$vessel_id %in% current_data$vessel_id & !is.na(data_sql$data_full_trip$trip_end_full_trip_id) & data_sql$data_full_trip$trip_enddate == date_min_full_trip, "trip_end_full_trip_id", drop = TRUE]
+            output = "logical"
+          )) {
+            codama::r_table_checking(
+              r_table = data_sql$data_full_trip,
+              type = "data.frame",
+              column_name = c("trip_end_full_trip_id", "trip_id", "vessel_id", "trip_enddate"),
+              column_type = c("character", "character", "character", "Date"),
+              output = "error"
+            )
+          }
+          for (i in data_sql$data_full_trip[is.na(data_sql$data_full_trip$trip_end_full_trip_id) & !is.na(data_sql$data_full_trip$trip_id), "trip_id", drop = TRUE]) {
+            # Recover trip info that doesn't belong to a finished full trip
+            current_data <- data_sql$data_full_trip[data_sql$data_full_trip$trip_id %in% i, ]
+            # Search for trips on the same vessel, in a finished full trip and with a date later than the current trip
+            date_full_trip <- data_sql$data_full_trip[data_sql$data_full_trip$vessel_id %in% current_data$vessel_id & !is.na(data_sql$data_full_trip$trip_end_full_trip_id) & current_data$trip_enddate <= data_sql$data_full_trip$trip_enddate, "trip_enddate", drop = TRUE]
+            if (length(date_full_trip) > 0) {
+              date_min_full_trip <- min(date_full_trip, na.rm = TRUE)
+              # Assigns the identifier of the finished full trip
+              data_sql$data_full_trip[data_sql$data_full_trip$trip_id %in% i, "trip_end_full_trip_id"] <- data_sql$data_full_trip[data_sql$data_full_trip$vessel_id %in% current_data$vessel_id & !is.na(data_sql$data_full_trip$trip_end_full_trip_id) & data_sql$data_full_trip$trip_enddate == date_min_full_trip, "trip_end_full_trip_id", drop = TRUE]
+            }
           }
         }
-        # Checks data consistency
-        if (nrow(data_sql$data_previous_trip) != length(trip_select()$trip_selected$trip_id)) {
-          warning(text_object_more_or_less(id = trip_select()$trip_selected$trip_id, result_check = data_sql$data_previous_trip$trip_id))
-        }
-        # Filter check by user selection
-        check_info <- check_info[sapply(check_info, function(check) any(check[["id"]] %in% parent_in[["tab-select_check"]]))]
         # Execute check
         table_finish <- sapply(check_info, function(check) {
           if (!is.null(check[["function_check"]])) {
@@ -7899,7 +7914,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
               tryCatch({
                 # Finds the data frames to supply as arguments to the control function
                 argument <- lapply(stats::setNames(check[["argument_function_check"]], names(check[["argument_function_check"]])), function(argument) {
-                  if (argument %in% name_file_sql) {
+                  if (paste0("data_", argument) %in% names(data_sql)) {
                     # Extract data from data SQL
                     data_sql[[paste0("data_", argument)]]
                   } else if (argument %in% names(referential_file())) {
@@ -7928,7 +7943,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                   if (!is.null(check[["argument_function_display"]])) {
                     # Finds the data frames to supply as arguments to the display function
                     argument <- lapply(stats::setNames(check[["argument_function_display"]], names(check[["argument_function_display"]])), function(argument) {
-                      if (argument %in% name_file_sql) {
+                      if (paste0("data_", argument) %in% names(data_sql)) {
                         # Extract data
                         data_sql[[paste0("data_", argument)]]
                       } else if (argument == "check") {
@@ -7948,7 +7963,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                   if (!is.null(check[["function_data_plot"]])) {
                     # Finds the data frames to supply as arguments to the data plot function
                     argument <- lapply(stats::setNames(check[["argument_function_data_plot"]], names(check[["argument_function_data_plot"]])), function(argument) {
-                      if (argument %in% name_file_sql) {
+                      if (paste0("data_", argument) %in% names(data_sql)) {
                         # Extract data
                         data_sql[[paste0("data_", argument)]]
                       } else if (argument %in% names(trip_select())) {
@@ -7978,9 +7993,9 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                   }
                 }
                 # Finds the table containing the information needed for the user to identify the rows
-                if (check[["table_user_id"]] %in% name_file_sql) {
+                if (paste0("data_", check[["table_user_id"]]) %in% names(data_sql)) {
                   # Extract data in data_sql
-                  table_display_data_info <- data_sql[[paste0("data_", check[["table_user_id"]])]][,  c(sql_info[[which(name_file_sql == check[["table_user_id"]])]][["column_user_id"]], check[["additional_column_user"]])]
+                  table_display_data_info <- data_sql[[paste0("data_", check[["table_user_id"]])]][,  c(sql_info[[which(sapply(sql_info, `[[`, "file") == check[["table_user_id"]])]][["column_user_id"]], check[["additional_column_user"]])]
                 } else if (check[["table_user_id"]] %in% names(trip_select())) {
                   # Extract data in trip_select
                   table_display_data_info <- trip_select()[[check[["table_user_id"]]]][,  c(check[["additional_column_user"]])]
@@ -7990,7 +8005,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
                       x = Sys.time(),
                       format = "%Y-%m-%d %H:%M:%S"
                     ),
-                    " - The sub-list named 'table_user_id' must be a name of the file SQL (", paste0(name_file_sql, collapse = ", "), ") or a name from the SQL initializing the user's query trip_select() (", paste0(names(trip_select()), collapse = ", "), ")",
+                    " - The sub-list named 'table_user_id' must be a name of the file SQL (", paste0(names(data_sql), collapse = ", "), ") or a name from the SQL initializing the user's query trip_select() (", paste0(names(trip_select()), collapse = ", "), ")",
                     "\n check id : ",
                     check[["id"]],
                     "\n table_user_id : ",

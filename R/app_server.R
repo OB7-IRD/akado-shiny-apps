@@ -9,22 +9,6 @@ app_server <- function(input, output, session) {
   # Verification that the user is authorized to connect to AkadoR
   res_auth <- set_server_authentication()
 
-  # Error message if the date range is not correct
-  output$error_date_select <- renderText({
-    if (isTruthy(input$trip_start_date_range) && isTruthy(input$trip_end_date_range) && input$trip_start_date_range > input$trip_end_date_range) {
-      "Error: start date must be before end date"
-    }
-  })
-
-  # Read the .yml file of configuration for the connection
-  config_data <- config_data_server(id = "start_button", parent_in = input)
-
-  # Error message if the trip selection elements are not correctly filled in
-  text_error_trip_select <- text_error_trip_select_server(id = "start_button", parent_in = input, config_data = config_data)
-
-  # Retrieves the list of trips selected by the user
-  trip_select <- trip_select_server(id = "start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data)
-
   # Read the referential file
   referential_file <- reactive({
     # 0 - Global variables assignement ----
@@ -548,12 +532,15 @@ app_server <- function(input, output, session) {
                           title_window = "Anapo activity"))
   # Information about the sql
   # file : Name of sql file (without .sql extension), mandatory, character expected
-  # anchor : list containing information in case of anchor in sql file, the left part is the name given to the anchor in the SQL, the right part is the content of the anchor, which may come from another SQL (indicate the name of the file, note that use_selection_other_sql must be TRUE for this one), or from a parameter in the configuration file, or from the SQL initializing the user's query (trip_selected or vessel_selected), optional, character expected
+  # anchor : list containing information in case of anchor in sql file, the left part is the name given to the anchor in the SQL, the right part is the content of the anchor, which may come from another SQL (indicate the name of the file, note that use_selection_other_sql must be TRUE for this one and FALSE for the current SQL), or from a parameter in the configuration file, or from the SQL initializing the user's query (trip_selected or vessel_selected), optional, character expected
   # use_selection_other_sql : Indicates whether the SQL is used in the construction of other SQLs, optional (default : FALSE), logical expected
   # column_anchor : Name of column to be used to supply values when used in other SQL anchors, optional (but mandatory if use_selection_other_sql is TRUE and vector is FALSE), character expected
   # column_user_id : Column names used by the user to identify the element, optional, character expected
   # vector : Logical which indicates whether the data frame created should be transformed into a vector (if a single column in the data frame), optional (default : FALSE), logical expected
-  sql_info <- list(list(file = "activity",
+  sql_info <- list(list(file = "trip_selected"), # Do not modify, different generated directly from user inputs
+                   list(file = "vms"), # Do not modify, different generated directly from user inputs
+                   list(file = "activity_vms"), # Do not modify, different generated directly from user inputs
+                   list(file = "activity",
                         anchor = list(select_item = "trip_selected"),
                         use_selection_other_sql = TRUE,
                         column_anchor = "activity_id",
@@ -634,8 +621,52 @@ app_server <- function(input, output, session) {
   column_user_info <- list(rename_id_column_user = list(vessel_code = "Vessel code", trip_enddate = "Trip enddate", activity_date = "Activity date",  activity_time = "Activity time", activity_number = "Activity number", vesselactivity_code = "Vessel activity", sample_number = "Sample number", samplespecies_subsamplenumber = "Sub sample number", species_fao_code = "FAO code", sizemeasuretype_code = "Size measure type", samplespeciesmeasure_sizeclass = "Size class", well_label = "Well", weightcategory_code = "Weight category"),
                            order_id_column_user = c("vessel_code", "trip_enddate"))
 
+  # Checks the consistency of the various lists before filtering by the user
+  function_consistency_list(sql_info = sql_info, column_user_info = column_user_info)
+
+  # Error message if the date range is not correct
+  output$error_date_select <- renderText({
+    if (isTruthy(input$trip_start_date_range) && isTruthy(input$trip_end_date_range) && input$trip_start_date_range > input$trip_end_date_range) {
+      "Error: start date must be before end date"
+    }
+  })
+
+  # Read the .yml file of configuration for the connection
+  config_data <- config_data_server(id = "start_button", parent_in = input)
+
+  # Filter check by user selection
+  check_info_selected <- reactive({
+    check_info[sapply(check_info, function(check) any(check[["id"]] %in% input[["tab-select_check"]]))]
+  })
+
+  # Filter SQL by user selection
+  sql_info_selected <- reactive({
+    # Retrieves arguments that may contain references to SQL data
+    name_argument_check_select <- unique(unname(unlist(sapply(check_info_selected(), `[`, c("argument_function_check", "argument_function_data_plot", "argument_function_display", "table_user_id")))))
+    # Retrieves the SQLs info used in the anchors for the selected SQL data
+    sql_info_check_select <- sql_info[sapply(sql_info, function(sql) any(sql[["file"]] %in% name_argument_check_select))]
+    # Filter SQL by user selection
+    sql_info <- sql_info[sapply(sql_info, function(sql) any(sql[["file"]] %in% c(name_argument_check_select, unname(unlist(sapply(sql_info_check_select, `[[`, "anchor"))))))]
+    # Deletion of SQLs that are managed differently, with the use of user inputs
+    sql_info_input_user <- sql_info
+    sql_info <- sql_info[!sapply(sql_info, function(sql) any(sql[["file"]] %in% c("trip_selected", "vms", "activity_vms")))]
+    # Add default value FALSE for use_selection_other_sql
+    for (sql in sql_info) {
+      if (is.null(sql[["use_selection_other_sql"]])) {
+        sql_info[[which(sapply(sql_info, `[[`, "file") == sql[["file"]])]][["use_selection_other_sql"]] <- FALSE
+      }
+    }
+    return(list(sql_info_input_user = sql_info_input_user, sql_info = sql_info))
+  })
+
+  # Error message if the trip selection elements are not correctly filled in
+  text_error_trip_select <- text_error_trip_select_server(id = "start_button", parent_in = input, config_data = config_data)
+
+  # Retrieves the list of trips selected by the user
+  trip_select <- trip_select_server(id = "start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data, sql_info_selected = sql_info_selected)
+
   # Performs all calculations to test for inconsistencies
-  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, sql_info = sql_info, check_info = check_info, column_user_info = column_user_info, parent_in = input)
+  calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, check_info_selected = check_info_selected, sql_info_selected = sql_info_selected, column_user_info = column_user_info, parent_in = input)
 
   # Displays the errors and notifications that occur when you want to start the calculation
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
