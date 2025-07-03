@@ -622,7 +622,7 @@ app_server <- function(input, output, session) {
                            order_id_column_user = c("vessel_code", "trip_enddate"))
 
   # Checks the consistency of the various lists before filtering by the user
-  function_consistency_list(sql_info = sql_info, column_user_info = column_user_info)
+  check_consistency_list(sql_info = sql_info, check_info = check_info, column_user_info = column_user_info, type_check_info = type_check_info, tab_info = tab_info)
 
   # Error message if the date range is not correct
   output$error_date_select <- renderText({

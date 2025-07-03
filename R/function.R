@@ -6910,9 +6910,789 @@ check_anapo_activity_consistent_inspector <- function(dataframe1,
 }
 
 # Function that checks the consistency of the various lists before filtering by the user
-function_consistency_list <- function(sql_info, column_user_info) {
+check_consistency_list <- function(sql_info, check_info, column_user_info, type_check_info, tab_info) {
   # 1 - Arguments verification ----
+  name_file_sql <- sapply(sql_info, `[[`, "file")
   name_column_sql <- sapply(sql_info, `[[`, "column_user_id")
+  name_rename_column_user_check <- sapply(check_info, `[[`, "rename_column_user")
+  # Check tab_info arguments and retrieve all tab identifiers
+  all_id_tab <- lapply(tab_info, function(tab) {
+    # Check that the sublist contains an 'id' element
+    if (!("id" %in% names(tab))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Impossible to identify the tab because there is no element in the sub-list named 'id'.
+   Present element : ",
+        paste0(paste(names(tab), tab, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    if (!codama::r_type_checking(
+      r_object = tab[["id"]],
+      type = "character",
+      length = 1L,
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = tab[["id"]],
+        type = "character",
+        length = 1L,
+        output = "error"
+      ))
+    }
+    # Check that element 'title' in the sub-list is character
+    if (!("title" %in% names(tab))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Tabs must have a title, there is no element in the sub-list named 'title'.
+   Present element : ",
+        paste0(paste(names(tab), tab, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    if (!codama::r_type_checking(
+      r_object = tab[["title"]],
+      type = "character",
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = tab[["title"]],
+        type = "character",
+        output = "error"
+      ))
+    }
+    # Check that element 'text' in the sub-list is character
+    if ("text" %in% names(tab)) {
+      if (!codama::r_type_checking(
+        r_object = tab[["text"]],
+        type = "character",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = tab[["text"]],
+          type = "character",
+          output = "error"
+        ))
+      }
+    }
+    # Check that element 'display_dividing_lines' in the sub-list is logical
+    if ("display_dividing_lines" %in% names(tab)) {
+      if (!codama::r_type_checking(
+        r_object = tab[["display_dividing_lines"]],
+        type = "logical",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = tab[["display_dividing_lines"]],
+          type = "logical",
+          output = "error"
+        ))
+      }
+    }
+    return(tab[["id"]])
+  })
+  if (length(unlist(all_id_tab)) != length(unique(unlist(all_id_tab)))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Tab id are not unique.",
+      "\n Tab id : ",
+      paste0(unlist(all_id_tab), collapse = ", "),
+      sep = ""
+    )
+  }
+  # Check type_check_info arguments and retrieve all choice identifiers
+  # Check that the sublist contains an 'title' element
+  if (!("title" %in% names(type_check_info))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Information is missing for the button used to select the check to be displayed. There is no element in the sub-list named 'title'.",
+      "\n Present element : ",
+      paste0(paste(names(type_check_info), type_check_info, sep = " : "), collapse = ", "),
+      sep = ""
+    )
+  }
+  if (!codama::r_type_checking(
+    r_object = type_check_info[["title"]],
+    type = "character",
+    length = 1L,
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = type_check_info[["title"]],
+      type = "character",
+      length = 1L,
+      output = "error"
+    ))
+  }
+  all_id_choice_type_check <- lapply(type_check_info, function(choice) {
+    if (is.list(choice)) {
+      # Check that the sublist contains an 'id' element
+      if (!("id" %in% names(choice))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - Impossible to identify the choice because there is no element in the sub-list named 'id'.
+   Present element : ",
+          paste0(paste(names(choice), choice, sep = " : "), collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!codama::r_type_checking(
+        r_object = choice[["id"]],
+        type = "character",
+        length = 1L,
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = choice[["id"]],
+          type = "character",
+          length = 1L,
+          output = "error"
+        ))
+      }
+      # Check that element 'text' in the sub-list is character
+      if (!("text" %in% names(choice))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - Tabs must have a text, there is no element in the sub-list named 'text'.
+     Present element : ",
+          paste0(paste(names(choice), choice, sep = " : "), collapse = ", "),
+          sep = ""
+        )
+      }
+      if (!codama::r_type_checking(
+        r_object = choice[["text"]],
+        type = "character",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = choice[["text"]],
+          type = "character",
+          output = "error"
+        ))
+      }
+      # Check that element 'specific_check' in the sub-list is logical
+      if ("specific_check" %in% names(choice)) {
+        if (!codama::r_type_checking(
+          r_object = choice[["specific_check"]],
+          type = "logical",
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = choice[["specific_check"]],
+            type = "logical",
+            output = "error"
+          ))
+        }
+      }
+      return(choice[["id"]])
+    }
+  })
+  if (length(unlist(all_id_choice_type_check)) != length(unique(unlist(all_id_choice_type_check)))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Choice id of check types are not unique.",
+      "\n Choice id : ",
+      paste0(unlist(all_id_choice_type_check), collapse = ", "),
+      sep = ""
+    )
+  }
+  # Check check_info arguments and retrieve all tab identifiers
+  all_id_check <- lapply(check_info, function(check) {
+    # Check that the sublist contains an 'id' element
+    if (!("id" %in% names(check))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Impossible to identify the check because there is no element in the sub-list named 'id'.",
+        "\n Present element : ",
+        paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    if (!codama::r_type_checking(
+      r_object = check[["id"]],
+      type = "character",
+      length = 1L,
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = check[["id"]],
+        type = "character",
+        length = 1L,
+        output = "error"
+      ))
+    }
+    # Check that the sublist contains an 'function_check' element
+    if (!("function_check" %in% names(check))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Information is missing for check. There is no element in the sub-list named 'function_check', mandatory.",
+        "\n Present element : ",
+        paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    # Check that element 'function_check' in the sub-list is function
+    if (!inherits(x = check[["function_check"]], what = "function")) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - The sub-list named 'function_check' must be a function.",
+        "\n check id : ",
+        check[["id"]],
+        "\n function_check : ",
+        check[["function_check"]]
+        ,
+        sep = ""
+      )
+    }
+    # Check that the sublist contains an 'argument_function_check' element
+    if (!("argument_function_check" %in% names(check))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Information is missing for check. There is no element in the sub-list named 'argument_function_check', mandatory.",
+        "\n Present element : ",
+        paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    if (!codama::r_type_checking(
+      r_object = check[["argument_function_check"]],
+      type = "list",
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = check[["argument_function_check"]],
+        type = "list",
+        output = "error"
+      ))
+    }
+    # Check that the sublist contains an 'table_user_id' element
+    if (!("table_user_id" %in% names(check))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Information is missing for check. There is no element in the sub-list named 'table_user_id', mandatory.",
+        "\n Present element : ",
+        paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    if (!codama::r_type_checking(
+      r_object = check[["table_user_id"]],
+      type = "character",
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = check[["table_user_id"]],
+        type = "character",
+        output = "error"
+      ))
+    }
+    # Check that the sublist contains an 'user_type' element
+    if (!("user_type" %in% names(check))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Information is missing for check. There is no element in the sub-list named 'user_type', mandatory.",
+        "\n Present element : ",
+        paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    if (!codama::r_type_checking(
+      r_object = check[["user_type"]],
+      type = "character",
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = check[["user_type"]],
+        type = "character",
+        output = "error"
+      ))
+    }
+    # Check that element 'rename_column_user' in the sub-list is list
+    if ("rename_column_user" %in% names(check)) {
+      if (!codama::r_type_checking(
+        r_object = check[["rename_column_user"]],
+        type = "list",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["rename_column_user"]],
+          type = "list",
+          output = "error"
+        ))
+      }
+    }
+    # Check that the sublist contains an 'function_data_plot' element
+    if ("function_data_plot" %in% names(check)) {
+      # Check that element 'function_data_plot' in the sub-list is function
+      if (!inherits(x = check[["function_data_plot"]], what = "function")) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - The sub-list named 'function_data_plot' must be a function.",
+          "\n check id : ",
+          check[["id"]],
+          "\n function_data_plot : ",
+          check[["function_data_plot"]]
+          ,
+          sep = ""
+        )
+      }
+      # Check that the sublist contains an 'argument_function_data_plot' element
+      if (!("argument_function_data_plot" %in% names(check))) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - Information is missing for check. There is no element in the sub-list named 'argument_function_data_plot', mandatory if function_data_plot exist.",
+          "\n Present element : ",
+          paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+          sep = ""
+        )
+      }
+      # Check that element 'argument_function_data_plot' in the sub-list is list
+      if (!codama::r_type_checking(
+        r_object = check[["argument_function_data_plot"]],
+        type = "list",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["argument_function_data_plot"]],
+          type = "list",
+          output = "error"
+        ))
+      }
+    }
+    if ("additional_column_user" %in% names(check)) {
+      # Check that element 'additional_column_user' in the sub-list is character
+      if (!codama::r_type_checking(
+        r_object = check[["additional_column_user"]],
+        type = "character",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["additional_column_user"]],
+          type = "character",
+          output = "error"
+        ))
+      }
+    }
+    if ("function_display" %in% names(check)) {
+      # Check that element 'function_display' in the sub-list is function
+      if (!inherits(x = check[["function_display"]], what = "function")) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - The sub-list named 'function_display' must be a function.",
+          "\n check id : ",
+          check[["id"]],
+          "\n function_display : ",
+          check[["function_display"]]
+          ,
+          sep = ""
+        )
+      }
+    }
+    if ("argument_function_display" %in% names(check)) {
+      # Check that element 'argument_function_display' in the sub-list is list
+      if (!codama::r_type_checking(
+        r_object = check[["argument_function_display"]],
+        type = "list",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["argument_function_display"]],
+          type = "list",
+          output = "error"
+        ))
+      }
+    }
+    if ("need_vms" %in% names(check)) {
+      # Check that element 'need_vms' in the sub-list is logical
+      if (!codama::r_type_checking(
+        r_object = check[["need_vms"]],
+        type = "logical",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["need_vms"]],
+          type = "logical",
+          output = "error"
+        ))
+      }
+    }
+    # Check that element 'title' in the sub-list is character
+    if ("title" %in% names(check)) {
+      if (!codama::r_type_checking(
+        r_object = check[["title"]],
+        type = "character",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["title"]],
+          type = "character",
+          output = "error"
+        ))
+      }
+    }
+    # Check that element 'text' in the sub-list is character
+    if ("text" %in% names(check)) {
+      if (!codama::r_type_checking(
+        r_object = check[["text"]],
+        type = "character",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["text"]],
+          type = "character",
+          output = "error"
+        ))
+      }
+    }
+    # Check that element 'type' in the sub-list is character
+    if (!("type" %in% names(check))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Check must have a type, there is no element in the sub-list named 'type'.",
+        "\n Present element : ",
+        paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    if (!codama::r_type_checking(
+      r_object = check[["type"]],
+      type = "character",
+      allowed_value = unlist(all_id_choice_type_check),
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = check[["type"]],
+        type = "character",
+        allowed_value = unlist(all_id_choice_type_check),
+        output = "error"
+      ))
+    }
+    # Check that element 'size_box' in the sub-list is character
+    if ("size_box" %in% names(check)) {
+      if (!codama::r_type_checking(
+        r_object = check[["size_box"]],
+        type = "character",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["size_box"]],
+          type = "character",
+          output = "error"
+        ))
+      }
+    }
+    # Check that element 'column_no_wrap' in the sub-list is numeric
+    if ("column_no_wrap" %in% names(check)) {
+      if (!codama::r_type_checking(
+        r_object = check[["column_no_wrap"]],
+        type = "numeric",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["column_no_wrap"]],
+          type = "numeric",
+          output = "error"
+        ))
+      }
+    }
+    # Check that element 'function_plot' in the sub-list is function
+    if ("function_plot" %in% names(check)) {
+      if (!inherits(x = check[["function_plot"]], what = "function")) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - The sub-list named 'function_plot' must be a function.",
+          "\n check id : ",
+          check[["id"]],
+          "\n function_plot : ",
+          check[["function_plot"]]
+          ,
+          sep = ""
+        )
+      }
+    }
+    # Check that element 'function_text_plot' in the sub-list is character
+    if ("function_text_plot" %in% names(check)) {
+      if (!inherits(x = check[["function_text_plot"]], what = "function")) {
+        stop(
+          format(
+            x = Sys.time(),
+            format = "%Y-%m-%d %H:%M:%S"
+          ),
+          " - The sub-list named 'function_text_plot' must be a function.",
+          "\n check id : ",
+          check[["id"]],
+          "\n function_text_plot : ",
+          check[["function_text_plot"]]
+          ,
+          sep = ""
+        )
+      }
+    }
+    # Check that element 'title_window' in the sub-list is character
+    if ("title_window" %in% names(check)) {
+      if (!codama::r_type_checking(
+        r_object = check[["title_window"]],
+        type = "character",
+        length = 1L,
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = check[["title_window"]],
+          type = "character",
+          length = 1L,
+          output = "error"
+        ))
+      }
+    }
+    # Check that the sublist contains an 'tab' element
+    if (!("tab" %in% names(check))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Impossible to identify the tab for check because there is no element in the sub-list named 'tab'.",
+        "\n Control element available : ",
+        paste0(paste(names(check), check, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    # Check that element 'tab' in the sub-list is character
+    if (!codama::r_type_checking(
+      r_object = check[["tab"]],
+      type = "character",
+      length = 1L,
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = check[["tab"]],
+        type = "character",
+        length = 1L,
+        output = "error"
+      ))
+    }
+    if (!(check[["tab"]] %in% unlist(all_id_tab))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Invalid tab reference for check display.",
+        "\n Check tab name : ",
+        check[["tab"]],
+        " for check id ", check[["id"]],
+        "\n Tab name available : ",
+        paste0(unlist(all_id_tab), collapse = ", "),
+        sep = ""
+      )
+    }
+    return(check[["id"]])
+  })
+  if (length(unlist(all_id_check)) != length(unique(unlist(all_id_check)))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - Check id are not unique.",
+      "\n Check id : ",
+      paste0(unlist(all_id_check), collapse = ", "),
+      sep = ""
+    )
+  }
+  # Check arguments in sql_info
+  lapply(sql_info, function(sql) {
+    # Check that the sublist contains an 'file' element
+    if (!("file" %in% names(sql))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - Impossible to identify the sql because there is no element in the sub-list named 'file'.",
+        "\n Present element : ",
+        paste0(paste(names(sql), sql, sep = " : "), collapse = ", "),
+        sep = ""
+      )
+    }
+    if (!codama::r_type_checking(
+      r_object = sql[["file"]],
+      type = "character",
+      length = 1L,
+      output = "logical"
+    )) {
+      return(codama::r_type_checking(
+        r_object = sql[["file"]],
+        type = "character",
+        length = 1L,
+        output = "error"
+      ))
+    }
+    # Check that element 'anchor' in the sub-list is list
+    if ("anchor" %in% names(sql)) {
+      if (!codama::r_type_checking(
+        r_object = sql[["anchor"]],
+        type = "list",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = sql[["anchor"]],
+          type = "list",
+          output = "error"
+        ))
+      }
+    }
+    # Check that element 'use_selection_other_sql' in the sub-list is list
+    if ("use_selection_other_sql" %in% names(sql)) {
+      if (!codama::r_type_checking(
+        r_object = sql[["use_selection_other_sql"]],
+        type = "logical",
+        length = 1L,
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = sql[["use_selection_other_sql"]],
+          type = "logical",
+          length = 1L,
+          output = "error"
+        ))
+      }
+      # Check that the sublist contains an 'column_anchor' element
+      if (sql[["use_selection_other_sql"]] && (!("vector" %in% names(sql)) || !sql[["vector"]])) {
+        if (!("column_anchor" %in% names(sql))) {
+          stop(
+            format(
+              x = Sys.time(),
+              format = "%Y-%m-%d %H:%M:%S"
+            ),
+            " - Information is missing for SQL. There is no element in the sub-list named 'column_anchor', mandatory if use_selection_other_sql are TRUE and vector is FALSE.",
+            "\n Present element : ",
+            paste0(paste(names(sql), sql, sep = " : "), collapse = ", "),
+            sep = ""
+          )
+        }
+        if (!codama::r_type_checking(
+          r_object = sql[["column_anchor"]],
+          type = "character",
+          length = 1L,
+          output = "logical"
+        )) {
+          return(codama::r_type_checking(
+            r_object = sql[["column_anchor"]],
+            type = "character",
+            length = 1L,
+            output = "error"
+          ))
+        }
+      }
+    }
+    # Check that element 'column_user_id' in the sub-list is list
+    if ("column_user_id" %in% names(sql)) {
+      if (!codama::r_type_checking(
+        r_object = sql[["column_user_id"]],
+        type = "character",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = sql[["column_user_id"]],
+          type = "character",
+          output = "error"
+        ))
+      }
+    }
+    # Check that element 'vector' in the sub-list is list
+    if ("vector" %in% names(sql)) {
+      # Check that element 'vector' in the sub-list is logical
+      if (!codama::r_type_checking(
+        r_object = sql[["vector"]],
+        type = "logical",
+        output = "logical"
+      )) {
+        return(codama::r_type_checking(
+          r_object = sql[["vector"]],
+          type = "logical",
+          output = "error"
+        ))
+      }
+    }
+  })
+  if (length(unlist(name_file_sql)) != length(unique(unlist(name_file_sql)))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - File names must be unique.",
+      "\n File names : ",
+      paste0(unlist(name_file_sql), collapse = ", "),
+      sep = ""
+    )
+  }
+  if (!codama::r_type_checking(
+    r_object = column_user_info[["rename_id_column_user"]],
+    type = "list",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = column_user_info[["rename_id_column_user"]],
+      type = "list",
+      output = "error"
+    ))
+  }
   if (!all(names(column_user_info[["rename_id_column_user"]]) %in% unlist(name_column_sql))) {
     stop(
       format(
@@ -6922,6 +7702,41 @@ function_consistency_list <- function(sql_info, column_user_info) {
       " - The column names of sub-list named 'rename_id_column_user' must also exist in at least one sub-list 'column_user_id', if the rename only concerns a specific check, then use the 'rename_column_user' sub-list.",
       "\n Problematic column names of sub-list named 'rename_id_column_user' : ",
       paste0(names(column_user_info[["rename_id_column_user"]])[!(names(column_user_info[["rename_id_column_user"]]) %in% unlist(name_column_sql))], collapse = ", "),
+      sep = ""
+    )
+  }
+  if (any(names(column_user_info[["rename_id_column_user"]]) %in% names(unlist(name_rename_column_user_check)))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - The column names of sub-list named 'rename_id_column_user' must not also be indicated in a sub-list 'rename_column_user', either the column allows the user to identify the row, in which case use sub-list 'rename_id_column_user', or it is specific to a check, in which case use sub-list 'rename_column_user'.",
+      "\n Problematic column names of sub-list named 'rename_id_column_user' : ",
+      paste0(names(column_user_info[["rename_id_column_user"]])[names(column_user_info[["rename_id_column_user"]]) %in% names(unlist(name_rename_column_user_check))], collapse = ", "),
+      sep = ""
+    )
+  }
+  if (!codama::r_type_checking(
+    r_object = column_user_info[["order_id_column_user"]],
+    type = "character",
+    output = "logical"
+  )) {
+    return(codama::r_type_checking(
+      r_object = column_user_info[["order_id_column_user"]],
+      type = "character",
+      output = "error"
+    ))
+  }
+  if (!all(names(column_user_info[["order_id_column_user"]]) %in% unlist(name_column_sql))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - The column names of sub-list named 'order_id_column_user' must also exist in at least one sub-list 'column_user_id'.",
+      "\n Problematic column names of sub-list named 'order_id_column_user' : ",
+      paste0(names(column_user_info[["order_id_column_user"]])[!(names(column_user_info[["order_id_column_user"]]) %in% unlist(name_column_sql))], collapse = ", "),
       sep = ""
     )
   }
@@ -7125,7 +7940,8 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
       # Recovery of reactive values
       check_info <- check_info_selected()
       sql_info <- sql_info_selected()[["sql_info"]]
-      # Check arguments and replace missing information with default values and add new internal information for SQL
+      # Check arguments in sql_info
+      name_file_sql <- sapply(sql_info, `[[`, "file")
       lapply(sql_info, function(sql) {
         # Check that the sublist contains an 'file' element
         if (!("file" %in% names(sql))) {
@@ -7249,72 +8065,10 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
             ))
           }
         }
-        # Check that element 'use_selection_other_sql' in the sub-list is list
-        if ("use_selection_other_sql" %in% names(sql)) {
-          if (!codama::r_type_checking(
-            r_object = sql[["use_selection_other_sql"]],
-            type = "logical",
-            length = 1L,
-            output = "logical"
-          )) {
-            return(codama::r_type_checking(
-              r_object = sql[["use_selection_other_sql"]],
-              type = "logical",
-              length = 1L,
-              output = "error"
-            ))
-          }
-          # Check that the sublist contains an 'column_anchor' element
-          if (sql[["use_selection_other_sql"]] && (!("vector" %in% names(sql)) || !sql[["vector"]])) {
-            if (!("column_anchor" %in% names(sql))) {
-              stop(
-                format(
-                  x = Sys.time(),
-                  format = "%Y-%m-%d %H:%M:%S"
-                ),
-                " - Information is missing for SQL. There is no element in the sub-list named 'column_anchor', mandatory if use_selection_other_sql are TRUE and vector is FALSE.",
-                "\n Present element : ",
-                paste0(paste(names(sql), sql, sep = " : "), collapse = ", "),
-                sep = ""
-              )
-            }
-            if (!codama::r_type_checking(
-              r_object = sql[["column_anchor"]],
-              type = "character",
-              length = 1L,
-              output = "logical"
-            )) {
-              return(codama::r_type_checking(
-                r_object = sql[["column_anchor"]],
-                type = "character",
-                length = 1L,
-                output = "error"
-              ))
-            }
-          }
-        }
-        if ("vector" %in% names(sql)) {
-          # Check that element 'vector' in the sub-list is logical
-          if (!codama::r_type_checking(
-            r_object = sql[["vector"]],
-            type = "logical",
-            output = "logical"
-          )) {
-            return(codama::r_type_checking(
-              r_object = sql[["vector"]],
-              type = "logical",
-              output = "error"
-            ))
-          }
-        }
-      })
-      name_column_sql <- sapply(sql_info, `[[`, "column_user_id")
-      name_file_sql <- sapply(sql_info, `[[`, "file")
-      # Check that the anchor reference is correct
-      lapply(sql_info, function(sql) {
+        # Check that the anchor reference is correct
         if ("anchor" %in% names(sql)) {
           # For SQL that allows the extraction of other SQL (use_selection_other_sql is TRUE), only references to data frames initializing the user query or configuration file arguments are allowed
-          if (sql[["use_selection_other_sql"]]) {
+          if (!is.null(sql[["use_selection_other_sql"]]) && sql[["use_selection_other_sql"]]) {
             if (any(!c(unlist(sql[["anchor"]]) %in% c("trip_selected", "vessel_selected", names(config_data()))))) {
               stop(
                 format(
@@ -7348,240 +8102,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           }
         }
       })
-      if (length(unlist(name_file_sql)) != length(unique(unlist(name_file_sql)))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - File names must be unique.",
-          "\n File names : ",
-          paste0(unlist(name_file_sql), collapse = ", "),
-          sep = ""
-        )
-      }
-      lapply(check_info, function(check) {
-        # Check that the sublist contains an 'function_check' element
-        if (!("function_check" %in% names(check))) {
-          stop(
-            format(
-              x = Sys.time(),
-              format = "%Y-%m-%d %H:%M:%S"
-            ),
-            " - Information is missing for check. There is no element in the sub-list named 'function_check', mandatory.",
-            "\n Present element : ",
-            paste0(paste(names(check), check, sep = " : "), collapse = ", "),
-            sep = ""
-          )
-        }
-        # Check that element 'function_check' in the sub-list is function
-        if (!inherits(x = check[["function_check"]], what = "function")) {
-          stop(
-            format(
-              x = Sys.time(),
-              format = "%Y-%m-%d %H:%M:%S"
-            ),
-            " - The sub-list named 'function_check' must be a function.",
-            "\n check id : ",
-            check[["id"]],
-            "\n function_check : ",
-            check[["function_check"]]
-            ,
-            sep = ""
-          )
-        }
-        # Check that the sublist contains an 'argument_function_check' element
-        if (!("argument_function_check" %in% names(check))) {
-          stop(
-            format(
-              x = Sys.time(),
-              format = "%Y-%m-%d %H:%M:%S"
-            ),
-            " - Information is missing for check. There is no element in the sub-list named 'argument_function_check', mandatory.",
-            "\n Present element : ",
-            paste0(paste(names(check), check, sep = " : "), collapse = ", "),
-            sep = ""
-          )
-        }
-        if (!codama::r_type_checking(
-          r_object = check[["argument_function_check"]],
-          type = "list",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = check[["argument_function_check"]],
-            type = "list",
-            output = "error"
-          ))
-        }
-        # Check that the sublist contains an 'table_user_id' element
-        if (!("table_user_id" %in% names(check))) {
-          stop(
-            format(
-              x = Sys.time(),
-              format = "%Y-%m-%d %H:%M:%S"
-            ),
-            " - Information is missing for check. There is no element in the sub-list named 'table_user_id', mandatory.",
-            "\n Present element : ",
-            paste0(paste(names(check), check, sep = " : "), collapse = ", "),
-            sep = ""
-          )
-        }
-        if (!codama::r_type_checking(
-          r_object = check[["table_user_id"]],
-          type = "character",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = check[["table_user_id"]],
-            type = "character",
-            output = "error"
-          ))
-        }
-        # Check that the sublist contains an 'user_type' element
-        if (!("user_type" %in% names(check))) {
-          stop(
-            format(
-              x = Sys.time(),
-              format = "%Y-%m-%d %H:%M:%S"
-            ),
-            " - Information is missing for check. There is no element in the sub-list named 'user_type', mandatory.",
-            "\n Present element : ",
-            paste0(paste(names(check), check, sep = " : "), collapse = ", "),
-            sep = ""
-          )
-        }
-        if (!codama::r_type_checking(
-          r_object = check[["user_type"]],
-          type = "character",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = check[["user_type"]],
-            type = "character",
-            output = "error"
-          ))
-        }
-        # Check that element 'rename_column_user' in the sub-list is list
-        if ("rename_column_user" %in% names(check)) {
-          if (!codama::r_type_checking(
-            r_object = check[["rename_column_user"]],
-            type = "list",
-            output = "logical"
-          )) {
-            return(codama::r_type_checking(
-              r_object = check[["rename_column_user"]],
-              type = "list",
-              output = "error"
-            ))
-          }
-        }
-        # Check that the sublist contains an 'function_data_plot' element
-        if ("function_data_plot" %in% names(check)) {
-          # Check that element 'function_data_plot' in the sub-list is function
-          if (!inherits(x = check[["function_data_plot"]], what = "function")) {
-            stop(
-              format(
-                x = Sys.time(),
-                format = "%Y-%m-%d %H:%M:%S"
-              ),
-              " - The sub-list named 'function_data_plot' must be a function.",
-              "\n check id : ",
-              check[["id"]],
-              "\n function_data_plot : ",
-              check[["function_data_plot"]]
-              ,
-              sep = ""
-            )
-          }
-          # Check that the sublist contains an 'argument_function_data_plot' element
-          if (!("argument_function_data_plot" %in% names(check))) {
-            stop(
-              format(
-                x = Sys.time(),
-                format = "%Y-%m-%d %H:%M:%S"
-              ),
-              " - Information is missing for check. There is no element in the sub-list named 'argument_function_data_plot', mandatory if function_data_plot exist.",
-              "\n Present element : ",
-              paste0(paste(names(check), check, sep = " : "), collapse = ", "),
-              sep = ""
-            )
-          }
-          # Check that element 'argument_function_data_plot' in the sub-list is list
-          if (!codama::r_type_checking(
-            r_object = check[["argument_function_data_plot"]],
-            type = "list",
-            output = "logical"
-          )) {
-            return(codama::r_type_checking(
-              r_object = check[["argument_function_data_plot"]],
-              type = "list",
-              output = "error"
-            ))
-          }
-        }
-        if ("additional_column_user" %in% names(check)) {
-          # Check that element 'additional_column_user' in the sub-list is character
-          if (!codama::r_type_checking(
-            r_object = check[["additional_column_user"]],
-            type = "character",
-            output = "logical"
-          )) {
-            return(codama::r_type_checking(
-              r_object = check[["additional_column_user"]],
-              type = "character",
-              output = "error"
-            ))
-          }
-        }
-        if ("function_display" %in% names(check)) {
-          # Check that element 'function_display' in the sub-list is function
-          if (!inherits(x = check[["function_display"]], what = "function")) {
-            stop(
-              format(
-                x = Sys.time(),
-                format = "%Y-%m-%d %H:%M:%S"
-              ),
-              " - The sub-list named 'function_display' must be a function.",
-              "\n check id : ",
-              check[["id"]],
-              "\n function_display : ",
-              check[["function_display"]]
-              ,
-              sep = ""
-            )
-          }
-        }
-        if ("argument_function_display" %in% names(check)) {
-          # Check that element 'argument_function_display' in the sub-list is list
-          if (!codama::r_type_checking(
-            r_object = check[["argument_function_display"]],
-            type = "list",
-            output = "logical"
-          )) {
-            return(codama::r_type_checking(
-              r_object = check[["argument_function_display"]],
-              type = "list",
-              output = "error"
-            ))
-          }
-        }
-        if ("need_vms" %in% names(check)) {
-          # Check that element 'need_vms' in the sub-list is logical
-          if (!codama::r_type_checking(
-            r_object = check[["need_vms"]],
-            type = "logical",
-            output = "logical"
-          )) {
-            return(codama::r_type_checking(
-              r_object = check[["need_vms"]],
-              type = "logical",
-              output = "error"
-            ))
-          }
-        }
-      })
-      name_rename_column_user_check <- sapply(check_info, `[[`, "rename_column_user")
       if (any(names(trip_select()) %in% c("check", "plot"))) {
         stop(
           format(
@@ -7635,52 +8155,6 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
           paste0(names(config_data()), collapse = ", "),
           "\n Names of reference data sets : ",
           paste0(names(referential_file()), collapse = ", "),
-          sep = ""
-        )
-      }
-      if (!codama::r_type_checking(
-        r_object = column_user_info[["rename_id_column_user"]],
-        type = "list",
-        output = "logical"
-      )) {
-        return(codama::r_type_checking(
-          r_object = column_user_info[["rename_id_column_user"]],
-          type = "list",
-          output = "error"
-        ))
-      }
-      if (any(names(column_user_info[["rename_id_column_user"]]) %in% names(unlist(name_rename_column_user_check)))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - The column names of sub-list named 'rename_id_column_user' must not also be indicated in a sub-list 'rename_column_user', either the column allows the user to identify the row, in which case use sub-list 'rename_id_column_user', or it is specific to a check, in which case use sub-list 'rename_column_user'.",
-          "\n Problematic column names of sub-list named 'rename_id_column_user' : ",
-          paste0(names(column_user_info[["rename_id_column_user"]])[names(column_user_info[["rename_id_column_user"]]) %in% names(unlist(name_rename_column_user_check))], collapse = ", "),
-          sep = ""
-        )
-      }
-      if (!codama::r_type_checking(
-        r_object = column_user_info[["order_id_column_user"]],
-        type = "character",
-        output = "logical"
-      )) {
-        return(codama::r_type_checking(
-          r_object = column_user_info[["order_id_column_user"]],
-          type = "character",
-          output = "error"
-        ))
-      }
-      if (!all(names(column_user_info[["order_id_column_user"]]) %in% unlist(name_column_sql))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - The column names of sub-list named 'order_id_column_user' must also exist in at least one sub-list 'column_user_id'.",
-          "\n Problematic column names of sub-list named 'order_id_column_user' : ",
-          paste0(names(column_user_info[["order_id_column_user"]])[!(names(column_user_info[["order_id_column_user"]]) %in% unlist(name_column_sql))], collapse = ", "),
           sep = ""
         )
       }
@@ -8090,435 +8564,6 @@ tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referen
       length = 1L,
       output = "error"
     ))
-  }
-  # Check type_check_info arguments and retrieve all choice identifiers
-  # Check that the sublist contains an 'title' element
-  if (!("title" %in% names(type_check_info))) {
-    stop(
-      format(
-        x = Sys.time(),
-        format = "%Y-%m-%d %H:%M:%S"
-      ),
-      " - Information is missing for the button used to select the check to be displayed. There is no element in the sub-list named 'title'.",
-      "\n Present element : ",
-      paste0(paste(names(type_check_info), type_check_info, sep = " : "), collapse = ", "),
-      sep = ""
-    )
-  }
-  if (!codama::r_type_checking(
-    r_object = type_check_info[["title"]],
-    type = "character",
-    length = 1L,
-    output = "logical"
-  )) {
-    return(codama::r_type_checking(
-      r_object = type_check_info[["title"]],
-      type = "character",
-      length = 1L,
-      output = "error"
-    ))
-  }
-  all_id_choice_type_check <- lapply(
-    type_check_info,
-    function(choice) {
-      if (is.list(choice)) {
-        # Check that the sublist contains an 'id' element
-        if (!("id" %in% names(choice))) {
-          stop(
-            format(
-              x = Sys.time(),
-              format = "%Y-%m-%d %H:%M:%S"
-            ),
-            " - Impossible to identify the choice because there is no element in the sub-list named 'id'.
-       Present element : ",
-            paste0(paste(names(choice), choice, sep = " : "), collapse = ", "),
-            sep = ""
-          )
-        }
-        if (!codama::r_type_checking(
-          r_object = choice[["id"]],
-          type = "character",
-          length = 1L,
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = choice[["id"]],
-            type = "character",
-            length = 1L,
-            output = "error"
-          ))
-        }
-        # Check that element 'text' in the sub-list is character
-        if (!("text" %in% names(choice))) {
-          stop(
-            format(
-              x = Sys.time(),
-              format = "%Y-%m-%d %H:%M:%S"
-            ),
-            " - Tabs must have a text, there is no element in the sub-list named 'text'.
-         Present element : ",
-            paste0(paste(names(choice), choice, sep = " : "), collapse = ", "),
-            sep = ""
-          )
-        }
-        if (!codama::r_type_checking(
-          r_object = choice[["text"]],
-          type = "character",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = choice[["text"]],
-            type = "character",
-            output = "error"
-          ))
-        }
-        # Check that element 'specific_check' in the sub-list is logical
-        if ("specific_check" %in% names(choice)) {
-          if (!codama::r_type_checking(
-            r_object = choice[["specific_check"]],
-            type = "logical",
-            output = "logical"
-          )) {
-            return(codama::r_type_checking(
-              r_object = choice[["specific_check"]],
-              type = "logical",
-              output = "error"
-            ))
-          }
-        }
-        return(choice[["id"]])
-      }
-    }
-  )
-  if (length(unlist(all_id_choice_type_check)) != length(unique(unlist(all_id_choice_type_check)))) {
-    stop(
-      format(
-        x = Sys.time(),
-        format = "%Y-%m-%d %H:%M:%S"
-      ),
-      " - Choice id of check types are not unique.",
-      "\n Choice id : ",
-      paste0(unlist(all_id_choice_type_check), collapse = ", "),
-      sep = ""
-    )
-  }
-  # Check tab_info arguments and retrieve all tab identifiers
-  all_id_tab <- lapply(
-    tab_info,
-    function(tab) {
-      # Check that the sublist contains an 'id' element
-      if (!("id" %in% names(tab))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - Impossible to identify the tab because there is no element in the sub-list named 'id'.
-       Present element : ",
-          paste0(paste(names(tab), tab, sep = " : "), collapse = ", "),
-          sep = ""
-        )
-      }
-      if (!codama::r_type_checking(
-        r_object = tab[["id"]],
-        type = "character",
-        length = 1L,
-        output = "logical"
-      )) {
-        return(codama::r_type_checking(
-          r_object = tab[["id"]],
-          type = "character",
-          length = 1L,
-          output = "error"
-        ))
-      }
-      # Check that element 'title' in the sub-list is character
-      if (!("title" %in% names(tab))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - Tabs must have a title, there is no element in the sub-list named 'title'.
-       Present element : ",
-          paste0(paste(names(tab), tab, sep = " : "), collapse = ", "),
-          sep = ""
-        )
-      }
-      if (!codama::r_type_checking(
-        r_object = tab[["title"]],
-        type = "character",
-        output = "logical"
-      )) {
-        return(codama::r_type_checking(
-          r_object = tab[["title"]],
-          type = "character",
-          output = "error"
-        ))
-      }
-      # Check that element 'text' in the sub-list is character
-      if ("text" %in% names(tab)) {
-        if (!codama::r_type_checking(
-          r_object = tab[["text"]],
-          type = "character",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = tab[["text"]],
-            type = "character",
-            output = "error"
-          ))
-        }
-      }
-      # Check that element 'display_dividing_lines' in the sub-list is logical
-      if ("display_dividing_lines" %in% names(tab)) {
-        if (!codama::r_type_checking(
-          r_object = tab[["display_dividing_lines"]],
-          type = "logical",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = tab[["display_dividing_lines"]],
-            type = "logical",
-            output = "error"
-          ))
-        }
-      }
-      return(tab[["id"]])
-    }
-  )
-  if (length(unlist(all_id_tab)) != length(unique(unlist(all_id_tab)))) {
-    stop(
-      format(
-        x = Sys.time(),
-        format = "%Y-%m-%d %H:%M:%S"
-      ),
-      " - Tab id are not unique.",
-      "\n Tab id : ",
-      paste0(unlist(all_id_tab), collapse = ", "),
-      sep = ""
-    )
-  }
-  # Check check_info arguments and retrieve all tab identifiers
-  all_id_check <- lapply(
-    check_info,
-    function(check) {
-      # Check that the sublist contains an 'id' element
-      if (!("id" %in% names(check))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - Impossible to identify the check because there is no element in the sub-list named 'id'.",
-          "\n Present element : ",
-          paste0(paste(names(check), check, sep = " : "), collapse = ", "),
-          sep = ""
-        )
-      }
-      if (!codama::r_type_checking(
-        r_object = check[["id"]],
-        type = "character",
-        length = 1L,
-        output = "logical"
-      )) {
-        return(codama::r_type_checking(
-          r_object = check[["id"]],
-          type = "character",
-          length = 1L,
-          output = "error"
-        ))
-      }
-      # Check that element 'title' in the sub-list is character
-      if ("title" %in% names(check)) {
-        if (!codama::r_type_checking(
-          r_object = check[["title"]],
-          type = "character",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = check[["title"]],
-            type = "character",
-            output = "error"
-          ))
-        }
-      }
-      # Check that element 'text' in the sub-list is character
-      if ("text" %in% names(check)) {
-        if (!codama::r_type_checking(
-          r_object = check[["text"]],
-          type = "character",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = check[["text"]],
-            type = "character",
-            output = "error"
-          ))
-        }
-      }
-      # Check that element 'type' in the sub-list is character
-      if (!("type" %in% names(check))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - Check must have a type, there is no element in the sub-list named 'type'.",
-          "\n Present element : ",
-          paste0(paste(names(check), check, sep = " : "), collapse = ", "),
-          sep = ""
-        )
-      }
-      if (!codama::r_type_checking(
-        r_object = check[["type"]],
-        type = "character",
-        allowed_value = unlist(all_id_choice_type_check),
-        output = "logical"
-      )) {
-        return(codama::r_type_checking(
-          r_object = check[["type"]],
-          type = "character",
-          allowed_value = unlist(all_id_choice_type_check),
-          output = "error"
-        ))
-      }
-      # Check that element 'size_box' in the sub-list is character
-      if ("size_box" %in% names(check)) {
-        if (!codama::r_type_checking(
-          r_object = check[["size_box"]],
-          type = "character",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = check[["size_box"]],
-            type = "character",
-            output = "error"
-          ))
-        }
-      }
-      # Check that element 'column_no_wrap' in the sub-list is numeric
-      if ("column_no_wrap" %in% names(check)) {
-        if (!codama::r_type_checking(
-          r_object = check[["column_no_wrap"]],
-          type = "numeric",
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = check[["column_no_wrap"]],
-            type = "numeric",
-            output = "error"
-          ))
-        }
-      }
-      # Check that element 'function_plot' in the sub-list is function
-      if ("function_plot" %in% names(check)) {
-        if (!inherits(x = check[["function_plot"]], what = "function")) {
-          stop(
-            format(
-              x = Sys.time(),
-              format = "%Y-%m-%d %H:%M:%S"
-            ),
-            " - The sub-list named 'function_plot' must be a function.",
-            "\n check id : ",
-            check[["id"]],
-            "\n function_plot : ",
-            check[["function_plot"]]
-            ,
-            sep = ""
-          )
-        }
-      }
-      # Check that element 'function_text_plot' in the sub-list is character
-      if ("function_text_plot" %in% names(check)) {
-        if (!inherits(x = check[["function_text_plot"]], what = "function")) {
-          stop(
-            format(
-              x = Sys.time(),
-              format = "%Y-%m-%d %H:%M:%S"
-            ),
-            " - The sub-list named 'function_text_plot' must be a function.",
-            "\n check id : ",
-            check[["id"]],
-            "\n function_text_plot : ",
-            check[["function_text_plot"]]
-            ,
-            sep = ""
-          )
-        }
-      }
-      # Check that element 'title_window' in the sub-list is character
-      if ("title_window" %in% names(check)) {
-        if (!codama::r_type_checking(
-          r_object = check[["title_window"]],
-          type = "character",
-          length = 1L,
-          output = "logical"
-        )) {
-          return(codama::r_type_checking(
-            r_object = check[["title_window"]],
-            type = "character",
-            length = 1L,
-            output = "error"
-          ))
-        }
-      }
-      # Check that the sublist contains an 'tab' element
-      if (!("tab" %in% names(check))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - Impossible to identify the tab for check because there is no element in the sub-list named 'tab'.",
-          "\n Control element available : ",
-          paste0(paste(names(check), check, sep = " : "), collapse = ", "),
-          sep = ""
-        )
-      }
-      # Check that element 'tab' in the sub-list is character
-      if (!codama::r_type_checking(
-        r_object = check[["tab"]],
-        type = "character",
-        length = 1L,
-        output = "logical"
-      )) {
-        return(codama::r_type_checking(
-          r_object = check[["tab"]],
-          type = "character",
-          length = 1L,
-          output = "error"
-        ))
-      }
-      if (!(check[["tab"]] %in% unlist(all_id_tab))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - Invalid tab reference for check display.",
-          "\n Check tab name : ",
-          check[["tab"]],
-          " for check id ", check[["id"]],
-          "\n Tab name available : ",
-          paste0(unlist(all_id_tab), collapse = ", "),
-          sep = ""
-        )
-      }
-      return(check[["id"]])
-    }
-  )
-  if (length(unlist(all_id_check)) != length(unique(unlist(all_id_check)))) {
-    stop(
-      format(
-        x = Sys.time(),
-        format = "%Y-%m-%d %H:%M:%S"
-      ),
-      " - Check id are not unique.",
-      "\n Check id : ",
-      paste0(unlist(all_id_check), collapse = ", "),
-      sep = ""
-    )
   }
   # 2 - Data design ----
   # Instantiating the radio button to select the display of controls
