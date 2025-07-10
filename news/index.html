@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AkadoR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -41,26 +41,6 @@
 
     </div>
 
-    <div class="section level2">
-<h2 class="page-header" data-toc-text="2.0.0" id="akador-200--20250710">AkadoR 2.0.0- 2025.07.10<a class="anchor" aria-label="anchor" href="#akador-200--20250710"></a></h2>
-<div class="section level3">
-<h3 id="added-2-0-0">Added<a class="anchor" aria-label="anchor" href="#added-2-0-0"></a></h3>
-<p>For display table (Added 3 functions):<br>
-- Add <code>display_raising_factor</code> : Function to change table display raising_factor - Add <code>display_little_big</code> : Function to change table display little_big - Add <code>display_anapo</code> : Function to change table display anapo</p>
-<p>For plot (Added 5 functions):<br>
-- Add <code>plot_temporal_limit_data</code> : Function to create list data/argument for the plot plot_temporal_limit - Add <code>plot_position_data</code> : Function to create list data/argument for the plot plot_position - Add <code>plot_eez_data</code> : Function to create list data/argument for the plot plot_eez - Add <code>plot_anapo_data</code> : Function to create list data/argument for the plot plot_anapo - Add <code>plot_anapo_activity_data</code> : Function to create list data/argument for the plot plot_anapo_activity</p>
-<p>New functionality (2) : - Add database selection by user and filter database by user type - Add check selection by user and filter check by user type</p>
-</div>
-<div class="section level3">
-<h3 id="changed-2-0-0">Changed<a class="anchor" aria-label="anchor" href="#changed-2-0-0"></a></h3>
-<ul><li>Modularization of the application using :
-<ul><li>lists : check_info, sql_info, tab_info, type_check_info, column_user_info</li>
-<li>modules : mod_table, mod_tab_content, mod_tab_menu, mod_radiobuttons_type_check</li>
-</ul></li>
-</ul><p>Change check (1) : - <code>check_harbour_inspector</code> : - Change output column order : - inversion of harbour_label_departure and harbour_label_landing_trip_previous</p>
-<p>Change SQL : - <code>trip</code> : - Split SQL in tow sql <code>trip</code> and <code>previous_trip</code> - Add column : - wellcontentstatus_landing_label - <code>trip_selected_startdate_enddat</code> and <code>trip_selected_vesselcode_enddate</code>: - Merging the two sql into a single <code>trip_selected</code> - <code>vms</code> : - Add column : - vms_id : identifier for VMS with vessel and date in SQL</p>
-</div>
-</div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="1.0.2" id="akador-102--20250331">AkadoR 1.0.2- 2025.03.31<a class="anchor" aria-label="anchor" href="#akador-102--20250331"></a></h2>
 <div class="section level3">

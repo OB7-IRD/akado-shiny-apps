@@ -33,7 +33,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="index.html">AkadoR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.0</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">1.0.2</span>
       </span>
     </div>
 
@@ -129,7 +129,7 @@ Numerical value of the difference deemed acceptable between two numbers</p>
 <p>String vector allowing the selection of reference list of species used for well distribution control</p>
 <div class="sourceCode" id="cb10"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb10-1"><a href="#cb10-1" tabindex="-1"></a><span class="fu">reference_list_species_well_distribution_control </span><span class="kw">:</span><span class="at"> </span><span class="kw">[</span><span class="st">"your_first_reference_list"</span><span class="kw">,</span><span class="at"> </span><span class="st">"your_second_reference_list"</span><span class="kw">,</span><span class="at"> ...</span><span class="kw">]</span></span></code></pre></div>
 <p>Configuring the secure connection to AkadoR.<br>
-A default database is created when the secure connection is activated for the first time. The database includes a user <code>shiny</code> with the password <code>azerty</code>, check user types <code>logbook</code> (access to logbook check only) and an administrator <code>shinymanager</code> with the password <code>12345</code>, check user types <code>logbook;vms_logbook</code> (access to logbook and vms logbook check) . These credentials must be changed immediately ! Which can be done directly within the application by logging in as the administrator. The administrator must also specify which databases each user is authorized to access (list the database names defined in the configuration file at step databases_configuration, databases must be separated by ; for example “your_database_name_1;your_database_name_2” in the column database_user_types of the database).</p>
+A default database is created when the secure connection is activated for the first time. The database includes a user <code>shiny</code> with the password <code>azerty</code> and an administrator <code>shinymanager</code> with the password <code>12345</code>. These credentials must be changed immediately ! Which can be done directly within the application by logging in as the administrator.</p>
 <div class="sourceCode" id="cb11"><pre class="sourceCode yml"><code class="sourceCode yaml"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">start_AkadoR_configuration </span><span class="kw">:</span></span>
 <span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a><span class="co">  # If you wish to enable secure connection to the application, set TRUE, otherwise set FALSE</span></span>
 <span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a><span class="at">  </span><span class="fu">secure_connection </span><span class="kw">:</span><span class="at"> </span><span class="ch">FALSE</span></span>
