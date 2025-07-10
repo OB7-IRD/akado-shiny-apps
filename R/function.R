@@ -9138,7 +9138,7 @@ plot_eez_windows <- function(vessel_code, trip_enddate, activity_date, activity_
          <li>Calculated eez : ", eez_calculated, "</li></ul>")
 }
 
-# Function to change table displayraising_factor
+# Function to change table display anapo
 display_anapo <- function(dataframe1, dataframe2, dataframe3, dataframe4) {
   # 0 - Global variables assignement ----
   activity_id <- NULL

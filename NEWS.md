@@ -1,3 +1,44 @@
+# AkadoR 2.0.0- 2025.07.10
+
+## Added
+
+For display table (Added 3 functions):  
+- Add `display_raising_factor` : Function to change table display raising_factor
+- Add `display_little_big` : Function to change table display little_big
+- Add `display_anapo` : Function to change table display anapo
+
+For plot (Added 5 functions):  
+- Add `plot_temporal_limit_data` : Function to create list data/argument for the plot plot_temporal_limit
+- Add `plot_position_data` : Function to create list data/argument for the plot plot_position
+- Add `plot_eez_data` : Function to create list data/argument for the plot plot_eez
+- Add `plot_anapo_data` : Function to create list data/argument for the plot plot_anapo
+- Add `plot_anapo_activity_data` : Function to create list data/argument for the plot plot_anapo_activity
+
+New functionality (2) : 
+- Add database selection by user and filter database by user type
+- Add check selection by user and filter check by user type
+
+## Changed
+- Modularization of the application using :
+    - lists : check_info, sql_info, tab_info, type_check_info, column_user_info
+    - modules : mod_table, mod_tab_content, mod_tab_menu, mod_radiobuttons_type_check
+
+Change check (1) : 
+- `check_harbour_inspector` :
+    - Change output column order :
+        - inversion of harbour_label_departure and harbour_label_landing_trip_previous
+
+Change SQL : 
+- `trip` :
+    - Split SQL in tow sql `trip` and `previous_trip`
+    - Add column  :
+        - wellcontentstatus_landing_label
+- `trip_selected_startdate_enddat` and `trip_selected_vesselcode_enddate`: 
+    - Merging the two sql into a single `trip_selected`
+- `vms` :
+    - Add column : 
+        - vms_id : identifier for VMS with vessel and date in SQL
+
 # AkadoR 1.0.2- 2025.03.31
 
 ## Added
