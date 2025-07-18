@@ -617,7 +617,7 @@ app_server <- function(input, output, session) {
                         vector = TRUE))
   # Information about the column user
   # rename_id_column_user : List of column names to be renamed (the left part is the column names of column_user_id in sql_info, the right part is the new names), mandatory, character expected
-  # order_id_column_user : Column names of column_user_id in sql_info, according to which rows are to be sorted
+  # order_id_column_user : Column names of column_user_id in sql_info, according to which rows are to be sorted, mandatory, character expected
   column_user_info <- list(rename_id_column_user = list(vessel_code = "Vessel code", trip_enddate = "Trip enddate", activity_date = "Activity date",  activity_time = "Activity time", activity_number = "Activity number", vesselactivity_code = "Vessel activity", sample_number = "Sample number", samplespecies_subsamplenumber = "Sub sample number", species_fao_code = "FAO code", sizemeasuretype_code = "Size measure type", samplespeciesmeasure_sizeclass = "Size class", well_label = "Well", weightcategory_code = "Weight category"),
                            order_id_column_user = c("vessel_code", "trip_enddate"))
 

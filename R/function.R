@@ -7682,6 +7682,19 @@ check_consistency_list <- function(sql_info, check_info, column_user_info, type_
       sep = ""
     )
   }
+  # Check that the sublist contains an 'rename_id_column_user' element
+  if (!("rename_id_column_user" %in% names(column_user_info))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - There is no element in the sub-list named 'rename_id_column_user' in list column_user_info.",
+      "\n Present element : ",
+      paste0(paste(names(column_user_info), column_user_info, sep = " : "), collapse = ", "),
+      sep = ""
+    )
+  }
   if (!codama::r_type_checking(
     r_object = column_user_info[["rename_id_column_user"]],
     type = "list",
@@ -7714,6 +7727,19 @@ check_consistency_list <- function(sql_info, check_info, column_user_info, type_
       " - The column names of sub-list named 'rename_id_column_user' must not also be indicated in a sub-list 'rename_column_user', either the column allows the user to identify the row, in which case use sub-list 'rename_id_column_user', or it is specific to a check, in which case use sub-list 'rename_column_user'.",
       "\n Problematic column names of sub-list named 'rename_id_column_user' : ",
       paste0(names(column_user_info[["rename_id_column_user"]])[names(column_user_info[["rename_id_column_user"]]) %in% names(unlist(name_rename_column_user_check))], collapse = ", "),
+      sep = ""
+    )
+  }
+  # Check that the sublist contains an 'order_id_column_user' element
+  if (!("order_id_column_user" %in% names(column_user_info))) {
+    stop(
+      format(
+        x = Sys.time(),
+        format = "%Y-%m-%d %H:%M:%S"
+      ),
+      " - There is no element in the sub-list named 'order_id_column_user' in list column_user_info.",
+      "\n Present element : ",
+      paste0(paste(names(column_user_info), column_user_info, sep = " : "), collapse = ", "),
       sep = ""
     )
   }
