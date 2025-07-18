@@ -58,8 +58,7 @@ mod_tab_menu_server <- function(id, tab_info) {
     # Return reactive value use by other module
     return(
       list(
-        type_line_check = reactive(input$type_line_check),
-        type_check = reactive(input$type_check)
+        type_line_check = reactive(input$type_line_check)
       )
     )
   })

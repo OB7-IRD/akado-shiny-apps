@@ -8597,7 +8597,7 @@ tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referen
   # Instantiating the menu and retrieving reactive values
   reactive_value_menu <- mod_tab_menu_server(id = id, tab_info = tab_info)
   # Instantiating the tab
-  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_info, type_check = reactive_value_menu$type_check, config_data = config_data, res_auth = res_auth)
+  mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, config_data = config_data, res_auth = res_auth)
   # Creation of all tables
   lapply(
     check_info,

@@ -16,7 +16,6 @@ mod_tab_content_ui <- function(id) {
 #' @param tab_info {\link[base]{list}} expected. Information about the dynamic tab display
 #' @param check_info {\link[base]{list}} expected. Information about the dynamic check display
 #' @param type_check_info {\link[base]{list}} expected. Information about the dynamic type of check
-#' @param type_check {\link[base]{character}} expected. Reactive value containing the type of check selected by the user
 #' @param config_data {\link[base]{list}} expected. Reactive value contains the contents of the configuration file
 #' @param res_auth {\link[base]{character}} expected. Reactive value containing information about the user's connection
 #' @return The function returns nothing, instantiating the tab
@@ -45,7 +44,7 @@ mod_tab_content_ui <- function(id) {
 #'  \item{\code{  databases_configuration : named list with database connection information}}
 #' }
 #' @export
-mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, type_check, config_data, res_auth) {
+mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, config_data, res_auth) {
   moduleServer(id, function(input, output, session) {
     # Creation of all tab, both static tab and user-specified dynamic tab (static tabs are also created here, as the UI does not support the mixing of dynamic and static tabs)
     output$content <- shiny::renderUI({
@@ -222,7 +221,7 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, ty
     })
 
     # Management of the display or not of the boxes in the trip tab
-    observeEvent(type_check(), {
+    observeEvent(input$type_check, {
       # Information on the type of control selected by the user, its name and whether it concerns all types of control or not
       specific_check <- lapply(type_check_info, function(check) {
         if (is.list(check) && check[["id"]] == input$type_check) {
@@ -266,4 +265,4 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, ty
 # mod_tab_content_ui("tab_content_1")
 
 ## To be copied in the server
-# mod_tab_content_server("tab_content_1", tab_info, check_info, type_check)
+# mod_tab_content_server("tab_content_1", tab_info, check_info, type_check_info, config_data, res_auth)

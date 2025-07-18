@@ -9,7 +9,6 @@ mod_tab_content_server(
   tab_info,
   check_info,
   type_check_info,
-  type_check,
   config_data,
   res_auth
 )
@@ -22,8 +21,6 @@ mod_tab_content_server(
 \item{check_info}{{\link[base]{list}} expected. Information about the dynamic check display}
 
 \item{type_check_info}{{\link[base]{list}} expected. Information about the dynamic type of check}
-
-\item{type_check}{{\link[base]{character}} expected. Reactive value containing the type of check selected by the user}
 
 \item{config_data}{{\link[base]{list}} expected. Reactive value contains the contents of the configuration file}
 
