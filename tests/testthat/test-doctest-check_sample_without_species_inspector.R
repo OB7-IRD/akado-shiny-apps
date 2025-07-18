@@ -7,7 +7,7 @@ test_that("Doctest: check_sample_without_species_inspector", {
   # Source line: 3931
   dataframe1 <- data.frame(sample_id = c("1", "2"))
   dataframe2 <- data.frame(samplespecies_id = c("1", "2"), sample_id = c("1", "1"))
-  expect_equal(check_sample_without_species_inspector(dataframe1, dataframe2, output = "report"), structure(list(sample_id = c("1", "2"), logical = c(TRUE, FALSE)), row.names = c(
-    NA, -2L), class = "data.frame"))
+  expect_equal(check_sample_without_species_inspector(dataframe1, dataframe2, output = "report"), structure(list(sample_id = c("1", "2"), logical = c(TRUE,
+    FALSE)), row.names = c(NA, -2L), class = "data.frame"))
 })
 
