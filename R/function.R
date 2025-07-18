@@ -8566,7 +8566,7 @@ error_trip_select_serveur <- function(id, text_error_trip_select, config_data, t
 }
 
 # Shiny function : Selection window for choosing the type of file to download
-window_button_download <- function(name) {
+window_button_download <- function() {
   modalDialog(downloadButton(outputId = "download_csv", label = "CSV"),
               downloadButton(outputId = "download_excel", label = "Excel"),
               fade = TRUE,

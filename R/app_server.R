@@ -702,7 +702,7 @@ app_server <- function(input, output, session) {
         paste("data-", gsub(" |:|-", "-", Sys.time()), ".csv", sep = "")
       },
       content = function(file) {
-        data <- calcul_check()[[input$button_download]]
+        data <- calcul_check()[[input$button_download]][["table"]]
         # Delete icons
         data[data$Check == "<i class=\"fas fa-check\" role=\"presentation\" aria-label=\"check icon\"></i>", "Check"] <- "TRUE"
         data[data$Check != "TRUE", "Check"] <- "FALSE"
@@ -719,7 +719,7 @@ app_server <- function(input, output, session) {
         paste("data-", gsub(" |:|-", "-", Sys.time()), ".xlsx", sep = "")
       },
       content = function(file) {
-        data <- calcul_check()[[input$button_download]]
+        data <- calcul_check()[[input$button_download]][["table"]]
         # Delete icons
         data[data$Check == "<i class=\"fas fa-check\" role=\"presentation\" aria-label=\"check icon\"></i>", "Check"] <- "TRUE"
         data[data$Check != "TRUE", "Check"] <- "FALSE"
