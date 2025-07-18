@@ -1,3 +1,13 @@
+# AkadoR 2.0.1- 2025.07.18
+
+## Changed
+- Sets minimum version package dependencies : codama (>= 1.3.1), DBI (>= 1.2.3), dplyr (>= 1.1.4), DT (>= 0.33), magrittr (>= 2.0.3), plotly (>= 4.10.4), purrr (>= 1.0.2), sf (>= 1.0.19), shinycssloaders (>= 1.1.0), shinydashboard (>= 0.7.2), shinyjs (>= 2.1.0), shinymanager (>= 1.0.410), terra (>= 1.8.21), tibble (>= 3.2.1), tidyr (>= 1.3.1), units (>= 0.8.5), writexl (>= 1.5.1), knitr (>= 1.49), rmarkdown (>= 2.29), spelling (>= 2.3.1)
+- Add check in `check_consistency_list` : for elements 'rename_id_column_user' and 'order_id_column_user' of column_user_info 
+- observeEvent button_download : Specific output 'table' 
+
+## Remove
+- `mod_tab_menu_server` : Remove return reactive 'type_check'
+
 # AkadoR 2.0.0- 2025.07.10
 
 ## Added
