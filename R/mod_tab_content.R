@@ -147,11 +147,17 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, co
         shinydashboard::tabItem(
           tabName = "setting",
           fluidPage(
-            fileInput(
-              inputId = "setting_file_path", label = paste0("Path of the configuration file .yml ; (Default: ", file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"), ")"),
-              multiple = FALSE,
-              accept = c(".yml")
-            )
+            # Launching the application without authentication or administrator login
+            if (is.null(res_auth) || res_auth[["admin"]] == TRUE) {
+              fileInput(
+                inputId = "setting_file_path", label = paste0("Path of the configuration file .yml ; (Default: ", file.path(path.expand("~"), ".appconfig", "akador", "configuration_file.yml"), ")"),
+                multiple = FALSE,
+                accept = c(".yml")
+              )
+            } else {
+              # Not administrator login
+              HTML(paste0("<span style=\"color:red\">", "Only the AkadoR administrator can change the session configuration file", "</span>"))
+            }
           )
         ))
       )
