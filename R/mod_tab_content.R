@@ -110,7 +110,7 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, co
                        actionButton(inputId = NS(namespace = "start_button", id = "start_button"), label = "Start"),
                        shinycssloaders::withSpinner(htmlOutput(NS(namespace = "error_trip_select", id = "text")), type = 6, size = 0.5, proxy.height = "70px")),
                 column(width = 5,
-                       selectInput(inputId = NS(namespace = id, id = "select_check"), label = "Choose a check (optional):", choices = choices_check(), multiple = TRUE, selected = choices_check()))
+                       selectInput(inputId = NS(namespace = id, id = "select_check"), label = "Choose a check (optional):", choices = check_info()[["id_check_authorize"]], multiple = TRUE, selected = check_info()[["id_check_authorize"]]))
               )
             )
           )
@@ -124,10 +124,10 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, co
               tabName = tab[["id"]],
               fluidPage(
                 lapply(
-                  check_info,
+                  check_info()[["check_info_authorize"]],
                   function(check) {
-                    # Filters the checks available for the tab and which are authorized to the user
-                    if (check[["tab"]] == tab[["id"]] && check[["id"]] %in% choices_check()) {
+                    # Filters the checks available for the tab
+                    if (check[["tab"]] == tab[["id"]]) {
                       # Configure display check with recovered parameters
                       do.call(mod_table_ui, check[names(check) %in% c("id", "title", "text", "size_box")])
                     }
@@ -202,31 +202,6 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, co
       }
     })
 
-    # Update choice for check selection
-    choices_check <- reactive({
-      # List check identifiers
-      name_id <- sapply(check_info, `[[`, "id")
-      # Launching the application without authentication
-      if (is.null(res_auth)) {
-        choices_check_current_value <- name_id
-      } else {
-        # Filter check by user type
-        choices_check_current_value <- name_id[sapply(check_info, function(check) any(check[["user_type"]] %in% unlist(strsplit(res_auth[["check_user_types"]], ";"))))]
-      }
-      # Checks that the user type has access to at least 1 control
-      if (identical(choices_check_current_value, character(0))) {
-        stop(
-          format(
-            x = Sys.time(),
-            format = "%Y-%m-%d %H:%M:%S"
-          ),
-          " - No check allowed for this user type ", res_auth[["check_user_types"]], ".\n",
-          sep = ""
-        )
-      }
-      choices_check_current_value
-    })
-
     # Management of the display or not of the boxes in the trip tab
     observeEvent(input$type_check, {
       # Information on the type of control selected by the user, its name and whether it concerns all types of control or not
@@ -244,9 +219,9 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, co
       for (tab in tab_info) {
         # Number of the control displayed within the tab, to display a line for every two controls
         num_check <- 0
-        for (check in check_info) {
-          # Filters the checks available for the tab and which are authorized to the user
-          if (check[["tab"]] == tab[["id"]] && check[["id"]] %in% choices_check()) {
+        for (check in check_info()[["check_info_authorize"]]) {
+          # Filters the checks available for the tab
+          if (check[["tab"]] == tab[["id"]]) {
             # Controls the display of check according to the type chosen by the user
             if (specific_check && check[["type"]] != input$type_check) {
               # Hide controls

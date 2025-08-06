@@ -634,6 +634,39 @@ app_server <- function(input, output, session) {
   # Read the .yml file of configuration for the connection
   config_data <- config_data_server(id = "start_button", parent_in = input)
 
+  # Filter check by user type
+  check_authorize <- reactive({
+    # List check identifiers
+    name_id <- sapply(check_info, `[[`, "id")
+    # Launching the application without authentication
+    if (is.null(res_auth)) {
+      choices_check_current_value_id <- name_id
+    } else {
+      # Filter check by user type
+      choices_check_current_value_id <- name_id[sapply(check_info, function(check) any(check[["user_type"]] %in% unlist(strsplit(res_auth[["check_user_types"]], ";"))))]
+    }
+    # Checks that the user type has access to at least 1 control
+    if (identical(choices_check_current_value_id, character(0))) {
+      stop(
+        format(
+          x = Sys.time(),
+          format = "%Y-%m-%d %H:%M:%S"
+        ),
+        " - No check allowed for this user type ", res_auth[["check_user_types"]], ".\n",
+        sep = ""
+      )
+    }
+    check_info_authorize <- check_info[name_id %in% choices_check_current_value_id]
+    # Creation of all tables (authorize) serveur
+    lapply(
+      check_info_authorize,
+      function(check) {
+        do.call(mod_table_server, c(check[names(check) %in% names(formals(mod_table_server))], data_all = calcul_check, type_line_check = reactive(input$`tab-type_line_check`), referential_file = referential_file))
+      }
+    )
+    return(list(id_check_authorize = choices_check_current_value_id, check_info_authorize = check_info_authorize))
+  })
+
   # Filter check by user selection
   check_info_selected <- reactive({
     check_info[sapply(check_info, function(check) any(check[["id"]] %in% input[["tab-select_check"]]))]
@@ -672,7 +705,7 @@ app_server <- function(input, output, session) {
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
 
   # Tab creation, menu, tab content
-  tab(id = "tab", tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data, res_auth = res_auth)
+  tab(id = "tab", tab_info = tab_info, check_info = check_authorize, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data, res_auth = res_auth)
 
   # Force activation of first tab at startup, remove the lazy evaluation
   observe({

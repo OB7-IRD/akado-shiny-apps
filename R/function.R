@@ -8595,16 +8595,9 @@ tab <- function(id, tab_info, check_info, type_check_info, calcul_check, referen
   # Instantiating the radio button to select the display of controls
   mod_radiobuttons_type_check_server(id = id, type_check_info = type_check_info)
   # Instantiating the menu and retrieving reactive values
-  reactive_value_menu <- mod_tab_menu_server(id = id, tab_info = tab_info)
+  mod_tab_menu_server(id = id, tab_info = tab_info)
   # Instantiating the tab
   mod_tab_content_server(id = id, tab_info = tab_info, check_info = check_info, type_check_info = type_check_info, config_data = config_data, res_auth = res_auth)
-  # Creation of all tables
-  lapply(
-    check_info,
-    function(check) {
-      do.call(mod_table_server, c(check[names(check) %in% names(formals(mod_table_server))], data_all = calcul_check, type_line_check = reactive_value_menu$type_line_check, referential_file = referential_file))
-    }
-  )
 }
 
 #' @name table_display
