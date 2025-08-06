@@ -126,7 +126,8 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, co
                 lapply(
                   check_info,
                   function(check) {
-                    if (check[["tab"]] == tab[["id"]]) {
+                    # Filters the checks available for the tab and which are authorized to the user
+                    if (check[["tab"]] == tab[["id"]] && check[["id"]] %in% choices_check()) {
                       # Configure display check with recovered parameters
                       do.call(mod_table_ui, check[names(check) %in% c("id", "title", "text", "size_box")])
                     }
@@ -244,7 +245,8 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, co
         # Number of the control displayed within the tab, to display a line for every two controls
         num_check <- 0
         for (check in check_info) {
-          if (check[["tab"]] == tab[["id"]]) {
+          # Filters the checks available for the tab and which are authorized to the user
+          if (check[["tab"]] == tab[["id"]] && check[["id"]] %in% choices_check()) {
             # Controls the display of check according to the type chosen by the user
             if (specific_check && check[["type"]] != input$type_check) {
               # Hide controls
