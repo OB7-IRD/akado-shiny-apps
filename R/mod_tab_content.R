@@ -13,8 +13,8 @@ mod_tab_content_ui <- function(id) {
 #' @title tab_content Server Functions
 #' @description A shiny Module for creation of all tab
 #' @param id Internal parameters for shiny
-#' @param tab_info {\link[base]{list}} expected. Information about the dynamic tab display
-#' @param check_info {\link[base]{list}} expected. Information about the dynamic check display
+#' @param tab_info {\link[base]{list}} expected. Reactive value contains information about the dynamic tab display allowed for user type
+#' @param check_info {\link[base]{list}} expected. Reactive value contains information about the dynamic check display allowed for user type
 #' @param type_check_info {\link[base]{list}} expected. Information about the dynamic type of check
 #' @param config_data {\link[base]{list}} expected. Reactive value contains the contents of the configuration file
 #' @param res_auth {\link[base]{character}} expected. Reactive value containing information about the user's connection
@@ -22,18 +22,27 @@ mod_tab_content_ui <- function(id) {
 #' @details
 #' \itemize{
 #' tab_info:
-#'  \item{\code{  id : Tab identification, mandatory, character expected}}
+#' \item{ tab_info_authorize : }
+#'    \itemize{
+#'    \item{\code{  id : Tab identification, mandatory, character expected}}
+#'    }
 #' }
 #' \itemize{
 #' check_info:
-#'  \item{\code{  id : Check identification, mandatory, character expected}}
-#'  \item{\code{  tab : Tab identification, mandatory, character expected}}
-#'  \item{\code{  title : Name to be displayed for check, optional, character expected}}
-#'  \item{\code{  text : Text to be displayed for check, optional, character expected}}
-#'  \item{\code{  type : Check type, you must choose between check type identifiers (type_check_info), mandatory, character expected}}
-#'  \item{\code{  column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected}}
-#'  \item{\code{  size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected}}
-#' }
+#'    \itemize{
+#'    \item{ id_check_authorize : Check identification, mandatory, character expected}
+#'    \item{ check_info_authorize : }
+#'      \itemize{
+#'      \item{\code{  id : Check identification, mandatory, character expected}}
+#'      \item{\code{  tab : Tab identification, mandatory, character expected}}
+#'      \item{\code{  title : Name to be displayed for check, optional, character expected}}
+#'      \item{\code{  text : Text to be displayed for check, optional, character expected}}
+#'      \item{\code{  type : Check type, you must choose between check type identifiers (type_check_info), mandatory, character expected}}
+#'      \item{\code{  column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected}}
+#'      \item{\code{  size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected}}
+#'      }
+#'    }
+#'}
 #' \itemize{
 #' type_check_info:
 #'  \item{\code{  id : Button selection identification, mandatory, character expected}}
@@ -118,7 +127,7 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, co
         # Creating dynamic tab
         # Use of lapply and not a for loop to avoid lazy evaluation problems
         lapply(
-          tab_info,
+          tab_info()[["tab_info_authorize"]],
           function(tab) {
             shinydashboard::tabItem(
               tabName = tab[["id"]],
@@ -216,7 +225,7 @@ mod_tab_content_server <- function(id, tab_info, check_info, type_check_info, co
       }
       removeUI(selector = "div:has(> #div_visible_md_check)", multiple = TRUE)
       removeUI(selector = "div:has(> #div_visible_lg_check)", multiple = TRUE)
-      for (tab in tab_info) {
+      for (tab in tab_info()[["tab_info_authorize"]]) {
         # Number of the control displayed within the tab, to display a line for every two controls
         num_check <- 0
         for (check in check_info()[["check_info_authorize"]]) {

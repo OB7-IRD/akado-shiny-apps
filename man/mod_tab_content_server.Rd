@@ -16,9 +16,9 @@ mod_tab_content_server(
 \arguments{
 \item{id}{Internal parameters for shiny}
 
-\item{tab_info}{{\link[base]{list}} expected. Information about the dynamic tab display}
+\item{tab_info}{{\link[base]{list}} expected. Reactive value contains information about the dynamic tab display allowed for user type}
 
-\item{check_info}{{\link[base]{list}} expected. Information about the dynamic check display}
+\item{check_info}{{\link[base]{list}} expected. Reactive value contains information about the dynamic check display allowed for user type}
 
 \item{type_check_info}{{\link[base]{list}} expected. Information about the dynamic type of check}
 
@@ -35,17 +35,26 @@ A shiny Module for creation of all tab
 \details{
 \itemize{
 tab_info:
- \item{\code{  id : Tab identification, mandatory, character expected}}
+\item{ tab_info_authorize : }
+   \itemize{
+   \item{\code{  id : Tab identification, mandatory, character expected}}
+   }
 }
 \itemize{
 check_info:
- \item{\code{  id : Check identification, mandatory, character expected}}
- \item{\code{  tab : Tab identification, mandatory, character expected}}
- \item{\code{  title : Name to be displayed for check, optional, character expected}}
- \item{\code{  text : Text to be displayed for check, optional, character expected}}
- \item{\code{  type : Check type, you must choose between check type identifiers (type_check_info), mandatory, character expected}}
- \item{\code{  column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected}}
- \item{\code{  size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected}}
+   \itemize{
+   \item{ id_check_authorize : Check identification, mandatory, character expected}
+   \item{ check_info_authorize : }
+     \itemize{
+     \item{\code{  id : Check identification, mandatory, character expected}}
+     \item{\code{  tab : Tab identification, mandatory, character expected}}
+     \item{\code{  title : Name to be displayed for check, optional, character expected}}
+     \item{\code{  text : Text to be displayed for check, optional, character expected}}
+     \item{\code{  type : Check type, you must choose between check type identifiers (type_check_info), mandatory, character expected}}
+     \item{\code{  column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected}}
+     \item{\code{  size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected}}
+     }
+   }
 }
 \itemize{
 type_check_info:

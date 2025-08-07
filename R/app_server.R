@@ -667,6 +667,16 @@ app_server <- function(input, output, session) {
     return(list(id_check_authorize = choices_check_current_value_id, check_info_authorize = check_info_authorize))
   })
 
+  # Filter tab by user type
+  tab_authorize <- reactive({
+    # List of check tabs
+    name_id <- sapply(tab_info, `[[`, "id")
+    name_tab_authorize <- sapply(check_authorize()[["check_info_authorize"]], `[[`, "tab")
+    # Filters tabs if at least one check is available for the user type
+    tab_info_authorize <- tab_info[name_id %in% name_tab_authorize]
+    return(list(tab_info_authorize = tab_info_authorize))
+  })
+
   # Filter check by user selection
   check_info_selected <- reactive({
     check_info[sapply(check_info, function(check) any(check[["id"]] %in% input[["tab-select_check"]]))]
@@ -705,7 +715,7 @@ app_server <- function(input, output, session) {
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
 
   # Tab creation, menu, tab content
-  tab(id = "tab", tab_info = tab_info, check_info = check_authorize, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data, res_auth = res_auth)
+  tab(id = "tab", tab_info = tab_authorize, check_info = check_authorize, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data, res_auth = res_auth)
 
   # Force activation of first tab at startup, remove the lazy evaluation
   observe({

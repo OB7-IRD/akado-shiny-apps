@@ -15,15 +15,18 @@ mod_tab_menu_ui <- function(id) {
 #' @title tab_menu Server Functions
 #' @description A shiny Module for creation of all menus
 #' @param id Internal parameters for shiny
-#' @param tab_info {\link[base]{list}} expected. Information about the dynamic tab display
-#' @return The function returns a reactive valu
+#' @param tab_info {\link[base]{list}} expected. Reactive value contains information about the dynamic tab display
+#' @return The function returns nothing, instantiating the menu
 #' @details
 #' \itemize{
 #' tab_info:
-#'  \item{\code{  id : Tab identification, mandatory, character expected}}
-#'  \item{\code{  title : Name to be displayed for tab, mandatory, character expected}}
-#'  \item{\code{  icon : Picture to be displayed for tab, optional, character expected}}
-#' }
+#' \item{ tab_info_authorize : }
+#'    \itemize{
+#'    \item{\code{  id : Tab identification, mandatory, character expected}}
+#'    \item{\code{  title : Name to be displayed for tab, mandatory, character expected}}
+#'    \item{\code{  icon : Picture to be displayed for tab, optional, character expected}}
+#'    }
+#'}
 #' @export
 mod_tab_menu_server <- function(id, tab_info) {
   moduleServer(id, function(input, output, session) {
@@ -35,7 +38,7 @@ mod_tab_menu_server <- function(id, tab_info) {
         # Creating dynamic menu
         # Use of lapply and not a for loop to avoid lazy evaluation problems
         lapply(
-          tab_info,
+          tab_info()[["tab_info_authorize"]],
           function(tab) {
             tab_tmp <- list(tabName = tab[["id"]], text = tab[["title"]])
             if ("icon" %in% names(tab)) {

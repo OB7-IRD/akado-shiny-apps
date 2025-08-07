@@ -9,10 +9,10 @@ mod_tab_menu_server(id, tab_info)
 \arguments{
 \item{id}{Internal parameters for shiny}
 
-\item{tab_info}{{\link[base]{list}} expected. Information about the dynamic tab display}
+\item{tab_info}{{\link[base]{list}} expected. Reactive value contains information about the dynamic tab display}
 }
 \value{
-The function returns a reactive valu
+The function returns nothing, instantiating the menu
 }
 \description{
 A shiny Module for creation of all menus
@@ -20,8 +20,11 @@ A shiny Module for creation of all menus
 \details{
 \itemize{
 tab_info:
- \item{\code{  id : Tab identification, mandatory, character expected}}
- \item{\code{  title : Name to be displayed for tab, mandatory, character expected}}
- \item{\code{  icon : Picture to be displayed for tab, optional, character expected}}
+\item{ tab_info_authorize : }
+   \itemize{
+   \item{\code{  id : Tab identification, mandatory, character expected}}
+   \item{\code{  title : Name to be displayed for tab, mandatory, character expected}}
+   \item{\code{  icon : Picture to be displayed for tab, optional, character expected}}
+   }
 }
 }
