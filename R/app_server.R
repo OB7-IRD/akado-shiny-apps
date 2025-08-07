@@ -727,13 +727,15 @@ app_server <- function(input, output, session) {
   # Summary page text
   output$text_summary <- renderText({
     # Local binding global variables
-    check <- NULL
+    Check <- NULL
+    # Selection of check result tables
+    data_regroup <- lapply(calcul_check(), `[[`, "table")
     # Grouping of data sets with the addition of the group number, then selection of lines containing inconsistencies
-    data_regroup <- calcul_check() %>%
+    data_regroup <- data_regroup %>%
       dplyr::bind_rows(.id = "group_id") %>%
-      dplyr::filter(check != '<i class="fas fa-check" role="presentation" aria-label="check icon"></i>')
+      dplyr::filter(Check != '<i class="fas fa-check" role="presentation" aria-label="check icon"></i>')
     # Text display
-    paste0("Number of trips analyzed : ", length(trip_select()$trip_id), " ; Number of trip reports :  ", nrow(unique(data_regroup[, c("Vessel code", "Trip enddate")])), " ; Number of check : ", length(calcul_check()), " ; Number of check with trip reports :  ", length(unique(data_regroup[, "group_id"])))
+    paste0("Number of trips analyzed : ", length(trip_select()$trip_selected$trip_id), " ; Number of trip reports :  ", nrow(unique(stats::na.omit(data_regroup[, c("Vessel code", "Trip enddate")]))), " ; Number of check : ", length(calcul_check()), " ; Number of check with trip reports :  ", nrow(unique(data_regroup[, "group_id"])))
   })
 
   # Date control window
