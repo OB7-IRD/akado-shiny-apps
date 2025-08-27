@@ -8540,7 +8540,7 @@ calcul_check_server <- function(id, text_error_trip_select, trip_select, config_
 }
 
 # Shiny function : Displays the errors and notifications that occur when you want to start the calculation
-error_trip_select_serveur <- function(id, text_error_trip_select, config_data, trip_select, calcul_check, parent_in) {
+error_trip_select_serveur <- function(id, text_error_trip_select, trip_select, calcul_check) {
   moduleServer(id, function(input, output, session) {
     output$text <- renderText({
       # If there are errors in the selection parameters

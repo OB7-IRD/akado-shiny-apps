@@ -712,7 +712,7 @@ app_server <- function(input, output, session) {
   calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, check_info_selected = check_info_selected, sql_info_selected = sql_info_selected, column_user_info = column_user_info, parent_in = input)
 
   # Displays the errors and notifications that occur when you want to start the calculation
-  error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, config_data = config_data, trip_select = trip_select, calcul_check = calcul_check)
+  error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
 
   # Tab creation, menu, tab content
   tab(id = "tab", tab_info = tab_authorize, check_info = check_authorize, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data, res_auth = res_auth)
