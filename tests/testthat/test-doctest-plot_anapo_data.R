@@ -4,7 +4,7 @@
 test_that("Doctest: plot_anapo_data", {
   # Created from @doctest for `plot_anapo_data`
   # Source file: R/function_specific_check.R
-  # Source line: 1203
+  # Source line: 1195
   dataframe1 <- data.frame(activity_id = c("4", "4", "4", "6", "6", "6", "2", "2", "2"), activity_date = as.Date(c("2020/01/13", "2020/01/13", "2020/01/13", "2020/01/13",
     "2020/01/13", "2020/01/13", "2020/01/12", "2020/01/12", "2020/01/12")), activity_time = c("03:12:34", "03:12:34", "03:12:34", "23:26:47", "23:26:47", "23:26:47",
     "05:26:01", "05:26:01", "05:26:01"), activity_position = c("POINT (2.6 3.8)", "POINT (2.6 3.8)", "POINT (2.6 3.8)", "POINT (3 0.6)", "POINT (3 0.6)", "POINT (3 0.6)",

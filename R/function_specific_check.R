@@ -1001,16 +1001,12 @@ plot_eez_windows <- function(vessel_code, trip_enddate, activity_date, activity_
 #'  \item{\code{  activity_date}}
 #'  \item{\code{  activity_time}}
 #'  \item{\code{  activity_position}}
-#'  \item{\code{  activity_crs}}
 #' }
 #' \itemize{
 #' Dataframe 2:
 #'  \item{\code{  trip_id}}
-#'  \item{\code{  vessel_code}}
-#'  \item{\code{  trip_enddate}}
 #'  \item{\code{  activity_id}}
 #'  \item{\code{  activity_number}}
-#'  \item{\code{  vesselactivity_code}}
 #' }
 #' \itemize{
 #' Dataframe 3:
@@ -1031,14 +1027,10 @@ plot_eez_windows <- function(vessel_code, trip_enddate, activity_date, activity_
 #' dataframe1 <- data.frame(activity_id  = c("2", "4", "6"),
 #'                          activity_date = as.Date(c("2020/01/12", "2020/01/13", "2020/01/13")),
 #'                          activity_time = c("05:26:01", "03:12:34", "23:26:47"),
-#'                          activity_position = c("POINT (0 0)", "POINT (4 4)", "POINT (3 0.6)"),
-#'                          activity_crs = c(4326, 4326, 4326))
+#'                          activity_position = c("POINT (0 0)", "POINT (4 4)", "POINT (3 0.6)"))
 #' dataframe2 <- data.frame(trip_id  = c("1", "1", "1"),
-#'                          vessel_code = c("0", "0", "0"),
-#'                          trip_enddate = as.Date(c("2020/01/20", "2020/01/20", "2020/01/20")),
 #'                          activity_id = c("2", "4", "6"),
-#'                          activity_number = c(1L, 1L, 2L),
-#'                          vesselactivity_code = c("2","6", "13"))
+#'                          activity_number = c(1L, 1L, 2L))
 #' dataframe3 <- data.frame(transmittingbuoy_id  = c("1"),
 #'                          transmittingbuoyoperation_code = c("4"),
 #'                          activity_id = c("6"))
@@ -1066,34 +1058,34 @@ display_anapo <- function(dataframe1, dataframe2, dataframe3, dataframe4) {
   if (!codama::r_table_checking(
     r_table = dataframe1,
     type = "data.frame",
-    column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "activity_crs"),
-    column_type = c("character", "Date", "character", "character", "numeric"),
+    column_name = c("activity_id", "activity_date", "activity_time", "activity_position"),
+    column_type = c("character", "Date", "character", "character"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe1,
       type = "data.frame",
-      column_name = c("activity_id", "activity_date", "activity_time", "activity_position", "activity_crs"),
-      column_type = c("character", "Date", "character", "character", "numeric"),
+      column_name = c("activity_id", "activity_date", "activity_time", "activity_position"),
+      column_type = c("character", "Date", "character", "character"),
       output = "error"
     )
   }
   if (!codama::r_table_checking(
     r_table = dataframe2,
     type = "data.frame",
-    column_name = c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code"),
-    column_type = c("character", "Date", "character", "character", "integer", "character"),
+    column_name = c("activity_id", "trip_id", "activity_number"),
+    column_type = c("character", "character", "integer"),
     output = "logical"
   )) {
     codama::r_table_checking(
       r_table = dataframe2,
       type = "data.frame",
-      column_name = c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code"),
-      column_type = c("character", "Date", "character", "character", "integer", "character"),
+      column_name = c("activity_id", "trip_id", "activity_number"),
+      column_type = c("character", "character", "integer"),
       output = "error"
     )
   } else {
-    dataframe2 <- dataframe2[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")]
+    dataframe2 <- dataframe2[, c("activity_id", "trip_id", "activity_number")]
   }
   if (!codama::r_table_checking(
     r_table = dataframe3,
@@ -1128,13 +1120,13 @@ display_anapo <- function(dataframe1, dataframe2, dataframe3, dataframe4) {
     )
   }
   # 2 - Data design ----
-  check_anapo_inspector_dataplot <- dplyr::inner_join(dataframe1, dataframe2[, c("vessel_code", "trip_enddate", "activity_id", "trip_id", "activity_number", "vesselactivity_code")], by = dplyr::join_by(activity_id))
+  check_anapo_inspector_dataplot <- dplyr::inner_join(dataframe1, dataframe2[, c("activity_id", "trip_id", "activity_number")], by = dplyr::join_by(activity_id))
   # Add information on whether the activity is linked to a grounding (object or buoy) or not in data plot
   data_tmp_grounding <- column_grounding(data = check_anapo_inspector_dataplot, data_transmittingbuoy = dataframe3)
   check_anapo_inspector_dataplot <- dplyr::inner_join(check_anapo_inspector_dataplot, data_tmp_grounding, by = dplyr::join_by(activity_id))
   # Selecting useful data for the plot
   check_anapo_inspector_dataplot_trip <- check_anapo_inspector_dataplot %>%
-    dplyr::select("trip_id", "activity_id", "activity_date", "activity_time", "activity_position", "activity_number", "vesselactivity_code", "activity_crs", "grounding") %>%
+    dplyr::select("trip_id", "activity_id", "activity_date", "activity_time", "activity_position", "activity_number", "grounding") %>%
     dplyr::group_by(trip_id) %>%
     dplyr::distinct()
   # Add position information for activities n, n-1 and n+1 (not just related to grounding)

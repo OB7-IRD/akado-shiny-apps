@@ -4,7 +4,7 @@
 test_that("Doctest: plot_anapo_windows", {
   # Created from @doctest for `plot_anapo_windows`
   # Source file: R/function_specific_check.R
-  # Source line: 1618
+  # Source line: 1610
   data_activity <- data.frame(vessel_code = c("0"), trip_enddate = as.Date(c("2020/01/20")), activity_date = as.Date(c("2020/01/12")), activity_time = c("05:26:01"),
   activity_number = 1L, vesselactivity_code = "2", X = c("E0°0'"), Y = c("N0°0'"), grounding = FALSE)
   expect_equal(plot_anapo_windows(data_activity),

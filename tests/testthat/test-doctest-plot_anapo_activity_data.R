@@ -4,7 +4,7 @@
 test_that("Doctest: plot_anapo_activity_data", {
   # Created from @doctest for `plot_anapo_activity_data`
   # Source file: R/function_specific_check.R
-  # Source line: 1683
+  # Source line: 1675
   dataframe1 <- data.frame(vms_id = c("1", "2"), vessel_code = c("0", "0"), vms_date = as.Date(c("2020/01/13", "2020/01/13")), vessel_type = c("6", "6"))
   dataframe2 <- data.frame(vms_id = c("1", "2"), vms_time = c("10:55:15", "22:32:17"), vms_position = c("POINT (0 0.1)", "POINT (3 0.3)"), vms_crs = c(4326, 4326))
   expect_equal(plot_anapo_activity_data(dataframe1, dataframe2), list(`1` = list(data_vms = structure(list(vms_position = "POINT (0 0.1)", vms_time = "10:55:15"), class = "data.frame",

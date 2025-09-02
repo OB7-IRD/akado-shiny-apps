@@ -29,16 +29,12 @@ Dataframe 1:
  \item{\code{  activity_date}}
  \item{\code{  activity_time}}
  \item{\code{  activity_position}}
- \item{\code{  activity_crs}}
 }
 \itemize{
 Dataframe 2:
  \item{\code{  trip_id}}
- \item{\code{  vessel_code}}
- \item{\code{  trip_enddate}}
  \item{\code{  activity_id}}
  \item{\code{  activity_number}}
- \item{\code{  vesselactivity_code}}
 }
 \itemize{
 Dataframe 3:
@@ -59,14 +55,10 @@ Dataframe 4:
 dataframe1 <- data.frame(activity_id  = c("2", "4", "6"),
                          activity_date = as.Date(c("2020/01/12", "2020/01/13", "2020/01/13")),
                          activity_time = c("05:26:01", "03:12:34", "23:26:47"),
-                         activity_position = c("POINT (0 0)", "POINT (4 4)", "POINT (3 0.6)"),
-                         activity_crs = c(4326, 4326, 4326))
+                         activity_position = c("POINT (0 0)", "POINT (4 4)", "POINT (3 0.6)"))
 dataframe2 <- data.frame(trip_id  = c("1", "1", "1"),
-                         vessel_code = c("0", "0", "0"),
-                         trip_enddate = as.Date(c("2020/01/20", "2020/01/20", "2020/01/20")),
                          activity_id = c("2", "4", "6"),
-                         activity_number = c(1L, 1L, 2L),
-                         vesselactivity_code = c("2","6", "13"))
+                         activity_number = c(1L, 1L, 2L))
 dataframe3 <- data.frame(transmittingbuoy_id  = c("1"),
                          transmittingbuoyoperation_code = c("4"),
                          activity_id = c("6"))

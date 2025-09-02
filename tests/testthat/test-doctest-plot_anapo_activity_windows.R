@@ -4,7 +4,7 @@
 test_that("Doctest: plot_anapo_activity_windows", {
   # Created from @doctest for `plot_anapo_activity_windows`
   # Source file: R/function_specific_check.R
-  # Source line: 1853
+  # Source line: 1845
   expect_equal(plot_anapo_activity_windows("0", as.Date(c("2020/01/13")), "6"),
   "<b>Trip information : </b><br>\n         <ul><li>Vessel code : 0</li>\n         <li>VMS date : 2020-01-13</li>\n         <li>Vessel type : 6</li></ul>")
 })
