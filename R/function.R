@@ -8819,7 +8819,7 @@ data_to_list <- function(data, name_col_dataplot, colname_id, colname_plot, coln
   # Partition table by id
   data_split <- data %>%
     dplyr::ungroup() %>%
-    dplyr::select(c(colname_id, colname_plot, colname_info)) %>%
+    dplyr::select(dplyr::all_of(c(colname_id, colname_plot, colname_info))) %>%
     split(data[[colname_id]])
   # Lists useful plot information for each id
   data_list <- lapply(stats::setNames(data_split, names(data_split)), function(data_tmp) {
