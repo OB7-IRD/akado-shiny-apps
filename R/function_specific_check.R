@@ -1326,7 +1326,7 @@ plot_anapo_data <- function(dataframe1, dataframe2, dataframe3) {
   check_anapo_inspector_dataplot_range_date <- dplyr::bind_rows(check_anapo_inspector_dataplot_trip, check_anapo_inspector_dataplot_trip_prior, check_anapo_inspector_dataplot_trip_post) %>%
     dplyr::group_by(date_group, trip_id) %>%
     dplyr::distinct()
-  check_anapo_inspector_dataplot_range_date <- dplyr::inner_join(check_anapo_inspector_dataplot_range_date, dataframe2[, c("activity_date", "trip_id", "activity_id")], by = dplyr::join_by(date_group == activity_date, trip_id == trip_id))
+  check_anapo_inspector_dataplot_range_date <- dplyr::inner_join(check_anapo_inspector_dataplot_range_date, dataframe2[, c("activity_date", "trip_id", "activity_id")], by = dplyr::join_by(date_group == activity_date, trip_id == trip_id), relationship = "many-to-many")
   check_anapo_inspector_dataplot_range_date <- check_anapo_inspector_dataplot_range_date %>%
     dplyr::group_by(date_group, trip_id, activity_id) %>%
     dplyr::distinct()
