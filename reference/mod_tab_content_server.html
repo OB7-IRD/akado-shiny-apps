@@ -66,11 +66,11 @@
 
 
 <dt id="arg-tab-info">tab_info<a class="anchor" aria-label="anchor" href="#arg-tab-info"></a></dt>
-<dd><p><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> expected. Reactive value contains information about the dynamic tab display allowed for user type</p></dd>
+<dd><p><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> expected. Information about the dynamic tab display</p></dd>
 
 
 <dt id="arg-check-info">check_info<a class="anchor" aria-label="anchor" href="#arg-check-info"></a></dt>
-<dd><p><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> expected. Reactive value contains information about the dynamic check display allowed for user type</p></dd>
+<dd><p><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a> expected. Information about the dynamic check display</p></dd>
 
 
 <dt id="arg-type-check-info">type_check_info<a class="anchor" aria-label="anchor" href="#arg-type-check-info"></a></dt>
@@ -92,18 +92,14 @@
     <div id="details">
     <h2>Details</h2>
 
-<ul><li><p>tab_info_authorize :</p><ul><li><p><code>  id : Tab identification, mandatory, character expected</code></p></li>
-</ul></li>
-</ul><ul><li><p>check_info:</p><ul><li><p>id_check_authorize : Check identification, mandatory, character expected</p></li>
-<li><p>check_info_authorize :</p><ul><li><p><code>  id : Check identification, mandatory, character expected</code></p></li>
+<ul><li><p><code>  id : Tab identification, mandatory, character expected</code></p></li>
+</ul><ul><li><p><code>  id : Check identification, mandatory, character expected</code></p></li>
 <li><p><code>  tab : Tab identification, mandatory, character expected</code></p></li>
 <li><p><code>  title : Name to be displayed for check, optional, character expected</code></p></li>
 <li><p><code>  text : Text to be displayed for check, optional, character expected</code></p></li>
 <li><p><code>  type : Check type, you must choose between check type identifiers (type_check_info), mandatory, character expected</code></p></li>
 <li><p><code>  column_no_wrap : Column numbers that should not be subject to automatic line breaks, optional, integer expected</code></p></li>
 <li><p><code>  size_box : Check size specification for each window size type (format "col-sm-your_size col-md-your_size col-lg-your_size"), optional, character expected</code></p></li>
-</ul></li>
-</ul></li>
 </ul><ul><li><p><code>  id : Button selection identification, mandatory, character expected</code></p></li>
 <li><p><code>  specific_check : Indicates whether the selection should display specific controls or not, optional (default : TRUE), logical expected</code></p></li>
 </ul><ul><li><p><code>  databases_configuration : named list with database connection information</code></p></li>
