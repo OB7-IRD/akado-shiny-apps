@@ -7,13 +7,13 @@
 display_anapo(dataframe1, dataframe2, dataframe3, dataframe4)
 }
 \arguments{
-\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the second output of the function {\link[AkadoR]{check_anapo_inspector}}, which must be done before using the display_anapo () function.}
+\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the second output of the function {\link[codama]{check_anapo_inspector}}, which must be done before using the display_anapo () function.}
 
 \item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the display_anapo () function.}
 
 \item{dataframe3}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the display_anapo () function.}
 
-\item{dataframe4}{{\link[base]{data.frame}} expected. Csv or the first output of the function {\link[AkadoR]{check_anapo_inspector}}, which must be done before using the display_anapo () function.}
+\item{dataframe4}{{\link[base]{data.frame}} expected. Csv or the first output of the function {\link[codama]{check_anapo_inspector}}, which must be done before using the display_anapo () function.}
 }
 \value{
 The function returns a {\link[base]{data.frame}}

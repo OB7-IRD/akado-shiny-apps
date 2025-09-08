@@ -2,7 +2,7 @@
 #' @name display_raising_factor
 #' @title Function to change table display raising_factor
 #' @description Changes the number of decimal places in RF1
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the first output of the function {\link[AkadoR]{check_raising_factor_inspector}}, which must be done before using the display_raising_factor () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the first output of the function {\link[codama]{check_raising_factor_inspector}}, which must be done before using the display_raising_factor () function.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
@@ -40,7 +40,7 @@ display_raising_factor <- function(dataframe1) {
 #' @name display_little_big
 #' @title Function to change table display little_big
 #' @description Changes the number of decimal places in percentage
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the first output of the function {\link[AkadoR]{check_little_big_inspector}}, which must be done before using the display_little_big () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the first output of the function {\link[codama]{check_little_big_inspector}}, which must be done before using the display_little_big () function.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
@@ -87,7 +87,7 @@ display_little_big <- function(dataframe1) {
 #' @name plot_temporal_limit_data
 #' @title Function to create list data/argument for the plot plot_temporal_limit
 #' @description Function to create list data/argument
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[AkadoR]{check_temporal_limit_inspector}}, which must be done before using the plot_temporal_limit_data () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[codama]{check_temporal_limit_inspector}}, which must be done before using the plot_temporal_limit_data () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the plot_temporal_limit_data () function.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -328,7 +328,7 @@ plot_temporal_limit_windows <- function(vessel_code, enddate) {
 #' @name plot_position_data
 #' @title Function to create list data/argument for the plot plot_position
 #' @description Function to create list data/argument
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[AkadoR]{check_position_inspector}}, which must be done before using the plot_position_data () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[codama]{check_position_inspector}}, which must be done before using the plot_position_data () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the plot_position_data () function.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -634,7 +634,7 @@ plot_position_windows <- function(vessel_code, trip_enddate, activity_date, acti
 #' @name plot_eez_data
 #' @title Function to create list data/argument for the plot eez
 #' @description Function to create list data/argument
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[AkadoR]{check_eez_inspector}}, which must be done before using the plot_eez_data () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[codama]{check_eez_inspector}}, which must be done before using the plot_eez_data () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the plot_eez_data () function.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
@@ -989,10 +989,10 @@ plot_eez_windows <- function(vessel_code, trip_enddate, activity_date, activity_
 #' @name display_anapo
 #' @title Function to change table display anapo
 #' @description Adds information about groundings and previous and next activities
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[AkadoR]{check_anapo_inspector}}, which must be done before using the display_anapo () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[codama]{check_anapo_inspector}}, which must be done before using the display_anapo () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the display_anapo () function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the display_anapo () function.
-#' @param dataframe4 {\link[base]{data.frame}} expected. Csv or the first output of the function {\link[AkadoR]{check_anapo_inspector}}, which must be done before using the display_anapo () function.
+#' @param dataframe4 {\link[base]{data.frame}} expected. Csv or the first output of the function {\link[codama]{check_anapo_inspector}}, which must be done before using the display_anapo () function.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :
 #' \itemize{
@@ -1155,7 +1155,7 @@ display_anapo <- function(dataframe1, dataframe2, dataframe3, dataframe4) {
 #' @name plot_anapo_data
 #' @title Function to create list data/argument for the plot plot_anapo
 #' @description Function to create list data/argument
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[AkadoR]{check_anapo_inspector}}, which must be done before using the plot_anapo_data () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[codama]{check_anapo_inspector}}, which must be done before using the plot_anapo_data () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the plot_anapo_data () function.
 #' @param dataframe3 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the plot_anapo_data () function.
 #' @details
@@ -1653,7 +1653,7 @@ plot_anapo_windows <- function(data_activity) {
 #' @name plot_anapo_activity_data
 #' @title Function to create list data/argument for the plot plot_anapo_activity
 #' @description Function to create list data/argument
-#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[AkadoR]{check_anapo_activity_consistent_inspector}}, which must be done before using the plot_anapo_activity_data () function.
+#' @param dataframe1 {\link[base]{data.frame}} expected. Csv or the second output of the function {\link[codama]{check_anapo_activity_consistent_inspector}}, which must be done before using the plot_anapo_activity_data () function.
 #' @param dataframe2 {\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the plot_anapo_activity_data () function.
 #' @details
 #' The input dataframe must contain all these columns for the function to work :

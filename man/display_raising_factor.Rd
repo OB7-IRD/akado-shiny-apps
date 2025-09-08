@@ -7,7 +7,7 @@
 display_raising_factor(dataframe1)
 }
 \arguments{
-\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the first output of the function {\link[AkadoR]{check_raising_factor_inspector}}, which must be done before using the display_raising_factor () function.}
+\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the first output of the function {\link[codama]{check_raising_factor_inspector}}, which must be done before using the display_raising_factor () function.}
 }
 \value{
 The function returns a {\link[base]{data.frame}} with the modified RF1

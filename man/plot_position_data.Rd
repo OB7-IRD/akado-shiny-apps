@@ -7,7 +7,7 @@
 plot_position_data(dataframe1, dataframe2)
 }
 \arguments{
-\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the second output of the function {\link[AkadoR]{check_position_inspector}}, which must be done before using the plot_position_data () function.}
+\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the second output of the function {\link[codama]{check_position_inspector}}, which must be done before using the plot_position_data () function.}
 
 \item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the plot_position_data () function.}
 }
