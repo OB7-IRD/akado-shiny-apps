@@ -1,3 +1,56 @@
+# AkadoR 2.0.2 - 2025.09.09
+
+## Added 
+- Add reactive `tab_authorize` : Display tab least one check available user type
+
+## Changed
+- Change `mod_tab_content` : 
+    - Displays the configuration file download button only for the administrator
+    - Displays the checks boxes by user type
+- Change `text_summary` : Patch (before bug with the sub list 'table')
+- Change `display_raising_factor` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `display_little_big` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `display_raising_factor` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_anapo` :
+    - Add exemple and move in file function_specific_check.R
+- Change `plot_anapo_activity` :
+    - Add exemple and move in file function_specific_check.R
+- Change `plot_anapo_activity_data` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_anapo_activity_windows` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_anapo_data` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_anapo_windows` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_eez` :
+    - Add exemple and move in file function_specific_check.R
+- Change `plot_eez_data` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_eez_windows` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_position` :
+    - Add exemple and move in file function_specific_check.R
+- Change `plot_position_data` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_position_windows` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_temporal_limit` :
+    - Add exemple and move in file function_specific_check.R
+- Change `plot_temporal_limit_data` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `plot_temporal_limit_windows` :
+    - Add exemple and basic unit testing and move in file function_specific_check.R
+- Change `column_grounding` :
+    - Add exemple and basic unit testing and move in file function_toolbox.R
+- Change `coordinate_dd_to_dmd` :
+    - Add exemple and basic unit testing and move in file function_toolbox.R
+- Change `data_to_list` :
+    - Add exemple and basic unit testing and move in file function_toolbox.R
+
 # AkadoR 2.0.1- 2025.07.18
 
 ## Changed

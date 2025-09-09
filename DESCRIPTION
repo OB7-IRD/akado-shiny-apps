@@ -1,6 +1,6 @@
 Package: AkadoR
 Title: AkadoR
-Version: 2.0.1
+Version: 2.0.2
 Authors@R: 
     person("Oceane", "Bouhineau", , "oceane.bouhineau@ird.fr", role = c("cre", "aut"),
            comment = c(ORCID = "0000-0001-7418-2925"))
