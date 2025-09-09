@@ -5,15 +5,15 @@ test_that("Doctest: plot_eez_data", {
   # Created from @doctest for `plot_eez_data`
   # Source file: R/function_specific_check.R
   # Source line: 659
-  dataframe1 <- data.frame(activity_id = c("1", "2"), activity_position = c("POINT (0.1 0)", "POINT (0 0)"), fpazone_code = c("SYC", "XSG"), fpazone_country_iso3 = c(
-    "SYC", "XXX"), eez_calculated = c("SYC", "XSG"), activity_crs = c(4326, 4326))
-  dataframe2 <- data.frame(activity_id = c("1", "2"), vessel_code = c("0", "0"), trip_enddate = as.Date(c("2020/01/10", "2020/01/10")), activity_date = as.Date(c(
-    "2020/01/09", "2020/01/10")), activity_number = c(1L, 1L))
+  dataframe1 <- data.frame(activity_id = c("1", "2"), activity_position = c("POINT (0.1 0)", "POINT (0 0)"), fpazone_code = c("SYC", "XSG"),
+  fpazone_country_iso3 = c("SYC", "XXX"), eez_calculated = c("SYC", "XSG"), activity_crs = c(4326, 4326))
+  dataframe2 <- data.frame(activity_id = c("1", "2"), vessel_code = c("0", "0"), trip_enddate = as.Date(c("2020/01/10", "2020/01/10")), activity_date = as.Date(
+    c("2020/01/09", "2020/01/10")), activity_number = c(1L, 1L))
   expect_equal(plot_eez_data(dataframe1, dataframe2), list(`1` = list(data = structure(list(activity_position = "POINT (0.1 0)", activity_crs = 4326), class = "data.frame",
   row.names = 1L), vessel_code = "0", trip_enddate = structure(18271, class = "Date"), activity_date = structure(18270, class = "Date"), activity_number = 1L,
-  fpazone_code = "SYC", fpazone_country_iso3 = "SYC", eez_calculated = "SYC", X = "E0°6'", Y = "N0°0'", referential_geographical_shape = "shape_eez"), `2` = list(data = structure(
-    list(activity_position = "POINT (0 0)", activity_crs = 4326), class = "data.frame", row.names = 2L), vessel_code = "0", trip_enddate = structure(18271, class = "Date"),
-  activity_date = structure(18271, class = "Date"), activity_number = 1L, fpazone_code = "XSG", fpazone_country_iso3 = "XXX", eez_calculated = "XSG", X = "E0°0'", Y = "N0°0'",
-  referential_geographical_shape = "shape_eez")))
+  fpazone_code = "SYC", fpazone_country_iso3 = "SYC", eez_calculated = "SYC", X = "E0°6'", Y = "N0°0'", referential_geographical_shape = "shape_eez"), `2` = list(
+    data = structure(list(activity_position = "POINT (0 0)", activity_crs = 4326), class = "data.frame", row.names = 2L), vessel_code = "0", trip_enddate = structure(
+      18271, class = "Date"), activity_date = structure(18271, class = "Date"), activity_number = 1L, fpazone_code = "XSG", fpazone_country_iso3 = "XXX",
+    eez_calculated = "XSG", X = "E0°0'", Y = "N0°0'", referential_geographical_shape = "shape_eez")))
 })
 
