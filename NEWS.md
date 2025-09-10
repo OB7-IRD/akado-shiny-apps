@@ -1,3 +1,41 @@
+# AkadoR 2.0.3 - 2025.09.10
+
+## Changed
+Move check in Codama and rename :
+- `check_trip_activity_inspector` -> `logbook_trip_activity_control`
+- `check_fishing_time_inspector` -> `logbook_fishing_time_control`
+- `check_sea_time_inspector` -> `logbook_sea_time_control`
+- `check_landing_consistent_inspector` -> `logbook_landing_control`
+- `check_landing_total_weight_inspector` -> `logbook_landing_total_weight_control`
+- `check_temporal_limit_inspector` -> `logbook_temporal_limit_control`
+- `check_harbour_inspector` -> `logbook_harbour_control`
+- `check_raising_factor_inspector` -> `logbook_raising_factor_control`
+- `check_fishing_context_inspector` -> `logbook_fishing_context_control`
+- `check_operation_inspector` -> `logbook_operation_control`
+- `check_position_inspector` -> `logbook_position_control`
+- `check_weight_inspector` -> `logbook_weight_control`
+- `check_length_class_inspector` -> `logbook_length_class_control`
+- `check_measure_inspector` -> `logbook_measure_control`
+- `check_temperature_inspector` -> `logbook_temperature_control`
+- `check_weighting_sample_inspector` -> `logbook_weighting_sample_control`
+- `check_time_route_inspector` -> `logbook_time_route_control`
+- `check_eez_inspector` -> `logbook_eez_control`
+- `check_species_inspector` -> `logbook_species_control`
+- `check_sample_without_measure_inspector` -> `logbook_sample_without_measure_control`
+- `check_sample_without_species_inspector` -> `logbook_sample_without_species_control`
+- `check_super_sample_number_consistent_inspector` -> `logbook_super_sample_number_control`
+- `check_well_number_consistent_inspector` -> `logbook_well_number_control`
+- `check_little_big_inspector` -> `logbook_little_big_control`
+- `check_weighting_inspector` -> `logbook_weighting_control`
+- `check_weight_sample_inspector` -> `logbook_weight_sample_control`
+- `check_activity_sample_inspector` -> `logbook_activity_sample_control`
+- `check_ldlf_inspector` -> `logbook_ldlf_control`
+- `check_category_species_forbidden_well_inspector` -> `logbook_category_species_forbidden_well_control`
+- `check_distribution_inspector` -> `logbook_distribution_control`
+- `check_sample_harbour_inspector` -> `logbook_sample_harbour_control`
+- `check_anapo_inspector` -> `logbook_anapo_control`
+- `check_anapo_activity_consistent_inspector` -> `logbook_anapo_activity_control`
+
 # AkadoR 2.0.2 - 2025.09.09
 
 ## Added 
