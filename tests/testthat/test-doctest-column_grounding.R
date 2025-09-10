@@ -7,7 +7,7 @@ test_that("Doctest: column_grounding", {
   # Source line: 150
   data <- data.frame(activity_id = c("1", "2", "3"))
   data_transmittingbuoy <- data.frame(transmittingbuoyoperation_code = c("1", "4"), activity_id = c("1", "3"))
-  expect_equal(column_grounding(data, data_transmittingbuoy), structure(list(activity_id = c("1", "2", "3"), grounding = c(FALSE, FALSE, TRUE)), row.names = c(NA, -3L),
-  class = "data.frame"))
+  expect_equal(column_grounding(data, data_transmittingbuoy), structure(list(activity_id = c("1", "2", "3"), grounding = c(FALSE, FALSE, TRUE)), row.names = c(
+    NA, -3L), class = "data.frame"))
 })
 

@@ -5,15 +5,15 @@ test_that("Doctest: plot_temporal_limit_data", {
   # Created from @doctest for `plot_temporal_limit_data`
   # Source file: R/function_specific_check.R
   # Source line: 111
-  dataframe1 <- data.frame(trip_id = c("1", "1", "2", "2", "2"), trip_startdate = as.Date(c("2020/01/01", "2020/01/01", "2020/01/01", "2020/01/01", "2020/01/01")),
-  trip_enddate = as.Date(c("2020/01/02", "2020/01/02", "2020/01/02", "2020/01/02", "2020/01/02")), activity_date = as.Date(c("2020/01/01", "2020/01/02", "2020/01/01",
-    "2020/01/02", "2020/01/03")), inter_activity_date = c(TRUE, TRUE, TRUE, TRUE, FALSE), exter_activity_date = c(FALSE, FALSE, FALSE, FALSE, TRUE), count_freq = c(1L,
-    1L, 1L, 1L, 1L), logical = c(TRUE, TRUE, TRUE, TRUE, FALSE))
+  dataframe1 <- data.frame(trip_id = c("1", "1", "2", "2", "2"), trip_startdate = as.Date(c("2020/01/01", "2020/01/01", "2020/01/01", "2020/01/01",
+    "2020/01/01")), trip_enddate = as.Date(c("2020/01/02", "2020/01/02", "2020/01/02", "2020/01/02", "2020/01/02")), activity_date = as.Date(c("2020/01/01",
+    "2020/01/02", "2020/01/01", "2020/01/02", "2020/01/03")), inter_activity_date = c(TRUE, TRUE, TRUE, TRUE, FALSE), exter_activity_date = c(FALSE, FALSE,
+    FALSE, FALSE, TRUE), count_freq = c(1L, 1L, 1L, 1L, 1L), logical = c(TRUE, TRUE, TRUE, TRUE, FALSE))
   dataframe2 <- data.frame(trip_id = c("1", "2"), vessel_code = c("0", "0"))
   expect_equal(plot_temporal_limit_data(dataframe1, dataframe2), list(`1` = list(data = structure(list(activity_date = structure(c(18262, 18263), class = "Date"),
   logical = c(TRUE, TRUE), count_freq = c(1L, 1L)), row.names = c(NA, -2L), class = c("tbl_df", "tbl", "data.frame")), startdate = structure(18262, class = "Date"),
   enddate = structure(18263, class = "Date"), vessel_code = "0"), `2` = list(data = structure(list(activity_date = structure(c(18262, 18263, 18264), class = "Date"),
-  logical = c(TRUE, TRUE, FALSE), count_freq = c(1L, 1L, 1L)), row.names = c(NA, -3L), class = c("tbl_df", "tbl", "data.frame")), startdate = structure(18262, class = "Date"),
-  enddate = structure(18263, class = "Date"), vessel_code = "0")))
+  logical = c(TRUE, TRUE, FALSE), count_freq = c(1L, 1L, 1L)), row.names = c(NA, -3L), class = c("tbl_df", "tbl", "data.frame")), startdate = structure(18262,
+    class = "Date"), enddate = structure(18263, class = "Date"), vessel_code = "0")))
 })
 

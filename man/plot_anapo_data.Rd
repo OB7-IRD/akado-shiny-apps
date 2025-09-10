@@ -7,7 +7,7 @@
 plot_anapo_data(dataframe1, dataframe2, dataframe3)
 }
 \arguments{
-\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the second output of the function {\link[AkadoR]{check_anapo_inspector}}, which must be done before using the plot_anapo_data () function.}
+\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the second output of the function {\link[codama]{logbook_anapo_control}}, which must be done before using the plot_anapo_data () function.}
 
 \item{dataframe2}{{\link[base]{data.frame}} expected. Csv or output of the function {\link[furdeb]{data_extraction}}, which must be done before using the plot_anapo_data () function.}
 

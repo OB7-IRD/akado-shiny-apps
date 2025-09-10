@@ -7,7 +7,7 @@
 display_little_big(dataframe1)
 }
 \arguments{
-\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the first output of the function {\link[AkadoR]{check_little_big_inspector}}, which must be done before using the display_little_big () function.}
+\item{dataframe1}{{\link[base]{data.frame}} expected. Csv or the first output of the function {\link[codama]{logbook_little_big_control}}, which must be done before using the display_little_big () function.}
 }
 \value{
 The function returns a {\link[base]{data.frame}} with the modified percentage

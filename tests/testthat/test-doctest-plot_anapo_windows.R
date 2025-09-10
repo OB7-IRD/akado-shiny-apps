@@ -5,8 +5,8 @@ test_that("Doctest: plot_anapo_windows", {
   # Created from @doctest for `plot_anapo_windows`
   # Source file: R/function_specific_check.R
   # Source line: 1610
-  data_activity <- data.frame(vessel_code = c("0"), trip_enddate = as.Date(c("2020/01/20")), activity_date = as.Date(c("2020/01/12")), activity_time = c("05:26:01"),
-  activity_number = 1L, vesselactivity_code = "2", X = c("E0°0'"), Y = c("N0°0'"), grounding = FALSE)
+  data_activity <- data.frame(vessel_code = c("0"), trip_enddate = as.Date(c("2020/01/20")), activity_date = as.Date(c("2020/01/12")), activity_time = c(
+    "05:26:01"), activity_number = 1L, vesselactivity_code = "2", X = c("E0°0'"), Y = c("N0°0'"), grounding = FALSE)
   expect_equal(plot_anapo_windows(data_activity),
   "<b>Trip information : </b><br>\n         <ul><li>Vessel code : 0</li>\n         <li>Trip end date : 2020-01-20</li>\n         <li>Activity date : 2020-01-12</li>\n         <li>Activity time : 05:26:01</li>\n         <li>Activity number : 1</li>\n         <li>Vessel activity : 2</li>\n         <li>Latitude : N0°0'</li>\n         <li>Longitude : E0°0'</li>\n         <li>Grounding : FALSE</li></ul>")
 })
