@@ -903,7 +903,7 @@ config_data_server <- function(id, parent_in) {
 }
 
 # Shiny function : Retrieves the list of trips and VMS selected by the user
-trip_select_server <- function(id, parent_in, text_error_trip_select, config_data, sql_info_selected, text_error_data_base_select, parameters_trip_select) {
+trip_select_server <- function(id, parent_in, text_error_trip_select, config_data, sql_info_selected, parameters_trip_select) {
   # 0 - Global variables assignement ----
   vessel_status <- NULL
   vessel_id <- NULL
@@ -923,7 +923,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
   moduleServer(id, function(input, output, session) {
     eventReactive(input$start_button, {
       # Recovers user trip selection parameters
-      if (text_error_data_base_select() == TRUE) {
+      if (text_error_trip_select() == TRUE) {
         trip_select <- parameters_trip_select()
         # If the user wants active trips
         if (parent_in[["tab-vessel_active"]]) {
@@ -957,34 +957,8 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
           # If the user wants only one trip
           trip_select <- trip_select %>% dplyr::filter(trip_id == parent_in[["tab-one_trip"]])
         }
-      }
-      # Recovery of reactive values
-      sql_info <- sql_info_selected()[["sql_info_input_user"]]
-      # If the connection data exists and there was no error in the trip selection, makes the connection
-      req(config_data())
-      if (text_error_trip_select() == TRUE) {
-        config_observe_database <- config_data()[["databases_configuration"]]
-        data_connection <- list()
-        for (observe_database in config_observe_database[c(parent_in$`tab-data_base_observe`)]){
-          data_connection <- append(data_connection, list(furdeb::postgresql_dbconnection(
-            db_user = observe_database[["login"]],
-            db_password = observe_database[["password"]],
-            db_dbname = observe_database[["dbname"]],
-            db_host = observe_database[["host"]],
-            db_port = observe_database[["port"]]
-          )))
-        }
-        cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start sql trip_selected \n", sep = "")
-        trip_selected <- furdeb::data_extraction(
-          type = "database",
-          file_path = system.file("sql",
-                                  "trip_selected.sql",
-                                  package = "AkadoR"),
-          database_connection = data_connection,
-          anchor = list(select_item_1 = trip_select$trip_id)
-        )
-        list_return <- list(trip_selected = trip_selected)
-        if (dim(trip_selected)[1] > 0) {
+        list_return <- list(trip_selected = trip_select)
+        if (dim(trip_select)[1] > 0) {
           # If selected several trips
           if (parent_in[["tab-select_several_trip"]]) {
             # VMS selection parameter date range by user-selected period explicit
@@ -999,14 +973,28 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
           } else {
             # If selected only one trip
             # VMS selection parameter date range by user-selected trip duration
-            start_date_range <- min(trip_selected$trip_startdate)
-            end_date_range <- max(trip_selected$trip_enddate)
+            start_date_range <- min(trip_select$trip_startdate)
+            end_date_range <- max(trip_select$trip_enddate)
             # VMS selection parameter vessel number by user-selected explicit
-            vessel_number <- as.character(trip_selected$vessel_code)
+            vessel_number <- as.character(trip_select$vessel_code)
           }
         }
-        if (dim(trip_selected)[1] > 0 && "activity_vms" %in% sapply(sql_info, `[[`, "file")) {
+        # Recovery of reactive values
+        sql_info <- sql_info_selected()[["sql_info_input_user"]]
+        # If the connection data exists and there was no error in the trip selection, makes the connection
+        if (dim(trip_select)[1] > 0 && "activity_vms" %in% sapply(sql_info, `[[`, "file")) {
           cat(format(x = Sys.time(), format = "%Y-%m-%d %H:%M:%S"), " - Start sql activity_vms \n", sep = "")
+          config_observe_database <- config_data()[["databases_configuration"]]
+          data_connection <- list()
+          for (observe_database in config_observe_database[c(parent_in$`tab-data_base_observe`)]){
+            data_connection <- append(data_connection, list(furdeb::postgresql_dbconnection(
+              db_user = observe_database[["login"]],
+              db_password = observe_database[["password"]],
+              db_dbname = observe_database[["dbname"]],
+              db_host = observe_database[["host"]],
+              db_port = observe_database[["port"]]
+            )))
+          }
           # Uses a function to extract data from VMS
           activity_vms <- furdeb::data_extraction(
             type = "database",
@@ -1017,12 +1005,12 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
             anchor = list(select_item_1 = start_date_range, select_item_2 = end_date_range, select_item_3 = vessel_number)
           )
           list_return <- append(list_return, list(activity_vms = activity_vms))
+          # Disconnection to the base
+          for (i in seq(from = 1, to = length(data_connection))) {
+            DBI::dbDisconnect(data_connection[[i]][[2]])
+          }
         }
-        # Disconnection to the base
-        for (i in seq(from = 1, to = length(data_connection))) {
-          DBI::dbDisconnect(data_connection[[i]][[2]])
-        }
-        if (dim(trip_selected)[1] > 0 && "vms" %in% sapply(sql_info, `[[`, "file")) {
+        if (dim(trip_select)[1] > 0 && "vms" %in% sapply(sql_info, `[[`, "file")) {
           # If the database is "vms", read, transform and execute the SQL query that selects the trips according to the user parameters
           if (!is.null(config_data()[["vms_databases_configuration"]][["vms"]])) {
             # Connection to the base VMS
@@ -1056,7 +1044,7 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
           }
         }
         # If trips have been found return them otherwise return FALSE
-        if (dim(trip_selected)[1] > 0) {
+        if (dim(trip_select)[1] > 0) {
           return(list_return)
         } else {
           return(FALSE)

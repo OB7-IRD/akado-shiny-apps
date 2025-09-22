@@ -537,7 +537,7 @@ app_server <- function(input, output, session) {
   # column_anchor : Name of column to be used to supply values when used in other SQL anchors, optional (but mandatory if use_selection_other_sql is TRUE and vector is FALSE), character expected
   # column_user_id : Column names used by the user to identify the element, optional, character expected
   # vector : Logical which indicates whether the data frame created should be transformed into a vector (if a single column in the data frame), optional (default : FALSE), logical expected
-  sql_info <- list(list(file = "trip_selected"), # Do not modify, different generated directly from user inputs
+  sql_info <- list(list(file = "trip_parameter"), # Do not modify, different generated directly from user inputs
                    list(file = "vms"), # Do not modify, different generated directly from user inputs
                    list(file = "activity_vms"), # Do not modify, different generated directly from user inputs
                    list(file = "activity",
@@ -685,7 +685,7 @@ app_server <- function(input, output, session) {
     sql_info <- sql_info[sapply(sql_info, function(sql) any(sql[["file"]] %in% c(name_argument_check_select, unname(unlist(sapply(sql_info_check_select, `[[`, "anchor"))))))]
     # Deletion of SQLs that are managed differently, with the use of user inputs
     sql_info_input_user <- sql_info
-    sql_info <- sql_info[!sapply(sql_info, function(sql) any(sql[["file"]] %in% c("trip_selected", "vms", "activity_vms")))]
+    sql_info <- sql_info[!sapply(sql_info, function(sql) any(sql[["file"]] %in% c("trip_parameter", "vms", "activity_vms")))]
     # Add default value FALSE for use_selection_other_sql
     for (sql in sql_info) {
       if (is.null(sql[["use_selection_other_sql"]])) {
@@ -708,7 +708,7 @@ app_server <- function(input, output, session) {
   text_error_trip_select <- text_error_trip_select_server(id = "start_button", parent_in = input, parameters_trip_select = parameters_trip_select)
 
   # Retrieves the list of trips selected by the user
-  trip_select <- trip_select_server(id = "start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data, sql_info_selected = sql_info_selected, text_error_data_base_select = text_error_data_base_select, parameters_trip_select = parameters_trip_select)
+  trip_select <- trip_select_server(id = "start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data, sql_info_selected = sql_info_selected, parameters_trip_select = parameters_trip_select)
 
   # Performs all calculations to test for inconsistencies
   calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, check_info_selected = check_info_selected, sql_info_selected = sql_info_selected, column_user_info = column_user_info, parent_in = input)
