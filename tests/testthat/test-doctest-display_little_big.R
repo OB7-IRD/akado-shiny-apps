@@ -5,9 +5,9 @@ test_that("Doctest: display_little_big", {
   # Created from @doctest for `display_little_big`
   # Source file: R/function_specific_check.R
   # Source line: 54
-  dataframe1 <- data.frame(little_percentage = c(1e-04, 0.19), big_percentage = c(0.1999, 0.61), measure1_percentage = c(0.5, 0.005), measure2_percentage = c(
-    0.3, 0.195))
-  expect_equal(display_little_big(dataframe1), structure(list(little_percentage = c(0, 19), big_percentage = c(19.9, 61), measure1_percentage = c(50, 0.5),
-  measure2_percentage = c(30, 19.5)), row.names = c(NA, -2L), class = "data.frame"))
+  dataframe1 <- data.frame(little_percentage = c(1e-04, 0.19), big_percentage = c(0.1999, 0.61), measure1_percentage = c(0.5, 0.005),
+  measure2_percentage = c(0.3, 0.195))
+  expect_equal(display_little_big(dataframe1), structure(list(little_percentage = c(0, 19), big_percentage = c(19.9, 61), measure1_percentage = c(50,
+    0.5), measure2_percentage = c(30, 19.5)), row.names = c(NA, -2L), class = "data.frame"))
 })
 

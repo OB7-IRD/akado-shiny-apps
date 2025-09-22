@@ -10,7 +10,8 @@ mod_tab_content_server(
   check_info,
   type_check_info,
   config_data,
-  res_auth
+  res_auth,
+  parameters_trip_select
 )
 }
 \arguments{
@@ -25,6 +26,8 @@ mod_tab_content_server(
 \item{config_data}{{\link[base]{list}} expected. Reactive value contains the contents of the configuration file}
 
 \item{res_auth}{{\link[base]{character}} expected. Reactive value containing information about the user's connection}
+
+\item{parameters_trip_select}{{\link[base]{data.frame}} expected. Reactive value containing information about the trip store in database}
 }
 \value{
 The function returns nothing, instantiating the tab
@@ -64,5 +67,27 @@ type_check_info:
 \itemize{
 config_data:
  \item{\code{  databases_configuration : named list with database connection information}}
+}
+\itemize{
+parameters_trip_select:
+ \item{\code{  trip_id }}
+ \item{\code{  vessel_active }}
+ \item{\code{  vessel_status }}
+ \item{\code{  trip_startdate }}
+ \item{\code{  trip_enddate }}
+ \item{\code{  vessel_code }}
+ \item{\code{  vessel_label }}
+ \item{\code{  ocean_id }}
+ \item{\code{  ocean_label }}
+ \item{\code{  ocean_code }}
+ \item{\code{  flagcountry_id }}
+ \item{\code{  flagcountry_label }}
+ \item{\code{  flagcountry_code }}
+ \item{\code{  fleetcountry_id }}
+ \item{\code{  fleetcountry_label }}
+ \item{\code{  fleetcountry_code }}
+ \item{\code{  logbookprogram_id }}
+ \item{\code{  logbookprogram_label }}
+ \item{\code{  logbookprogram_code }}
 }
 }

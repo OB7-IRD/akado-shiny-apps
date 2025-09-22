@@ -624,13 +624,6 @@ app_server <- function(input, output, session) {
   # Checks the consistency of the various lists before filtering by the user
   check_consistency_list(sql_info = sql_info, check_info = check_info, column_user_info = column_user_info, type_check_info = type_check_info, tab_info = tab_info)
 
-  # Error message if the date range is not correct
-  output$error_date_select <- renderText({
-    if (isTruthy(input$trip_start_date_range) && isTruthy(input$trip_end_date_range) && input$trip_start_date_range > input$trip_end_date_range) {
-      "Error: start date must be before end date"
-    }
-  })
-
   # Read the .yml file of configuration for the connection
   config_data <- config_data_server(id = "start_button", parent_in = input)
 
@@ -702,11 +695,20 @@ app_server <- function(input, output, session) {
     return(list(sql_info_input_user = sql_info_input_user, sql_info = sql_info))
   })
 
+  # Error message if the data base selection elements are not correctly filled in
+  text_error_data_base_select <- text_error_data_base_select_server(id = "start_data_base", parent_in = input, config_data = config_data)
+
+  # Retrieves the list of trip section parameters from database(s)
+  parameters_trip_select <- parameters_trip_select_server(id = "start_data_base", parent_in = input, text_error_data_base_select = text_error_data_base_select, config_data = config_data)
+
+  # Displays the errors and notifications that occur when you want to start connection data base
+  error_data_base_select_serveur(id = "error_data_base_select", text_error_data_base_select = text_error_data_base_select, parameters_trip_select = parameters_trip_select)
+
   # Error message if the trip selection elements are not correctly filled in
-  text_error_trip_select <- text_error_trip_select_server(id = "start_button", parent_in = input, config_data = config_data)
+  text_error_trip_select <- text_error_trip_select_server(id = "start_button", parent_in = input, parameters_trip_select = parameters_trip_select)
 
   # Retrieves the list of trips selected by the user
-  trip_select <- trip_select_server(id = "start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data, sql_info_selected = sql_info_selected)
+  trip_select <- trip_select_server(id = "start_button", parent_in = input, text_error_trip_select = text_error_trip_select, config_data = config_data, sql_info_selected = sql_info_selected, text_error_data_base_select = text_error_data_base_select, parameters_trip_select = parameters_trip_select)
 
   # Performs all calculations to test for inconsistencies
   calcul_check <- calcul_check_server(id = "start_button", text_error_trip_select = text_error_trip_select, trip_select = trip_select, config_data = config_data, referential_file = referential_file, check_info_selected = check_info_selected, sql_info_selected = sql_info_selected, column_user_info = column_user_info, parent_in = input)
@@ -715,7 +717,7 @@ app_server <- function(input, output, session) {
   error_trip_select_serveur(id = "error_trip_select", text_error_trip_select = text_error_trip_select, trip_select = trip_select, calcul_check = calcul_check)
 
   # Tab creation, menu, tab content
-  tab(id = "tab", tab_info = tab_authorize, check_info = check_authorize, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data, res_auth = res_auth)
+  tab(id = "tab", tab_info = tab_authorize, check_info = check_authorize, type_check_info = type_check_info, calcul_check = calcul_check, referential_file = referential_file, config_data = config_data, res_auth = res_auth, parameters_trip_select)
 
   # Force activation of first tab at startup, remove the lazy evaluation
   observe({

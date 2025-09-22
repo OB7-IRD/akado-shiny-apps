@@ -6,12 +6,13 @@ test_that("Doctest: data_to_list", {
   # Source file: R/function_toolbox.R
   # Source line: 12
   dataframe1 <- data.frame(trip_id = c("1", "1", "2", "2", "2"), trip_startdate = as.Date(c("2020/01/01", "2020/01/01", "2020/01/01", "2020/01/01",
-    "2020/01/01")), trip_enddate = as.Date(c("2020/01/02", "2020/01/02", "2020/01/02", "2020/01/02", "2020/01/02")), activity_date = as.Date(c("2020/01/01",
-    "2020/01/02", "2020/01/01", "2020/01/02", "2020/01/03")), logical = c(TRUE, TRUE, TRUE, TRUE, FALSE))
-  expect_equal(data_to_list(data = dataframe1, name_col_dataplot = "data", colname_id = "trip_id", colname_plot = c("activity_date", "logical"), colname_info = c(
-    "trip_startdate", "trip_enddate"), rename_colname_info = c("startdate", "enddate")), list(`1` = list(data = structure(list(activity_date = structure(c(
-    18262, 18263), class = "Date"), logical = c(TRUE, TRUE)), class = "data.frame", row.names = 1:2), startdate = structure(18262, class = "Date"), enddate = structure(
-    18263, class = "Date")), `2` = list(data = structure(list(activity_date = structure(c(18262, 18263, 18264), class = "Date"), logical = c(TRUE, TRUE, FALSE)),
-  class = "data.frame", row.names = 3:5), startdate = structure(18262, class = "Date"), enddate = structure(18263, class = "Date"))))
+    "2020/01/01")), trip_enddate = as.Date(c("2020/01/02", "2020/01/02", "2020/01/02", "2020/01/02", "2020/01/02")), activity_date = as.Date(c(
+    "2020/01/01", "2020/01/02", "2020/01/01", "2020/01/02", "2020/01/03")), logical = c(TRUE, TRUE, TRUE, TRUE, FALSE))
+  expect_equal(data_to_list(data = dataframe1, name_col_dataplot = "data", colname_id = "trip_id", colname_plot = c("activity_date", "logical"),
+  colname_info = c("trip_startdate", "trip_enddate"), rename_colname_info = c("startdate", "enddate")), list(`1` = list(data = structure(list(
+    activity_date = structure(c(18262, 18263), class = "Date"), logical = c(TRUE, TRUE)), class = "data.frame", row.names = 1:2), startdate = structure(
+    18262, class = "Date"), enddate = structure(18263, class = "Date")), `2` = list(data = structure(list(activity_date = structure(c(18262, 18263,
+    18264), class = "Date"), logical = c(TRUE, TRUE, FALSE)), class = "data.frame", row.names = 3:5), startdate = structure(18262, class = "Date"),
+  enddate = structure(18263, class = "Date"))))
 })
 

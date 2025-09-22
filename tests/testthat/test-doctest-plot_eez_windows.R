@@ -5,8 +5,8 @@ test_that("Doctest: plot_eez_windows", {
   # Created from @doctest for `plot_eez_windows`
   # Source file: R/function_specific_check.R
   # Source line: 849
-  expect_equal(plot_eez_windows(vessel_code = "0", trip_enddate = as.Date("2020/01/10"), activity_date = as.Date("2020/01/09"), activity_number = 1L, X = "E0°6'",
-  Y = "N0°0'", fpazone_code = "SYC", fpazone_country_iso3 = "SYC", eez_calculated = "SYC"),
+  expect_equal(plot_eez_windows(vessel_code = "0", trip_enddate = as.Date("2020/01/10"), activity_date = as.Date("2020/01/09"), activity_number = 1L,
+  X = "E0°6'", Y = "N0°0'", fpazone_code = "SYC", fpazone_country_iso3 = "SYC", eez_calculated = "SYC"),
   "<b>Trip information : </b><br>\n         <ul><li>Vessel code : 0</li>\n         <li>Trip end date : 2020-01-10</li>\n         <li>Activity date : 2020-01-09</li>\n         <li>Activity number : 1</li>\n         <li>Latitude : N0°0'</li>\n         <li>Longitude : E0°6'</li></ul>\n         <b>Problem information : </b><br>\n         <ul><li>Declared eez : SYC</li>\n         <li>Declared country eez : SYC</li>\n         <li>Calculated eez : SYC</li></ul>")
 })
 

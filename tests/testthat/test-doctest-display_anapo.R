@@ -5,18 +5,18 @@ test_that("Doctest: display_anapo", {
   # Created from @doctest for `display_anapo`
   # Source file: R/function_specific_check.R
   # Source line: 1026
-  dataframe1 <- data.frame(activity_id = c("2", "4", "6"), activity_date = as.Date(c("2020/01/12", "2020/01/13", "2020/01/13")), activity_time = c("05:26:01",
-    "03:12:34", "23:26:47"), activity_position = c("POINT (0 0)", "POINT (4 4)", "POINT (3 0.6)"))
+  dataframe1 <- data.frame(activity_id = c("2", "4", "6"), activity_date = as.Date(c("2020/01/12", "2020/01/13", "2020/01/13")), activity_time = c(
+    "05:26:01", "03:12:34", "23:26:47"), activity_position = c("POINT (0 0)", "POINT (4 4)", "POINT (3 0.6)"))
   dataframe2 <- data.frame(trip_id = c("1", "1", "1"), activity_id = c("2", "4", "6"), activity_number = c(1L, 1L, 2L))
   dataframe3 <- data.frame(transmittingbuoy_id = c("1"), transmittingbuoyoperation_code = c("4"), activity_id = c("6"))
-  dataframe4 <- data.frame(activity_id = c("2", "4", "6"), logical = c(TRUE, FALSE, FALSE), nb_vms = c(1L, NA, 2L), min_distance = c(6.004055, 84.717419,
-    18.012165), max_score = c(NA, 0, 0.2094411))
+  dataframe4 <- data.frame(activity_id = c("2", "4", "6"), logical = c(TRUE, FALSE, FALSE), nb_vms = c(1L, NA, 2L), min_distance = c(6.004055,
+    84.717419, 18.012165), max_score = c(NA, 0, 0.2094411))
   units::install_unit("NM", "1852 m", "Nautical mile")
   dataframe4$min_distance <- units::set_units(dataframe4$min_distance, NM)
-  expect_equal(display_anapo(dataframe1, dataframe2, dataframe3, dataframe4), structure(list(activity_id = c("2", "4", "6"), logical = c(TRUE, FALSE, FALSE),
-  nb_vms = c(1L, NA, 2L), min_distance = structure(c(6.004, 84.717, 18.012), units = structure(list(numerator = "NM", denominator = character(0)), class = "symbolic_units"),
-  class = "units"), max_score = c(NA, 0, 0.209), grounding = c(FALSE, FALSE, TRUE), activity_position = c("POINT (0 0)", "POINT (4 4)", "POINT (3 0.6)"),
-  activity_position_prior = c(NA, "POINT (0 0)", "POINT (4 4)"), activity_position_post = c("POINT (4 4)", NA, NA)), row.names = c(NA, -3L), class = c(
-    "tbl_df", "tbl", "data.frame")))
+  expect_equal(display_anapo(dataframe1, dataframe2, dataframe3, dataframe4), structure(list(activity_id = c("2", "4", "6"), logical = c(TRUE, FALSE,
+    FALSE), nb_vms = c(1L, NA, 2L), min_distance = structure(c(6.004, 84.717, 18.012), units = structure(list(numerator = "NM", denominator = character(
+    0)), class = "symbolic_units"), class = "units"), max_score = c(NA, 0, 0.209), grounding = c(FALSE, FALSE, TRUE), activity_position = c(
+    "POINT (0 0)", "POINT (4 4)", "POINT (3 0.6)"), activity_position_prior = c(NA, "POINT (0 0)", "POINT (4 4)"), activity_position_post = c(
+    "POINT (4 4)", NA, NA)), row.names = c(NA, -3L), class = c("tbl_df", "tbl", "data.frame")))
 })
 
