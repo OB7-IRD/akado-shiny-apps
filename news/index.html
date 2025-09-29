@@ -17,7 +17,7 @@
       </button>
       <span class="navbar-brand">
         <a class="navbar-link" href="../index.html">AkadoR</a>
-        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.0.3</span>
+        <span class="version label label-default" data-toggle="tooltip" data-placement="bottom" title="">2.1.0</span>
       </span>
     </div>
 
@@ -41,6 +41,56 @@
 
     </div>
 
+    <div class="section level2">
+<h2 class="page-header" data-toc-text="2.1.0" id="akador-210---20250929">AkadoR 2.1.0 - 2025.09.29<a class="anchor" aria-label="anchor" href="#akador-210---20250929"></a></h2>
+<div class="section level3">
+<h3 id="added-2-1-0">Added<a class="anchor" aria-label="anchor" href="#added-2-1-0"></a></h3>
+<ul><li>Add package <code>shinyWidgets</code> : Shiny button catalog</li>
+<li>Add SQL <code>trip_parameter.sql</code> : To fill in the trip selection parameter drop-down lists</li>
+<li>Add reactive <code>text_error_data_base_select</code> and function <code>error_data_base_select_serveur</code>: Check parameter data base</li>
+<li>Add reactive <code>parameters_trip_select</code> and function <code>parameters_trip_select_server</code> : Load parameter trip for data base user selection</li>
+<li>Add observeEvent <code>parameters_trip_select</code> : For update value of parameter select trip with data base select</li>
+<li>Add observeEvent <code>select_several_trip</code> : Disable parameter select one trip only or several trips</li>
+</ul></div>
+<div class="section level3">
+<h3 id="changed-2-1-0">Changed<a class="anchor" aria-label="anchor" href="#changed-2-1-0"></a></h3>
+<ul><li>Change function <code>text_error_trip_select_server</code> : Remove check parameter vessel and date, add check parameter data base</li>
+<li>Change function <code>trip_select_server</code> :
+<ul><li>Change parameter user selection trip</li>
+<li>Remove extraction SQL trip_selected.sql</li>
+</ul></li>
+<li>Change function <code>config_data_server</code> : Add observe button start_data_base (for reload file configuration)</li>
+<li>Change function <code>trip_select_server</code> : Change parameter user selection trip</li>
+<li>Change function <code>mod_tab_content_server</code> :
+<ul><li>Display new parameter select trip :
+<ul><li>select_several_trip</li>
+<li>vessel_active</li>
+<li>one_trip</li>
+<li>vessel</li>
+<li>ocean</li>
+<li>flag</li>
+<li>fleet</li>
+<li>program</li>
+<li>range_enddate</li>
+</ul></li>
+<li>Remove the old parameter select trip :
+<ul><li>vessel_number</li>
+<li>trip_end_date</li>
+<li>trip_start_date_range</li>
+<li>trip_end_date_range</li>
+</ul></li>
+</ul></li>
+<li>Change list <code>sql_info</code> : Change name sql from trip_selected to trip_parameter</li>
+<li>Change reactive <code>sql_info_selected</code> : Change name sql from trip_selected to trip_parameter</li>
+</ul></div>
+<div class="section level3">
+<h3 id="remove-2-1-0">Remove<a class="anchor" aria-label="anchor" href="#remove-2-1-0"></a></h3>
+<ul><li>Remove SQL <code>trip_selected.sql</code>
+</li>
+<li>Remove output <code>error_date_select</code>
+</li>
+</ul></div>
+</div>
     <div class="section level2">
 <h2 class="page-header" data-toc-text="2.0.3" id="akador-203---20250910">AkadoR 2.0.3 - 2025.09.10<a class="anchor" aria-label="anchor" href="#akador-203---20250910"></a></h2>
 <div class="section level3">
