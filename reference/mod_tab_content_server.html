@@ -53,7 +53,8 @@
 <span>  <span class="va">check_info</span>,</span>
 <span>  <span class="va">type_check_info</span>,</span>
 <span>  <span class="va">config_data</span>,</span>
-<span>  <span class="va">res_auth</span></span>
+<span>  <span class="va">res_auth</span>,</span>
+<span>  <span class="va">parameters_trip_select</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -84,6 +85,10 @@
 <dt id="arg-res-auth">res_auth<a class="anchor" aria-label="anchor" href="#arg-res-auth"></a></dt>
 <dd><p><a href="https://rdrr.io/r/base/character.html" class="external-link">character</a> expected. Reactive value containing information about the user's connection</p></dd>
 
+
+<dt id="arg-parameters-trip-select">parameters_trip_select<a class="anchor" aria-label="anchor" href="#arg-parameters-trip-select"></a></dt>
+<dd><p><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a> expected. Reactive value containing information about the trip store in database</p></dd>
+
 </dl></div>
     <div id="value">
     <h2>Value</h2>
@@ -107,6 +112,25 @@
 </ul><ul><li><p><code>  id : Button selection identification, mandatory, character expected</code></p></li>
 <li><p><code>  specific_check : Indicates whether the selection should display specific controls or not, optional (default : TRUE), logical expected</code></p></li>
 </ul><ul><li><p><code>  databases_configuration : named list with database connection information</code></p></li>
+</ul><ul><li><p><code>  trip_id </code></p></li>
+<li><p><code>  vessel_active </code></p></li>
+<li><p><code>  vessel_status </code></p></li>
+<li><p><code>  trip_startdate </code></p></li>
+<li><p><code>  trip_enddate </code></p></li>
+<li><p><code>  vessel_code </code></p></li>
+<li><p><code>  vessel_label </code></p></li>
+<li><p><code>  ocean_id </code></p></li>
+<li><p><code>  ocean_label </code></p></li>
+<li><p><code>  ocean_code </code></p></li>
+<li><p><code>  flagcountry_id </code></p></li>
+<li><p><code>  flagcountry_label </code></p></li>
+<li><p><code>  flagcountry_code </code></p></li>
+<li><p><code>  fleetcountry_id </code></p></li>
+<li><p><code>  fleetcountry_label </code></p></li>
+<li><p><code>  fleetcountry_code </code></p></li>
+<li><p><code>  logbookprogram_id </code></p></li>
+<li><p><code>  logbookprogram_label </code></p></li>
+<li><p><code>  logbookprogram_code </code></p></li>
 </ul></div>
 
   </div>
