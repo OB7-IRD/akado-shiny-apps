@@ -1,3 +1,43 @@
+# AkadoR 2.1.0 - 2025.09.29
+
+## Added 
+- Add package `shinyWidgets` : Shiny button catalog
+- Add SQL `trip_parameter.sql` : To fill in the trip selection parameter drop-down lists
+- Add reactive `text_error_data_base_select` and function `error_data_base_select_serveur`:  Check parameter data base
+- Add reactive `parameters_trip_select` and function `parameters_trip_select_server` : Load parameter trip for data base user selection
+- Add observeEvent `parameters_trip_select` : For update value of parameter select trip with data base select 
+- Add observeEvent `select_several_trip` : Disable parameter select one trip only or several trips 
+
+## Changed
+- Change function `text_error_trip_select_server` : Remove check parameter vessel and date, add check parameter data base
+- Change function `trip_select_server` : 
+    - Change parameter user selection trip
+    - Remove extraction SQL trip_selected.sql
+- Change function `config_data_server` : Add observe button start_data_base (for reload file configuration)
+- Change function `trip_select_server` : Change parameter user selection trip
+- Change function `mod_tab_content_server` : 
+    - Display new parameter select trip :
+        - select_several_trip
+        - vessel_active
+        - one_trip
+        - vessel
+        - ocean
+        - flag
+        - fleet
+        - program
+        - range_enddate
+    - Remove the old parameter select trip :
+        - vessel_number
+        - trip_end_date
+        - trip_start_date_range
+        - trip_end_date_range
+- Change list `sql_info` : Change name sql from trip_selected to trip_parameter
+- Change reactive `sql_info_selected ` : Change name sql from trip_selected to trip_parameter
+
+## Remove
+- Remove SQL `trip_selected.sql ` 
+- Remove output `error_date_select ` 
+
 # AkadoR 2.0.3 - 2025.09.10
 
 ## Changed
