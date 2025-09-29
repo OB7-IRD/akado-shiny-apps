@@ -964,9 +964,9 @@ trip_select_server <- function(id, parent_in, text_error_trip_select, config_dat
             # VMS selection parameter date range by user-selected period explicit
             start_date_range <- parent_in[["tab-range_enddate"]][1]
             end_date_range <- parent_in[["tab-range_enddate"]][2]
-            # VMS selection if parameter vessel by user-selected explicit
+            # VMS selection if parameter vessel code by user-selected explicit
             if (!is.null(parent_in[["tab-vessel"]])) {
-              vessel_number <- parent_in[["tab-vessel"]]
+              vessel_number <- unique(trip_select[trip_select[, "vessel_id"] == parent_in[["tab-vessel"]], "vessel_code", drop = TRUE])
             } else {
               vessel_number <- ""
             }

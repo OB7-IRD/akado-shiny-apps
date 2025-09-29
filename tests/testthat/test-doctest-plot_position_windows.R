@@ -5,8 +5,8 @@ test_that("Doctest: plot_position_windows", {
   # Created from @doctest for `plot_position_windows`
   # Source file: R/function_specific_check.R
   # Source line: 494
-  expect_equal(plot_position_windows(vessel_code = "0", trip_enddate = as.Date("2020/01/10"), activity_date = as.Date("2020/01/09"),
-  activity_number = 1L, X = "E0°0'", Y = "N0°0'", type = "Sea", ocean_label = "ocean_1", ocean_calculate = "ocean_1"),
+  expect_equal(plot_position_windows(vessel_code = "0", trip_enddate = as.Date("2020/01/10"), activity_date = as.Date("2020/01/09"), activity_number = 1L, X = "E0°0'",
+  Y = "N0°0'", type = "Sea", ocean_label = "ocean_1", ocean_calculate = "ocean_1"),
   "<b>Trip information : </b><br>\n          <ul><li>Vessel code : 0</li>\n          <li>Trip end date : 2020-01-10</li>\n          <li>Activity date : 2020-01-09</li>\n          <li>Activity number : 1</li>\n          <li>Latitude : N0°0'</li>\n          <li>Longitude : E0°0'</li></ul>\n          <b>Problem information : </b><br>\n          <ul><li>Type : Sea</li>\n          <li>Ocean trip : ocean_1</li>\n          <li>Ocean activity : ocean_1</li></ul>")
 })
 
